@@ -1,0 +1,5 @@
+spring:
+  kafka:
+    bootstrap-servers: ${app.kafka.servers}
+    template:
+      default-topic: ${app.kafka.topic}
