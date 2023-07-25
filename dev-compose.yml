@@ -8,3 +8,11 @@ services:
       MARIADB_USER: dev
       MARIADB_PASSWORD: dev
       MARIADB_ROOT_PASSWORD: dev
+#  postgres:
+#    image: postgres:alpine
+#    ports:
+#      - "15432:5432"
+#    environment:
+#      POSTGRES_DB: dev
+#      POSTGRES_USER: dev
+#      POSTGRES_PASSWORD: dev

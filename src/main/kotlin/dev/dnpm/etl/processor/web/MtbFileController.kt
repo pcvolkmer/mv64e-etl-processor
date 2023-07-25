@@ -46,6 +46,7 @@ class MtbFileController(
 
     @PostMapping(path = ["/mtbfile"])
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Void> {
+        val pid = mtbFile.patient.id
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
         val lastRequestForPatient =
@@ -55,6 +56,7 @@ class MtbFileController(
             requestRepository.save(
                 Request(
                     patientId = pseudonymized.patient.id,
+                    pid = pid,
                     fingerprint = fingerprint(mtbFile),
                     status = RequestStatus.DUPLICATION
                 )
@@ -93,6 +95,7 @@ class MtbFileController(
         requestRepository.save(
             Request(
                 patientId = pseudonymized.patient.id,
+                pid = pid,
                 fingerprint = fingerprint(mtbFile),
                 status = requestStatus
             )

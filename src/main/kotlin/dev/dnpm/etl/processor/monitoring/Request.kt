@@ -32,6 +32,7 @@ data class Request(
     @Id val id: Long? = null,
     val uuid: RequestId = RequestId.randomUUID(),
     val patientId: String,
+    val pid: String,
     val fingerprint: String,
     val status: RequestStatus,
     val processedAt: Instant = Instant.now()
