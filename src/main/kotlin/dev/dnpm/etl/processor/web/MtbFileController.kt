@@ -53,7 +53,8 @@ class MtbFileController(
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
         val lastRequestForPatient =
-            requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id).firstOrNull()
+            requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id)
+                .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
 
         if (null != lastRequestForPatient && lastRequestForPatient.fingerprint == fingerprint(mtbFile)) {
             requestRepository.save(
@@ -107,6 +108,7 @@ class MtbFileController(
                     RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
                     RequestStatus.WARNING -> Report("Warnungen über mangelhafte Daten",
                         responses.joinToString("\n") { it.reason })
+
                     RequestStatus.UNKNOWN -> Report("Keine Informationen")
                     else -> null
                 }
