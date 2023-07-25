@@ -34,7 +34,7 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
 
     private val restTemplate = RestTemplate()
 
-    override fun send(mtbFile: MtbFile): Boolean {
+    override fun send(mtbFile: MtbFile): MtbFileSender.ResponseStatus {
         try {
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
@@ -46,17 +46,21 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
             )
             if (!response.statusCode.is2xxSuccessful) {
                 logger.warn("Error sending to remote system: {}", response.body)
-                return false
+                return MtbFileSender.ResponseStatus.ERROR
             }
             logger.debug("Sent file via RestMtbFileSender")
-            return true
+            return if (response.body?.contains("warning") == true) {
+                MtbFileSender.ResponseStatus.WARNING
+            } else {
+                MtbFileSender.ResponseStatus.SUCCESS
+            }
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
             logger.info(restTargetProperties.uri!!.toString())
             logger.error("Cannot send data to remote system", e)
         }
-        return false
+        return MtbFileSender.ResponseStatus.ERROR
     }
 
 }

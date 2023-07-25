@@ -17,17 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.output
+package dev.dnpm.etl.processor.monitoring
 
-import de.ukw.ccc.bwhc.dto.MtbFile
-
-interface MtbFileSender {
-    fun send(mtbFile: MtbFile): ResponseStatus
-
-    enum class ResponseStatus {
-        SUCCESS,
-        WARNING,
-        ERROR,
-        UNKNOWN
-    }
+enum class RequestStatus(val value: String) {
+    SUCCESS("success"),
+    WARNING("warning"),
+    ERROR("error"),
+    UNKNOWN("unknown"),
+    DUPLICATION("duplication")
 }

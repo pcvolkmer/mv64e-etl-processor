@@ -19,11 +19,17 @@
 
 package dev.dnpm.etl.processor.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.monitoring.Request
+import dev.dnpm.etl.processor.monitoring.RequestRepository
+import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import org.apache.commons.codec.binary.Base32
+import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -31,22 +37,78 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class MtbFileController(
     private val pseudonymizeService: PseudonymizeService,
-    private val senders: List<MtbFileSender>
+    private val senders: List<MtbFileSender>,
+    private val requestRepository: RequestRepository,
+    private val objectMapper: ObjectMapper
 ) {
 
     private val logger = LoggerFactory.getLogger(MtbFileController::class.java)
 
     @PostMapping(path = ["/mtbfile"])
-    fun mtbFile(@RequestBody mtbFile: MtbFile) {
+    fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Void> {
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
-        senders.forEach {
-            val success = it.send(pseudonymized)
-            if (success) {
-                logger.info("Sent file for Patient '{}' using '{}'", pseudonymized.patient.id, it.javaClass.simpleName)
-            } else {
-                logger.error("Error sending file for Patient '{}' using '{}'", pseudonymized.patient.id, it.javaClass.simpleName)
-            }
+
+        val lastRequestForPatient =
+            requestRepository.findByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id).firstOrNull()
+
+        if (null != lastRequestForPatient && lastRequestForPatient.fingerprint == fingerprint(mtbFile)) {
+            requestRepository.save(
+                Request(
+                    patientId = pseudonymized.patient.id,
+                    fingerprint = fingerprint(mtbFile),
+                    status = RequestStatus.DUPLICATION
+                )
+            )
+            return ResponseEntity.noContent().build()
         }
+
+        val responses = senders.map {
+            val responseStatus = it.send(pseudonymized)
+            if (responseStatus == MtbFileSender.ResponseStatus.SUCCESS || responseStatus == MtbFileSender.ResponseStatus.WARNING) {
+                logger.info(
+                    "Sent file for Patient '{}' using '{}'",
+                    pseudonymized.patient.id,
+                    it.javaClass.simpleName
+                )
+            } else {
+                logger.error(
+                    "Error sending file for Patient '{}' using '{}'",
+                    pseudonymized.patient.id,
+                    it.javaClass.simpleName
+                )
+            }
+            responseStatus
+        }
+
+        val requestStatus = if (responses.contains(MtbFileSender.ResponseStatus.ERROR)) {
+            RequestStatus.ERROR
+        } else if (responses.contains(MtbFileSender.ResponseStatus.WARNING)) {
+            RequestStatus.WARNING
+        } else if (responses.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
+            RequestStatus.SUCCESS
+        } else {
+            RequestStatus.UNKNOWN
+        }
+
+        requestRepository.save(
+            Request(
+                patientId = pseudonymized.patient.id,
+                fingerprint = fingerprint(mtbFile),
+                status = requestStatus
+            )
+        )
+
+        return if (requestStatus == RequestStatus.ERROR) {
+            ResponseEntity.unprocessableEntity().build()
+        } else {
+            ResponseEntity.noContent().build()
+        }
+    }
+
+    private fun fingerprint(mtbFile: MtbFile): String {
+        return Base32().encodeAsString(DigestUtils.sha256(objectMapper.writeValueAsString(mtbFile)))
+            .replace("=", "")
+            .lowercase()
     }
 
 }

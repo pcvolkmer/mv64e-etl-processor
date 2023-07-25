@@ -21,7 +21,6 @@ package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.config.KafkaTargetProperties
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
@@ -32,14 +31,14 @@ class KafkaMtbFileSender(
 
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
-    override fun send(mtbFile: MtbFile): Boolean {
+    override fun send(mtbFile: MtbFile): MtbFileSender.ResponseStatus {
         return try {
             kafkaTemplate.sendDefault(objectMapper.writeValueAsString(mtbFile))
             logger.debug("Sent file via KafkaMtbFileSender")
-            true
+            MtbFileSender.ResponseStatus.UNKNOWN
         } catch (e: Exception) {
             logger.error("An error occured sending to kafka", e)
-            false
+            MtbFileSender.ResponseStatus.ERROR
         }
     }
 

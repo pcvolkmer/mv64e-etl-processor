@@ -17,17 +17,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.output
+package dev.dnpm.etl.processor.monitoring
 
-import de.ukw.ccc.bwhc.dto.MtbFile
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
+import org.springframework.data.repository.CrudRepository
+import java.time.Instant
+import java.util.*
 
-interface MtbFileSender {
-    fun send(mtbFile: MtbFile): ResponseStatus
+typealias RequestId = UUID
 
-    enum class ResponseStatus {
-        SUCCESS,
-        WARNING,
-        ERROR,
-        UNKNOWN
-    }
+@Table("request")
+data class Request(
+    @Id val id: Long? = null,
+    val uuid: RequestId = RequestId.randomUUID(),
+    val patientId: String,
+    val fingerprint: String,
+    val status: RequestStatus,
+    val processedAt: Instant = Instant.now()
+)
+
+interface RequestRepository : CrudRepository<Request, Long> {
+
+    fun findByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
+
 }
