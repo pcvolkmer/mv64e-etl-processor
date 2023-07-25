@@ -21,9 +21,15 @@ package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import org.reactivestreams.Publisher
+import org.springframework.http.MediaType
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Sinks
+import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant
 import java.time.Month
 import java.time.ZoneId
@@ -34,6 +40,7 @@ import java.time.temporal.TemporalUnit
 @RestController
 @RequestMapping(path = ["/statistics"])
 class StatisticsRestController(
+    private val statisticsUpdateProducer: Sinks.Many<Any>,
     private val requestRepository: RequestRepository
 ) {
 
@@ -68,13 +75,15 @@ class StatisticsRestController(
                     .toMap()
                 Pair(
                     it.key.toString(),
-                    DateNameValues(it.key.toString(), NameValues(
-                        error = requestList[RequestStatus.ERROR] ?: 0,
-                        warning = requestList[RequestStatus.WARNING] ?: 0,
-                        success = requestList[RequestStatus.SUCCESS] ?: 0,
-                        duplication = requestList[RequestStatus.DUPLICATION] ?: 0,
-                        unknown = requestList[RequestStatus.UNKNOWN] ?: 0,
-                    ))
+                    DateNameValues(
+                        it.key.toString(), NameValues(
+                            error = requestList[RequestStatus.ERROR] ?: 0,
+                            warning = requestList[RequestStatus.WARNING] ?: 0,
+                            success = requestList[RequestStatus.SUCCESS] ?: 0,
+                            duplication = requestList[RequestStatus.DUPLICATION] ?: 0,
+                            unknown = requestList[RequestStatus.UNKNOWN] ?: 0,
+                        )
+                    )
                 )
             }.toMap()
 
@@ -86,10 +95,33 @@ class StatisticsRestController(
             .sortedBy { it.date }
     }
 
+    @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun updater(): Flux<ServerSentEvent<Any>> {
+        return statisticsUpdateProducer.asFlux().flatMap {
+            Flux.fromIterable(
+                listOf(
+                    ServerSentEvent.builder<Any>()
+                        .event("requeststates").id("none").data(this.requestStates())
+                        .build(),
+                    ServerSentEvent.builder<Any>()
+                        .event("requestslastmonth").id("none").data(this.requestsLastMonth())
+                        .build()
+                )
+            )
+
+        }
+    }
+
 }
 
 data class NameValue(val name: String, val value: Int, val color: String)
 
 data class DateNameValues(val date: String, val nameValues: NameValues)
 
-data class NameValues(val error: Int = 0, val warning: Int = 0, val success: Int = 0, val duplication: Int = 0, val unknown: Int = 0)
+data class NameValues(
+    val error: Int = 0,
+    val warning: Int = 0,
+    val success: Int = 0,
+    val duplication: Int = 0,
+    val unknown: Int = 0
+)

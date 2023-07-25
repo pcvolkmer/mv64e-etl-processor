@@ -34,13 +34,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Sinks
 
 @RestController
 class MtbFileController(
     private val pseudonymizeService: PseudonymizeService,
     private val senders: List<MtbFileSender>,
     private val requestRepository: RequestRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val statisticsUpdateProducer: Sinks.Many<Any>
 ) {
 
     private val logger = LoggerFactory.getLogger(MtbFileController::class.java)
@@ -63,6 +65,7 @@ class MtbFileController(
                     report = Report("Duplikat erkannt - keine Daten weitergeleitet")
                 )
             )
+            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
             return ResponseEntity.noContent().build()
         }
 
@@ -109,6 +112,8 @@ class MtbFileController(
                 }
             )
         )
+
+        statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
 
         return if (requestStatus == RequestStatus.ERROR) {
             ResponseEntity.unprocessableEntity().build()

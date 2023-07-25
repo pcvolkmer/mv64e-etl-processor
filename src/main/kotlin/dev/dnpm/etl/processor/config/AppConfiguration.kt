@@ -27,12 +27,16 @@ import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import org.reactivestreams.Publisher
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.KafkaTemplate
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Sinks
 import java.net.URI
+import java.time.Duration
 
 @Configuration
 @EnableConfigurationProperties(
@@ -76,6 +80,11 @@ class AppConfiguration {
         objectMapper: ObjectMapper
     ): MtbFileSender {
         return KafkaMtbFileSender(kafkaTemplate, objectMapper)
+    }
+
+    @Bean
+    fun statisticsUpdateProducer(): Sinks.Many<Any> {
+        return Sinks.many().multicast().directBestEffort()
     }
 
 }

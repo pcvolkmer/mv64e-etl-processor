@@ -20,15 +20,18 @@
 package dev.dnpm.etl.processor.web
 
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import java.time.Instant
 
 @Controller
 @RequestMapping(path = ["/statistics"])
 class StatisticsController {
 
     @GetMapping
-    fun index(): String {
+    fun index(model: Model): String {
+        model.addAttribute("now", Instant.now())
         return "statistics"
     }
 

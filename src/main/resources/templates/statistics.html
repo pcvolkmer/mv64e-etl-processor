@@ -17,8 +17,18 @@
     <script th:src="@{/echarts.min.js}"></script>
     <script th:src="@{/scripts.js}"></script>
     <script>
-        drawPieChart('statistics/requeststates', 'piechart', 'Statusverteilung der Anfragen');
-        drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen des letzten Monats');
+        window.onload = () => {
+            drawPieChart('statistics/requeststates', 'piechart', 'Statusverteilung aller Anfragen');
+            drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen der letzten 30 Tage');
+
+            const eventSource = new EventSource('statistics/events');
+            eventSource.addEventListener('requeststates', event => {
+                drawPieChart('statistics/requeststates', 'piechart', 'Statusverteilung aller Anfragen', JSON.parse(event.data));
+            });
+            eventSource.addEventListener('requestslastmonth', event => {
+                drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen des letzten Monats', JSON.parse(event.data));
+            });
+        }
     </script>
 </body>
 </html>
