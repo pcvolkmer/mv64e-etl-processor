@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -50,7 +51,7 @@ class MtbFileController(
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
         val lastRequestForPatient =
-            requestRepository.findByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id).firstOrNull()
+            requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id).firstOrNull()
 
         if (null != lastRequestForPatient && lastRequestForPatient.fingerprint == fingerprint(mtbFile)) {
             requestRepository.save(
@@ -58,7 +59,8 @@ class MtbFileController(
                     patientId = pseudonymized.patient.id,
                     pid = pid,
                     fingerprint = fingerprint(mtbFile),
-                    status = RequestStatus.DUPLICATION
+                    status = RequestStatus.DUPLICATION,
+                    report = Report("Duplikat erkannt - keine Daten weitergeleitet")
                 )
             )
             return ResponseEntity.noContent().build()
@@ -66,7 +68,7 @@ class MtbFileController(
 
         val responses = senders.map {
             val responseStatus = it.send(pseudonymized)
-            if (responseStatus == MtbFileSender.ResponseStatus.SUCCESS || responseStatus == MtbFileSender.ResponseStatus.WARNING) {
+            if (responseStatus.status == MtbFileSender.ResponseStatus.SUCCESS || responseStatus.status == MtbFileSender.ResponseStatus.WARNING) {
                 logger.info(
                     "Sent file for Patient '{}' using '{}'",
                     pseudonymized.patient.id,
@@ -82,11 +84,11 @@ class MtbFileController(
             responseStatus
         }
 
-        val requestStatus = if (responses.contains(MtbFileSender.ResponseStatus.ERROR)) {
+        val requestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
             RequestStatus.ERROR
-        } else if (responses.contains(MtbFileSender.ResponseStatus.WARNING)) {
+        } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.WARNING)) {
             RequestStatus.WARNING
-        } else if (responses.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
+        } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
             RequestStatus.SUCCESS
         } else {
             RequestStatus.UNKNOWN
@@ -97,7 +99,14 @@ class MtbFileController(
                 patientId = pseudonymized.patient.id,
                 pid = pid,
                 fingerprint = fingerprint(mtbFile),
-                status = requestStatus
+                status = requestStatus,
+                report = when (requestStatus) {
+                    RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
+                    RequestStatus.WARNING -> Report("Warnungen über mangelhafte Daten",
+                        responses.joinToString("\n") { it.reason })
+                    RequestStatus.UNKNOWN -> Report("Keine Informationen")
+                    else -> null
+                }
             )
         )
 

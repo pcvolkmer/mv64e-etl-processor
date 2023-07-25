@@ -9,7 +9,7 @@
     <div th:replace="~{fragments.html :: nav}"></div>
     <main>
 
-        <h1>Letzte Anfragen</h1>
+        <h1>Anfrage <span class="monospace">[[ ${request.uuid} ]]</span></h1>
 
         <table>
             <thead>
@@ -21,22 +21,21 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="request : ${requests}">
+                <tr>
                     <td th:if="${request.status.value == 'success'}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'warning'}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'error'}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
-                    <td th:if="${request.report}">
-                        <a th:href="@{/report/{id}(id=${request.uuid})}">[[ ${request.uuid} ]]</a>
-                    </td>
+                    <td>[[ ${request.uuid} ]]</td>
                     <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
                     <td>[[ ${request.patientId} ]]</td>
                 </tr>
             </tbody>
         </table>
 
+        <h2 th:text="${request.report.description}"></h2>
+        <div class="chart monospace" th:text="${request.report.dataQualityReport}"></div>
     </main>
     <script th:src="@{/scripts.js}"></script>
 </body>

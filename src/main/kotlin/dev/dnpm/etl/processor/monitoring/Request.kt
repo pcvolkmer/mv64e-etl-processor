@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.monitoring
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import java.time.Instant
@@ -30,16 +31,24 @@ typealias RequestId = UUID
 @Table("request")
 data class Request(
     @Id val id: Long? = null,
-    val uuid: RequestId = RequestId.randomUUID(),
+    val uuid: String = RequestId.randomUUID().toString(),
     val patientId: String,
     val pid: String,
     val fingerprint: String,
     val status: RequestStatus,
-    val processedAt: Instant = Instant.now()
+    val processedAt: Instant = Instant.now(),
+    @Embedded.Nullable var report: Report? = null
+)
+
+data class Report(
+    val description: String,
+    val dataQualityReport: String = ""
 )
 
 interface RequestRepository : CrudRepository<Request, Long> {
 
-    fun findByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
+    fun findAllByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
+
+    fun findByUuidEquals(uuid: String): Optional<Request>
 
 }

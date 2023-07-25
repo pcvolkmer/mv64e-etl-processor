@@ -31,14 +31,14 @@ class KafkaMtbFileSender(
 
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
-    override fun send(mtbFile: MtbFile): MtbFileSender.ResponseStatus {
+    override fun send(mtbFile: MtbFile): MtbFileSender.Response {
         return try {
             kafkaTemplate.sendDefault(objectMapper.writeValueAsString(mtbFile))
             logger.debug("Sent file via KafkaMtbFileSender")
-            MtbFileSender.ResponseStatus.UNKNOWN
+            MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
         } catch (e: Exception) {
             logger.error("An error occured sending to kafka", e)
-            MtbFileSender.ResponseStatus.ERROR
+            MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
         }
     }
 

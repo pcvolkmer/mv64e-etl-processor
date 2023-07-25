@@ -17,19 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.output
+package dev.dnpm.etl.processor
 
-import de.ukw.ccc.bwhc.dto.MtbFile
-
-interface MtbFileSender {
-    fun send(mtbFile: MtbFile): Response
-
-    data class Response(val status: ResponseStatus, val reason: String = "")
-
-    enum class ResponseStatus {
-        SUCCESS,
-        WARNING,
-        ERROR,
-        UNKNOWN
-    }
-}
+class NotFoundException : RuntimeException()

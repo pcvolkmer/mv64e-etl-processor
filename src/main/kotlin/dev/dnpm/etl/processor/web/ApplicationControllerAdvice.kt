@@ -17,19 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.output
+package dev.dnpm.etl.processor.web
 
-import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.NotFoundException
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
 
-interface MtbFileSender {
-    fun send(mtbFile: MtbFile): Response
+@ControllerAdvice
+class ApplicationControllerAdvice {
 
-    data class Response(val status: ResponseStatus, val reason: String = "")
-
-    enum class ResponseStatus {
-        SUCCESS,
-        WARNING,
-        ERROR,
-        UNKNOWN
+    @ExceptionHandler(NotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleNotFoundException(e: NotFoundException): String {
+        return "errors/404"
     }
+
 }
