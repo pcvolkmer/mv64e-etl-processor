@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ETL-Prozessor</title>
+    <link rel="stylesheet" th:href="@{/style.css}" />
+</head>
+<body>
+    <div th:replace="~{fragments.html :: nav}"></div>
+    <main>
+        <h1>Statistiken</h1>
+
+        <div id="piechart" class="chart" style="width: 320px; height: 320px; display: inline-block"></div>
+        <div id="barchart" class="chart" style="width: 720px; height: 320px; display: inline-block"></div>
+
+    </main>
+    <script th:src="@{/echarts.min.js}"></script>
+    <script th:src="@{/scripts.js}"></script>
+    <script>
+        drawPieChart('statistics/requeststates', 'piechart', 'Statusverteilung der Anfragen');
+        drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen des letzten Monats');
+    </script>
+</body>
+</html>

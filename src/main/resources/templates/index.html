@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ETL-Prozessor</title>
+    <link rel="stylesheet" th:href="@{/style.css}" />
+</head>
+<body>
+    <div th:replace="~{fragments.html :: nav}"></div>
+    <main>
+
+        <h1>Letzte Anfragen</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>ID</th>
+                    <th>Datum</th>
+                    <th>Patienten-ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="request : ${requests}">
+                    <td th:if="${request.status.value == 'success'}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value == 'warning'}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value == 'error'}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                    <td>[[ ${request.uuid} ]]</td>
+                    <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
+                    <td>[[ ${request.patientId} ]]</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </main>
+    <script th:src="@{/scripts.js}"></script>
+</body>
+</html>
