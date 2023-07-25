@@ -50,9 +50,9 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
             }
             logger.debug("Sent file via RestMtbFileSender")
             return if (response.body?.contains("warning") == true) {
-                return MtbFileSender.Response(MtbFileSender.ResponseStatus.WARNING, "${response.body}")
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.WARNING, "${response.body}")
             } else {
-                return MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
             }
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
