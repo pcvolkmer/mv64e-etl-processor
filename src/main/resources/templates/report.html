@@ -35,7 +35,22 @@
         </table>
 
         <h2 th:text="${request.report.description}"></h2>
-        <div class="chart monospace" th:text="${request.report.dataQualityReport}"></div>
+
+        <table th:if="not ${issues.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Schweregrad</th>
+                <th>Beschreibung</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="issue : ${issues}">
+                <td th:if="${issue.severity.value == 'warning'}" class="bg-yellow"><small>[[ ${issue.severity} ]]</small></td>
+                <td th:if="${issue.severity.value == 'error'}" class="bg-red"><small>[[ ${issue.severity} ]]</small></td>
+                <td>[[ ${issue.message} ]]</td>
+            </tr>
+            </tbody>
+        </table>
     </main>
     <script th:src="@{/scripts.js}"></script>
 </body>

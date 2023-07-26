@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
@@ -80,6 +81,11 @@ class AppConfiguration {
         objectMapper: ObjectMapper
     ): MtbFileSender {
         return KafkaMtbFileSender(kafkaTemplate, objectMapper)
+    }
+
+    @Bean
+    fun reportService(objectMapper: ObjectMapper): ReportService {
+        return ReportService(objectMapper)
     }
 
     @Bean

@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.NotFoundException
+import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestId
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import org.springframework.stereotype.Controller
@@ -31,7 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 @RequestMapping(path = ["/"])
 class HomeController(
-    private val requestRepository: RequestRepository
+    private val requestRepository: RequestRepository,
+    private val reportService: ReportService
 ) {
 
     @GetMapping
@@ -46,6 +48,7 @@ class HomeController(
     fun report(@PathVariable id: RequestId, model: Model): String {
         val request = requestRepository.findByUuidEquals(id.toString()).orElse(null) ?: throw NotFoundException()
         model.addAttribute("request", request)
+        model.addAttribute("issues", reportService.deserialize(request.report?.dataQualityReport))
 
         return "report"
     }
