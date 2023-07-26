@@ -25,15 +25,16 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
 class KafkaMtbFileSender(
-    private val kafkaTemplate: KafkaTemplate<String, String>,
-    private val objectMapper: ObjectMapper
+        private val kafkaTemplate: KafkaTemplate<String, String>,
+        private val objectMapper: ObjectMapper
 ) : MtbFileSender {
 
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
     override fun send(mtbFile: MtbFile): MtbFileSender.Response {
         return try {
-            kafkaTemplate.sendDefault(objectMapper.writeValueAsString(mtbFile))
+            kafkaTemplate.sendDefault(String.format("{\"pid\": %s, \"eid\": %s}", mtbFile.patient.id,
+                    mtbFile.episode.id), objectMapper.writeValueAsString(mtbFile))
             logger.debug("Sent file via KafkaMtbFileSender")
             MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
         } catch (e: Exception) {
