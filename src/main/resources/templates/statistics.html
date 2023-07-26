@@ -10,20 +10,27 @@
     <main>
         <h1>Statistiken</h1>
 
-        <div id="piechart" class="chart" style="width: 320px; height: 320px; display: inline-block"></div>
-        <div id="barchart" class="chart" style="width: 720px; height: 320px; display: inline-block"></div>
+        <div>
+            <div id="piechart1" class="chart chart-50pc"></div>
+            <div id="piechart2" class="chart chart-50pc"></div>
+        </div>
+        <div id="barchart" class="chart"></div>
 
     </main>
     <script th:src="@{/echarts.min.js}"></script>
     <script th:src="@{/scripts.js}"></script>
     <script>
         window.onload = () => {
-            drawPieChart('statistics/requeststates', 'piechart', 'Statusverteilung aller Anfragen');
+            drawPieChart('statistics/requeststates', 'piechart1', 'Statusverteilung aller Anfragen');
+            drawPieChart('statistics/requestpatientstates', 'piechart2', 'Statusverteilung nach Patient');
             drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen der letzten 30 Tage');
 
             const eventSource = new EventSource('statistics/events');
             eventSource.addEventListener('requeststates', event => {
-                drawPieChart('statistics/requeststates', 'piechart', 'Statusverteilung aller Anfragen', JSON.parse(event.data));
+                drawPieChart('statistics/requeststates', 'piechart1', 'Statusverteilung aller Anfragen', JSON.parse(event.data));
+            });
+            eventSource.addEventListener('requestpatientstates', event => {
+                drawPieChart('statistics/requestpatientstates', 'piechart2', 'Statusverteilung nach Patient', JSON.parse(event.data));
             });
             eventSource.addEventListener('requestslastmonth', event => {
                 drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen des letzten Monats', JSON.parse(event.data));

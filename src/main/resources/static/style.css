@@ -281,4 +281,13 @@ input.inline:focus-visible {
 
     border: 1px solid lightgray;
     border-radius: 3px;
+
+    width: calc(100% - 2.4rem - 4px);
+    height: 320px;
+
+    display: inline-block;
+}
+
+.chart-50pc {
+    width: calc(50% - 2.4rem - 4px);
 }

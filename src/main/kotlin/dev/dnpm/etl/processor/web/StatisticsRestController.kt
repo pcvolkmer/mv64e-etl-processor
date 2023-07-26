@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.web
 
+import dev.dnpm.etl.processor.monitoring.PatientUniqueState
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.reactivestreams.Publisher
@@ -95,6 +96,19 @@ class StatisticsRestController(
             .sortedBy { it.date }
     }
 
+    @GetMapping(path = ["requestpatientstates"])
+    fun requestPatientStates(): List<NameValue> {
+        return requestRepository.findPatientUniqueStates().map {
+            val color = when (it.status) {
+                RequestStatus.ERROR -> "red"
+                RequestStatus.WARNING -> "darkorange"
+                RequestStatus.SUCCESS -> "green"
+                else -> "slategray"
+            }
+            NameValue(it.status.toString(), it.count, color)
+        }
+    }
+
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun updater(): Flux<ServerSentEvent<Any>> {
         return statisticsUpdateProducer.asFlux().flatMap {
@@ -105,6 +119,9 @@ class StatisticsRestController(
                         .build(),
                     ServerSentEvent.builder<Any>()
                         .event("requestslastmonth").id("none").data(this.requestsLastMonth())
+                        .build(),
+                    ServerSentEvent.builder<Any>()
+                        .event("requestpatientstates").id("none").data(this.requestPatientStates())
                         .build()
                 )
             )

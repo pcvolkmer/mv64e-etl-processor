@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.monitoring
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
@@ -45,10 +46,20 @@ data class Report(
     val dataQualityReport: String = ""
 )
 
+data class CountedState(
+    val count: Int,
+    val status: RequestStatus,
+)
+
 interface RequestRepository : CrudRepository<Request, Long> {
 
     fun findAllByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
 
     fun findByUuidEquals(uuid: String): Optional<Request>
+
+    @Query("SELECT count(*) AS count, status FROM (" +
+            "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request WHERE status NOT IN ('DUPLICATION')" +
+            ") rank WHERE rank = 1 GROUP BY status ORDER BY count DESC;")
+    fun findPatientUniqueStates(): List<CountedState>
 
 }
