@@ -19,10 +19,8 @@
 
 package dev.dnpm.etl.processor.web
 
-import dev.dnpm.etl.processor.monitoring.PatientUniqueState
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
-import org.reactivestreams.Publisher
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,13 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
-import reactor.kotlin.core.publisher.toFlux
 import java.time.Instant
-import java.time.Month
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 
 @RestController
 @RequestMapping(path = ["/statistics"])
@@ -47,16 +42,15 @@ class StatisticsRestController(
 
     @GetMapping(path = ["requeststates"])
     fun requestStates(): List<NameValue> {
-        return requestRepository.findAll()
-            .groupBy { it.status }
+        return requestRepository.countStates()
             .map {
-                val color = when (it.key) {
+                val color = when (it.status) {
                     RequestStatus.ERROR -> "red"
                     RequestStatus.WARNING -> "darkorange"
                     RequestStatus.SUCCESS -> "green"
                     else -> "slategray"
                 }
-                NameValue(it.key.toString(), it.value.size, color)
+                NameValue(it.status.toString(), it.count, color)
             }
             .sortedByDescending { it.value }
     }

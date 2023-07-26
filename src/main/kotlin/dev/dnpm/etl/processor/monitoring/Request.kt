@@ -57,9 +57,12 @@ interface RequestRepository : CrudRepository<Request, Long> {
 
     fun findByUuidEquals(uuid: String): Optional<Request>
 
+    @Query("SELECT count(*) AS count, status FROM request GROUP BY status ORDER BY status, count DESC;")
+    fun countStates(): List<CountedState>
+
     @Query("SELECT count(*) AS count, status FROM (" +
             "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request WHERE status NOT IN ('DUPLICATION')" +
-            ") rank WHERE rank = 1 GROUP BY status ORDER BY count DESC;")
+            ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
     fun findPatientUniqueStates(): List<CountedState>
 
 }
