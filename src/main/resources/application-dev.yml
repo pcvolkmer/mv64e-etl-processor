@@ -2,14 +2,28 @@ spring:
   docker:
     compose:
       file: ./dev-compose.yml
-
+  datasource:
+    hikari:
+      jdbc-url: "jdbc:mariadb://localhost:13306/dev"
+      driver-class-name: "org.mariadb.jdbc.Driver"
+      username: "dev"
+      password: "dev"
+    url: "jdbc:mariadb://localhost:13306/dev"
 app:
-  rest:
-    uri: http://localhost:9000/bwhc/etl/api/MTBFile
-  #kafka:
-  #  topic: test
-  #  servers: kafka:9092
+ # rest:
+ #   uri: "https://bwhc-test.diz.uni-marburg.de/bwhc/etl/api/MTBFile"
+  pseudonymizer: GPAS
+  pseudonymize:
+    prefix: "test"
+    gpas:
+      target: "demo.study.demo"
+      uri: "http://localhost:8080/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate"
+      username: ""
+      password: ""
+      sslCaLocation: ""
 
+  kafka:
+    servers: "localhost:9092"
+    topic: test-dev
 server:
   port: 8000
-

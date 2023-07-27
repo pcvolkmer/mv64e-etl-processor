@@ -35,21 +35,21 @@ class KafkaMtbFileSender(
 
     override fun send(mtbFile: MtbFile): MtbFileSender.Response {
         return try {
-            var result = kafkaTemplate.sendDefault(
+            val result = kafkaTemplate.sendDefault(
                 String.format(
                     "{\"pid\": \"%s\", \"eid\": \"%s\"}", mtbFile.patient.id,
                     mtbFile.episode.id
                 ), objectMapper.writeValueAsString(mtbFile)
             )
             if (result.get() != null) {
-                logger.debug("Sent file via KafkaMtbFileSender");
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS);
+                logger.debug("Sent file via KafkaMtbFileSender")
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
             } else {
                 MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
             }
 
         } catch (e: Exception) {
-            logger.error("An error occured sending to kafka", e)
+            logger.error("An error occurred sending to kafka", e)
             MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
         }
     }
