@@ -24,14 +24,16 @@ import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
-import dev.dnpm.etl.processor.pseudonym.*
+import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
+import dev.dnpm.etl.processor.pseudonym.Generator
+import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
+import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.KafkaTemplate
 import reactor.core.publisher.Sinks
-import java.net.URI
 
 @Configuration
 @EnableConfigurationProperties(
