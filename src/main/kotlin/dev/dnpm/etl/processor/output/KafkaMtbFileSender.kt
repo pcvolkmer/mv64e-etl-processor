@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.stereotype.Component
 
+@Component
 class KafkaMtbFileSender(
         private val kafkaTemplate: KafkaTemplate<String, String>,
         private val objectMapper: ObjectMapper
@@ -33,7 +35,7 @@ class KafkaMtbFileSender(
 
     override fun send(mtbFile: MtbFile): MtbFileSender.Response {
         return try {
-            kafkaTemplate.sendDefault(String.format("{\"pid\": %s, \"eid\": %s}", mtbFile.patient.id,
+            kafkaTemplate.sendDefault(String.format("{\"pid\": \"%s\", \"eid\": \"%s\"}", mtbFile.patient.id,
                     mtbFile.episode.id), objectMapper.writeValueAsString(mtbFile))
             logger.debug("Sent file via KafkaMtbFileSender")
             MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
