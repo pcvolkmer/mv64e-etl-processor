@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
+import ca.uhn.fhir.util.StringUtil
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 
@@ -28,7 +29,9 @@ class PseudonymizeService(
 ) {
 
     fun pseudonymize(mtbFile: MtbFile): MtbFile {
-        val patientPseudonym = "${configProperties.prefix}_${generator.generate(mtbFile.patient.id)}"
+        val patientPseudonym: String = if(configProperties.prefix.isNotEmpty())
+            "${configProperties.prefix}_${generator.generate(mtbFile.patient.id)}"
+        else generator.generate(mtbFile.patient.id)
 
         mtbFile.episode.patient = patientPseudonym
         mtbFile.carePlans.forEach { it.patient = patientPseudonym }
