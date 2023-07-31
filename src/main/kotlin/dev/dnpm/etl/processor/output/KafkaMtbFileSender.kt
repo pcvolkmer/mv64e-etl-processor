@@ -30,7 +30,7 @@ class KafkaMtbFileSender(
 
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
-    override fun send(request: MtbFileSender.Request): MtbFileSender.Response {
+    override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         return try {
             val result = kafkaTemplate.sendDefault(
                 header(request),
@@ -49,7 +49,12 @@ class KafkaMtbFileSender(
         }
     }
 
-    private fun header(request: MtbFileSender.Request): String {
+    // TODO not yet implemented
+    override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
+        return MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+    }
+
+    private fun header(request: MtbFileSender.MtbFileRequest): String {
         return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
                 "\"eid\": \"${request.mtbFile.episode.id}\", " +
                 "\"requestId\": \"${request.requestId}\"}"

@@ -31,12 +31,9 @@ import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Sinks
-import java.util.UUID
+import java.util.*
 
 @RestController
 class MtbFileController(
@@ -129,7 +126,7 @@ class MtbFileController(
         }
     }
 
-    @PostMapping(path = ["/mtbfile/{patientId}"])
+    @DeleteMapping(path = ["/mtbfile/{patientId}"])
     fun deleteData(@PathVariable patientId: String): ResponseEntity<Void> {
         val requestId = UUID.randomUUID().toString()
 

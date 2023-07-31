@@ -33,7 +33,7 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
 
     private val restTemplate = RestTemplate()
 
-    override fun send(request: MtbFileSender.Request): MtbFileSender.Response {
+    override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         try {
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
@@ -53,6 +53,27 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
             } else {
                 MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
             }
+        } catch (e: IllegalArgumentException) {
+            logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
+        } catch (e: RestClientException) {
+            logger.info(restTargetProperties.uri!!.toString())
+            logger.error("Cannot send data to remote system", e)
+        }
+        return MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
+    }
+
+    override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
+        try {
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+            val entityReq = HttpEntity(null, headers)
+            restTemplate.delete(
+                restTargetProperties.uri!!,
+                entityReq,
+                String::class.java
+            )
+            logger.debug("Sent file via RestMtbFileSender")
+            MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
