@@ -45,7 +45,11 @@ data class PseudonymizeConfigProperties(
 @ConfigurationProperties(GPasConfigProperties.NAME)
 data class GPasConfigProperties(
     val uri: String?,
-    val target: String = "etl-processor"
+    val target: String = "etl-processor",
+    val username: String?,
+    val password: String?,
+    val sslCaLocation: String?,
+
 ) {
     companion object {
         const val NAME = "app.pseudonymize.gpas"
