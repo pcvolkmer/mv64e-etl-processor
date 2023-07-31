@@ -5,15 +5,3 @@ spring:
       default-topic: ${app.kafka.topic}
   flyway:
     locations: "classpath:db/migration/{vendor}"
-  main:
-    allow-bean-definition-overriding: true
-
-
-app:
-  rest:
-    #uri: "localhost:9000/bwhc/etl/api/MTBFile"
-  pseudonymizer: BUILDIN
-
-
-server:
-  port: 8000
