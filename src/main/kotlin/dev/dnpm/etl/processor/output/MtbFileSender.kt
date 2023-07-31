@@ -22,11 +22,15 @@ package dev.dnpm.etl.processor.output
 import de.ukw.ccc.bwhc.dto.MtbFile
 
 interface MtbFileSender {
-    fun send(request: Request): Response
+    fun send(request: MtbFileRequest): Response
+
+    fun send(request: DeleteRequest): Response
 
     data class Response(val status: ResponseStatus, val reason: String = "")
 
-    data class Request(val requestId: String, val mtbFile: MtbFile)
+    data class MtbFileRequest(val requestId: String, val mtbFile: MtbFile)
+
+    data class DeleteRequest(val requestId: String, val patientId: String)
 
     enum class ResponseStatus {
         SUCCESS,

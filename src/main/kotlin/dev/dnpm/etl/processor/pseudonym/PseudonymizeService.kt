@@ -28,7 +28,7 @@ class PseudonymizeService(
 ) {
 
     fun pseudonymize(mtbFile: MtbFile): MtbFile {
-        val patientPseudonym = "${configProperties.prefix}_${generator.generate(mtbFile.patient.id)}"
+        val patientPseudonym = patientPseudonym(mtbFile.patient.id)
 
         mtbFile.episode.patient = patientPseudonym
         mtbFile.carePlans.forEach { it.patient = patientPseudonym }
@@ -55,6 +55,10 @@ class PseudonymizeService(
         mtbFile.specimens.forEach { it.patient = patientPseudonym }
 
         return mtbFile
+    }
+
+    fun patientPseudonym(patientId: String): String {
+        return "${configProperties.prefix}_${generator.generate(patientId)}"
     }
 
 }

@@ -31,6 +31,7 @@ import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -71,7 +72,7 @@ class MtbFileController(
             return ResponseEntity.noContent().build()
         }
 
-        val request = MtbFileSender.Request(UUID.randomUUID().toString(), pseudonymized)
+        val request = MtbFileSender.MtbFileRequest(UUID.randomUUID().toString(), pseudonymized)
 
         val responses = senders.map {
             val responseStatus = it.send(request)
@@ -128,8 +129,63 @@ class MtbFileController(
         }
     }
 
+    @PostMapping(path = ["/mtbfile/{patientId}"])
+    fun deleteData(@PathVariable patientId: String): ResponseEntity<Void> {
+        val requestId = UUID.randomUUID().toString()
+
+        try {
+            val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
+
+            val responses = senders.map {
+                it.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+            }
+
+            val requestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
+                RequestStatus.DELETE_ERROR
+            } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
+                RequestStatus.DELETE_SUCCESS
+            } else {
+                RequestStatus.UNKNOWN
+            }
+
+            requestRepository.save(
+                Request(
+                    uuid = requestId,
+                    patientId = patientPseudonym,
+                    pid = patientId,
+                    fingerprint = fingerprint(patientPseudonym),
+                    status = requestStatus,
+                    report = when (requestStatus) {
+                        RequestStatus.DELETE_ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
+                        RequestStatus.UNKNOWN -> Report("Keine Informationen")
+                        else -> null
+                    }
+                )
+            )
+
+            return ResponseEntity.unprocessableEntity().build()
+        } catch (e: Exception) {
+            requestRepository.save(
+                Request(
+                    uuid = requestId,
+                    patientId = "???",
+                    pid = patientId,
+                    fingerprint = "",
+                    status = RequestStatus.DELETE_ERROR,
+                    report = Report("Fehler bei der Pseudonymisierung")
+                )
+            )
+
+            return ResponseEntity.noContent().build()
+        }
+    }
+
     private fun fingerprint(mtbFile: MtbFile): String {
-        return Base32().encodeAsString(DigestUtils.sha256(objectMapper.writeValueAsString(mtbFile)))
+        return fingerprint(objectMapper.writeValueAsString(mtbFile))
+    }
+
+    private fun fingerprint(s: String): String {
+        return Base32().encodeAsString(DigestUtils.sha256(s))
             .replace("=", "")
             .lowercase()
     }
