@@ -20,7 +20,6 @@
 package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.MtbFile
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
@@ -31,14 +30,11 @@ class KafkaMtbFileSender(
 
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
-    override fun send(mtbFile: MtbFile): MtbFileSender.Response {
+    override fun send(request: MtbFileSender.Request): MtbFileSender.Response {
         return try {
             val result = kafkaTemplate.sendDefault(
-                String.format(
-                    "{\"pid\": \"%s\", \"eid\": \"%s\"}",
-                    mtbFile.patient.id,
-                    mtbFile.episode.id
-                ), objectMapper.writeValueAsString(mtbFile)
+                header(request),
+                objectMapper.writeValueAsString(request.mtbFile)
             )
             if (result.get() != null) {
                 logger.debug("Sent file via KafkaMtbFileSender")
@@ -53,4 +49,9 @@ class KafkaMtbFileSender(
         }
     }
 
+    private fun header(request: MtbFileSender.Request): String {
+        return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
+                "\"eid\": \"${request.mtbFile.episode.id}\", " +
+                "\"requestId\": \"${request.requestId}\"}"
+    }
 }

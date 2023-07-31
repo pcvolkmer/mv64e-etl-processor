@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Sinks
+import java.util.UUID
 
 @RestController
 class MtbFileController(
@@ -70,8 +71,10 @@ class MtbFileController(
             return ResponseEntity.noContent().build()
         }
 
+        val request = MtbFileSender.Request(UUID.randomUUID().toString(), pseudonymized)
+
         val responses = senders.map {
-            val responseStatus = it.send(pseudonymized)
+            val responseStatus = it.send(request)
             if (responseStatus.status == MtbFileSender.ResponseStatus.SUCCESS || responseStatus.status == MtbFileSender.ResponseStatus.WARNING) {
                 logger.info(
                     "Sent file for Patient '{}' using '{}'",
@@ -100,9 +103,10 @@ class MtbFileController(
 
         requestRepository.save(
             Request(
-                patientId = pseudonymized.patient.id,
+                uuid = request.requestId,
+                patientId = request.mtbFile.patient.id,
                 pid = pid,
-                fingerprint = fingerprint(mtbFile),
+                fingerprint = fingerprint(request.mtbFile),
                 status = requestStatus,
                 report = when (requestStatus) {
                     RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")

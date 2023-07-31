@@ -22,9 +22,11 @@ package dev.dnpm.etl.processor.output
 import de.ukw.ccc.bwhc.dto.MtbFile
 
 interface MtbFileSender {
-    fun send(mtbFile: MtbFile): Response
+    fun send(request: Request): Response
 
     data class Response(val status: ResponseStatus, val reason: String = "")
+
+    data class Request(val requestId: String, val mtbFile: MtbFile)
 
     enum class ResponseStatus {
         SUCCESS,

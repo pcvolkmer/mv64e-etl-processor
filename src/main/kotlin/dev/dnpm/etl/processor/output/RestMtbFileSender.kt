@@ -19,7 +19,6 @@
 
 package dev.dnpm.etl.processor.output
 
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -34,11 +33,11 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
 
     private val restTemplate = RestTemplate()
 
-    override fun send(mtbFile: MtbFile): MtbFileSender.Response {
+    override fun send(request: MtbFileSender.Request): MtbFileSender.Response {
         try {
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
-            val entityReq = HttpEntity(mtbFile, headers)
+            val entityReq = HttpEntity(request.mtbFile, headers)
             val response = restTemplate.postForEntity(
                 restTargetProperties.uri!!,
                 entityReq,
