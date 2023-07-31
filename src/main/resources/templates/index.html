@@ -22,9 +22,9 @@
             </thead>
             <tbody>
                 <tr th:each="request : ${requests}">
-                    <td th:if="${request.status.value == 'success'}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="${request.status.value == 'warning'}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="${request.status.value == 'error'}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value.contains('success')}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value.contains('warning')}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
+                    <td th:if="${request.status.value.contains('error')}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
