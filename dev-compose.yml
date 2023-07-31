@@ -1,4 +1,12 @@
 services:
+  kafka:
+    image: bitnami/kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+
   mariadb:
     image: mariadb:10
     ports:
