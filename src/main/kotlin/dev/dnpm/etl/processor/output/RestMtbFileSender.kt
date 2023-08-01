@@ -40,7 +40,7 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
             headers.contentType = MediaType.APPLICATION_JSON
             val entityReq = HttpEntity(request.mtbFile, headers)
             val response = restTemplate.postForEntity(
-                restTargetProperties.uri!!,
+                "${restTargetProperties.uri}/MTBFile",
                 entityReq,
                 String::class.java
             )
@@ -69,7 +69,7 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
             headers.contentType = MediaType.APPLICATION_JSON
             val entityReq = HttpEntity(null, headers)
             restTemplate.delete(
-                "${restTargetProperties.uri}/${request.patientId}",
+                "${restTargetProperties.uri}/Patient/${request.patientId}",
                 entityReq,
                 String::class.java
             )

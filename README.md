@@ -22,7 +22,7 @@ Für REST-Requests als auch (parallel) zur Nutzung von Kafka-Topics können Endp
 
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das bwHC-Backend gesendet wird:
 
-* `APP_REST_URI`: URI der zu benutzenden bwHC-Backend-Instanz
+* `APP_REST_URI`: URI der zu benutzenden API der bwHC-Backend-Instanz. z.B.: `http://localhost:9000/bwhc/etl/api`
 
 ### Kafka-Topics
 
@@ -31,4 +31,4 @@ Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein
 * `APP_KAFKA_TOPIC`: Zu verwendendes Topic
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 
-Weitere Konfigrationen können über die Parameter
+Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert werden.
