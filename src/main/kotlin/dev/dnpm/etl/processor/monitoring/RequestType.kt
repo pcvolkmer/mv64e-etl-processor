@@ -19,10 +19,7 @@
 
 package dev.dnpm.etl.processor.monitoring
 
-enum class RequestStatus(val value: String) {
-    SUCCESS("success"),
-    WARNING("warning"),
-    ERROR("error"),
-    UNKNOWN("unknown"),
-    DUPLICATION("duplication")
+enum class RequestType(val value: String) {
+    MTB_FILE("mtb_file"),
+    DELETE("delete"),
 }

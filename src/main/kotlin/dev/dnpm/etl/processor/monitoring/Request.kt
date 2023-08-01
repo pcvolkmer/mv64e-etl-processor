@@ -37,6 +37,7 @@ data class Request(
     val pid: String,
     val fingerprint: String,
     val status: RequestStatus,
+    val type: RequestType,
     val processedAt: Instant = Instant.now(),
     @Embedded.Nullable var report: Report? = null
 )
@@ -57,12 +58,22 @@ interface RequestRepository : CrudRepository<Request, Long> {
 
     fun findByUuidEquals(uuid: String): Optional<Request>
 
-    @Query("SELECT count(*) AS count, status FROM request GROUP BY status ORDER BY status, count DESC;")
+    @Query("SELECT count(*) AS count, status FROM request WHERE type = 'MTB_FILE' GROUP BY status ORDER BY status, count DESC;")
     fun countStates(): List<CountedState>
 
     @Query("SELECT count(*) AS count, status FROM (" +
-            "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request WHERE status NOT IN ('DUPLICATION')" +
+            "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request " +
+            "WHERE type = 'MTB_FILE' AND status NOT IN ('DUPLICATION') " +
             ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
     fun findPatientUniqueStates(): List<CountedState>
+
+    @Query("SELECT count(*) AS count, status FROM request WHERE type = 'DELETE' GROUP BY status ORDER BY status, count DESC;")
+    fun countDeleteStates(): List<CountedState>
+
+    @Query("SELECT count(*) AS count, status FROM (" +
+            "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request " +
+            "WHERE type = 'DELETE'" +
+            ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
+    fun findPatientUniqueDeleteStates(): List<CountedState>
 
 }

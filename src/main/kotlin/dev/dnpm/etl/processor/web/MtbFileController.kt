@@ -21,10 +21,7 @@ package dev.dnpm.etl.processor.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.monitoring.Report
-import dev.dnpm.etl.processor.monitoring.Request
-import dev.dnpm.etl.processor.monitoring.RequestRepository
-import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import org.apache.commons.codec.binary.Base32
@@ -62,6 +59,7 @@ class MtbFileController(
                     pid = pid,
                     fingerprint = fingerprint(mtbFile),
                     status = RequestStatus.DUPLICATION,
+                    type = RequestType.MTB_FILE,
                     report = Report("Duplikat erkannt - keine Daten weitergeleitet")
                 )
             )
@@ -106,6 +104,7 @@ class MtbFileController(
                 pid = pid,
                 fingerprint = fingerprint(request.mtbFile),
                 status = requestStatus,
+                type = RequestType.MTB_FILE,
                 report = when (requestStatus) {
                     RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
                     RequestStatus.WARNING -> Report("Warnungen über mangelhafte Daten",
@@ -134,13 +133,37 @@ class MtbFileController(
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
             val responses = senders.map {
-                it.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+                val responseStatus = it.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+                when (responseStatus.status) {
+                    MtbFileSender.ResponseStatus.SUCCESS -> {
+                        logger.info(
+                            "Sent delete for Patient '{}' using '{}'",
+                            patientPseudonym,
+                            it.javaClass.simpleName
+                        )
+                    }
+                    MtbFileSender.ResponseStatus.ERROR -> {
+                        logger.error(
+                            "Error deleting data for Patient '{}' using '{}'",
+                            patientPseudonym,
+                            it.javaClass.simpleName
+                        )
+                    }
+                    else -> {
+                        logger.error(
+                            "Unknown result on deleting data for Patient '{}' using '{}'",
+                            patientPseudonym,
+                            it.javaClass.simpleName
+                        )
+                    }
+                }
+                responseStatus
             }
 
-            val requestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
-                RequestStatus.DELETE_ERROR
+            val overallRequestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
+                RequestStatus.ERROR
             } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
-                RequestStatus.DELETE_SUCCESS
+                RequestStatus.SUCCESS
             } else {
                 RequestStatus.UNKNOWN
             }
@@ -151,9 +174,10 @@ class MtbFileController(
                     patientId = patientPseudonym,
                     pid = patientId,
                     fingerprint = fingerprint(patientPseudonym),
-                    status = requestStatus,
-                    report = when (requestStatus) {
-                        RequestStatus.DELETE_ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
+                    status = overallRequestStatus,
+                    type = RequestType.DELETE,
+                    report = when (overallRequestStatus) {
+                        RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
                         RequestStatus.UNKNOWN -> Report("Keine Informationen")
                         else -> null
                     }
@@ -168,7 +192,8 @@ class MtbFileController(
                     patientId = "???",
                     pid = patientId,
                     fingerprint = "",
-                    status = RequestStatus.DELETE_ERROR,
+                    status = RequestStatus.ERROR,
+                    type = RequestType.DELETE,
                     report = Report("Fehler bei der Pseudonymisierung")
                 )
             )

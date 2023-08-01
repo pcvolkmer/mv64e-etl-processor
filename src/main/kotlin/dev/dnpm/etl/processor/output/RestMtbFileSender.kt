@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) : MtbFileSender {
 
@@ -68,12 +69,12 @@ class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) 
             headers.contentType = MediaType.APPLICATION_JSON
             val entityReq = HttpEntity(null, headers)
             restTemplate.delete(
-                restTargetProperties.uri!!,
+                "${restTargetProperties.uri}/${request.patientId}",
                 entityReq,
                 String::class.java
             )
             logger.debug("Sent file via RestMtbFileSender")
-            MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
+            return MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
