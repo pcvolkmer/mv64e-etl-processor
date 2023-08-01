@@ -15,6 +15,7 @@
             <thead>
                 <tr>
                     <th>Status</th>
+                    <th>Typ</th>
                     <th>ID</th>
                     <th>Datum</th>
                     <th>Patienten-ID</th>
@@ -27,6 +28,7 @@
                     <td th:if="${request.status.value.contains('error')}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                    <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
                     <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
                     <td th:if="${request.report}">
                         <a th:href="@{/report/{id}(id=${request.uuid})}">[[ ${request.uuid} ]]</a>
