@@ -21,10 +21,12 @@ package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.monitoring.RequestType
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
@@ -41,8 +43,14 @@ class StatisticsRestController(
 ) {
 
     @GetMapping(path = ["requeststates"])
-    fun requestStates(): List<NameValue> {
-        return requestRepository.countStates()
+    fun requestStates(@RequestParam(required = false, defaultValue = "false") delete: Boolean): List<NameValue> {
+        val states = if (delete) {
+            requestRepository.countDeleteStates()
+        } else {
+            requestRepository.countStates()
+        }
+
+        return states
             .map {
                 val color = when (it.status) {
                     RequestStatus.ERROR -> "red"
@@ -56,9 +64,21 @@ class StatisticsRestController(
     }
 
     @GetMapping(path = ["requestslastmonth"])
-    fun requestsLastMonth(): List<DateNameValues> {
+    fun requestsLastMonth(
+        @RequestParam(
+            required = false,
+            defaultValue = "false"
+        ) delete: Boolean
+    ): List<DateNameValues> {
+        val requestType = if (delete) {
+            RequestType.DELETE
+        } else {
+            RequestType.MTB_FILE
+        }
+
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("Europe/Berlin"))
         val data = requestRepository.findAll()
+            .filter { it.type == requestType }
             .filter { it.processedAt.isAfter(Instant.now().minus(30, ChronoUnit.DAYS)) }
             .groupBy { formatter.format(it.processedAt) }
             .map {
@@ -91,8 +111,14 @@ class StatisticsRestController(
     }
 
     @GetMapping(path = ["requestpatientstates"])
-    fun requestPatientStates(): List<NameValue> {
-        return requestRepository.findPatientUniqueStates().map {
+    fun requestPatientStates(@RequestParam(required = false, defaultValue = "false") delete: Boolean): List<NameValue> {
+        val states = if (delete) {
+            requestRepository.findPatientUniqueDeleteStates()
+        } else {
+            requestRepository.findPatientUniqueStates()
+        }
+
+        return states.map {
             val color = when (it.status) {
                 RequestStatus.ERROR -> "red"
                 RequestStatus.WARNING -> "darkorange"
@@ -109,13 +135,23 @@ class StatisticsRestController(
             Flux.fromIterable(
                 listOf(
                     ServerSentEvent.builder<Any>()
-                        .event("requeststates").id("none").data(this.requestStates())
+                        .event("requeststates").id("none").data(this.requestStates(false))
                         .build(),
                     ServerSentEvent.builder<Any>()
-                        .event("requestslastmonth").id("none").data(this.requestsLastMonth())
+                        .event("requestslastmonth").id("none").data(this.requestsLastMonth(false))
                         .build(),
                     ServerSentEvent.builder<Any>()
-                        .event("requestpatientstates").id("none").data(this.requestPatientStates())
+                        .event("requestpatientstates").id("none").data(this.requestPatientStates(false))
+                        .build(),
+
+                    ServerSentEvent.builder<Any>()
+                        .event("deleterequeststates").id("none").data(this.requestStates(true))
+                        .build(),
+                    ServerSentEvent.builder<Any>()
+                        .event("deleterequestslastmonth").id("none").data(this.requestsLastMonth(true))
+                        .build(),
+                    ServerSentEvent.builder<Any>()
+                        .event("deleterequestpatientstates").id("none").data(this.requestPatientStates(true))
                         .build()
                 )
             )
