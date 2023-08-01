@@ -20,13 +20,11 @@
 package dev.dnpm.etl.processor.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import java.net.URI
-import java.net.URL
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
     var bwhc_uri: String?,
-    var pseudonymizer: Pseudonymizer = Pseudonymizer.BUILDIN
+    var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN
 ) {
     companion object {
         const val NAME = "app"
@@ -75,7 +73,7 @@ data class KafkaTargetProperties(
     }
 }
 
-enum class Pseudonymizer {
+enum class PseudonymGenerator {
     BUILDIN,
     GPAS
 }
