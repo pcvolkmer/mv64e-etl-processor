@@ -8,6 +8,18 @@ Wenn eine URI zu einer gPAS-Instanz angegeben ist, wird diese verwendet.
 Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgenommen.
 
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
+* `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
+
+### Eingebaute Pseudonymisierung
+
+Wurde keine oder die Verwendung der eingebauten Pseudonymisierung konfiguriert, so wird für die Patienten-ID der
+entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende "=" - zuzüglich des konfigurierten Prefixes
+als Patienten-Pseudonym verwendet.
+
+### Pseudonymisierung mit gPAS
+
+Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren.
+
 * `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate`)
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
