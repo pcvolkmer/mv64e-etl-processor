@@ -179,6 +179,8 @@ class RequestProcessor(
                 )
             )
 
+            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
+
             return overallRequestStatus
         } catch (e: Exception) {
             requestRepository.save(
@@ -192,6 +194,8 @@ class RequestProcessor(
                     report = Report("Fehler bei der Pseudonymisierung")
                 )
             )
+
+            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
 
             return RequestStatus.ERROR
         }
