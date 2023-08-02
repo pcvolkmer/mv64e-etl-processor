@@ -5,10 +5,11 @@ spring:
 
 app:
   rest:
-    uri: http://localhost:9000/bwhc/etl/api/MTBFile
-  #kafka:
-  #  topic: test
-  #  servers: kafka:9092
+    uri: http://localhost:9000/bwhc/etl/api
+  kafka:
+    topic: test
+    response-topic: test-response
+    servers: kafka:9092
 
 server:
   port: 8000

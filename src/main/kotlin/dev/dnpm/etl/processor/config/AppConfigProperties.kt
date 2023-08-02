@@ -48,7 +48,7 @@ data class GPasConfigProperties(
     val password: String?,
     val sslCaLocation: String?,
 
-) {
+    ) {
     companion object {
         const val NAME = "app.pseudonymize.gpas"
     }
@@ -66,6 +66,8 @@ data class RestTargetProperties(
 @ConfigurationProperties(KafkaTargetProperties.NAME)
 data class KafkaTargetProperties(
     val topic: String = "etl-processor",
+    val responseTopic: String = "${topic}_response",
+    val groupId: String = "${topic}_group",
     val servers: String = ""
 ) {
     companion object {

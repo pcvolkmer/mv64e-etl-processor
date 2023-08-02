@@ -21,7 +21,6 @@ package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
@@ -32,7 +31,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.kafka.core.KafkaTemplate
 import reactor.core.publisher.Sinks
 
 @Configuration
@@ -60,7 +58,10 @@ class AppConfiguration {
     }
 
     @Bean
-    fun pseudonymizeService(generator: Generator, pseudonymizeConfigProperties: PseudonymizeConfigProperties): PseudonymizeService {
+    fun pseudonymizeService(
+        generator: Generator,
+        pseudonymizeConfigProperties: PseudonymizeConfigProperties
+    ): PseudonymizeService {
         return PseudonymizeService(generator, pseudonymizeConfigProperties)
     }
 
@@ -68,15 +69,6 @@ class AppConfiguration {
     @Bean
     fun restMtbFileSender(restTargetProperties: RestTargetProperties): MtbFileSender {
         return RestMtbFileSender(restTargetProperties)
-    }
-
-    @ConditionalOnProperty(value = ["app.kafka.topic", "app.kafka.servers"])
-    @Bean
-    fun kafkaMtbFileSender(
-        kafkaTemplate: KafkaTemplate<String, String>,
-        objectMapper: ObjectMapper
-    ): MtbFileSender {
-        return KafkaMtbFileSender(kafkaTemplate, objectMapper)
     }
 
     @Bean
