@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.monitoring
 
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 
@@ -33,9 +34,14 @@ class ReportService(
         }
         return try {
             objectMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues
-        } catch (e: JsonMappingException) {
-            e.printStackTrace()
-            listOf()
+        } catch (e: Exception) {
+            val otherIssue =
+                Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
+            return when (e) {
+                is JsonMappingException -> listOf(otherIssue)
+                is JsonParseException -> listOf(otherIssue)
+                else -> throw e
+            }
         }
     }
 
