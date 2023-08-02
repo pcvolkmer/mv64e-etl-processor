@@ -42,7 +42,7 @@ class RequestProcessor(
 
     private val logger = LoggerFactory.getLogger(RequestProcessor::class.java)
 
-    fun processMtbFile(mtbFile: MtbFile): RequestStatus {
+    fun processMtbFile(mtbFile: MtbFile) {
         val pid = mtbFile.patient.id
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
@@ -62,7 +62,7 @@ class RequestProcessor(
                 )
             )
             statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-            return RequestStatus.DUPLICATION
+            return
         }
 
         val request = MtbFileSender.MtbFileRequest(UUID.randomUUID().toString(), pseudonymized)
@@ -115,11 +115,9 @@ class RequestProcessor(
         )
 
         statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-
-        return requestStatus
     }
 
-    fun processDeletion(patientId: String): RequestStatus {
+    fun processDeletion(patientId: String) {
         val requestId = UUID.randomUUID().toString()
 
         try {
@@ -178,10 +176,6 @@ class RequestProcessor(
                     }
                 )
             )
-
-            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-
-            return overallRequestStatus
         } catch (e: Exception) {
             requestRepository.save(
                 Request(
@@ -194,11 +188,8 @@ class RequestProcessor(
                     report = Report("Fehler bei der Pseudonymisierung")
                 )
             )
-
-            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-
-            return RequestStatus.ERROR
         }
+        statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
     }
 
     private fun fingerprint(mtbFile: MtbFile): String {
