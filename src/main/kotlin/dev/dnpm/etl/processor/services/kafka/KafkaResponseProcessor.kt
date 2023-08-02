@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.services.kafka
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.Report
@@ -81,7 +82,7 @@ class KafkaResponseProcessor(
     data class ResponseKey(val requestId: String)
 
     data class ResponseBody(
-        @JsonProperty("status code") val statusCode: Int,
+        @JsonProperty("status_code") @JsonAlias("status code") val statusCode: Int,
         @JsonProperty("status_body") val statusBody: String
     )
 }
