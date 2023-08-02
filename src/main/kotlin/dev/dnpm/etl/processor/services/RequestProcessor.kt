@@ -48,6 +48,7 @@ class RequestProcessor(
 
         val lastRequestForPatient =
             requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id)
+                .filter { it.type == RequestType.MTB_FILE }
                 .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
 
         if (null != lastRequestForPatient && lastRequestForPatient.fingerprint == fingerprint(mtbFile)) {
