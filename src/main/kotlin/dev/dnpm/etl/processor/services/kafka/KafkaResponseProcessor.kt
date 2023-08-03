@@ -43,8 +43,6 @@ class KafkaResponseProcessor(
             requestRepository.findByUuidEquals(responseKey.requestId).ifPresent {
                 val responseBody = objectMapper.readValue(data.value(), ResponseBody::class.java)
 
-                println("${responseBody.statusCode}")
-
                 when (responseBody.statusCode) {
                     200 -> {
                         it.status = RequestStatus.SUCCESS

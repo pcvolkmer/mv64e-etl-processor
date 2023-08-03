@@ -45,6 +45,9 @@ Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein
 * `APP_KAFKA_GROUP_ID`: Kafka GroupID des Consumers. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_group".
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 
-Wird keine Rückantwort über Apache Kafka empfangen und gibt es keine weitere Möglichkeit den Status festzustellen, verbleibt der Status auf `UNKNOWN`.
+Wird keine Rückantwort über Apache Kafka empfangen und es gibt keine weitere Möglichkeit den Status festzustellen, verbleibt der Status auf `UNKNOWN`.
 
 Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert werden.
+
+Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
+für HTTP nicht gibt.
