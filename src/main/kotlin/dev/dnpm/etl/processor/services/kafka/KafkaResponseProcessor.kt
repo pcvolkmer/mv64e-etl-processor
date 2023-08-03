@@ -42,6 +42,9 @@ class KafkaResponseProcessor(
             val responseKey = objectMapper.readValue(data.key(), ResponseKey::class.java)
             requestRepository.findByUuidEquals(responseKey.requestId).ifPresent {
                 val responseBody = objectMapper.readValue(data.value(), ResponseBody::class.java)
+
+                println("${responseBody.statusCode}")
+
                 when (responseBody.statusCode) {
                     200 -> {
                         it.status = RequestStatus.SUCCESS
@@ -64,6 +67,16 @@ class KafkaResponseProcessor(
                         it.processedAt = Instant.ofEpochMilli(data.timestamp())
                         it.report = Report(
                             "Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar",
+                            objectMapper.writeValueAsString(responseBody.statusBody)
+                        )
+                        requestRepository.save(it)
+                    }
+
+                    in 900..999 -> {
+                        it.status = RequestStatus.ERROR
+                        it.processedAt = Instant.ofEpochMilli(data.timestamp())
+                        it.report = Report(
+                            "Fehler bei der Datenübertragung, keine Verbindung zum bwHC-Backend möglich",
                             objectMapper.writeValueAsString(responseBody.statusBody)
                         )
                         requestRepository.save(it)

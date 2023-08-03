@@ -43,9 +43,10 @@ class AppKafkaConfiguration {
     @Bean
     fun kafkaMtbFileSender(
         kafkaTemplate: KafkaTemplate<String, String>,
+        kafkaTargetProperties: KafkaTargetProperties,
         objectMapper: ObjectMapper
     ): MtbFileSender {
-        return KafkaMtbFileSender(kafkaTemplate, objectMapper)
+        return KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, objectMapper)
     }
 
     @Bean
@@ -54,7 +55,7 @@ class AppKafkaConfiguration {
         kafkaTargetProperties: KafkaTargetProperties,
         kafkaResponseProcessor: KafkaResponseProcessor
     ): KafkaMessageListenerContainer<String, String> {
-        val containerProperties = ContainerProperties(kafkaTargetProperties.responseTopic);
+        val containerProperties = ContainerProperties(kafkaTargetProperties.responseTopic)
         containerProperties.messageListener = kafkaResponseProcessor
         return KafkaMessageListenerContainer(consumerFactory, containerProperties)
     }

@@ -22,11 +22,13 @@ package dev.dnpm.etl.processor.output
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.config.KafkaTargetProperties
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
 class KafkaMtbFileSender(
     private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val kafkaTargetProperties: KafkaTargetProperties,
     private val objectMapper: ObjectMapper
 ) : MtbFileSender {
 
@@ -34,13 +36,14 @@ class KafkaMtbFileSender(
 
     override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         return try {
-            val result = kafkaTemplate.sendDefault(
-                header(request),
+            val result = kafkaTemplate.send(
+                kafkaTargetProperties.topic,
+                key(request),
                 objectMapper.writeValueAsString(request.mtbFile)
             )
             if (result.get() != null) {
                 logger.debug("Sent file via KafkaMtbFileSender")
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
             } else {
                 MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
             }
@@ -61,14 +64,15 @@ class KafkaMtbFileSender(
             .build()
 
         return try {
-            val result = kafkaTemplate.sendDefault(
-                header(request),
+            val result = kafkaTemplate.send(
+                kafkaTargetProperties.topic,
+                key(request),
                 objectMapper.writeValueAsString(dummyMtbFile)
             )
 
             if (result.get() != null) {
                 logger.debug("Sent deletion request via KafkaMtbFileSender")
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
             } else {
                 MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
             }
@@ -78,13 +82,13 @@ class KafkaMtbFileSender(
         }
     }
 
-    private fun header(request: MtbFileSender.MtbFileRequest): String {
+    private fun key(request: MtbFileSender.MtbFileRequest): String {
         return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
                 "\"eid\": \"${request.mtbFile.episode.id}\", " +
                 "\"requestId\": \"${request.requestId}\"}"
     }
 
-    private fun header(request: MtbFileSender.DeleteRequest): String {
+    private fun key(request: MtbFileSender.DeleteRequest): String {
         return "{\"pid\": \"${request.patientId}\", " +
                 "\"requestId\": \"${request.requestId}\"}"
     }
