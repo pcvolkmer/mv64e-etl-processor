@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.ukw.ccc.bwhc.dto.Consent
+import de.ukw.ccc.bwhc.dto.MtbFile
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
@@ -42,21 +44,48 @@ class KafkaMtbFileSender(
             } else {
                 MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
             }
-
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
             MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
         }
     }
 
-    // TODO not yet implemented
     override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
-        return MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+        val dummyMtbFile = MtbFile.builder()
+            .withConsent(
+                Consent.builder()
+                    .withPatient(request.patientId)
+                    .withStatus(Consent.Status.REJECTED)
+                    .build()
+            )
+            .build()
+
+        return try {
+            val result = kafkaTemplate.sendDefault(
+                header(request),
+                objectMapper.writeValueAsString(dummyMtbFile)
+            )
+
+            if (result.get() != null) {
+                logger.debug("Sent deletion request via KafkaMtbFileSender")
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.SUCCESS)
+            } else {
+                MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
+            }
+        } catch (e: Exception) {
+            logger.error("An error occurred sending to kafka", e)
+            MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+        }
     }
 
     private fun header(request: MtbFileSender.MtbFileRequest): String {
         return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
                 "\"eid\": \"${request.mtbFile.episode.id}\", " +
+                "\"requestId\": \"${request.requestId}\"}"
+    }
+
+    private fun header(request: MtbFileSender.DeleteRequest): String {
+        return "{\"pid\": \"${request.patientId}\", " +
                 "\"requestId\": \"${request.requestId}\"}"
     }
 }
