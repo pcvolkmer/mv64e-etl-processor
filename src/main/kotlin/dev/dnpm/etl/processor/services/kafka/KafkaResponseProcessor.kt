@@ -54,7 +54,7 @@ class KafkaResponseProcessor(
                         it.processedAt = Instant.ofEpochMilli(data.timestamp())
                         it.report = Report(
                             "Warnungen über mangelhafte Daten",
-                            responseBody.statusBody
+                            objectMapper.writeValueAsString(responseBody.statusBody)
                         )
                         requestRepository.save(it)
                     }
@@ -64,7 +64,7 @@ class KafkaResponseProcessor(
                         it.processedAt = Instant.ofEpochMilli(data.timestamp())
                         it.report = Report(
                             "Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar",
-                            responseBody.statusBody
+                            objectMapper.writeValueAsString(responseBody.statusBody)
                         )
                         requestRepository.save(it)
                     }
@@ -83,6 +83,6 @@ class KafkaResponseProcessor(
 
     data class ResponseBody(
         @JsonProperty("status_code") @JsonAlias("status code") val statusCode: Int,
-        @JsonProperty("status_body") val statusBody: String
+        @JsonProperty("status_body") val statusBody: Map<String, Any>
     )
 }
