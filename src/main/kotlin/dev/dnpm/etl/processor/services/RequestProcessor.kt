@@ -46,12 +46,15 @@ class RequestProcessor(
         val pid = mtbFile.patient.id
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
-        val lastRequestForPatient =
-            requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id)
+        val allRequests = requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id)
+
+        val lastMtbFileRequestForPatient = allRequests
                 .filter { it.type == RequestType.MTB_FILE }
                 .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
 
-        if (null != lastRequestForPatient && lastRequestForPatient.fingerprint == fingerprint(mtbFile)) {
+        val isLastRequestDeletion = allRequests.firstOrNull()?.type == RequestType.DELETE
+
+        if (null != lastMtbFileRequestForPatient && lastMtbFileRequestForPatient.fingerprint == fingerprint(mtbFile) && !isLastRequestDeletion) {
             requestRepository.save(
                 Request(
                     patientId = pseudonymized.patient.id,
