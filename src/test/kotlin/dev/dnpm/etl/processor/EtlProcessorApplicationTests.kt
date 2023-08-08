@@ -28,7 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-class BwhcMapperApplicationTests : AbstractTestcontainerTest() {
+class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
 
     @Test
     fun contextLoads() {
