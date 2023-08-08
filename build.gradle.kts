@@ -15,6 +15,18 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
 }
 
+sourceSets {
+    create("integrationTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val integrationTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+    extendsFrom(configurations.runtimeOnly.get())
+}
+
 configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
@@ -50,8 +62,8 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    integrationTestImplementation("org.testcontainers:junit-jupiter")
+    integrationTestImplementation("org.testcontainers:postgresql")
 }
 
 tasks.withType<KotlinCompile> {
@@ -65,3 +77,11 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+task<Test>("integrationTest") {
+    description = "Runs integration tests"
+
+    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+
+    shouldRunAfter("test")
+}
