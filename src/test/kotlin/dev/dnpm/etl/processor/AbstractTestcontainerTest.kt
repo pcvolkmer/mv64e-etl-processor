@@ -28,7 +28,7 @@ abstract class AbstractTestcontainerTest {
 
     companion object {
         @Container
-        val dbContainer = PostgreSQLContainer("postgres:10-alpine")
+        val dbContainer = CustomPostgreSQLContainer("postgres:10-alpine")
             .withDatabaseName("test")
             .withUsername("test")
             .withPassword("test") ?: throw RuntimeException("Failed to create testcontainer!")
@@ -42,4 +42,10 @@ abstract class AbstractTestcontainerTest {
         }
     }
 
+}
+
+class CustomPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<CustomPostgreSQLContainer>(dockerImageName) {
+    override fun stop() {
+        // Keep Testcontainer alive until JVM destroys it
+    }
 }
