@@ -130,7 +130,7 @@ class RequestProcessorTest {
     }
 
     @Test
-    fun testShouldSendMtbFileAndSaveRequestStatus() {
+    fun testShouldSendMtbFileAndSaveSuccessRequestStatus() {
         doAnswer {
             Request(
                 id = 1L,
@@ -189,7 +189,66 @@ class RequestProcessorTest {
     }
 
     @Test
-    fun testShouldSendDeleterequestAndSaveRequestStatus() {
+    fun testShouldSendMtbFileAndSaveErrorRequestStatus() {
+        doAnswer {
+            Request(
+                id = 1L,
+                uuid = UUID.randomUUID().toString(),
+                patientId = "TEST_12345678901",
+                pid = "P1",
+                fingerprint = "different",
+                type = RequestType.MTB_FILE,
+                status = RequestStatus.SUCCESS,
+                processedAt = Instant.parse("2023-08-08T02:00:00Z")
+            )
+        }.`when`(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+
+        doAnswer {
+            false
+        }.`when`(requestService).isLastRequestDeletion(anyString())
+
+        doAnswer {
+            MtbFileSender.Response(status = MtbFileSender.ResponseStatus.ERROR)
+        }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
+
+        doAnswer {
+            it.arguments[0] as MtbFile
+        }.`when`(pseudonymizeService).pseudonymize(any())
+
+        val mtbFile = MtbFile.builder()
+            .withPatient(
+                Patient.builder()
+                    .withId("1")
+                    .withBirthDate("2000-08-08")
+                    .withGender(Patient.Gender.MALE)
+                    .build()
+            )
+            .withConsent(
+                Consent.builder()
+                    .withId("1")
+                    .withStatus(Consent.Status.ACTIVE)
+                    .withPatient("123")
+                    .build()
+            )
+            .withEpisode(
+                Episode.builder()
+                    .withId("1")
+                    .withPatient("1")
+                    .withPeriod(PeriodStart("2023-08-08"))
+                    .build()
+            )
+            .build()
+
+        this.requestProcessor.processMtbFile(mtbFile)
+
+        val requestCaptor = argumentCaptor<Request>()
+        verify(requestService, times(1)).save(requestCaptor.capture())
+        assertThat(requestCaptor.firstValue).isNotNull
+        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+    }
+
+    @Test
+    fun testShouldSendDeleteRequestAndSaveSuccessRequestStatus() {
         doAnswer {
             "PSEUDONYM"
         }.`when`(pseudonymizeService).patientPseudonym(anyString())
@@ -204,6 +263,36 @@ class RequestProcessorTest {
         verify(requestService, times(1)).save(requestCaptor.capture())
         assertThat(requestCaptor.firstValue).isNotNull
         assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+    }
+
+    @Test
+    fun testShouldSendDeleteRequestAndSaveErrorRequestStatus() {
+        doAnswer {
+            "PSEUDONYM"
+        }.`when`(pseudonymizeService).patientPseudonym(anyString())
+
+        doAnswer {
+            MtbFileSender.Response(status = MtbFileSender.ResponseStatus.ERROR)
+        }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
+
+        this.requestProcessor.processDeletion("TEST_12345678901")
+
+        val requestCaptor = argumentCaptor<Request>()
+        verify(requestService, times(1)).save(requestCaptor.capture())
+        assertThat(requestCaptor.firstValue).isNotNull
+        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+    }
+
+    @Test
+    fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
+        doThrow(RuntimeException()).`when`(pseudonymizeService).patientPseudonym(anyString())
+
+        this.requestProcessor.processDeletion("TEST_12345678901")
+
+        val requestCaptor = argumentCaptor<Request>()
+        verify(requestService, times(1)).save(requestCaptor.capture())
+        assertThat(requestCaptor.firstValue).isNotNull
+        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
     }
 
 }
