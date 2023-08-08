@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.monitoring
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
@@ -46,8 +47,10 @@ class ReportService(
     }
 
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private data class DataQualityReport(val issues: List<Issue>)
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class Issue(val severity: Severity, val message: String)
 
     enum class Severity(@JsonValue val value: String) {
