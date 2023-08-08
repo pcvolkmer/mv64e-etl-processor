@@ -21,7 +21,10 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.monitoring.*
+import dev.dnpm.etl.processor.monitoring.Report
+import dev.dnpm.etl.processor.monitoring.Request
+import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import org.apache.commons.codec.binary.Base32
@@ -35,7 +38,7 @@ import java.util.*
 class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
     private val senders: List<MtbFileSender>,
-    private val requestRepository: RequestRepository,
+    private val requestService: RequestService,
     private val objectMapper: ObjectMapper,
     private val statisticsUpdateProducer: Sinks.Many<Any>
 ) {
@@ -46,7 +49,7 @@ class RequestProcessor(
         val pid = mtbFile.patient.id
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
-        val allRequests = requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id)
+        val allRequests = requestService.allRequestsByPatientPseudonym(pseudonymized.patient.id)
 
         val lastMtbFileRequestForPatient = allRequests
                 .filter { it.type == RequestType.MTB_FILE }
@@ -55,7 +58,7 @@ class RequestProcessor(
         val isLastRequestDeletion = allRequests.firstOrNull()?.type == RequestType.DELETE
 
         if (null != lastMtbFileRequestForPatient && lastMtbFileRequestForPatient.fingerprint == fingerprint(mtbFile) && !isLastRequestDeletion) {
-            requestRepository.save(
+            requestService.save(
                 Request(
                     patientId = pseudonymized.patient.id,
                     pid = pid,
@@ -99,7 +102,7 @@ class RequestProcessor(
             RequestStatus.UNKNOWN
         }
 
-        requestRepository.save(
+        requestService.save(
             Request(
                 uuid = request.requestId,
                 patientId = request.mtbFile.patient.id,
@@ -165,7 +168,7 @@ class RequestProcessor(
                 RequestStatus.UNKNOWN
             }
 
-            requestRepository.save(
+            requestService.save(
                 Request(
                     uuid = requestId,
                     patientId = patientPseudonym,
@@ -181,7 +184,7 @@ class RequestProcessor(
                 )
             )
         } catch (e: Exception) {
-            requestRepository.save(
+            requestService.save(
                 Request(
                     uuid = requestId,
                     patientId = "???",
