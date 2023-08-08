@@ -49,15 +49,7 @@ class RequestProcessor(
         val pid = mtbFile.patient.id
         val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
-        val allRequests = requestService.allRequestsByPatientPseudonym(pseudonymized.patient.id)
-
-        val lastMtbFileRequestForPatient = allRequests
-                .filter { it.type == RequestType.MTB_FILE }
-                .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
-
-        val isLastRequestDeletion = allRequests.firstOrNull()?.type == RequestType.DELETE
-
-        if (null != lastMtbFileRequestForPatient && lastMtbFileRequestForPatient.fingerprint == fingerprint(mtbFile) && !isLastRequestDeletion) {
+        if (isDuplication(pseudonymized)) {
             requestService.save(
                 Request(
                     patientId = pseudonymized.patient.id,
@@ -122,6 +114,16 @@ class RequestProcessor(
         )
 
         statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
+    }
+
+    private fun isDuplication(pseudonymizedMtbFile: MtbFile): Boolean {
+        val lastMtbFileRequestForPatient =
+            requestService.lastMtbFileRequestForPatientPseudonym(pseudonymizedMtbFile.patient.id)
+        val isLastRequestDeletion = requestService.isLastRequestDeletion(pseudonymizedMtbFile.patient.id)
+
+        return null != lastMtbFileRequestForPatient
+                && !isLastRequestDeletion
+                && lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFile)
     }
 
     fun processDeletion(patientId: String) {
