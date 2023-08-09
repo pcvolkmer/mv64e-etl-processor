@@ -20,7 +20,6 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.services.kafka.KafkaResponseProcessor
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -70,10 +70,10 @@ class AppKafkaConfiguration {
 
     @Bean
     fun kafkaResponseProcessor(
-        requestRepository: RequestRepository,
+        applicationEventPublisher: ApplicationEventPublisher,
         objectMapper: ObjectMapper
     ): KafkaResponseProcessor {
-        return KafkaResponseProcessor(requestRepository, objectMapper)
+        return KafkaResponseProcessor(applicationEventPublisher, objectMapper)
     }
 
 }

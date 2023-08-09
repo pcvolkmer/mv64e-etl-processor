@@ -22,16 +22,18 @@ package dev.dnpm.etl.processor.services.kafka
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.monitoring.Report
-import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.output.asRequestStatus
+import dev.dnpm.etl.processor.services.ResponseEvent
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.kafka.listener.MessageListener
 import java.time.Instant
+import java.util.*
 
 class KafkaResponseProcessor(
-    private val requestRepository: RequestRepository,
+    private val eventPublisher: ApplicationEventPublisher,
     private val objectMapper: ObjectMapper
 ) : MessageListener<String, String> {
 
@@ -39,55 +41,44 @@ class KafkaResponseProcessor(
 
     override fun onMessage(data: ConsumerRecord<String, String>) {
         try {
-            val responseKey = objectMapper.readValue(data.key(), ResponseKey::class.java)
-            requestRepository.findByUuidEquals(responseKey.requestId).ifPresent {
-                val responseBody = objectMapper.readValue(data.value(), ResponseBody::class.java)
-
-                when (responseBody.statusCode) {
-                    200 -> {
-                        it.status = RequestStatus.SUCCESS
-                        it.processedAt = Instant.ofEpochMilli(data.timestamp())
-                        requestRepository.save(it)
-                    }
-
-                    201 -> {
-                        it.status = RequestStatus.WARNING
-                        it.processedAt = Instant.ofEpochMilli(data.timestamp())
-                        it.report = Report(
-                            "Warnungen über mangelhafte Daten",
-                            objectMapper.writeValueAsString(responseBody.statusBody)
-                        )
-                        requestRepository.save(it)
-                    }
-
-                    400, 422 -> {
-                        it.status = RequestStatus.ERROR
-                        it.processedAt = Instant.ofEpochMilli(data.timestamp())
-                        it.report = Report(
-                            "Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar",
-                            objectMapper.writeValueAsString(responseBody.statusBody)
-                        )
-                        requestRepository.save(it)
-                    }
-
-                    in 900..999 -> {
-                        it.status = RequestStatus.ERROR
-                        it.processedAt = Instant.ofEpochMilli(data.timestamp())
-                        it.report = Report(
-                            "Fehler bei der Datenübertragung, keine Verbindung zum bwHC-Backend möglich",
-                            objectMapper.writeValueAsString(responseBody.statusBody)
-                        )
-                        requestRepository.save(it)
-                    }
-
-                    else -> {
-                        logger.error("Cannot process Kafka response: Unknown response code!")
-                    }
-                }
-            }
+            Optional.of(objectMapper.readValue(data.key(), ResponseKey::class.java))
         } catch (e: Exception) {
-            logger.error("Cannot process Kafka response", e)
-        }
+            Optional.empty()
+        }.ifPresentOrElse({ responseKey ->
+            val event = try {
+                val responseBody = objectMapper.readValue(data.value(), ResponseBody::class.java)
+                ResponseEvent(
+                    responseKey.requestId,
+                    Instant.ofEpochMilli(data.timestamp()),
+                    responseBody.statusCode.asRequestStatus(),
+                    when (responseBody.statusCode.asRequestStatus()) {
+                        RequestStatus.SUCCESS -> {
+                            Optional.empty()
+                        }
+
+                        RequestStatus.WARNING, RequestStatus.ERROR -> {
+                            Optional.of(objectMapper.writeValueAsString(responseBody.statusBody))
+                        }
+
+                        else -> {
+                            logger.error("Kafka response: Unknown response code!")
+                            Optional.empty()
+                        }
+                    }
+                )
+            } catch (e: Exception) {
+                logger.error("Cannot process Kafka response", e)
+                ResponseEvent(
+                    responseKey.requestId,
+                    Instant.ofEpochMilli(data.timestamp()),
+                    RequestStatus.ERROR,
+                    Optional.of("Cannot process Kafka response")
+                )
+            }
+            eventPublisher.publishEvent(event)
+        }, {
+            logger.error("No response key in Kafka response")
+        })
     }
 
     data class ResponseKey(val requestId: String)

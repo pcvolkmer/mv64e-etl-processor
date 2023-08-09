@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.config.KafkaTargetProperties
+import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
@@ -43,13 +44,13 @@ class KafkaMtbFileSender(
             )
             if (result.get() != null) {
                 logger.debug("Sent file via KafkaMtbFileSender")
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+                MtbFileSender.Response(RequestStatus.UNKNOWN)
             } else {
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
+                MtbFileSender.Response(RequestStatus.ERROR)
             }
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
-            MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+            MtbFileSender.Response(RequestStatus.UNKNOWN)
         }
     }
 
@@ -72,13 +73,13 @@ class KafkaMtbFileSender(
 
             if (result.get() != null) {
                 logger.debug("Sent deletion request via KafkaMtbFileSender")
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+                MtbFileSender.Response(RequestStatus.UNKNOWN)
             } else {
-                MtbFileSender.Response(MtbFileSender.ResponseStatus.ERROR)
+                MtbFileSender.Response(RequestStatus.ERROR)
             }
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
-            MtbFileSender.Response(MtbFileSender.ResponseStatus.UNKNOWN)
+            MtbFileSender.Response(RequestStatus.UNKNOWN)
         }
     }
 

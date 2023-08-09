@@ -37,7 +37,7 @@ import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import reactor.core.publisher.Sinks
+import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.util.*
 
@@ -48,7 +48,7 @@ class RequestProcessorTest {
     private lateinit var pseudonymizeService: PseudonymizeService
     private lateinit var sender: MtbFileSender
     private lateinit var requestService: RequestService
-    private lateinit var statisticsUpdateProducer: Sinks.Many<Any>
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     private lateinit var requestProcessor: RequestProcessor
 
@@ -57,11 +57,12 @@ class RequestProcessorTest {
         @Mock pseudonymizeService: PseudonymizeService,
         @Mock sender: RestMtbFileSender,
         @Mock requestService: RequestService,
+        @Mock applicationEventPublisher: ApplicationEventPublisher
     ) {
         this.pseudonymizeService = pseudonymizeService
         this.sender = sender
         this.requestService = requestService
-        this.statisticsUpdateProducer = Sinks.many().multicast().directBestEffort()
+        this.applicationEventPublisher = applicationEventPublisher
 
         val objectMapper = ObjectMapper()
 
@@ -70,12 +71,12 @@ class RequestProcessorTest {
             sender,
             requestService,
             objectMapper,
-            statisticsUpdateProducer
+            applicationEventPublisher
         )
     }
 
     @Test
-    fun testShouldDetectMtbFileDuplicationAndSaveRequestStatus() {
+    fun testShouldSendMtbFileDuplicationAndSaveUnknownRequestStatusAtFirst() {
         doAnswer {
             Request(
                 id = 1L,
@@ -126,11 +127,66 @@ class RequestProcessorTest {
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
         assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.DUPLICATION)
+        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
     }
 
     @Test
-    fun testShouldSendMtbFileAndSaveSuccessRequestStatus() {
+    fun testShouldDetectMtbFileDuplicationAndSendDuplicationEvent() {
+        doAnswer {
+            Request(
+                id = 1L,
+                uuid = UUID.randomUUID().toString(),
+                patientId = "TEST_12345678901",
+                pid = "P1",
+                fingerprint = "xrysxpozhbs2lnrjgf3yq4fzj33kxr7xr5c2cbuskmelfdmckl3a",
+                type = RequestType.MTB_FILE,
+                status = RequestStatus.SUCCESS,
+                processedAt = Instant.parse("2023-08-08T02:00:00Z")
+            )
+        }.`when`(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+
+        doAnswer {
+            false
+        }.`when`(requestService).isLastRequestDeletion(anyString())
+
+        doAnswer {
+            it.arguments[0] as String
+        }.`when`(pseudonymizeService).patientPseudonym(any())
+
+        val mtbFile = MtbFile.builder()
+            .withPatient(
+                Patient.builder()
+                    .withId("1")
+                    .withBirthDate("2000-08-08")
+                    .withGender(Patient.Gender.MALE)
+                    .build()
+            )
+            .withConsent(
+                Consent.builder()
+                    .withId("1")
+                    .withStatus(Consent.Status.ACTIVE)
+                    .withPatient("123")
+                    .build()
+            )
+            .withEpisode(
+                Episode.builder()
+                    .withId("1")
+                    .withPatient("1")
+                    .withPeriod(PeriodStart("2023-08-08"))
+                    .build()
+            )
+            .build()
+
+        this.requestProcessor.processMtbFile(mtbFile)
+
+        val eventCaptor = argumentCaptor<ResponseEvent>()
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+        assertThat(eventCaptor.firstValue).isNotNull
+        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.DUPLICATION)
+    }
+
+    @Test
+    fun testShouldSendMtbFileAndSendSuccessEvent() {
         doAnswer {
             Request(
                 id = 1L,
@@ -149,7 +205,7 @@ class RequestProcessorTest {
         }.`when`(requestService).isLastRequestDeletion(anyString())
 
         doAnswer {
-            MtbFileSender.Response(status = MtbFileSender.ResponseStatus.SUCCESS)
+            MtbFileSender.Response(status = RequestStatus.SUCCESS)
         }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         doAnswer {
@@ -182,14 +238,14 @@ class RequestProcessorTest {
 
         this.requestProcessor.processMtbFile(mtbFile)
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+        val eventCaptor = argumentCaptor<ResponseEvent>()
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+        assertThat(eventCaptor.firstValue).isNotNull
+        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
     }
 
     @Test
-    fun testShouldSendMtbFileAndSaveErrorRequestStatus() {
+    fun testShouldSendMtbFileAndSendErrorEvent() {
         doAnswer {
             Request(
                 id = 1L,
@@ -208,7 +264,7 @@ class RequestProcessorTest {
         }.`when`(requestService).isLastRequestDeletion(anyString())
 
         doAnswer {
-            MtbFileSender.Response(status = MtbFileSender.ResponseStatus.ERROR)
+            MtbFileSender.Response(status = RequestStatus.ERROR)
         }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         doAnswer {
@@ -241,20 +297,20 @@ class RequestProcessorTest {
 
         this.requestProcessor.processMtbFile(mtbFile)
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+        val eventCaptor = argumentCaptor<ResponseEvent>()
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+        assertThat(eventCaptor.firstValue).isNotNull
+        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
     }
 
     @Test
-    fun testShouldSendDeleteRequestAndSaveSuccessRequestStatus() {
+    fun testShouldSendDeleteRequestAndSaveUnknownRequestStatusAtFirst() {
         doAnswer {
             "PSEUDONYM"
         }.`when`(pseudonymizeService).patientPseudonym(anyString())
 
         doAnswer {
-            MtbFileSender.Response(status = MtbFileSender.ResponseStatus.SUCCESS)
+            MtbFileSender.Response(status = RequestStatus.UNKNOWN)
         }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
 
         this.requestProcessor.processDeletion("TEST_12345678901")
@@ -262,25 +318,43 @@ class RequestProcessorTest {
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
         assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
     }
 
     @Test
-    fun testShouldSendDeleteRequestAndSaveErrorRequestStatus() {
+    fun testShouldSendDeleteRequestAndSendSuccessEvent() {
         doAnswer {
             "PSEUDONYM"
         }.`when`(pseudonymizeService).patientPseudonym(anyString())
 
         doAnswer {
-            MtbFileSender.Response(status = MtbFileSender.ResponseStatus.ERROR)
+            MtbFileSender.Response(status = RequestStatus.SUCCESS)
         }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
 
         this.requestProcessor.processDeletion("TEST_12345678901")
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+        val eventCaptor = argumentCaptor<ResponseEvent>()
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+        assertThat(eventCaptor.firstValue).isNotNull
+        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+    }
+
+    @Test
+    fun testShouldSendDeleteRequestAndSendErrorEvent() {
+        doAnswer {
+            "PSEUDONYM"
+        }.`when`(pseudonymizeService).patientPseudonym(anyString())
+
+        doAnswer {
+            MtbFileSender.Response(status = RequestStatus.ERROR)
+        }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
+
+        this.requestProcessor.processDeletion("TEST_12345678901")
+
+        val eventCaptor = argumentCaptor<ResponseEvent>()
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+        assertThat(eventCaptor.firstValue).isNotNull
+        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
     }
 
     @Test
