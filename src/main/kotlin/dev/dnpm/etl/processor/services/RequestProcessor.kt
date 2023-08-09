@@ -27,6 +27,7 @@ import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.LoggerFactory
@@ -47,12 +48,13 @@ class RequestProcessor(
 
     fun processMtbFile(mtbFile: MtbFile) {
         val pid = mtbFile.patient.id
-        val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
-        if (isDuplication(pseudonymized)) {
+        mtbFile pseudonymizeWith pseudonymizeService
+
+        if (isDuplication(mtbFile)) {
             requestService.save(
                 Request(
-                    patientId = pseudonymized.patient.id,
+                    patientId = mtbFile.patient.id,
                     pid = pid,
                     fingerprint = fingerprint(mtbFile),
                     status = RequestStatus.DUPLICATION,
@@ -64,19 +66,19 @@ class RequestProcessor(
             return
         }
 
-        val request = MtbFileSender.MtbFileRequest(UUID.randomUUID().toString(), pseudonymized)
+        val request = MtbFileSender.MtbFileRequest(UUID.randomUUID().toString(), mtbFile)
 
         val responseStatus = sender.send(request)
         if (responseStatus.status == MtbFileSender.ResponseStatus.SUCCESS || responseStatus.status == MtbFileSender.ResponseStatus.WARNING) {
             logger.info(
                 "Sent file for Patient '{}' using '{}'",
-                pseudonymized.patient.id,
+                mtbFile.patient.id,
                 sender.javaClass.simpleName
             )
         } else {
             logger.error(
                 "Error sending file for Patient '{}' using '{}'",
-                pseudonymized.patient.id,
+                mtbFile.patient.id,
                 sender.javaClass.simpleName
             )
         }

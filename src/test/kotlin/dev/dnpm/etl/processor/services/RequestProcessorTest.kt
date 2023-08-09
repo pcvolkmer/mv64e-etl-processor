@@ -82,7 +82,7 @@ class RequestProcessorTest {
                 uuid = UUID.randomUUID().toString(),
                 patientId = "TEST_12345678901",
                 pid = "P1",
-                fingerprint = "cwaxsvectyfj4qcw4hiwzx5fwwo7lekyagpzd2ayuf36jlvi6msa",
+                fingerprint = "xrysxpozhbs2lnrjgf3yq4fzj33kxr7xr5c2cbuskmelfdmckl3a",
                 type = RequestType.MTB_FILE,
                 status = RequestStatus.SUCCESS,
                 processedAt = Instant.parse("2023-08-08T02:00:00Z")
@@ -94,8 +94,8 @@ class RequestProcessorTest {
         }.`when`(requestService).isLastRequestDeletion(anyString())
 
         doAnswer {
-            it.arguments[0] as MtbFile
-        }.`when`(pseudonymizeService).pseudonymize(any())
+            it.arguments[0] as String
+        }.`when`(pseudonymizeService).patientPseudonym(any())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -153,8 +153,8 @@ class RequestProcessorTest {
         }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         doAnswer {
-            it.arguments[0] as MtbFile
-        }.`when`(pseudonymizeService).pseudonymize(any())
+            it.arguments[0] as String
+        }.`when`(pseudonymizeService).patientPseudonym(any())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -212,8 +212,8 @@ class RequestProcessorTest {
         }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         doAnswer {
-            it.arguments[0] as MtbFile
-        }.`when`(pseudonymizeService).pseudonymize(any())
+            it.arguments[0] as String
+        }.`when`(pseudonymizeService).patientPseudonym(any())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
