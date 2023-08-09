@@ -24,12 +24,14 @@ import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.output.MtbFileSender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -40,6 +42,7 @@ import java.util.*
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 @Transactional
+@MockBean(MtbFileSender::class)
 class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
 
     private lateinit var requestRepository: RequestRepository

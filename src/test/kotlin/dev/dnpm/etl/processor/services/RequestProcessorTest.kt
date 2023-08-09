@@ -67,7 +67,7 @@ class RequestProcessorTest {
 
         requestProcessor = RequestProcessor(
             pseudonymizeService,
-            listOf(sender),
+            sender,
             requestService,
             objectMapper,
             statisticsUpdateProducer

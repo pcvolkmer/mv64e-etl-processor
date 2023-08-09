@@ -37,7 +37,7 @@ import java.util.*
 @Service
 class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
-    private val senders: List<MtbFileSender>,
+    private val sender: MtbFileSender,
     private val requestService: RequestService,
     private val objectMapper: ObjectMapper,
     private val statisticsUpdateProducer: Sinks.Many<Any>
@@ -66,32 +66,26 @@ class RequestProcessor(
 
         val request = MtbFileSender.MtbFileRequest(UUID.randomUUID().toString(), pseudonymized)
 
-        val responses = senders.map {
-            val responseStatus = it.send(request)
-            if (responseStatus.status == MtbFileSender.ResponseStatus.SUCCESS || responseStatus.status == MtbFileSender.ResponseStatus.WARNING) {
-                logger.info(
-                    "Sent file for Patient '{}' using '{}'",
-                    pseudonymized.patient.id,
-                    it.javaClass.simpleName
-                )
-            } else {
-                logger.error(
-                    "Error sending file for Patient '{}' using '{}'",
-                    pseudonymized.patient.id,
-                    it.javaClass.simpleName
-                )
-            }
-            responseStatus
+        val responseStatus = sender.send(request)
+        if (responseStatus.status == MtbFileSender.ResponseStatus.SUCCESS || responseStatus.status == MtbFileSender.ResponseStatus.WARNING) {
+            logger.info(
+                "Sent file for Patient '{}' using '{}'",
+                pseudonymized.patient.id,
+                sender.javaClass.simpleName
+            )
+        } else {
+            logger.error(
+                "Error sending file for Patient '{}' using '{}'",
+                pseudonymized.patient.id,
+                sender.javaClass.simpleName
+            )
         }
 
-        val requestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
-            RequestStatus.ERROR
-        } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.WARNING)) {
-            RequestStatus.WARNING
-        } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
-            RequestStatus.SUCCESS
-        } else {
-            RequestStatus.UNKNOWN
+        val requestStatus = when (responseStatus.status) {
+            MtbFileSender.ResponseStatus.ERROR -> RequestStatus.ERROR
+            MtbFileSender.ResponseStatus.WARNING -> RequestStatus.WARNING
+            MtbFileSender.ResponseStatus.SUCCESS -> RequestStatus.SUCCESS
+            else -> RequestStatus.UNKNOWN
         }
 
         requestService.save(
@@ -104,9 +98,7 @@ class RequestProcessor(
                 type = RequestType.MTB_FILE,
                 report = when (requestStatus) {
                     RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
-                    RequestStatus.WARNING -> Report("Warnungen über mangelhafte Daten",
-                        responses.joinToString("\n") { it.reason })
-
+                    RequestStatus.WARNING -> Report("Warnungen über mangelhafte Daten", responseStatus.reason)
                     RequestStatus.UNKNOWN -> Report("Keine Informationen")
                     else -> null
                 }
@@ -132,42 +124,38 @@ class RequestProcessor(
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
-            val responses = senders.map {
-                val responseStatus = it.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
-                when (responseStatus.status) {
-                    MtbFileSender.ResponseStatus.SUCCESS -> {
-                        logger.info(
-                            "Sent delete for Patient '{}' using '{}'",
-                            patientPseudonym,
-                            it.javaClass.simpleName
-                        )
-                    }
-
-                    MtbFileSender.ResponseStatus.ERROR -> {
-                        logger.error(
-                            "Error deleting data for Patient '{}' using '{}'",
-                            patientPseudonym,
-                            it.javaClass.simpleName
-                        )
-                    }
-
-                    else -> {
-                        logger.error(
-                            "Unknown result on deleting data for Patient '{}' using '{}'",
-                            patientPseudonym,
-                            it.javaClass.simpleName
-                        )
-                    }
+            val responseStatus = sender.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+            when (responseStatus.status) {
+                MtbFileSender.ResponseStatus.SUCCESS -> {
+                    logger.info(
+                        "Sent delete for Patient '{}' using '{}'",
+                        patientPseudonym,
+                        sender.javaClass.simpleName
+                    )
                 }
-                responseStatus
+
+                MtbFileSender.ResponseStatus.ERROR -> {
+                    logger.error(
+                        "Error deleting data for Patient '{}' using '{}'",
+                        patientPseudonym,
+                        sender.javaClass.simpleName
+                    )
+                }
+
+                else -> {
+                    logger.error(
+                        "Unknown result on deleting data for Patient '{}' using '{}'",
+                        patientPseudonym,
+                        sender.javaClass.simpleName
+                    )
+                }
             }
 
-            val overallRequestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
-                RequestStatus.ERROR
-            } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
-                RequestStatus.SUCCESS
-            } else {
-                RequestStatus.UNKNOWN
+            val requestStatus = when (responseStatus.status) {
+                MtbFileSender.ResponseStatus.ERROR -> RequestStatus.ERROR
+                MtbFileSender.ResponseStatus.WARNING -> RequestStatus.WARNING
+                MtbFileSender.ResponseStatus.SUCCESS -> RequestStatus.SUCCESS
+                else -> RequestStatus.UNKNOWN
             }
 
             requestService.save(
@@ -176,9 +164,9 @@ class RequestProcessor(
                     patientId = patientPseudonym,
                     pid = patientId,
                     fingerprint = fingerprint(patientPseudonym),
-                    status = overallRequestStatus,
+                    status = requestStatus,
                     type = RequestType.DELETE,
-                    report = when (overallRequestStatus) {
+                    report = when (requestStatus) {
                         RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
                         RequestStatus.UNKNOWN -> Report("Keine Informationen")
                         else -> null
