@@ -24,10 +24,13 @@ import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.services.kafka.KafkaResponseProcessor
+import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.ContainerProperties
@@ -38,7 +41,11 @@ import org.springframework.kafka.listener.KafkaMessageListenerContainer
     value = [KafkaTargetProperties::class]
 )
 @ConditionalOnProperty(value = ["app.kafka.topic", "app.kafka.servers"])
+@ConditionalOnMissingBean(MtbFileSender::class)
+@Order(-5)
 class AppKafkaConfiguration {
+
+    private val logger = LoggerFactory.getLogger(AppKafkaConfiguration::class.java)
 
     @Bean
     fun kafkaMtbFileSender(
@@ -46,6 +53,7 @@ class AppKafkaConfiguration {
         kafkaTargetProperties: KafkaTargetProperties,
         objectMapper: ObjectMapper
     ): MtbFileSender {
+        logger.info("Selected 'KafkaMtbFileSender'")
         return KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, objectMapper)
     }
 

@@ -21,8 +21,6 @@ package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
@@ -38,9 +36,7 @@ import reactor.core.publisher.Sinks
     value = [
         AppConfigProperties::class,
         PseudonymizeConfigProperties::class,
-        GPasConfigProperties::class,
-        RestTargetProperties::class,
-        KafkaTargetProperties::class
+        GPasConfigProperties::class
     ]
 )
 class AppConfiguration {
@@ -63,12 +59,6 @@ class AppConfiguration {
         pseudonymizeConfigProperties: PseudonymizeConfigProperties
     ): PseudonymizeService {
         return PseudonymizeService(generator, pseudonymizeConfigProperties)
-    }
-
-    @ConditionalOnProperty(value = ["app.rest.uri"])
-    @Bean
-    fun restMtbFileSender(restTargetProperties: RestTargetProperties): MtbFileSender {
-        return RestMtbFileSender(restTargetProperties)
     }
 
     @Bean

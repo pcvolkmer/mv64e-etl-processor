@@ -28,7 +28,10 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 
 ## Mögliche Endpunkte
 
-Für REST-Requests als auch (parallel) zur Nutzung von Kafka-Topics können Endpunkte konfiguriert werden.
+Für REST-Requests als auch zur Nutzung von Kafka-Topics können Endpunkte konfiguriert werden.
+
+Es ist dabei nur die Konfiguration eines Endpunkts zulässig.
+Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpunkt verwendet.
 
 ### REST
 
