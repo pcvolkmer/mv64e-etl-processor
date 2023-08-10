@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
@@ -89,4 +90,14 @@ task<Test>("integrationTest") {
     classpath = sourceSets["integrationTest"].runtimeClasspath
 
     shouldRunAfter("test")
+}
+
+tasks.named<BootBuildImage>("bootBuildImage") {
+    imageName.set("ghcr.io/ccc-mf/etl-processor")
+
+    environment.set(environment.get() + mapOf(
+        "BP_OCI_SOURCE" to "https://github.com/CCC-MF/etl-processor",
+        "BP_OCI_LICENSES" to "AGPLv3",
+        "BP_OCI_DESCRIPTION" to "ETL Processor for bwHC MTB files"
+    ))
 }
