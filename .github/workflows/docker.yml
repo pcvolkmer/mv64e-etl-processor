@@ -1,0 +1,30 @@
+name: "Run docker build and deploy"
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  call-test-workflow:
+    uses: ./.github/workflows/test.yml
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Execute image build and push
+        run: |
+          ./gradlew bootBuildImage
+          docker tag ghcr.io/ccc-mf/etl-processor ghcr.io/ccc-mf/etl-processor:${{ github.ref_name }}
+          docker push ghcr.io/ccc-mf/etl-processor
+          docker push ghcr.io/ccc-mf/etl-processor:${{ github.ref_name }}

@@ -1,13 +1,14 @@
 name: "Run Tests"
 
 on:
+  workflow_call:
   push:
     branches: [ 'master' ]
   pull_request:
     branches: [ '*' ]
 
 jobs:
-  docker:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,7 +18,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v2.4.2
 
       - name: Execute tests
         run: ./gradlew test
