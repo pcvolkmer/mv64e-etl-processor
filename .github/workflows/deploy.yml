@@ -1,13 +1,11 @@
-name: "Run docker build and deploy"
+name: "Run build and deploy"
 
 on:
-  workflow_run:
-    workflows: [ 'Run Tests' ]
-    types: [ 'completed' ]
+  release:
+    types: [ 'published' ]
 
 jobs:
   docker:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref_type == 'tag' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
