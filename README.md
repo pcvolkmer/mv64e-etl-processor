@@ -54,3 +54,7 @@ Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert 
 
 Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
 für HTTP nicht gibt.
+
+## Docker-Images
+
+Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/etl-processor/pkgs/container/etl-processor
