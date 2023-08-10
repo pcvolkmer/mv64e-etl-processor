@@ -28,11 +28,12 @@ import org.springframework.http.MediaType
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
-class RestMtbFileSender(private val restTargetProperties: RestTargetProperties) : MtbFileSender {
+class RestMtbFileSender(
+    private val restTemplate: RestTemplate,
+    private val restTargetProperties: RestTargetProperties
+) : MtbFileSender {
 
     private val logger = LoggerFactory.getLogger(RestMtbFileSender::class.java)
-
-    private val restTemplate = RestTemplate()
 
     override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         try {

@@ -28,6 +28,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.web.client.RestTemplate
 
 @Configuration
 @EnableConfigurationProperties(
@@ -43,9 +44,14 @@ class AppRestConfiguration {
     private val logger = LoggerFactory.getLogger(AppRestConfiguration::class.java)
 
     @Bean
-    fun restMtbFileSender(restTargetProperties: RestTargetProperties): MtbFileSender {
+    fun restTemplate(): RestTemplate {
+        return RestTemplate()
+    }
+
+    @Bean
+    fun restMtbFileSender(restTemplate: RestTemplate, restTargetProperties: RestTargetProperties): MtbFileSender {
         logger.info("Selected 'RestMtbFileSender'")
-        return RestMtbFileSender(restTargetProperties)
+        return RestMtbFileSender(restTemplate, restTargetProperties)
     }
 
 }
