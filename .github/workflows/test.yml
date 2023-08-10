@@ -2,11 +2,9 @@ name: "Run Tests"
 
 on:
   push:
-    branches:
-      - 'master'
-  pull-request:
-    branches:
-      - '*'
+    branches: [ 'master' ]
+  pull_request:
+    branches: [ '*' ]
 
 jobs:
   docker:
