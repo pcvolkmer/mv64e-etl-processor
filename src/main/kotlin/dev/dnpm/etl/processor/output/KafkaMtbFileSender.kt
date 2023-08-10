@@ -50,7 +50,7 @@ class KafkaMtbFileSender(
             }
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
-            MtbFileSender.Response(RequestStatus.UNKNOWN)
+            MtbFileSender.Response(RequestStatus.ERROR)
         }
     }
 
@@ -79,7 +79,7 @@ class KafkaMtbFileSender(
             }
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
-            MtbFileSender.Response(RequestStatus.UNKNOWN)
+            MtbFileSender.Response(RequestStatus.ERROR)
         }
     }
 
