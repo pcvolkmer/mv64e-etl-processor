@@ -95,7 +95,7 @@ class RequestProcessor(
     private fun isDuplication(pseudonymizedMtbFile: MtbFile): Boolean {
         val lastMtbFileRequestForPatient =
             requestService.lastMtbFileRequestForPatientPseudonym(pseudonymizedMtbFile.patient.id)
-        val isLastRequestDeletion = requestService.isLastRequestDeletion(pseudonymizedMtbFile.patient.id)
+        val isLastRequestDeletion = requestService.isLastRequestWithKnownStatusDeletion(pseudonymizedMtbFile.patient.id)
 
         return null != lastMtbFileRequestForPatient
                 && !isLastRequestDeletion

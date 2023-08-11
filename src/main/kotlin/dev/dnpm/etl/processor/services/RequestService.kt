@@ -38,8 +38,8 @@ class RequestService(
     fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: String) =
         Companion.lastMtbFileRequestForPatientPseudonym(allRequestsByPatientPseudonym(patientPseudonym))
 
-    fun isLastRequestDeletion(patientPseudonym: String) =
-        Companion.isLastRequestDeletion(allRequestsByPatientPseudonym(patientPseudonym))
+    fun isLastRequestWithKnownStatusDeletion(patientPseudonym: String) =
+        Companion.isLastRequestWithKnownStatusDeletion(allRequestsByPatientPseudonym(patientPseudonym))
 
     companion object {
 
@@ -48,7 +48,8 @@ class RequestService(
             .sortedByDescending { it.processedAt }
             .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
 
-        fun isLastRequestDeletion(allRequests: List<Request>) = allRequests
+        fun isLastRequestWithKnownStatusDeletion(allRequests: List<Request>) = allRequests
+            .filter { it.status != RequestStatus.UNKNOWN }
             .maxByOrNull { it.processedAt }?.type == RequestType.DELETE
 
     }

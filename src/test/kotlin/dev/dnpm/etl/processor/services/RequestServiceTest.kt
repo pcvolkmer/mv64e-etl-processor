@@ -68,23 +68,33 @@ class RequestServiceTest {
                 patientId = "TEST_12345678901",
                 pid = "P1",
                 fingerprint = "0123456789abcdef1",
-                type = RequestType.DELETE,
-                status = RequestStatus.SUCCESS,
-                processedAt = Instant.parse("2023-08-08T02:00:00Z")
-            ),
-            Request(
-                id = 1L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678902",
-                pid = "P2",
-                fingerprint = "0123456789abcdef2",
                 type = RequestType.MTB_FILE,
                 status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-08-08T00:00:00Z")
+                processedAt = Instant.parse("2023-07-07T00:00:00Z")
+            ),
+            Request(
+                id = 2L,
+                uuid = UUID.randomUUID().toString(),
+                patientId = "TEST_12345678901",
+                pid = "P1",
+                fingerprint = "0123456789abcdefd",
+                type = RequestType.DELETE,
+                status = RequestStatus.WARNING,
+                processedAt = Instant.parse("2023-07-07T02:00:00Z")
+            ),
+            Request(
+                id = 3L,
+                uuid = UUID.randomUUID().toString(),
+                patientId = "TEST_12345678901",
+                pid = "P1",
+                fingerprint = "0123456789abcdef1",
+                type = RequestType.MTB_FILE,
+                status = RequestStatus.UNKNOWN,
+                processedAt = Instant.parse("2023-08-11T00:00:00Z")
             )
         )
 
-        val actual = RequestService.isLastRequestDeletion(requests)
+        val actual = RequestService.isLastRequestWithKnownStatusDeletion(requests)
 
         assertThat(actual).isTrue()
     }
@@ -98,23 +108,33 @@ class RequestServiceTest {
                 patientId = "TEST_12345678901",
                 pid = "P1",
                 fingerprint = "0123456789abcdef1",
-                type = RequestType.DELETE,
-                status = RequestStatus.SUCCESS,
+                type = RequestType.MTB_FILE,
+                status = RequestStatus.WARNING,
+                processedAt = Instant.parse("2023-07-07T00:00:00Z")
+            ),
+            Request(
+                id = 2L,
+                uuid = UUID.randomUUID().toString(),
+                patientId = "TEST_12345678901",
+                pid = "P1",
+                fingerprint = "0123456789abcdef1",
+                type = RequestType.MTB_FILE,
+                status = RequestStatus.WARNING,
                 processedAt = Instant.parse("2023-07-07T02:00:00Z")
             ),
             Request(
-                id = 1L,
+                id = 3L,
                 uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678902",
-                pid = "P2",
-                fingerprint = "0123456789abcdef2",
+                patientId = "TEST_12345678901",
+                pid = "P1",
+                fingerprint = "0123456789abcdef1",
                 type = RequestType.MTB_FILE,
-                status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-08-08T00:00:00Z")
+                status = RequestStatus.UNKNOWN,
+                processedAt = Instant.parse("2023-08-11T00:00:00Z")
             )
         )
 
-        val actual = RequestService.isLastRequestDeletion(requests)
+        val actual = RequestService.isLastRequestWithKnownStatusDeletion(requests)
 
         assertThat(actual).isFalse()
     }
@@ -197,7 +217,7 @@ class RequestServiceTest {
 
     @Test
     fun isLastRequestDeletionShouldRequestAllRequestsForPatientPseudonym() {
-        requestService.isLastRequestDeletion("TEST_12345678901")
+        requestService.isLastRequestWithKnownStatusDeletion("TEST_12345678901")
 
         verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyString())
     }
