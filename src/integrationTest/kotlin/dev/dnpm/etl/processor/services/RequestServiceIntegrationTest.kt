@@ -116,7 +116,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
     fun shouldReturnDeleteRequestAsLastRequest() {
         setupTestData()
 
-        val actual = requestService.isLastRequestDeletion("TEST_12345678901")
+        val actual = requestService.isLastRequestWithKnownStatusDeletion("TEST_12345678901")
 
         assertThat(actual).isTrue()
     }

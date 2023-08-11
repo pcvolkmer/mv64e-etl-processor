@@ -92,7 +92,7 @@ class RequestProcessorTest {
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestDeletion(anyString())
+        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             it.arguments[0] as String
@@ -147,7 +147,7 @@ class RequestProcessorTest {
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestDeletion(anyString())
+        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             it.arguments[0] as String
@@ -202,7 +202,7 @@ class RequestProcessorTest {
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestDeletion(anyString())
+        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
@@ -261,7 +261,7 @@ class RequestProcessorTest {
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestDeletion(anyString())
+        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
