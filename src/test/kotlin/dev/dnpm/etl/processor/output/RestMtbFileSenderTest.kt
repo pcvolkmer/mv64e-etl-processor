@@ -61,7 +61,8 @@ class RestMtbFileSenderTest {
         }
 
         val response = restMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
-        assertThat(response.status).isEqualTo(requestWithResponse.requestStatus)
+        assertThat(response.status).isEqualTo(requestWithResponse.response.status)
+        assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
 
     @ParameterizedTest
@@ -75,11 +76,16 @@ class RestMtbFileSenderTest {
         }
 
         val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile))
-        assertThat(response.status).isEqualTo(requestWithResponse.requestStatus)
+        assertThat(response.status).isEqualTo(requestWithResponse.response.status)
+        assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
 
     companion object {
-        data class RequestWithResponse(val httpStatus: HttpStatus, val body: String, val requestStatus: RequestStatus)
+        data class RequestWithResponse(
+            val httpStatus: HttpStatus,
+            val body: String,
+            val response: MtbFileSender.Response
+        )
 
         private val warningBody = """
                 {
@@ -123,6 +129,8 @@ class RestMtbFileSenderTest {
             )
             .build()
 
+        private val errorResponseBody = "Sonstiger Fehler bei der Übertragung"
+
         /**
          * Synthetic http responses with related request status
          * Also see: https://ibmi-intra.cs.uni-tuebingen.de/display/ZPM/bwHC+REST+API
@@ -130,13 +138,33 @@ class RestMtbFileSenderTest {
         @JvmStatic
         fun mtbFileRequestWithResponseSource(): Set<RequestWithResponse> {
             return setOf(
-                RequestWithResponse(HttpStatus.OK, "{}", RequestStatus.SUCCESS),
-                RequestWithResponse(HttpStatus.CREATED, warningBody, RequestStatus.WARNING),
-                RequestWithResponse(HttpStatus.BAD_REQUEST, "??", RequestStatus.ERROR),
-                RequestWithResponse(HttpStatus.UNPROCESSABLE_ENTITY, errorBody, RequestStatus.ERROR),
+                RequestWithResponse(HttpStatus.OK, "{}", MtbFileSender.Response(RequestStatus.SUCCESS, "{}")),
+                RequestWithResponse(
+                    HttpStatus.CREATED,
+                    warningBody,
+                    MtbFileSender.Response(RequestStatus.WARNING, warningBody)
+                ),
+                RequestWithResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "??",
+                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                ),
+                RequestWithResponse(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    errorBody,
+                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                ),
                 // Some more errors not mentioned in documentation
-                RequestWithResponse(HttpStatus.NOT_FOUND, "what????", RequestStatus.ERROR),
-                RequestWithResponse(HttpStatus.INTERNAL_SERVER_ERROR, "what????", RequestStatus.ERROR)
+                RequestWithResponse(
+                    HttpStatus.NOT_FOUND,
+                    "what????",
+                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                ),
+                RequestWithResponse(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "what????",
+                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                )
             )
         }
 
@@ -147,10 +175,18 @@ class RestMtbFileSenderTest {
         @JvmStatic
         fun deleteRequestWithResponseSource(): Set<RequestWithResponse> {
             return setOf(
-                RequestWithResponse(HttpStatus.OK, "", RequestStatus.SUCCESS),
+                RequestWithResponse(HttpStatus.OK, "", MtbFileSender.Response(RequestStatus.SUCCESS)),
                 // Some more errors not mentioned in documentation
-                RequestWithResponse(HttpStatus.NOT_FOUND, "what????", RequestStatus.ERROR),
-                RequestWithResponse(HttpStatus.INTERNAL_SERVER_ERROR, "what????", RequestStatus.ERROR)
+                RequestWithResponse(
+                    HttpStatus.NOT_FOUND,
+                    "what????",
+                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                ),
+                RequestWithResponse(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "what????",
+                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                )
             )
         }
     }

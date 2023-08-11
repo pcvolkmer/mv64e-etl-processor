@@ -55,14 +55,14 @@ class ResponseProcessor(
                 RequestStatus.WARNING -> {
                     it.report = Report(
                         "Warnungen über mangelhafte Daten",
-                        objectMapper.writeValueAsString(event.body)
+                        event.body.orElse("")
                     )
                 }
 
                 RequestStatus.ERROR -> {
                     it.report = Report(
                         "Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar",
-                        objectMapper.writeValueAsString(event.body)
+                        event.body.orElse("")
                     )
                 }
 

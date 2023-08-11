@@ -50,7 +50,7 @@ class RestMtbFileSender(
                 return MtbFileSender.Response(response.statusCode.asRequestStatus(), "Status-Code: ${response.statusCode.value()}")
             }
             logger.debug("Sent file via RestMtbFileSender")
-            return MtbFileSender.Response(response.statusCode.asRequestStatus())
+            return MtbFileSender.Response(response.statusCode.asRequestStatus(), response.body.orEmpty())
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
