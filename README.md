@@ -2,6 +2,28 @@
 
 Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisiert die Patienten-ID.
 
+### Einordnung innerhalb einer DNPM-ETL-Strecke
+
+Diese Anwendung erlaubt das Entgegennehmen HTTP/REST-Anfragen aus dem Onkostar-Plugin **onkostar-pligin-dnpmexport**.
+
+Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
+Duplikate werden verworfen, Änderungen werden weitergeleitet.
+
+Löschanfragen werden immer als Löschanfrage an das bwHC-backend weitergeleitet.
+
+![Modell DNPM-ETL-Strecke](docs/etl.png)
+
+#### HTTP/REST-Konfiguration
+
+Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an das bwHC-Backend gesendet.
+
+#### Konfiguration für Apache Kafka
+
+Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung an Apache Kafka übergeben.
+Eine Antwort wird dabei ebenfalls mithilfe von Apache Kafka übermittelt und nach der Entgegennahme verarbeitet.
+
+Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
+
 ## Pseudonymisierung der Patienten-ID
 
 Wenn eine URI zu einer gPAS-Instanz angegeben ist, wird diese verwendet.
