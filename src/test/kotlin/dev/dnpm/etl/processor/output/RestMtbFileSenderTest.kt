@@ -105,7 +105,7 @@ class RestMtbFileSenderTest {
                 }
             """.trimIndent()
 
-        val mtbFile = MtbFile.builder()
+        val mtbFile: MtbFile = MtbFile.builder()
             .withPatient(
                 Patient.builder()
                     .withId("PID")
@@ -129,7 +129,7 @@ class RestMtbFileSenderTest {
             )
             .build()
 
-        private val errorResponseBody = "Sonstiger Fehler bei der Übertragung"
+        private const val ERROR_RESPONSE_BODY = "Sonstiger Fehler bei der Übertragung"
 
         /**
          * Synthetic http responses with related request status
@@ -147,23 +147,23 @@ class RestMtbFileSenderTest {
                 RequestWithResponse(
                     HttpStatus.BAD_REQUEST,
                     "??",
-                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 RequestWithResponse(
                     HttpStatus.UNPROCESSABLE_ENTITY,
                     errorBody,
-                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 // Some more errors not mentioned in documentation
                 RequestWithResponse(
                     HttpStatus.NOT_FOUND,
                     "what????",
-                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 RequestWithResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "what????",
-                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 )
             )
         }
@@ -180,12 +180,12 @@ class RestMtbFileSenderTest {
                 RequestWithResponse(
                     HttpStatus.NOT_FOUND,
                     "what????",
-                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 RequestWithResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "what????",
-                    MtbFileSender.Response(RequestStatus.ERROR, errorResponseBody)
+                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 )
             )
         }

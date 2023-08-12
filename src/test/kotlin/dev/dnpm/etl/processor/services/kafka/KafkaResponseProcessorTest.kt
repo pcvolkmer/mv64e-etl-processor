@@ -45,7 +45,7 @@ class KafkaResponseProcessorTest {
 
     private lateinit var kafkaResponseProcessor: KafkaResponseProcessor
 
-    private fun createkafkaRecord(
+    private fun createKafkaRecord(
         requestId: String? = null,
         statusCode: Int = 200,
         statusBody: Map<String, Any>? = mapOf()
@@ -79,14 +79,14 @@ class KafkaResponseProcessorTest {
 
     @Test
     fun shouldNotProcessRecordsWithoutValidKey() {
-        this.kafkaResponseProcessor.onMessage(createkafkaRecord(null, 200))
+        this.kafkaResponseProcessor.onMessage(createKafkaRecord(null, 200))
 
         verify(eventPublisher, never()).publishEvent(any())
     }
 
     @Test
     fun shouldNotProcessRecordsWithoutValidBody() {
-        this.kafkaResponseProcessor.onMessage(createkafkaRecord(requestId = "TestID1234", statusBody = null))
+        this.kafkaResponseProcessor.onMessage(createKafkaRecord(requestId = "TestID1234", statusBody = null))
 
         verify(eventPublisher, never()).publishEvent(any())
     }
@@ -94,7 +94,7 @@ class KafkaResponseProcessorTest {
     @ParameterizedTest
     @MethodSource("statusCodeSource")
     fun shouldProcessValidRecordsWithStatusCode(statusCode: Int) {
-        this.kafkaResponseProcessor.onMessage(createkafkaRecord("TestID1234", statusCode))
+        this.kafkaResponseProcessor.onMessage(createKafkaRecord("TestID1234", statusCode))
         verify(eventPublisher, times(1)).publishEvent(any<ResponseEvent>())
     }
 

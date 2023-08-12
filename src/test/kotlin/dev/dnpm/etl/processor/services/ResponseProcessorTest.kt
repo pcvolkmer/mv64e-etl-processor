@@ -19,8 +19,6 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -62,12 +60,10 @@ class ResponseProcessorTest {
         @Mock requestRepository: RequestRepository,
         @Mock statisticsUpdateProducer: Sinks.Many<Any>
     ) {
-        val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
-
         this.requestRepository = requestRepository
         this.statisticsUpdateProducer = statisticsUpdateProducer
 
-        this.responseProcessor = ResponseProcessor(requestRepository, statisticsUpdateProducer, objectMapper)
+        this.responseProcessor = ResponseProcessor(requestRepository, statisticsUpdateProducer)
     }
 
     @Test

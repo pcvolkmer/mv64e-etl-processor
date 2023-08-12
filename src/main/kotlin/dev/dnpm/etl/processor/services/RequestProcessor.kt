@@ -30,7 +30,6 @@ import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
-import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -44,8 +43,6 @@ class RequestProcessor(
     private val objectMapper: ObjectMapper,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
-
-    private val logger = LoggerFactory.getLogger(RequestProcessor::class.java)
 
     fun processMtbFile(mtbFile: MtbFile) {
         val requestId = UUID.randomUUID().toString()

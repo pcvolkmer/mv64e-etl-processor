@@ -20,10 +20,13 @@
 package dev.dnpm.etl.processor
 
 import dev.dnpm.etl.processor.output.MtbFileSender
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.testcontainers.junit.jupiter.Testcontainers
 
@@ -34,7 +37,9 @@ import org.testcontainers.junit.jupiter.Testcontainers
 class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
 
     @Test
-    fun contextLoadsIfMtbFileSenderConfigured() {
+    fun contextLoadsIfMtbFileSenderConfigured(@Autowired context: ApplicationContext) {
+        // Simply check bean configuration
+        assertThat(context).isNotNull
     }
 
 }

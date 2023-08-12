@@ -83,9 +83,9 @@ class StatisticsRestController(
             .groupBy { formatter.format(it.processedAt) }
             .map {
                 val requestList = it.value
-                    .groupBy { it.status }
-                    .map {
-                        Pair(it.key, it.value.size)
+                    .groupBy { request -> request.status }
+                    .map { request ->
+                        Pair(request.key, request.value.size)
                     }
                     .toMap()
                 Pair(

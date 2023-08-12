@@ -23,7 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
-    var bwhc_uri: String?,
+    var bwhcUri: String?,
     var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN
 ) {
     companion object {

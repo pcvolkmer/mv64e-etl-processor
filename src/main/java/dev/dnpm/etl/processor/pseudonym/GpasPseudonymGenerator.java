@@ -69,13 +69,11 @@ import java.util.HashMap;
 
 public class GpasPseudonymGenerator implements Generator {
 
+    private final static FhirContext r4Context = FhirContext.forR4();
     private final String gPasUrl;
     private final String psnTargetDomain;
-    private static FhirContext r4Context = FhirContext.forR4();
     private final HttpHeaders httpHeader;
-
     private final RetryTemplate retryTemplate = defaultTemplate();
-
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
 
     private SSLContext customSslContext;

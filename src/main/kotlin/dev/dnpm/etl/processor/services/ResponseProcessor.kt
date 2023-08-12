@@ -19,7 +19,6 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -33,8 +32,7 @@ import java.util.*
 @Service
 class ResponseProcessor(
     private val requestRepository: RequestRepository,
-    private val statisticsUpdateProducer: Sinks.Many<Any>,
-    private val objectMapper: ObjectMapper
+    private val statisticsUpdateProducer: Sinks.Many<Any>
 ) {
 
     private val logger = LoggerFactory.getLogger(ResponseProcessor::class.java)

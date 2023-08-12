@@ -38,7 +38,7 @@ infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     this.histologyReports.forEach { it.patient = patientPseudonym }
     this.lastGuidelineTherapies.forEach { it.patient = patientPseudonym }
     this.molecularPathologyFindings.forEach { it.patient = patientPseudonym }
-    this.molecularTherapies.forEach { it.history.forEach { it.patient = patientPseudonym } }
+    this.molecularTherapies.forEach { molecularTherapy -> molecularTherapy.history.forEach { it.patient = patientPseudonym } }
     this.ngsReports.forEach { it.patient = patientPseudonym }
     this.previousGuidelineTherapies.forEach { it.patient = patientPseudonym }
     this.rebiopsyRequests.forEach { it.patient = patientPseudonym }
