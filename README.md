@@ -4,7 +4,7 @@ Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisi
 
 ### Einordnung innerhalb einer DNPM-ETL-Strecke
 
-Diese Anwendung erlaubt das Entgegennehmen HTTP/REST-Anfragen aus dem Onkostar-Plugin **onkostar-pligin-dnpmexport**.
+Diese Anwendung erlaubt das Entgegennehmen HTTP/REST-Anfragen aus dem Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
 
 Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
