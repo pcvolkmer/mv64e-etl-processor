@@ -5,13 +5,20 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 plugins {
     war
     id("org.springframework.boot") version "3.1.2"
-    id("io.spring.dependency-management") version "1.1.0"
+    id("io.spring.dependency-management") version "1.1.3"
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.spring") version "1.9.0"
 }
 
 group = "de.ukw.ccc"
-version = "0.1.1"
+version = "0.2.0-SNAPSHOT"
+
+var versions = mapOf(
+    "bwhc-dto-java" to "0.2.0",
+    "hapi-fhir" to "6.6.2",
+    "httpclient5" to "5.2.1",
+    "mockito-kotlin" to "5.1.0"
+)
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -52,10 +59,10 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("de.ukw.ccc:bwhc-dto-java:0.2.0")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:6.6.2")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.6.2")
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
+    implementation("de.ukw.ccc:bwhc-dto-java:${versions["bwhc-dto-java"]}")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
+    implementation("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient5"]}")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -64,7 +71,7 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
 }
