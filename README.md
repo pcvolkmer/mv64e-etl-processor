@@ -80,3 +80,23 @@ für HTTP nicht gibt.
 ## Docker-Images
 
 Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/etl-processor/pkgs/container/etl-processor
+
+## Entwicklungssetup
+
+Zum Starten einer lokalen Entwicklungs- und Testumgebung kann die beiliegende Datei `dev-compose.yml` verwendet werden.
+Diese kann zur Nutzung der Datenbanken **MariaDB** als auch **PostgreSQL** angepasst werden.
+
+Zur Nutzung von Apache Kafka muss dazu ein Eintrag im hosts-File vorgenommen werden und der Hostname `kafka` auf die lokale
+IP-Adresse verweisen. Ohne diese Einstellung ist eine Nutzung von Apache Kafka außerhalb der Docker-Umgebung nicht möglich.
+
+Beim Start der Anwendung mit dem Profil `dev` wird die in `dev-compose.yml` definierte Umgebung beim Start der
+Anwendung mit gestartet:
+
+```
+SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+```
+
+Die Datei `application-dev.yml` enthält hierzu die Konfiguration für das Profil `dev`.
+
+Beim Ausführen der Integrationstests wird eine Testdatenbank in einem Docker-Container gestartet.
+Siehe hier auch die Klasse `AbstractTestcontainerTest` unter `src/integrationTest`. 
