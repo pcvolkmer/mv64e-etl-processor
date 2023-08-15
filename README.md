@@ -77,6 +77,19 @@ Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert 
 Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
 für HTTP nicht gibt.
 
+#### Retention Time
+
+Generell werden in Apache Kafka alle Records entsprechend der Konfiguration vorgehalten.
+So wird ohne spezielle Konfiguration ein Record für 7 Tage in Apache Kafka gespeichert.
+Es sind innerhalb dieses Zeitraums auch alte Informationen weiterhin enthalten, wenn der Consent später abgelehnt wurde.
+
+Durch eine entsprechende Konfiguration des Topics kann dies verhindert werden.
+
+Beispiel - auszuführen innerhalb des Kafka-Containers: Löschen alter Records nach einem Tag
+```
+kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-config retention.ms=86400000
+```
+
 ## Docker-Images
 
 Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/etl-processor/pkgs/container/etl-processor
