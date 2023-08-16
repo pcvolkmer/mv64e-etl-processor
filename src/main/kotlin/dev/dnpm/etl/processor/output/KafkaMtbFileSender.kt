@@ -40,7 +40,7 @@ class KafkaMtbFileSender(
             val result = kafkaTemplate.send(
                 kafkaTargetProperties.topic,
                 key(request),
-                objectMapper.writeValueAsString(request.mtbFile)
+                objectMapper.writeValueAsString(Data(request.requestId, request.mtbFile))
             )
             if (result.get() != null) {
                 logger.debug("Sent file via KafkaMtbFileSender")
@@ -68,7 +68,7 @@ class KafkaMtbFileSender(
             val result = kafkaTemplate.send(
                 kafkaTargetProperties.topic,
                 key(request),
-                objectMapper.writeValueAsString(dummyMtbFile)
+                objectMapper.writeValueAsString(Data(request.requestId, dummyMtbFile))
             )
 
             if (result.get() != null) {
@@ -85,12 +85,12 @@ class KafkaMtbFileSender(
 
     private fun key(request: MtbFileSender.MtbFileRequest): String {
         return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
-                "\"eid\": \"${request.mtbFile.episode.id}\", " +
-                "\"requestId\": \"${request.requestId}\"}"
+                "\"eid\": \"${request.mtbFile.episode.id}\"}"
     }
 
     private fun key(request: MtbFileSender.DeleteRequest): String {
-        return "{\"pid\": \"${request.patientId}\", " +
-                "\"requestId\": \"${request.requestId}\"}"
+        return "{\"pid\": \"${request.patientId}\"}"
     }
+
+    data class Data(val requestId: String, val content: MtbFile)
 }

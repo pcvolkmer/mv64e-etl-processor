@@ -97,9 +97,9 @@ class KafkaMtbFileSenderTest {
         val captor = argumentCaptor<String>()
         verify(kafkaTemplate, times(1)).send(anyString(), captor.capture(), captor.capture())
         assertThat(captor.firstValue).isNotNull
-        assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\", \"eid\": \"1\", \"requestId\": \"TestID\"}")
+        assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\", \"eid\": \"1\"}")
         assertThat(captor.secondValue).isNotNull
-        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(mtbFile(Consent.Status.ACTIVE)))
+        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.ACTIVE)))
     }
 
     @Test
@@ -113,9 +113,9 @@ class KafkaMtbFileSenderTest {
         val captor = argumentCaptor<String>()
         verify(kafkaTemplate, times(1)).send(anyString(), captor.capture(), captor.capture())
         assertThat(captor.firstValue).isNotNull
-        assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\", \"requestId\": \"TestID\"}")
+        assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\"}")
         assertThat(captor.secondValue).isNotNull
-        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(mtbFile(Consent.Status.REJECTED)))
+        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.REJECTED)))
     }
 
     companion object {
@@ -152,6 +152,10 @@ class KafkaMtbFileSenderTest {
                             .build()
                     )
             }.build()
+        }
+
+        fun kafkaRecordData(requestId: String, consentStatus: Consent.Status): KafkaMtbFileSender.Data {
+            return KafkaMtbFileSender.Data(requestId, mtbFile(consentStatus))
         }
 
         data class TestData(val requestStatus: RequestStatus, val exception: Throwable? = null)

@@ -11,7 +11,7 @@ app:
   # otherwise connection will not be available
   kafka:
     topic: test
-    response-topic: test-response
+    response-topic: test_response
     servers: kafka:9092
 
 server:

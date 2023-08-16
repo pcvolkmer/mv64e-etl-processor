@@ -46,7 +46,7 @@ class KafkaResponseProcessorTest {
     private lateinit var kafkaResponseProcessor: KafkaResponseProcessor
 
     private fun createKafkaRecord(
-        requestId: String? = null,
+        requestId: String,
         statusCode: Int = 200,
         statusBody: Map<String, Any>? = mapOf()
     ): ConsumerRecord<String, String> {
@@ -54,15 +54,11 @@ class KafkaResponseProcessorTest {
             "test-topic",
             0,
             0,
-            if (requestId == null) {
-                null
-            } else {
-                this.objectMapper.writeValueAsString(KafkaResponseProcessor.ResponseKey(requestId))
-            },
+            null,
             if (statusBody == null) {
                 ""
             } else {
-                this.objectMapper.writeValueAsString(KafkaResponseProcessor.ResponseBody(statusCode, statusBody))
+                this.objectMapper.writeValueAsString(KafkaResponseProcessor.ResponseBody(requestId, statusCode, statusBody))
             }
         )
     }
@@ -78,17 +74,51 @@ class KafkaResponseProcessorTest {
     }
 
     @Test
-    fun shouldNotProcessRecordsWithoutValidKey() {
-        this.kafkaResponseProcessor.onMessage(createKafkaRecord(null, 200))
+    fun shouldNotProcessRecordsWithoutRequestIdInBody() {
+        val record = ConsumerRecord<String, String>(
+            "test-topic",
+            0,
+            0,
+            null,
+            """
+                {
+                    "statusCode": 200,
+                    "statusBody": {}
+                }
+            """.trimIndent()
+        )
 
-        verify(eventPublisher, never()).publishEvent(any())
+        this.kafkaResponseProcessor.onMessage(record)
+
+        verify(eventPublisher, never()).publishEvent(any<ResponseEvent>())
     }
 
     @Test
-    fun shouldNotProcessRecordsWithoutValidBody() {
+    fun shouldProcessRecordsWithAliasNames() {
+        val record = ConsumerRecord<String, String>(
+            "test-topic",
+            0,
+            0,
+            null,
+            """
+                {
+                    "request_id": "test0123456789",
+                    "status_code": 200,
+                    "status_body": {}
+                }
+            """.trimIndent()
+        )
+
+        this.kafkaResponseProcessor.onMessage(record)
+
+        verify(eventPublisher, times(1)).publishEvent(any<ResponseEvent>())
+    }
+
+    @Test
+    fun shouldNotProcessRecordsWithoutValidStatusBody() {
         this.kafkaResponseProcessor.onMessage(createKafkaRecord(requestId = "TestID1234", statusBody = null))
 
-        verify(eventPublisher, never()).publishEvent(any())
+        verify(eventPublisher, never()).publishEvent(any<ResponseEvent>())
     }
 
     @ParameterizedTest
