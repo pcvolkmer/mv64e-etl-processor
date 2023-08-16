@@ -41,50 +41,40 @@ class KafkaResponseProcessor(
 
     override fun onMessage(data: ConsumerRecord<String, String>) {
         try {
-            Optional.of(objectMapper.readValue(data.key(), ResponseKey::class.java))
+            Optional.of(objectMapper.readValue(data.value(), ResponseBody::class.java))
         } catch (e: Exception) {
+            logger.error("Cannot process Kafka response", e)
             Optional.empty()
-        }.ifPresentOrElse({ responseKey ->
-            val event = try {
-                val responseBody = objectMapper.readValue(data.value(), ResponseBody::class.java)
-                ResponseEvent(
-                    responseKey.requestId,
-                    Instant.ofEpochMilli(data.timestamp()),
-                    responseBody.statusCode.asRequestStatus(),
-                    when (responseBody.statusCode.asRequestStatus()) {
-                        RequestStatus.SUCCESS -> {
-                            Optional.empty()
-                        }
-
-                        RequestStatus.WARNING, RequestStatus.ERROR -> {
-                            Optional.of(objectMapper.writeValueAsString(responseBody.statusBody))
-                        }
-
-                        else -> {
-                            logger.error("Kafka response: Unknown response code!")
-                            Optional.empty()
-                        }
+        }.ifPresentOrElse({ responseBody ->
+            val event = ResponseEvent(
+                responseBody.requestId,
+                Instant.ofEpochMilli(data.timestamp()),
+                responseBody.statusCode.asRequestStatus(),
+                when (responseBody.statusCode.asRequestStatus()) {
+                    RequestStatus.SUCCESS -> {
+                        Optional.empty()
                     }
-                )
-            } catch (e: Exception) {
-                logger.error("Cannot process Kafka response", e)
-                ResponseEvent(
-                    responseKey.requestId,
-                    Instant.ofEpochMilli(data.timestamp()),
-                    RequestStatus.ERROR,
-                    Optional.of("Cannot process Kafka response")
-                )
-            }
+
+                    RequestStatus.WARNING, RequestStatus.ERROR -> {
+                        Optional.of(objectMapper.writeValueAsString(responseBody.statusBody))
+                    }
+
+                    else -> {
+                        logger.error("Kafka response: Unknown response code '{}'!", responseBody.statusCode)
+                        Optional.empty()
+                    }
+                }
+            )
             eventPublisher.publishEvent(event)
         }, {
-            logger.error("No response key in Kafka response")
+            logger.error("No requestId in Kafka response")
         })
     }
 
-    data class ResponseKey(val requestId: String)
-
     data class ResponseBody(
+        @JsonProperty("request_id") @JsonAlias("requestId") val requestId: String,
         @JsonProperty("status_code") @JsonAlias("statusCode") val statusCode: Int,
         @JsonProperty("status_body") @JsonAlias("statusBody") val statusBody: Map<String, Any>
     )
+
 }
