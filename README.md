@@ -90,6 +90,32 @@ Beispiel - auszuführen innerhalb des Kafka-Containers: Löschen alter Records n
 kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-config retention.ms=86400000
 ```
 
+#### Key based Retention
+
+Möchten Sie hingegen immer nur die letzte Meldung für einen Patienten und eine Erkrankung in Apache Kafka vorhalten,
+so ist die nachfolgend genannte Konfiguration der Kafka-Topics hilfreich.
+
+
+* `retention.ms`: Möglichst kurze Zeit in der alte Records noch erhalten bleiben, z.B. 10 Sekunden 10000
+* `cleanup.policy`: Löschen alter Records und Beibehalten des letzten Records zu einem Key [delete,compact]
+
+Beispiele für ein Topic `test`, hier bitte an die verwendeten Topics anpassen.
+
+```
+kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-config retention.ms=10000
+kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-config cleanup.policy=[delete,compact]
+```
+
+Da als Key eines Records die (pseudonymisierte) Patienten-ID und die (anonymisierte) Erkrankungs-ID verwendet wird,
+stehen mit obiger Konfiguration der Kafka-Topics nach 10 Sekunden nur noch der jeweils letzte Eintrag für den entsprechenden
+Key zur Verfügung.
+
+Da der Key sowohl für die Records in Richtung bwHC-Backend für die Rückantwort identisch aufgebaut ist, lassen sich so
+auch im Falle eines Consent-Widerspruchs die enthaltenen Daten als auch die Offenlegung durch Verifikationsdaten in der
+Antwort effektiv verhindern, da diese nach 10 Sekunden gelöscht werden.
+Es steht dann nur noch die jeweils letzten Information zur Verfügung, dass für einen Patienten/eine Erkrankung
+ein Consent-Widerspruch erfolgte.
+
 ## Docker-Images
 
 Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/etl-processor/pkgs/container/etl-processor
@@ -112,4 +138,4 @@ SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
 Die Datei `application-dev.yml` enthält hierzu die Konfiguration für das Profil `dev`.
 
 Beim Ausführen der Integrationstests wird eine Testdatenbank in einem Docker-Container gestartet.
-Siehe hier auch die Klasse `AbstractTestcontainerTest` unter `src/integrationTest`. 
+Siehe hier auch die Klasse `AbstractTestcontainerTest` unter `src/integrationTest`.
