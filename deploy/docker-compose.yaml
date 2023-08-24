@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  dnpm-etl-processor:
+    image: dnpm-elt-processor:latest
+    env_file:
+      - ./env-sample.env
+    depends_on:
+      - db
+    networks:
+      - dnpm_processor
+
+  db:
+    image: mariadb:10
+    environment:
+      MARIADB_DATABASE: dev
+      MARIADB_USER: dev
+      MARIADB_PASSWORD: dev
+      MARIADB_ROOT_PASSWORD: dev
+    expose:
+      - "3306"
+    networks:
+      - dnpm_processor
+networks:
+  dnpm_processor: {}
