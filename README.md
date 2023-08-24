@@ -4,7 +4,7 @@ Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisi
 
 ## Pseudonymisierung der Patienten-ID
 
-Wenn eine URI zu einer gPAS-Instanz angegeben ist, wird diese verwendet.
+Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) angegeben ist, wird diese verwendet.
 Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgenommen.
 
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
@@ -44,3 +44,17 @@ Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 
 Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert werden.
+
+
+### Docker Image
+Bauen eines Docker Images kann wie folgt erzeugt werden:
+
+```bash
+docker build . -t "imageName"
+```
+
+*Ausführen als Docker Conatiner:*
+
+```bash
+docker compose -f deploy/docker-compose.yaml up -d
+```
