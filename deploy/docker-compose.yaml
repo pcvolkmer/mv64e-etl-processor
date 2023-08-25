@@ -1,4 +1,4 @@
-version: '3.7'
+
 
 services:
   dnpm-etl-processor:
@@ -9,6 +9,8 @@ services:
       - db
     networks:
       - dnpm_processor
+    ports:
+      - "${MONITORING_HTTP_PORT:-8080}:8080"
 
   db:
     image: mariadb:10
