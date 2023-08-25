@@ -15,12 +15,12 @@ services:
   db:
     image: mariadb:10
     environment:
-      MARIADB_DATABASE: dev
-      MARIADB_USER: dev
-      MARIADB_PASSWORD: dev
-      MARIADB_ROOT_PASSWORD: dev
-    expose:
-      - "3306"
+      MARIADB_DATABASE: ${MARIADB_DB}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_USER_PW}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PW}
+    ports:
+      - "3306:3306"
     networks:
       - dnpm_processor
 networks:
