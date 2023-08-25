@@ -32,5 +32,6 @@ LABEL org.opencontainers.image.created=${BUILD_TIME} \
     org.opencontainers.image.version=${VERSION} \
     org.opencontainers.image.revision=${GIT_REF} \
     org.opencontainers.image.vendor="" \
+    org.opencontainers.image.license="AGPLv3" \
     org.opencontainers.image.title="etl-processor" \
     org.opencontainers.image.description="Relay application between Onkostar and bwHc for pseudonymization or anonymization of patient data and profide additional monitoring of processed data."
