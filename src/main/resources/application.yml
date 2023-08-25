@@ -1,7 +1,7 @@
 spring:
   kafka:
     bootstrap-servers: ${app.kafka.servers}
-    template:
-      default-topic: ${app.kafka.topic}
+    consumer:
+      group-id: ${app.kafka.group-id}
   flyway:
     locations: "classpath:db/migration/{vendor}"

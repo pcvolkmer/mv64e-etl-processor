@@ -4,11 +4,15 @@ spring:
       file: ./dev-compose.yml
 
 app:
-  rest:
-    uri: http://localhost:9000/bwhc/etl/api/MTBFile
-  #kafka:
-  #  topic: test
-  #  servers: kafka:9092
+  #rest:
+  #  uri: http://localhost:9000/bwhc/etl/api
+
+  # Note: Make sure, hostname "kafka" points to 127.0.0.1
+  # otherwise connection will not be available
+  kafka:
+    topic: test
+    response-topic: test_response
+    servers: kafka:9092
 
 server:
   port: 8000

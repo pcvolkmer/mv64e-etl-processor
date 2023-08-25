@@ -21,169 +21,117 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.monitoring.*
+import dev.dnpm.etl.processor.monitoring.Report
+import dev.dnpm.etl.processor.monitoring.Request
+import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
-import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Sinks
+import java.time.Instant
 import java.util.*
 
 @Service
 class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
-    private val senders: List<MtbFileSender>,
-    private val requestRepository: RequestRepository,
+    private val sender: MtbFileSender,
+    private val requestService: RequestService,
     private val objectMapper: ObjectMapper,
-    private val statisticsUpdateProducer: Sinks.Many<Any>
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
 
-    private val logger = LoggerFactory.getLogger(RequestProcessor::class.java)
-
-    fun processMtbFile(mtbFile: MtbFile): RequestStatus {
+    fun processMtbFile(mtbFile: MtbFile) {
+        val requestId = UUID.randomUUID().toString()
         val pid = mtbFile.patient.id
-        val pseudonymized = pseudonymizeService.pseudonymize(mtbFile)
 
-        val lastRequestForPatient =
-            requestRepository.findAllByPatientIdOrderByProcessedAtDesc(pseudonymized.patient.id)
-                .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
+        mtbFile pseudonymizeWith pseudonymizeService
 
-        if (null != lastRequestForPatient && lastRequestForPatient.fingerprint == fingerprint(mtbFile)) {
-            requestRepository.save(
-                Request(
-                    patientId = pseudonymized.patient.id,
-                    pid = pid,
-                    fingerprint = fingerprint(mtbFile),
-                    status = RequestStatus.DUPLICATION,
-                    type = RequestType.MTB_FILE,
-                    report = Report("Duplikat erkannt - keine Daten weitergeleitet")
-                )
-            )
-            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-            return RequestStatus.DUPLICATION
-        }
+        val request = MtbFileSender.MtbFileRequest(requestId, mtbFile)
 
-        val request = MtbFileSender.MtbFileRequest(UUID.randomUUID().toString(), pseudonymized)
-
-        val responses = senders.map {
-            val responseStatus = it.send(request)
-            if (responseStatus.status == MtbFileSender.ResponseStatus.SUCCESS || responseStatus.status == MtbFileSender.ResponseStatus.WARNING) {
-                logger.info(
-                    "Sent file for Patient '{}' using '{}'",
-                    pseudonymized.patient.id,
-                    it.javaClass.simpleName
-                )
-            } else {
-                logger.error(
-                    "Error sending file for Patient '{}' using '{}'",
-                    pseudonymized.patient.id,
-                    it.javaClass.simpleName
-                )
-            }
-            responseStatus
-        }
-
-        val requestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
-            RequestStatus.ERROR
-        } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.WARNING)) {
-            RequestStatus.WARNING
-        } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
-            RequestStatus.SUCCESS
-        } else {
-            RequestStatus.UNKNOWN
-        }
-
-        requestRepository.save(
+        requestService.save(
             Request(
-                uuid = request.requestId,
+                uuid = requestId,
                 patientId = request.mtbFile.patient.id,
                 pid = pid,
                 fingerprint = fingerprint(request.mtbFile),
-                status = requestStatus,
-                type = RequestType.MTB_FILE,
-                report = when (requestStatus) {
-                    RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
-                    RequestStatus.WARNING -> Report("Warnungen über mangelhafte Daten",
-                        responses.joinToString("\n") { it.reason })
-
-                    RequestStatus.UNKNOWN -> Report("Keine Informationen")
-                    else -> null
-                }
+                status = RequestStatus.UNKNOWN,
+                type = RequestType.MTB_FILE
             )
         )
 
-        statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
+        if (isDuplication(mtbFile)) {
+            applicationEventPublisher.publishEvent(
+                ResponseEvent(
+                    requestId,
+                    Instant.now(),
+                    RequestStatus.DUPLICATION
+                )
+            )
+            return
+        }
 
-        return requestStatus
+        val responseStatus = sender.send(request)
+
+        applicationEventPublisher.publishEvent(
+            ResponseEvent(
+                requestId,
+                Instant.now(),
+                responseStatus.status,
+                when (responseStatus.status) {
+                    RequestStatus.WARNING -> Optional.of(responseStatus.body)
+                    else -> Optional.empty()
+                }
+            )
+        )
     }
 
-    fun processDeletion(patientId: String): RequestStatus {
+    private fun isDuplication(pseudonymizedMtbFile: MtbFile): Boolean {
+        val lastMtbFileRequestForPatient =
+            requestService.lastMtbFileRequestForPatientPseudonym(pseudonymizedMtbFile.patient.id)
+        val isLastRequestDeletion = requestService.isLastRequestWithKnownStatusDeletion(pseudonymizedMtbFile.patient.id)
+
+        return null != lastMtbFileRequestForPatient
+                && !isLastRequestDeletion
+                && lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFile)
+    }
+
+    fun processDeletion(patientId: String) {
         val requestId = UUID.randomUUID().toString()
 
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
-            val responses = senders.map {
-                val responseStatus = it.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
-                when (responseStatus.status) {
-                    MtbFileSender.ResponseStatus.SUCCESS -> {
-                        logger.info(
-                            "Sent delete for Patient '{}' using '{}'",
-                            patientPseudonym,
-                            it.javaClass.simpleName
-                        )
-                    }
-
-                    MtbFileSender.ResponseStatus.ERROR -> {
-                        logger.error(
-                            "Error deleting data for Patient '{}' using '{}'",
-                            patientPseudonym,
-                            it.javaClass.simpleName
-                        )
-                    }
-
-                    else -> {
-                        logger.error(
-                            "Unknown result on deleting data for Patient '{}' using '{}'",
-                            patientPseudonym,
-                            it.javaClass.simpleName
-                        )
-                    }
-                }
-                responseStatus
-            }
-
-            val overallRequestStatus = if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.ERROR)) {
-                RequestStatus.ERROR
-            } else if (responses.map { it.status }.contains(MtbFileSender.ResponseStatus.SUCCESS)) {
-                RequestStatus.SUCCESS
-            } else {
-                RequestStatus.UNKNOWN
-            }
-
-            requestRepository.save(
+            requestService.save(
                 Request(
                     uuid = requestId,
                     patientId = patientPseudonym,
                     pid = patientId,
                     fingerprint = fingerprint(patientPseudonym),
-                    status = overallRequestStatus,
-                    type = RequestType.DELETE,
-                    report = when (overallRequestStatus) {
-                        RequestStatus.ERROR -> Report("Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar")
-                        RequestStatus.UNKNOWN -> Report("Keine Informationen")
-                        else -> null
+                    status = RequestStatus.UNKNOWN,
+                    type = RequestType.DELETE
+                )
+            )
+
+            val responseStatus = sender.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+
+            applicationEventPublisher.publishEvent(
+                ResponseEvent(
+                    requestId,
+                    Instant.now(),
+                    responseStatus.status,
+                    when (responseStatus.status) {
+                        RequestStatus.WARNING, RequestStatus.ERROR -> Optional.of(responseStatus.body)
+                        else -> Optional.empty()
                     }
                 )
             )
 
-            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-
-            return overallRequestStatus
         } catch (e: Exception) {
-            requestRepository.save(
+            requestService.save(
                 Request(
                     uuid = requestId,
                     patientId = "???",
@@ -194,10 +142,6 @@ class RequestProcessor(
                     report = Report("Fehler bei der Pseudonymisierung")
                 )
             )
-
-            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-
-            return RequestStatus.ERROR
         }
     }
 

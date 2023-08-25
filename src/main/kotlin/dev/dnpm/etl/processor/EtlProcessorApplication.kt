@@ -28,4 +28,3 @@ class EtlProcessorApplication
 fun main(args: Array<String>) {
     runApplication<EtlProcessorApplication>(*args)
 }
-

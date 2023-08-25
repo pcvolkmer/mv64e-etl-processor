@@ -36,9 +36,9 @@ data class Request(
     val patientId: String,
     val pid: String,
     val fingerprint: String,
-    val status: RequestStatus,
     val type: RequestType,
-    val processedAt: Instant = Instant.now(),
+    var status: RequestStatus,
+    var processedAt: Instant = Instant.now(),
     @Embedded.Nullable var report: Report? = null
 )
 

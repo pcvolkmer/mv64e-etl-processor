@@ -69,13 +69,11 @@ import java.util.HashMap;
 
 public class GpasPseudonymGenerator implements Generator {
 
+    private final static FhirContext r4Context = FhirContext.forR4();
     private final String gPasUrl;
     private final String psnTargetDomain;
-    private static FhirContext r4Context = FhirContext.forR4();
     private final HttpHeaders httpHeader;
-
     private final RetryTemplate retryTemplate = defaultTemplate();
-
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
 
     private SSLContext customSslContext;
@@ -110,12 +108,19 @@ public class GpasPseudonymGenerator implements Generator {
 
     @NotNull
     public static String unwrapPseudonym(Parameters gPasPseudonymResult) {
-        Identifier pseudonym = (Identifier) gPasPseudonymResult.getParameter().stream().findFirst()
-            .get().getPart().stream().filter(a -> a.getName().equals("pseudonym")).findFirst()
-            .orElseGet(ParametersParameterComponent::new).getValue();
+        final var parameters = gPasPseudonymResult.getParameter().stream().findFirst();
+
+        if (parameters.isEmpty()) {
+            throw new PseudonymRequestFailed("Empty HL7 parameters, cannot find first one");
+        }
+
+        final var identifier = (Identifier) parameters.get().getPart().stream()
+                .filter(a -> a.getName().equals("pseudonym"))
+                .findFirst()
+                .orElseGet(ParametersParameterComponent::new).getValue();
 
         // pseudonym
-        return pseudonym.getSystem() + "|" + pseudonym.getValue();
+        return identifier.getSystem() + "|" + identifier.getValue();
     }
 
 

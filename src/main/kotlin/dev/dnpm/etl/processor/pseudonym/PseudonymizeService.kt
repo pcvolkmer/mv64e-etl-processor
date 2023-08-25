@@ -19,7 +19,6 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 
 class PseudonymizeService(
@@ -27,38 +26,11 @@ class PseudonymizeService(
     private val configProperties: PseudonymizeConfigProperties
 ) {
 
-    fun pseudonymize(mtbFile: MtbFile): MtbFile {
-        val patientPseudonym = patientPseudonym(mtbFile.patient.id)
-
-        mtbFile.episode.patient = patientPseudonym
-        mtbFile.carePlans.forEach { it.patient = patientPseudonym }
-        mtbFile.patient.id = patientPseudonym
-        mtbFile.claims.forEach { it.patient = patientPseudonym }
-        mtbFile.consent.patient = patientPseudonym
-        mtbFile.claimResponses.forEach { it.patient = patientPseudonym }
-        mtbFile.diagnoses.forEach { it.patient = patientPseudonym }
-        mtbFile.ecogStatus.forEach { it.patient = patientPseudonym }
-        mtbFile.familyMemberDiagnoses.forEach { it.patient = patientPseudonym }
-        mtbFile.geneticCounsellingRequests.forEach { it.patient = patientPseudonym }
-        mtbFile.histologyReevaluationRequests.forEach { it.patient = patientPseudonym }
-        mtbFile.histologyReports.forEach { it.patient = patientPseudonym }
-        mtbFile.lastGuidelineTherapies.forEach { it.patient = patientPseudonym }
-        mtbFile.molecularPathologyFindings.forEach { it.patient = patientPseudonym }
-        mtbFile.molecularTherapies.forEach { it.history.forEach { it.patient = patientPseudonym } }
-        mtbFile.ngsReports.forEach { it.patient = patientPseudonym }
-        mtbFile.previousGuidelineTherapies.forEach { it.patient = patientPseudonym }
-        mtbFile.rebiopsyRequests.forEach { it.patient = patientPseudonym }
-        mtbFile.recommendations.forEach { it.patient = patientPseudonym }
-        mtbFile.recommendations.forEach { it.patient = patientPseudonym }
-        mtbFile.responses.forEach { it.patient = patientPseudonym }
-        mtbFile.specimens.forEach { it.patient = patientPseudonym }
-        mtbFile.specimens.forEach { it.patient = patientPseudonym }
-
-        return mtbFile
-    }
-
     fun patientPseudonym(patientId: String): String {
-        return "${configProperties.prefix}_${generator.generate(patientId)}"
+        return when (generator) {
+            is GpasPseudonymGenerator -> generator.generate(patientId)
+            else -> "${configProperties.prefix}_${generator.generate(patientId)}"
+        }
     }
 
 }

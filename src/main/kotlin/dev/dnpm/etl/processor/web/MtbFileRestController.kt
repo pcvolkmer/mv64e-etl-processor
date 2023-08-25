@@ -19,40 +19,37 @@
 
 package dev.dnpm.etl.processor.web
 
+import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-class MtbFileController(
+class MtbFileRestController(
     private val requestProcessor: RequestProcessor,
 ) {
 
-    private val logger = LoggerFactory.getLogger(MtbFileController::class.java)
+    private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
 
     @PostMapping(path = ["/mtbfile"])
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Void> {
-        val requestStatus = requestProcessor.processMtbFile(mtbFile)
-
-        return if (requestStatus == RequestStatus.ERROR) {
-            ResponseEntity.unprocessableEntity().build()
+        if (mtbFile.consent.status == Consent.Status.ACTIVE) {
+            logger.debug("Accepted MTB File for processing")
+            requestProcessor.processMtbFile(mtbFile)
         } else {
-            ResponseEntity.noContent().build()
+            logger.debug("Accepted MTB File and process deletion")
+            requestProcessor.processDeletion(mtbFile.patient.id)
         }
+        return ResponseEntity.accepted().build()
     }
 
     @DeleteMapping(path = ["/mtbfile/{patientId}"])
     fun deleteData(@PathVariable patientId: String): ResponseEntity<Void> {
-        val requestStatus = requestProcessor.processDeletion(patientId)
-
-        return if (requestStatus == RequestStatus.ERROR) {
-            ResponseEntity.unprocessableEntity().build()
-        } else {
-            ResponseEntity.noContent().build()
-        }
+        logger.debug("Accepted patient ID to process deletion")
+        requestProcessor.processDeletion(patientId)
+        return ResponseEntity.accepted().build()
     }
 
 }

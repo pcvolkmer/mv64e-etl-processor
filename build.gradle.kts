@@ -1,4 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     id("org.springframework.boot") version "3.1.1"
@@ -8,10 +10,29 @@ plugins {
 }
 
 group = "de.ukw.ccc"
-version = "0.1.0-SNAPSHOT"
+version = "0.2.0-SNAPSHOT"
+
+var versions = mapOf(
+    "bwhc-dto-java" to "0.2.0",
+    "hapi-fhir" to "6.6.2",
+    "httpclient5" to "5.2.1",
+    "mockito-kotlin" to "5.1.0"
+)
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
+}
+
+sourceSets {
+    create("integrationTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val integrationTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+    extendsFrom(configurations.runtimeOnly.get())
 }
 
 configurations {
@@ -41,10 +62,10 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("de.ukw.ccc:bwhc-dto-java:0.2.0")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:6.6.2")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.6.2")
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.1")
+    implementation("de.ukw.ccc:bwhc-dto-java:${versions["bwhc-dto-java"]}")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
+    implementation("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient5"]}")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -52,6 +73,9 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
+    integrationTestImplementation("org.testcontainers:junit-jupiter")
+    integrationTestImplementation("org.testcontainers:postgresql")
 }
 
 tasks.withType<KotlinCompile> {
@@ -63,5 +87,26 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+    }
 }
 
+task<Test>("integrationTest") {
+    description = "Runs integration tests"
+
+    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+
+    shouldRunAfter("test")
+}
+
+tasks.named<BootBuildImage>("bootBuildImage") {
+    imageName.set("ghcr.io/ccc-mf/etl-processor")
+
+    environment.set(environment.get() + mapOf(
+        "BP_OCI_SOURCE" to "https://github.com/CCC-MF/etl-processor",
+        "BP_OCI_LICENSES" to "AGPLv3",
+        "BP_OCI_DESCRIPTION" to "ETL Processor for bwHC MTB files"
+    ))
+}
