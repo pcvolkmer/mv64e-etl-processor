@@ -3,8 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-    id("org.springframework.boot") version "3.1.1"
-    id("io.spring.dependency-management") version "1.1.0"
+    war
+    id("org.springframework.boot") version "3.1.2"
+    id("io.spring.dependency-management") version "1.1.3"
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.spring") version "1.9.0"
 }
@@ -48,17 +49,22 @@ repositories {
     mavenCentral()
 }
 
-tasks.getByName<Jar>("jar") {
-    enabled = false
-}
-
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.kafka:spring-kafka"){
+        // CVE-2023-34453, CVE-2023-34454, CVE-2023-34455
+        exclude( "org.xerial.snappy:snappy-java")
+        // CVE-2022-1471
+        exclude("org.yaml:snakeyaml")
+    }
+    // fixes CVE-2023-34453, CVE-2023-34454, CVE-2023-34455
+    implementation("org.xerial.snappy:snappy-java:1.1.10.3")
+    // fix CVE-2022-1471
+    implementation("org.yaml:snakeyaml:2.1")
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
@@ -71,6 +77,7 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
