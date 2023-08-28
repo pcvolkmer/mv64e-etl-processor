@@ -129,11 +129,14 @@ docker build . -t "imageName"
 
 ## Deployment
 *Ausführen als Docker Conatiner:*
-Wenn gewünscht, Änderungen in der `env` vornehmen. Beachten, dass *MONITORING_HTTP_PORT* über
-Host-Umgebung gesetzt werden muss (z.B. .env oder Parameter --env-file )
 
 ```bash
 cd ./deploy
+cp env-sample.env .env
+```
+Wenn gewünscht, Änderungen in der `.env` vornehmen.
+
+```bash
 docker compose up -d
 ```
 
