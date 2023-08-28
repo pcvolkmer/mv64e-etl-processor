@@ -12,7 +12,7 @@ app:
   kafka:
     topic: test
     response-topic: test_response
-    servers: localhost:9092
+    servers: localhost:9094
 
 server:
   port: 8000
