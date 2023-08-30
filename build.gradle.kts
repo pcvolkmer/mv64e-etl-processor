@@ -20,6 +20,10 @@ var versions = mapOf(
     "mockito-kotlin" to "5.1.0"
 )
 
+// Override Apache Kafka to be used
+// Fixes: CVE-2023-34455, CVE-2023-34454, CVE-2023-34453
+extra["kafka.version"] = "3.5.1"
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
 }
