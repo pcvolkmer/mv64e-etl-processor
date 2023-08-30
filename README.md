@@ -26,7 +26,7 @@ Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
 ## Pseudonymisierung der Patienten-ID
 
-Wenn eine URI zu einer gPAS-Instanz angegeben ist, wird diese verwendet.
+Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) angegeben ist, wird diese verwendet.
 Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgenommen.
 
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
@@ -42,7 +42,8 @@ als Patienten-Pseudonym verwendet.
 
 Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren.
 
-* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate`)
+* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (
+  z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$$pseudonymizeAllowCreate`) 
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
@@ -119,6 +120,25 @@ ein Consent-Widerspruch erfolgte.
 ## Docker-Images
 
 Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/etl-processor/pkgs/container/etl-processor
+
+### Images lokal bauen 
+
+```bash
+./gradlew bootBuildImage
+```
+
+## Deployment
+*Ausführen als Docker Conatiner:*
+
+```bash
+cd ./deploy
+cp env-sample.env .env
+```
+Wenn gewünscht, Änderungen in der `.env` vornehmen.
+
+```bash
+docker compose up -d
+```
 
 ## Entwicklungssetup
 

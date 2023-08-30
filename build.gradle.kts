@@ -60,6 +60,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.kafka:spring-kafka")
+    // fix CVE-2022-1471
+    implementation("org.yaml:snakeyaml:2.1")
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
