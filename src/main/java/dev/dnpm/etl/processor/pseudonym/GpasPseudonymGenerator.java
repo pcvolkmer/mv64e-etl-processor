@@ -22,6 +22,21 @@ package dev.dnpm.etl.processor.pseudonym;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dnpm.etl.processor.config.GPasConfigProperties;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+import java.util.HashMap;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -39,7 +54,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -50,22 +69,6 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.HashMap;
 
 public class GpasPseudonymGenerator implements Generator {
 
@@ -88,11 +91,15 @@ public class GpasPseudonymGenerator implements Generator {
         try {
             if (StringUtils.isNotBlank(gpasCfg.getSslCaLocation())) {
                 customSslContext = getSslContext(gpasCfg.getSslCaLocation());
+                log.debug(String.format("%s has been initialized with SSL certificate %s",
+                    this.getClass().getName(), gpasCfg.getSslCaLocation()));
             }
         } catch (IOException | KeyManagementException | KeyStoreException | CertificateException |
                  NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+
+        log.debug(String.format("%s has been initialized", this.getClass().getName()));
 
     }
 
@@ -115,9 +122,9 @@ public class GpasPseudonymGenerator implements Generator {
         }
 
         final var identifier = (Identifier) parameters.get().getPart().stream()
-                .filter(a -> a.getName().equals("pseudonym"))
-                .findFirst()
-                .orElseGet(ParametersParameterComponent::new).getValue();
+            .filter(a -> a.getName().equals("pseudonym"))
+            .findFirst()
+            .orElseGet(ParametersParameterComponent::new).getValue();
 
         // pseudonym
         return identifier.getSystem() + "|" + identifier.getValue();
