@@ -43,7 +43,7 @@ als Patienten-Pseudonym verwendet.
 Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren.
 
 * `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (
-  z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate`)
+  z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$$pseudonymizeAllowCreate`) 
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
@@ -124,7 +124,7 @@ Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/
 ### Images lokal bauen 
 
 ```bash
-docker build . -t "imageName"
+./gradlew bootBuildImage
 ```
 
 ## Deployment
