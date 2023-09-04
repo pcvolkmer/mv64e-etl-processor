@@ -127,7 +127,21 @@ public class GpasPseudonymGenerator implements Generator {
             .orElseGet(ParametersParameterComponent::new).getValue();
 
         // pseudonym
-        return identifier.getSystem() + "|" + identifier.getValue();
+        return sanitizeValue(identifier.getValue());
+    }
+
+    /**
+     * Allow only filename friendly values
+     *
+     * @param psnValue GAPS pseudonym value
+     * @return cleaned up value
+     */
+    public static String sanitizeValue(String psnValue) {
+        // pattern to match forbidden characters
+        String forbiddenCharsRegex = "[\\\\/:*?\"<>|;]";
+
+        // Replace all forbidden characters with underscores
+        return psnValue.replaceAll(forbiddenCharsRegex, "_");
     }
 
 
