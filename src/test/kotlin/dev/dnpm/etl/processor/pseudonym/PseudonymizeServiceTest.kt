@@ -71,6 +71,13 @@ class PseudonymizeServiceTest {
     }
 
     @Test
+    fun sanitizeFileName(@Mock generator: GpasPseudonymGenerator) {
+        val result= GpasPseudonymGenerator.sanitizeValue("l://a\\bs;1*2?3>")
+
+        assertThat(result).isEqualTo("l___a_bs_1_2_3_")
+    }
+
+    @Test
     fun shouldUsePseudonymPrefixForBuiltin(@Mock generator: AnonymizingGenerator) {
         doAnswer {
             it.arguments[0]
