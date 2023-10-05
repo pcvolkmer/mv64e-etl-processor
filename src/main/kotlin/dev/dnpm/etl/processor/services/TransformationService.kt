@@ -24,8 +24,8 @@ import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
 import de.ukw.ccc.bwhc.dto.MtbFile
 
-class TransformationService(private val objectMapper: ObjectMapper) {
-    fun transform(mtbFile: MtbFile, vararg transformations: Transformation): MtbFile {
+class TransformationService(private val objectMapper: ObjectMapper, private val transformations: List<Transformation>) {
+    fun transform(mtbFile: MtbFile): MtbFile {
         var json = objectMapper.writeValueAsString(mtbFile)
 
         transformations.forEach { transformation ->

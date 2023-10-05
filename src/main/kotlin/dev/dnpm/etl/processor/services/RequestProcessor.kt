@@ -38,6 +38,7 @@ import java.util.*
 @Service
 class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
+    private val transformationService: TransformationService,
     private val sender: MtbFileSender,
     private val requestService: RequestService,
     private val objectMapper: ObjectMapper,
@@ -50,7 +51,7 @@ class RequestProcessor(
 
         mtbFile pseudonymizeWith pseudonymizeService
 
-        val request = MtbFileSender.MtbFileRequest(requestId, mtbFile)
+        val request = MtbFileSender.MtbFileRequest(requestId, transformationService.transform(mtbFile))
 
         requestService.save(
             Request(

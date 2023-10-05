@@ -34,15 +34,16 @@ class TransformationServiceTest {
 
     @BeforeEach
     fun setup() {
-        this.service = TransformationService(ObjectMapper())
+        this.service = TransformationService(
+            ObjectMapper(), listOf(
+                Transformation.of("consent.status") from Consent.Status.ACTIVE to Consent.Status.REJECTED,
+                Transformation.of("diagnoses[*].icd10.version") from "2013" to "2014",
+            )
+        )
     }
 
     @Test
     fun shouldTransformMtbFile() {
-        val transformations = arrayOf(
-            Transformation.of("diagnoses[*].icd10.version") from "2013" to "2014",
-        )
-
         val mtbFile = MtbFile.builder().withDiagnoses(
             listOf(
                 Diagnosis.builder().withId("1234").withIcd10(Icd10("F79.9").also {
@@ -51,7 +52,7 @@ class TransformationServiceTest {
             )
         ).build()
 
-        val actual = this.service.transform(mtbFile, *transformations)
+        val actual = this.service.transform(mtbFile)
 
         assertThat(actual).isNotNull
         assertThat(actual.diagnoses[0].icd10.version).isEqualTo("2014")
@@ -59,10 +60,6 @@ class TransformationServiceTest {
 
     @Test
     fun shouldOnlyTransformGivenValues() {
-        val transformations = arrayOf(
-            Transformation.of("diagnoses[*].icd10.version") from "2013" to "2014",
-        )
-
         val mtbFile = MtbFile.builder().withDiagnoses(
             listOf(
                 Diagnosis.builder().withId("1234").withIcd10(Icd10("F79.9").also {
@@ -74,7 +71,7 @@ class TransformationServiceTest {
             )
         ).build()
 
-        val actual = this.service.transform(mtbFile, *transformations)
+        val actual = this.service.transform(mtbFile)
 
         assertThat(actual).isNotNull
         assertThat(actual.diagnoses[0].icd10.code).isEqualTo("F79.9")
@@ -85,15 +82,11 @@ class TransformationServiceTest {
 
     @Test
     fun shouldTransformMtbFileWithConsentEnum() {
-        val transformations = arrayOf(
-            Transformation.of("consent.status") from Consent.Status.ACTIVE to Consent.Status.REJECTED,
-        )
-
         val mtbFile = MtbFile.builder().withConsent(
             Consent("123", "456", Consent.Status.ACTIVE)
         ).build()
 
-        val actual = this.service.transform(mtbFile, *transformations)
+        val actual = this.service.transform(mtbFile)
 
         assertThat(actual.consent).isNotNull
         assertThat(actual.consent.status).isEqualTo(Consent.Status.REJECTED)

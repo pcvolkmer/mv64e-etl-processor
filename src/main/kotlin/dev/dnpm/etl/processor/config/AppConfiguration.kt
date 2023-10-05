@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.services.Transformation
+import dev.dnpm.etl.processor.services.TransformationService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -73,10 +74,13 @@ class AppConfiguration {
     }
 
     @Bean
-    fun transformations(configProperties: AppConfigProperties): List<Transformation> {
-        return configProperties.transformations.map {
+    fun transformationService(
+        objectMapper: ObjectMapper,
+        configProperties: AppConfigProperties
+    ): TransformationService {
+        return TransformationService(objectMapper, configProperties.transformations.map {
             Transformation.of(it.path) from it.from to it.to
-        }
+        })
     }
 
 }
