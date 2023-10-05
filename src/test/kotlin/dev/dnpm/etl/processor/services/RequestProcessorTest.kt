@@ -37,6 +37,7 @@ import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.util.*
@@ -46,6 +47,7 @@ import java.util.*
 class RequestProcessorTest {
 
     private lateinit var pseudonymizeService: PseudonymizeService
+    private lateinit var transformationService: TransformationService
     private lateinit var sender: MtbFileSender
     private lateinit var requestService: RequestService
     private lateinit var applicationEventPublisher: ApplicationEventPublisher
@@ -55,11 +57,13 @@ class RequestProcessorTest {
     @BeforeEach
     fun setup(
         @Mock pseudonymizeService: PseudonymizeService,
+        @Mock transformationService: TransformationService,
         @Mock sender: RestMtbFileSender,
         @Mock requestService: RequestService,
         @Mock applicationEventPublisher: ApplicationEventPublisher
     ) {
         this.pseudonymizeService = pseudonymizeService
+        this.transformationService = transformationService
         this.sender = sender
         this.requestService = requestService
         this.applicationEventPublisher = applicationEventPublisher
@@ -68,6 +72,7 @@ class RequestProcessorTest {
 
         requestProcessor = RequestProcessor(
             pseudonymizeService,
+            transformationService,
             sender,
             requestService,
             objectMapper,
@@ -97,6 +102,10 @@ class RequestProcessorTest {
         doAnswer {
             it.arguments[0] as String
         }.`when`(pseudonymizeService).patientPseudonym(any())
+
+        doAnswer {
+            it.arguments[0]
+        }.whenever(transformationService).transform(any())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -152,6 +161,10 @@ class RequestProcessorTest {
         doAnswer {
             it.arguments[0] as String
         }.`when`(pseudonymizeService).patientPseudonym(any())
+
+        doAnswer {
+            it.arguments[0]
+        }.whenever(transformationService).transform(any())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -212,6 +225,10 @@ class RequestProcessorTest {
             it.arguments[0] as String
         }.`when`(pseudonymizeService).patientPseudonym(any())
 
+        doAnswer {
+            it.arguments[0]
+        }.whenever(transformationService).transform(any())
+
         val mtbFile = MtbFile.builder()
             .withPatient(
                 Patient.builder()
@@ -270,6 +287,10 @@ class RequestProcessorTest {
         doAnswer {
             it.arguments[0] as String
         }.`when`(pseudonymizeService).patientPseudonym(any())
+
+        doAnswer {
+            it.arguments[0]
+        }.whenever(transformationService).transform(any())
 
         val mtbFile = MtbFile.builder()
             .withPatient(

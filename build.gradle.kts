@@ -69,6 +69,7 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient5"]}")
+    implementation("com.jayway.jsonpath:json-path")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

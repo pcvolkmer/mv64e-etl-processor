@@ -49,6 +49,20 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
 * `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
 
+## Transformation von Werten
+
+In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,
+der vom bwHC-Backend akzeptiert wird.
+
+Diese Anwendung bietet daher die Möglichkeit, eine Transformation vorzunehmen. Hierzu muss der "Pfad" innerhalb des JSON-MTB-Files angegeben werden und
+welcher Wert wie ersetzt werden soll.
+
+Hier ein Beispiel für die erste (Index 0 - weitere dann mit 1,2,...) Transformationsregel:
+
+* `APP_TRANSFORMATIONS_[0]_PATH`: Pfad zum Wert in der JSON-MTB-Datei. Beispiel: `diagnoses[*].icd10.version` für **alle** Diagnosen
+* `APP_TRANSFORMATIONS_[0]_FROM`: Angabe des Werts, der ersetzt werden soll. Andere Werte bleiben dabei unverändert.
+* `APP_TRANSFORMATIONS_[0]_TO`: Angabe des neuen Werts.
+
 ## Mögliche Endpunkte
 
 Für REST-Requests als auch zur Nutzung von Kafka-Topics können Endpunkte konfiguriert werden.

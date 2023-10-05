@@ -24,7 +24,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
     var bwhcUri: String?,
-    var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN
+    var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN,
+    var transformations: List<TransformationProperties> = listOf()
 ) {
     companion object {
         const val NAME = "app"
@@ -79,3 +80,9 @@ enum class PseudonymGenerator {
     BUILDIN,
     GPAS
 }
+
+data class TransformationProperties(
+    val path: String,
+    val from: String,
+    val to: String
+)

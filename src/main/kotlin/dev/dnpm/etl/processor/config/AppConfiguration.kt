@@ -25,6 +25,9 @@ import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.services.Transformation
+import dev.dnpm.etl.processor.services.TransformationService
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -40,6 +43,8 @@ import reactor.core.publisher.Sinks
     ]
 )
 class AppConfiguration {
+
+    private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)
 
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
     @Bean
@@ -69,6 +74,17 @@ class AppConfiguration {
     @Bean
     fun statisticsUpdateProducer(): Sinks.Many<Any> {
         return Sinks.many().multicast().directBestEffort()
+    }
+
+    @Bean
+    fun transformationService(
+        objectMapper: ObjectMapper,
+        configProperties: AppConfigProperties
+    ): TransformationService {
+        logger.info("Apply ${configProperties.transformations.size} transformation rules")
+        return TransformationService(objectMapper, configProperties.transformations.map {
+            Transformation.of(it.path) from it.from to it.to
+        })
     }
 
 }
