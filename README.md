@@ -59,9 +59,9 @@ welcher Wert wie ersetzt werden soll.
 
 Hier ein Beispiel für die erste (Index 0 - weitere dann mit 1,2,...) Transformationsregel:
 
-* `APP_TRANSFORMATION_[0]_PATH`: Pfad zum Wert in der JSON-MTB-Datei. Beispiel: `diagnoses[*].icd10.version` für **alle** Diagnosen
-* `APP_TRANSFORMATION_[0]_FROM`: Angabe des Werts, der ersetzt werden soll. Andere Werte bleiben dabei unverändert.
-* `APP_TRANSFORMATION_[0]_TO`: Angabe des neuen Werts.
+* `APP_TRANSFORMATIONS_[0]_PATH`: Pfad zum Wert in der JSON-MTB-Datei. Beispiel: `diagnoses[*].icd10.version` für **alle** Diagnosen
+* `APP_TRANSFORMATIONS_[0]_FROM`: Angabe des Werts, der ersetzt werden soll. Andere Werte bleiben dabei unverändert.
+* `APP_TRANSFORMATIONS_[0]_TO`: Angabe des neuen Werts.
 
 ## Mögliche Endpunkte
 
