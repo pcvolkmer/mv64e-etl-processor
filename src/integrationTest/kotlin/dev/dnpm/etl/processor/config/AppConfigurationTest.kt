@@ -31,13 +31,13 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.MockBeans
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 
 @SpringBootTest
-@ContextConfiguration(classes = [KafkaAutoConfiguration::class, AppKafkaConfiguration::class, AppRestConfiguration::class])
+@ContextConfiguration(classes = [AppConfiguration::class, KafkaAutoConfiguration::class, AppKafkaConfiguration::class, AppRestConfiguration::class])
+@MockBean(ObjectMapper::class)
 class AppConfigurationTest {
 
     @Nested
@@ -65,10 +65,7 @@ class AppConfigurationTest {
             "app.kafka.group-id=test"
         ]
     )
-    @MockBeans(value = [
-        MockBean(ObjectMapper::class),
-        MockBean(RequestRepository::class)
-    ])
+    @MockBean(RequestRepository::class)
     inner class AppConfigurationKafkaTest(private val context: ApplicationContext) {
 
         @Test
@@ -95,6 +92,26 @@ class AppConfigurationTest {
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
             assertThat(context.getBean(RestMtbFileSender::class.java)).isNotNull
             assertThrows<NoSuchBeanDefinitionException> { context.getBean(KafkaMtbFileSender::class.java) }
+        }
+
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties = [
+            "app.transformations[0].path=consent.status",
+            "app.transformations[0].from=rejected",
+            "app.transformations[0].to=accept",
+        ]
+    )
+    inner class AppConfigurationTransformationTest(private val context: ApplicationContext) {
+
+        @Test
+        fun shouldRecognizeTransformations() {
+            val appConfigProperties = context.getBean(AppConfigProperties::class.java)
+
+            assertThat(appConfigProperties).isNotNull
+            assertThat(appConfigProperties.transformations).hasSize(1)
         }
 
     }

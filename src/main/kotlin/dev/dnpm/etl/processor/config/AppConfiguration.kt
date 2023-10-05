@@ -25,6 +25,7 @@ import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.services.Transformation
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -69,6 +70,13 @@ class AppConfiguration {
     @Bean
     fun statisticsUpdateProducer(): Sinks.Many<Any> {
         return Sinks.many().multicast().directBestEffort()
+    }
+
+    @Bean
+    fun transformations(configProperties: AppConfigProperties): List<Transformation> {
+        return configProperties.transformations.map {
+            Transformation.of(it.path) from it.from to it.to
+        }
     }
 
 }
