@@ -21,8 +21,8 @@ var versions = mapOf(
 )
 
 // Override Apache Kafka to be used
-// Fixes: CVE-2023-34455, CVE-2023-34454, CVE-2023-34453
-extra["kafka.version"] = "3.5.1"
+// Fixes: CVE-2023-34455, CVE-2023-34454, CVE-2023-34453 and CVE-2023-43642
+extra["kafka.version"] = "3.6.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
