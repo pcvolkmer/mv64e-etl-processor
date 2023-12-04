@@ -1,6 +1,4 @@
 services:
-  # Note: Make sure, hostname "kafka" points to 127.0.0.1
-  # otherwise connection will not be available
   kafka:
     image: bitnami/kafka
     hostname: kafka
