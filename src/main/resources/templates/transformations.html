@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ETL-Prozessor</title>
+    <link rel="stylesheet" th:href="@{/style.css}" />
+</head>
+<body>
+    <div th:replace="~{fragments.html :: nav}"></div>
+    <main>
+        <h1>Transformationen</h1>
+
+        <h2>Syntax</h2>
+        Hier einige Beispiele zum Syntax des JSON-Path
+        <ul>
+            <li style="padding: 0.6rem 0;"><span class="bg-path">diagnoses[*].icdO3T.version</span>: Ersetze die ICD-O3T-Version in allen Diagnosen, z.B. zur Version der deutschen Übersetzung</li>
+            <li style="padding: 0.6rem 0;"><span class="bg-path">patient.gender</span>: Ersetze das Geschlecht des Patienten, z.B. in das von bwHC verlangte Format</li>
+        </ul>
+
+        <h2>Konfigurierte Transformationen</h2>
+        <p>
+            Hier sehen Sie eine Übersicht der konfigurierten Transformationen.
+        </p>
+
+        <table>
+            <thead>
+            <tr>
+                <th>JSON-Path</th>
+                <th>Transformation von &rArr; nach</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="transformation : ${transformations}">
+                <td>
+                    <span class="bg-path" title="Ersetze Wert(e) an dieser Stelle im MTB-File">[[ ${transformation.path} ]]</span>
+                </td>
+                <td>
+                    <span class="bg-from" title="Ersetze immer dann, wenn dieser Wert enthalten ist">[[ ${transformation.existingValue} ]]</span>
+                    <strong>&rArr;</strong>
+                    <span class="bg-to" title="Ersetze durch diesen Wert">[[ ${transformation.newValue} ]]</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

@@ -86,6 +86,10 @@ nav > ul > li:first-of-type {
     text-decoration: none;
 }
 
+.centered {
+    text-align: center;
+}
+
 main {
     margin: 0 auto;
     max-width: 1140px;
@@ -207,6 +211,25 @@ tr:has(td.bg-red) {
 td.bg-gray, th.bg-gray {
     background: var(--bg-gray);
     color: white;
+}
+
+.bg-path {
+    background: var(--bg-gray-op);
+}
+
+.bg-from {
+    background: var(--bg-red-op);
+}
+
+.bg-to {
+    background: var(--bg-green-op);
+}
+
+.bg-path, .bg-from, .bg-to {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+
+    font-family: monospace;
 }
 
 td.bg-shaded, th.bg-shaded {

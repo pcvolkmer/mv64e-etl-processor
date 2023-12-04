@@ -51,9 +51,13 @@ class TransformationService(private val objectMapper: ObjectMapper, private val 
         return objectMapper.readValue(json, MtbFile::class.java)
     }
 
+    fun getTransformations(): List<Transformation> {
+        return this.transformations
+    }
+
 }
 
-class Transformation private constructor(internal val path: String) {
+class Transformation private constructor(val path: String) {
 
     lateinit var existingValue: Any
         private set
