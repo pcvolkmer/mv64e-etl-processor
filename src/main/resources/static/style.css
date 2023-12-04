@@ -1,3 +1,21 @@
+:root {
+    --table-border: rgba(96, 96, 96, 1);
+
+    --bg-green: rgb(0, 128, 0);
+    --bg-green-op: rgba(0, 128, 0, .35);
+
+
+    --bg-yellow: rgb(255, 140, 0);
+    --bg-yellow-op: rgba(255, 140, 0, .35);
+
+
+    --bg-red: rgb(255, 0, 0);
+    --bg-red-op: rgba(255, 0, 0, .35);
+
+    --bg-gray: rgb(112, 128, 144);
+    --bg-gray-op: rgba(112, 128, 144, .35);
+}
+
 body {
     margin: 0;
     font-family: sans-serif;
@@ -57,7 +75,7 @@ nav > ul > li:first-of-type {
     display: inline;
 }
 
-.breadcrumps ul li+li:before {
+.breadcrumps ul li + li:before {
     padding: .4rem;
     color: gray;
     content: "/\00a0";
@@ -115,8 +133,8 @@ form.samplecode-input input:focus-visible {
 }
 
 table {
-    border-top: 1px solid lightgray;
-    border-left: 1px solid lightgray;
+    border-top: 1px solid var(--table-border);
+    border-left: 1px solid var(--table-border);
     border-spacing: 0;
     border-radius: 3px;
 
@@ -145,10 +163,10 @@ th {
 }
 
 td, th {
-    padding: .2rem;
+    padding: 0.4rem .2rem;
 
-    border-right: 1px solid lightgray;
-    border-bottom: 1px solid lightgray;
+    border-right: 1px solid var(--table-border);
+    border-bottom: 1px solid var(--table-border);
 
     text-align: left;
     white-space: nowrap;
@@ -160,22 +178,34 @@ td {
 }
 
 td.bg-green, th.bg-green {
-    background: green;
+    background: var(--bg-green);
     color: white;
+}
+
+tr:has(td.bg-green) {
+    background: var(--bg-green-op);
 }
 
 td.bg-yellow, th.bg-yellow {
-    background: darkorange;
+    background: var(--bg-yellow);
     color: white;
+}
+
+tr:has(td.bg-yellow) {
+    background: var(--bg-yellow-op);
 }
 
 td.bg-red, th.bg-red {
-    background: red;
+    background: var(--bg-red);
     color: white;
 }
 
+tr:has(td.bg-red) {
+    background: var(--bg-red-op);
+}
+
 td.bg-gray, th.bg-gray {
-    background: slategray;
+    background: var(--bg-gray);
     color: white;
 }
 
@@ -279,7 +309,7 @@ input.inline:focus-visible {
     padding: 1rem;
     margin: .2rem;
 
-    border: 1px solid lightgray;
+    border: 1px solid var(--table-border);
     border-radius: 3px;
 
     width: calc(100% - 2.4rem - 4px);
