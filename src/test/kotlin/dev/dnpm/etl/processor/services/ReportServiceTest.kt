@@ -51,12 +51,12 @@ class ReportServiceTest {
         val actual = this.reportService.deserialize(json)
 
         assertThat(actual).hasSize(3)
-        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.INFO)
-        assertThat(actual[0].message).isEqualTo("Info Message")
+        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
+        assertThat(actual[0].message).isEqualTo("Error Message")
         assertThat(actual[1].severity).isEqualTo(ReportService.Severity.WARNING)
         assertThat(actual[1].message).isEqualTo("Warning Message")
-        assertThat(actual[1].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[1].message).isEqualTo("Error Message")
+        assertThat(actual[2].severity).isEqualTo(ReportService.Severity.INFO)
+        assertThat(actual[2].message).isEqualTo("Info Message")
     }
 
     @Test
