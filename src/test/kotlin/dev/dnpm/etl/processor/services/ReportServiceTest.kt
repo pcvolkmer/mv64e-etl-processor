@@ -50,7 +50,7 @@ class ReportServiceTest {
 
         val actual = this.reportService.deserialize(json)
 
-        assertThat(actual).hasSize(2)
+        assertThat(actual).hasSize(3)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.INFO)
         assertThat(actual[0].message).isEqualTo("Info Message")
         assertThat(actual[1].severity).isEqualTo(ReportService.Severity.WARNING)
