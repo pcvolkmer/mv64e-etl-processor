@@ -1,6 +1,9 @@
 :root {
     --table-border: rgba(96, 96, 96, 1);
 
+    --bg-blue: rgb(0, 74, 157);
+    --bg-blue-op: rgba(0, 74, 157, .35);
+
     --bg-green: rgb(0, 128, 0);
     --bg-green-op: rgba(0, 128, 0, .35);
 
@@ -179,6 +182,15 @@ td, th {
 
 td {
     font-family: monospace;
+}
+
+td.bg-blue, th.bg-blue {
+    background: var(--bg-blue);
+    color: white;
+}
+
+tr:has(td.bg-blue) {
+    background: var(--bg-blue-op);
 }
 
 td.bg-green, th.bg-green {

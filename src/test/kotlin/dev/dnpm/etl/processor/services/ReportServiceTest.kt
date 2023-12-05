@@ -41,6 +41,7 @@ class ReportServiceTest {
             {
                 "patient": "4711",
                 "issues": [
+                    { "severity": "info", "message": "Info Message" },
                     { "severity": "warning", "message": "Warning Message" },
                     { "severity": "error", "message": "Error Message" }
                 ]
@@ -50,8 +51,10 @@ class ReportServiceTest {
         val actual = this.reportService.deserialize(json)
 
         assertThat(actual).hasSize(2)
-        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.WARNING)
-        assertThat(actual[0].message).isEqualTo("Warning Message")
+        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.INFO)
+        assertThat(actual[0].message).isEqualTo("Info Message")
+        assertThat(actual[1].severity).isEqualTo(ReportService.Severity.WARNING)
+        assertThat(actual[1].message).isEqualTo("Warning Message")
         assertThat(actual[1].severity).isEqualTo(ReportService.Severity.ERROR)
         assertThat(actual[1].message).isEqualTo("Error Message")
     }

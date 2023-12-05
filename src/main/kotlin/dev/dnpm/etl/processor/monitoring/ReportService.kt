@@ -56,5 +56,6 @@ class ReportService(
     enum class Severity(@JsonValue val value: String) {
         ERROR("error"),
         WARNING("warning"),
+        INFO("info")
     }
 }
