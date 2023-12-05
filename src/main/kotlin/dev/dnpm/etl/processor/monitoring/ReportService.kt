@@ -34,7 +34,10 @@ class ReportService(
             return listOf()
         }
         return try {
-            objectMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues
+            objectMapper
+                .readValue(dataQualityReport, DataQualityReport::class.java)
+                .issues
+                .sortedBy { it.severity }
         } catch (e: Exception) {
             val otherIssue =
                 Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
