@@ -35,7 +35,10 @@ infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     this.familyMemberDiagnoses.forEach { it.patient = patientPseudonym }
     this.geneticCounsellingRequests.forEach { it.patient = patientPseudonym }
     this.histologyReevaluationRequests.forEach { it.patient = patientPseudonym }
-    this.histologyReports.forEach { it.patient = patientPseudonym }
+    this.histologyReports.forEach {
+        it.patient = patientPseudonym
+        it.tumorMorphology.patient = patientPseudonym
+    }
     this.lastGuidelineTherapies.forEach { it.patient = patientPseudonym }
     this.molecularPathologyFindings.forEach { it.patient = patientPseudonym }
     this.molecularTherapies.forEach { molecularTherapy -> molecularTherapy.history.forEach { it.patient = patientPseudonym } }
@@ -45,6 +48,6 @@ infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     this.recommendations.forEach { it.patient = patientPseudonym }
     this.recommendations.forEach { it.patient = patientPseudonym }
     this.responses.forEach { it.patient = patientPseudonym }
-    this.specimens.forEach { it.patient = patientPseudonym }
+    this.studyInclusionRequests.forEach { it.patient = patientPseudonym }
     this.specimens.forEach { it.patient = patientPseudonym }
 }
