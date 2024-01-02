@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.KafkaConnectionCheckService
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.services.kafka.KafkaResponseProcessor
@@ -74,6 +76,11 @@ class AppKafkaConfiguration {
         objectMapper: ObjectMapper
     ): KafkaResponseProcessor {
         return KafkaResponseProcessor(applicationEventPublisher, objectMapper)
+    }
+
+    @Bean
+    fun connectionCheckService(consumerFactory: ConsumerFactory<String, String>): ConnectionCheckService {
+        return KafkaConnectionCheckService(consumerFactory.createConsumer())
     }
 
 }

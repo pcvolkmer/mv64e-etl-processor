@@ -19,6 +19,9 @@
 
 package dev.dnpm.etl.processor.web
 
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.services.TransformationService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -26,16 +29,23 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@RequestMapping(path = ["transformations"])
-class TransformationController(
-    private val transformationService: TransformationService
+@RequestMapping(path = ["configs"])
+class ConfigController(
+    private val transformationService: TransformationService,
+    private val pseudonymGenerator: Generator,
+    private val mtbFileSender: MtbFileSender,
+    private val connectionCheckService: ConnectionCheckService
+
 ) {
 
     @GetMapping
     fun index(model: Model): String {
+        model.addAttribute("pseudonymGenerator", pseudonymGenerator.javaClass.simpleName)
+        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+        model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
         model.addAttribute("transformations", transformationService.getTransformations())
 
-        return "transformations"
+        return "configs"
     }
 
 }
