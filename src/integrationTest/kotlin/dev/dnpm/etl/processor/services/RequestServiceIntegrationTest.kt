@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -43,6 +44,11 @@ import java.util.*
 @SpringBootTest
 @Transactional
 @MockBean(MtbFileSender::class)
+@TestPropertySource(
+    properties = [
+        "app.rest.uri=http://example.com"
+    ]
+)
 class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
 
     private lateinit var requestRepository: RequestRepository

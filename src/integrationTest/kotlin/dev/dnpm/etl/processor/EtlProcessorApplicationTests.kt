@@ -46,6 +46,11 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 @MockBean(MtbFileSender::class)
+@TestPropertySource(
+    properties = [
+        "app.rest.uri=http://example.com"
+    ]
+)
 class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
 
     @Test
