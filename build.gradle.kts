@@ -17,7 +17,7 @@ var versions = mapOf(
     "bwhc-dto-java" to "0.2.0",
     "hapi-fhir" to "6.10.2",
     "httpclient5" to "5.2.1",
-    "mockito-kotlin" to "5.1.0"
+    "mockito-kotlin" to "5.2.1"
 )
 
 java {
