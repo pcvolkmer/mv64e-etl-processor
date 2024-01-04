@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -35,6 +35,8 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
+import org.springframework.retry.policy.SimpleRetryPolicy
+import org.springframework.retry.support.RetryTemplateBuilder
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.ExecutionException
 
@@ -52,10 +54,12 @@ class KafkaMtbFileSenderTest {
         @Mock kafkaTemplate: KafkaTemplate<String, String>
     ) {
         val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+
         this.objectMapper = ObjectMapper()
         this.kafkaTemplate = kafkaTemplate
 
-        this.kafkaMtbFileSender = KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, objectMapper)
+        this.kafkaMtbFileSender = KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, retryTemplate, objectMapper)
     }
 
     @ParameterizedTest
@@ -116,6 +120,58 @@ class KafkaMtbFileSenderTest {
         assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\"}")
         assertThat(captor.secondValue).isNotNull
         assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.REJECTED)))
+    }
+
+    @ParameterizedTest
+    @MethodSource("requestWithResponseSource")
+    fun shouldRetryOnMtbFileKafkaSendError(testData: TestData) {
+        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaTargetProperties, retryTemplate, this.objectMapper)
+
+        doAnswer {
+            if (null != testData.exception) {
+                throw testData.exception
+            }
+            completedFuture(SendResult<String, String>(null, null))
+        }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
+
+        kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile(Consent.Status.ACTIVE)))
+
+        val expectedCount = when (testData.exception) {
+            // OK - No Retry
+            null -> times(1)
+            // Request failed - Retry max 3 times
+            else -> times(3)
+        }
+
+        verify(kafkaTemplate, expectedCount).send(anyString(), anyString(), anyString())
+    }
+
+    @ParameterizedTest
+    @MethodSource("requestWithResponseSource")
+    fun shouldRetryOnDeleteKafkaSendError(testData: TestData) {
+        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaTargetProperties, retryTemplate, this.objectMapper)
+
+        doAnswer {
+            if (null != testData.exception) {
+                throw testData.exception
+            }
+            completedFuture(SendResult<String, String>(null, null))
+        }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
+
+        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+
+        val expectedCount = when (testData.exception) {
+            // OK - No Retry
+            null -> times(1)
+            // Request failed - Retry max 3 times
+            else -> times(3)
+        }
+
+        verify(kafkaTemplate, expectedCount).send(anyString(), anyString(), anyString())
     }
 
     companion object {

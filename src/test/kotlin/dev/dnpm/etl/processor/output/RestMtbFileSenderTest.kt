@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -28,6 +28,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.retry.policy.SimpleRetryPolicy
+import org.springframework.retry.support.RetryTemplateBuilder
+import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
@@ -44,10 +47,11 @@ class RestMtbFileSenderTest {
     fun setup() {
         val restTemplate = RestTemplate()
         val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties)
+        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
     }
 
     @ParameterizedTest
@@ -76,6 +80,64 @@ class RestMtbFileSenderTest {
         }
 
         val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile))
+        assertThat(response.status).isEqualTo(requestWithResponse.response.status)
+        assertThat(response.body).isEqualTo(requestWithResponse.response.body)
+    }
+
+    @ParameterizedTest
+    @MethodSource("mtbFileRequestWithResponseSource")
+    fun shouldRetryOnMtbFileHttpRequestError(requestWithResponse: RequestWithResponse) {
+        val restTemplate = RestTemplate()
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+
+        this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
+        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+
+        val expectedCount = when (requestWithResponse.httpStatus) {
+            // OK - No Retry
+            HttpStatus.OK, HttpStatus.CREATED -> ExpectedCount.max(1)
+            // Request failed - Retry max 3 times
+            else -> ExpectedCount.max(3)
+        }
+
+        this.mockRestServiceServer.expect(expectedCount) {
+            method(HttpMethod.POST)
+            requestTo("/mtbfile")
+        }.andRespond {
+            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+        }
+
+        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile))
+        assertThat(response.status).isEqualTo(requestWithResponse.response.status)
+        assertThat(response.body).isEqualTo(requestWithResponse.response.body)
+    }
+
+    @ParameterizedTest
+    @MethodSource("deleteRequestWithResponseSource")
+    fun shouldRetryOnDeleteHttpRequestError(requestWithResponse: RequestWithResponse) {
+        val restTemplate = RestTemplate()
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+
+        this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
+        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+
+        val expectedCount = when (requestWithResponse.httpStatus) {
+            // OK - No Retry
+            HttpStatus.OK, HttpStatus.CREATED -> ExpectedCount.max(1)
+            // Request failed - Retry max 3 times
+            else -> ExpectedCount.max(3)
+        }
+
+        this.mockRestServiceServer.expect(expectedCount) {
+            method(HttpMethod.DELETE)
+            requestTo("/mtbfile")
+        }.andRespond {
+            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+        }
+
+        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }

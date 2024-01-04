@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -25,32 +25,39 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
 class RestMtbFileSender(
     private val restTemplate: RestTemplate,
-    private val restTargetProperties: RestTargetProperties
+    private val restTargetProperties: RestTargetProperties,
+    private val retryTemplate: RetryTemplate
 ) : MtbFileSender {
 
     private val logger = LoggerFactory.getLogger(RestMtbFileSender::class.java)
 
     override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         try {
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.APPLICATION_JSON
-            val entityReq = HttpEntity(request.mtbFile, headers)
-            val response = restTemplate.postForEntity(
-                "${restTargetProperties.uri}/MTBFile",
-                entityReq,
-                String::class.java
-            )
-            if (!response.statusCode.is2xxSuccessful) {
-                logger.warn("Error sending to remote system: {}", response.body)
-                return MtbFileSender.Response(response.statusCode.asRequestStatus(), "Status-Code: ${response.statusCode.value()}")
+            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+                val entityReq = HttpEntity(request.mtbFile, headers)
+                val response = restTemplate.postForEntity(
+                    "${restTargetProperties.uri}/MTBFile",
+                    entityReq,
+                    String::class.java
+                )
+                if (!response.statusCode.is2xxSuccessful) {
+                    logger.warn("Error sending to remote system: {}", response.body)
+                    return@execute MtbFileSender.Response(
+                        response.statusCode.asRequestStatus(),
+                        "Status-Code: ${response.statusCode.value()}"
+                    )
+                }
+                logger.debug("Sent file via RestMtbFileSender")
+                return@execute MtbFileSender.Response(response.statusCode.asRequestStatus(), response.body.orEmpty())
             }
-            logger.debug("Sent file via RestMtbFileSender")
-            return MtbFileSender.Response(response.statusCode.asRequestStatus(), response.body.orEmpty())
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
@@ -62,16 +69,18 @@ class RestMtbFileSender(
 
     override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
         try {
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.APPLICATION_JSON
-            val entityReq = HttpEntity(null, headers)
-            restTemplate.delete(
-                "${restTargetProperties.uri}/Patient/${request.patientId}",
-                entityReq,
-                String::class.java
-            )
-            logger.debug("Sent file via RestMtbFileSender")
-            return MtbFileSender.Response(RequestStatus.SUCCESS)
+            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+                val entityReq = HttpEntity(null, headers)
+                restTemplate.delete(
+                    "${restTargetProperties.uri}/Patient/${request.patientId}",
+                    entityReq,
+                    String::class.java
+                )
+                logger.debug("Sent file via RestMtbFileSender")
+                return@execute MtbFileSender.Response(RequestStatus.SUCCESS)
+            }
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {

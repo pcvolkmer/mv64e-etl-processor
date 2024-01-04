@@ -30,6 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestTemplate
 
 @Configuration
@@ -51,9 +52,13 @@ class AppRestConfiguration {
     }
 
     @Bean
-    fun restMtbFileSender(restTemplate: RestTemplate, restTargetProperties: RestTargetProperties): MtbFileSender {
+    fun restMtbFileSender(
+        restTemplate: RestTemplate,
+        restTargetProperties: RestTargetProperties,
+        retryTemplate: RetryTemplate
+    ): MtbFileSender {
         logger.info("Selected 'RestMtbFileSender'")
-        return RestMtbFileSender(restTemplate, restTargetProperties)
+        return RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
     }
 
     @Bean
