@@ -122,6 +122,58 @@ class KafkaMtbFileSenderTest {
         assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.REJECTED)))
     }
 
+    @ParameterizedTest
+    @MethodSource("requestWithResponseSource")
+    fun shouldRetryOnMtbFileKafkaSendError(testData: TestData) {
+        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaTargetProperties, retryTemplate, this.objectMapper)
+
+        doAnswer {
+            if (null != testData.exception) {
+                throw testData.exception
+            }
+            completedFuture(SendResult<String, String>(null, null))
+        }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
+
+        kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile(Consent.Status.ACTIVE)))
+
+        val expectedCount = when (testData.exception) {
+            // OK - No Retry
+            null -> times(1)
+            // Request failed - Retry max 3 times
+            else -> times(3)
+        }
+
+        verify(kafkaTemplate, expectedCount).send(anyString(), anyString(), anyString())
+    }
+
+    @ParameterizedTest
+    @MethodSource("requestWithResponseSource")
+    fun shouldRetryOnDeleteKafkaSendError(testData: TestData) {
+        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaTargetProperties, retryTemplate, this.objectMapper)
+
+        doAnswer {
+            if (null != testData.exception) {
+                throw testData.exception
+            }
+            completedFuture(SendResult<String, String>(null, null))
+        }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
+
+        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+
+        val expectedCount = when (testData.exception) {
+            // OK - No Retry
+            null -> times(1)
+            // Request failed - Retry max 3 times
+            else -> times(3)
+        }
+
+        verify(kafkaTemplate, expectedCount).send(anyString(), anyString(), anyString())
+    }
+
     companion object {
         fun mtbFile(consentStatus: Consent.Status): MtbFile {
             return if (consentStatus == Consent.Status.ACTIVE) {
