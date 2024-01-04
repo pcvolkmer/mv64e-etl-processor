@@ -154,6 +154,11 @@ Wenn gewünscht, Änderungen in der `.env` vornehmen.
 docker compose up -d
 ```
 
+### Einfaches Beispiel für ein Docker-Compose-File
+
+Die Datei [`docs/docker-compose.yml`](docs/docker-compose.yml) zeigt eine einfache Konfiguration für REST-Requests basierend 
+auf Docker-Compose mit der gestartet werden kann.
+
 ## Entwicklungssetup
 
 Zum Starten einer lokalen Entwicklungs- und Testumgebung kann die beiliegende Datei `dev-compose.yml` verwendet werden.
