@@ -1,0 +1,28 @@
+### Example for docker-compose
+version: '3.7'
+
+volumes:
+  data:
+
+services:
+
+  ### ETL-Processor
+  etl-processor:
+    image: ghcr.io/ccc-mf/etl-processor:latest
+    environment:
+      APP_REST_URI: http://bwhc-backend/bwhc/etl/api
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/etl
+      SPRING_DATASOURCE_USERNAME: etl
+      SPRING_DATASOURCE_PASSWORD: etl-password
+      # For reverse proxy
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+
+  ### Database
+  postgres:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: etl
+      POSTGRES_USER: etl
+      POSTGRES_PASSWORD: etl-password
+    volumes:
+      - data:/var/lib/postgresql/data
