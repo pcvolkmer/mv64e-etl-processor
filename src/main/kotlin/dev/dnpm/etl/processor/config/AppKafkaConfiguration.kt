@@ -37,6 +37,7 @@ import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
+import org.springframework.retry.support.RetryTemplate
 
 @Configuration
 @EnableConfigurationProperties(
@@ -53,10 +54,11 @@ class AppKafkaConfiguration {
     fun kafkaMtbFileSender(
         kafkaTemplate: KafkaTemplate<String, String>,
         kafkaTargetProperties: KafkaTargetProperties,
+        retryTemplate: RetryTemplate,
         objectMapper: ObjectMapper
     ): MtbFileSender {
         logger.info("Selected 'KafkaMtbFileSender'")
-        return KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, objectMapper)
+        return KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, retryTemplate, objectMapper)
     }
 
     @Bean

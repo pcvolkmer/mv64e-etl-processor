@@ -32,8 +32,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.retry.policy.SimpleRetryPolicy
+import org.springframework.retry.support.RetryTemplate
+import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import reactor.core.publisher.Sinks
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
+
 
 @Configuration
 @EnableConfigurationProperties(
@@ -87,6 +93,15 @@ class AppConfiguration {
         return TransformationService(objectMapper, configProperties.transformations.map {
             Transformation.of(it.path) from it.from to it.to
         })
+    }
+
+    @Bean
+    fun retryTemplate(): RetryTemplate {
+        return RetryTemplateBuilder()
+            .notRetryOn(IllegalArgumentException::class.java)
+            .fixedBackoff(5.seconds.toJavaDuration())
+            .customPolicy(SimpleRetryPolicy(3))
+            .build()
     }
 
 }

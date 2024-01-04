@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -26,10 +26,12 @@ import dev.dnpm.etl.processor.config.KafkaTargetProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.retry.support.RetryTemplate
 
 class KafkaMtbFileSender(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val kafkaTargetProperties: KafkaTargetProperties,
+    private val retryTemplate: RetryTemplate,
     private val objectMapper: ObjectMapper
 ) : MtbFileSender {
 
@@ -37,16 +39,18 @@ class KafkaMtbFileSender(
 
     override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         return try {
-            val result = kafkaTemplate.send(
-                kafkaTargetProperties.topic,
-                key(request),
-                objectMapper.writeValueAsString(Data(request.requestId, request.mtbFile))
-            )
-            if (result.get() != null) {
-                logger.debug("Sent file via KafkaMtbFileSender")
-                MtbFileSender.Response(RequestStatus.UNKNOWN)
-            } else {
-                MtbFileSender.Response(RequestStatus.ERROR)
+            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+                val result = kafkaTemplate.send(
+                    kafkaTargetProperties.topic,
+                    key(request),
+                    objectMapper.writeValueAsString(Data(request.requestId, request.mtbFile))
+                )
+                if (result.get() != null) {
+                    logger.debug("Sent file via KafkaMtbFileSender")
+                    MtbFileSender.Response(RequestStatus.UNKNOWN)
+                } else {
+                    MtbFileSender.Response(RequestStatus.ERROR)
+                }
             }
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
@@ -65,17 +69,19 @@ class KafkaMtbFileSender(
             .build()
 
         return try {
-            val result = kafkaTemplate.send(
-                kafkaTargetProperties.topic,
-                key(request),
-                objectMapper.writeValueAsString(Data(request.requestId, dummyMtbFile))
-            )
+            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+                val result = kafkaTemplate.send(
+                    kafkaTargetProperties.topic,
+                    key(request),
+                    objectMapper.writeValueAsString(Data(request.requestId, dummyMtbFile))
+                )
 
-            if (result.get() != null) {
-                logger.debug("Sent deletion request via KafkaMtbFileSender")
-                MtbFileSender.Response(RequestStatus.UNKNOWN)
-            } else {
-                MtbFileSender.Response(RequestStatus.ERROR)
+                if (result.get() != null) {
+                    logger.debug("Sent deletion request via KafkaMtbFileSender")
+                    MtbFileSender.Response(RequestStatus.UNKNOWN)
+                } else {
+                    MtbFileSender.Response(RequestStatus.ERROR)
+                }
             }
         } catch (e: Exception) {
             logger.error("An error occurred sending to kafka", e)
