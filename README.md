@@ -4,12 +4,14 @@ Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisi
 
 ### Einordnung innerhalb einer DNPM-ETL-Strecke
 
-Diese Anwendung erlaubt das Entgegennehmen HTTP/REST-Anfragen aus dem Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
+Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
 
 Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
 
 Löschanfragen werden immer als Löschanfrage an das bwHC-backend weitergeleitet.
+
+Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand der Anwendung gewährt.
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
@@ -168,17 +170,21 @@ automatisch erkannt und verwendet werden. Dadurch ist z.B. eine abweichende Anga
 
 #### Beispiel *Traefik* (mit Docker-Labels):
 
+Das folgende Beispiel zeigt die Konfiguration in einer Docker-Compose-Datei mit Service-Labels.
+
 ```
 ...
   deploy:
     labels:
-      - "traefik.http.routers.portainer.rule=PathPrefix(`/etl-processor`)"
-      - "traefik.http.routers.portainer.middlewares=portainer-strip"
-      - "traefik.http.middlewares.portainer-strip.stripprefix.prefixes=/etl-processor"
+      - "traefik.http.routers.etl.rule=PathPrefix(`/etl-processor`)"
+      - "traefik.http.routers.etl.middlewares=etl-path-strip"
+      - "traefik.http.middlewares.etl-path-strip.stripprefix.prefixes=/etl-processor"
 ...
 ```
 
 #### Beispiel *nginx*
+
+Das folgende Beispiel zeigt die Konfiguration einer _location_ in einer nginx-Konfigurationsdatei.
 
 ```
 ...
