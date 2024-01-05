@@ -5,3 +5,6 @@ spring:
       group-id: ${app.kafka.group-id}
   flyway:
     locations: "classpath:db/migration/{vendor}"
+
+server:
+  forward-headers-strategy: framework

@@ -154,10 +154,45 @@ Wenn gewünscht, Änderungen in der `.env` vornehmen.
 docker compose up -d
 ```
 
-### Einfaches Beispiel für ein Docker-Compose-File
+### Einfaches Beispiel für ein eigenes Docker-Compose-File
 
 Die Datei [`docs/docker-compose.yml`](docs/docker-compose.yml) zeigt eine einfache Konfiguration für REST-Requests basierend 
 auf Docker-Compose mit der gestartet werden kann.
+
+### Betrieb hinter einem Reverse-Proxy
+
+Die Anwendung verarbeitet `X-Forwarded`-HTTP-Header und kann daher auch hinter einem Reverse-Proxy betrieben werden.
+
+Dabei werden, je nachdem welche Header durch den Reverse-Proxy gesendet werden auch Protokoll, Host oder auch Path-Prefix
+automatisch erkannt und verwendet werden. Dadurch ist z.B. eine abweichende Angabe des Pfads problemlos möglich.
+
+#### Beispiel *Traefik* (mit Docker-Labels):
+
+```
+...
+  deploy:
+    labels:
+      - "traefik.http.routers.portainer.rule=PathPrefix(`/etl-processor`)"
+      - "traefik.http.routers.portainer.middlewares=portainer-strip"
+      - "traefik.http.middlewares.portainer-strip.stripprefix.prefixes=/etl-processor"
+...
+```
+
+#### Beispiel *nginx*
+
+```
+...
+  location /etl-processor {
+    set              $upstream http://<beispiel:8080>/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Scheme $scheme;
+    proxy_set_header X-Forwarded-Proto  $scheme;
+    proxy_set_header X-Forwarded-For    $remote_addr;
+    proxy_set_header X-Real-IP          $remote_addr;
+    proxy_pass       $upstream;
+  }
+...
+```
 
 ## Entwicklungssetup
 

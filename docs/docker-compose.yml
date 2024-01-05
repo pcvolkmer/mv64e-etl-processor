@@ -14,8 +14,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/etl
       SPRING_DATASOURCE_USERNAME: etl
       SPRING_DATASOURCE_PASSWORD: etl-password
-      # For reverse proxy
-      SERVER_FORWARD_HEADERS_STRATEGY: framework
 
   ### Database
   postgres:
