@@ -1,5 +1,6 @@
 :root {
-    --table-border: rgba(96, 96, 96, 1);
+    --text: #333;
+    --table-border: rgba(16, 24, 40, .1);
 
     --bg-blue: rgb(0, 74, 157);
     --bg-blue-op: rgba(0, 74, 157, .35);
@@ -19,47 +20,76 @@
     --bg-gray-op: rgba(112, 128, 144, .35);
 }
 
+html {
+    background: linear-gradient(-5deg, var(--bg-blue-op), transparent 10em);
+    min-height: 100vh;
+    overflow-y: scroll;
+}
+
 body {
-    margin: 0;
+    margin: 0 0 5em 0;
     font-family: sans-serif;
     font-size: .8rem;
-    color: #333;
+    color: var(--text);
+
+    min-height: 100vh;
+
+    background: url(bg.jpeg) no-repeat;
+    background-size: contain;
 }
 
 nav {
     margin: 0 auto;
-    background: #d5dad5;
-    height: 3rem;
+    padding: 2em 0;
+
+    line-height: 1.5rem;
     max-width: 1140px;
+
+    border-bottom: 1px solid var(--table-border);
 }
 
-nav a {
-    color: #004a8f;
-    text-transform: uppercase;
+nav > a.nav-home {
+    float: left;
+
+    color: var(--text);
+    line-height: 1.5em;
     text-decoration: none;
-    line-height: 2rem;
-    font-weight: 700;
+
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
-nav a:hover {
-    text-decoration: underline;
+nav > a.nav-home > img {
+    width: 1.5em;
+    vertical-align: middle;
 }
 
 nav > ul {
-    margin: 0 3rem;
+    margin: 0 0 0 auto;
     padding: 0;
+
+    width: max-content;
 }
 
 nav > ul > li {
-    background: #fbfbfb;
-    display: block;
-    float: left;
-    padding: 2px 1rem;
-    border-left: 1px solid #d5dad5;
+    display: inline-block;
+    padding: 0 1rem;
+    border-left: 1px solid var(--table-border);
 }
 
 nav > ul > li:first-of-type {
     border-left: none;
+}
+
+nav li a {
+    color: #004a8f;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+nav li a:hover {
+    text-decoration: underline;
 }
 
 .breadcrumps {
@@ -85,7 +115,7 @@ nav > ul > li:first-of-type {
 }
 
 .breadcrumps ul li a {
-    color: #333333;
+    color: var(--text);
     text-decoration: none;
 }
 
@@ -96,6 +126,10 @@ nav > ul > li:first-of-type {
 main {
     margin: 0 auto;
     max-width: 1140px;
+}
+
+section {
+    margin: 3em 0;
 }
 
 form {
@@ -139,12 +173,17 @@ form.samplecode-input input:focus-visible {
     background: lightgreen;
 }
 
-table {
-    border-top: 1px solid var(--table-border);
-    border-left: 1px solid var(--table-border);
-    border-spacing: 0;
-    border-radius: 3px;
+table, .chart {
+    border: 1px solid var(--table-border);
+    padding: 1.5em;
 
+    border-spacing: 0;
+    border-radius: .5em;
+
+    background: white;
+}
+
+table {
     min-width: 100%;
     font-family: sans-serif;
 }
@@ -165,64 +204,71 @@ table.samples {
     display: block;
 }
 
-th {
-    background: #eee;
-}
-
-td, th {
+th, td {
     padding: 0.4rem .2rem;
 
-    border-right: 1px solid var(--table-border);
-    border-bottom: 1px solid var(--table-border);
+    line-height: 2em;
 
     text-align: left;
     white-space: nowrap;
     vertical-align: top;
 }
 
+th {
+    border-bottom: 1px solid var(--bg-gray);
+}
+
 td {
     font-family: monospace;
+    border-bottom: 1px solid var(--bg-gray-op);
 }
 
-td.bg-blue, th.bg-blue {
+tr:last-of-type > td {
+    border-bottom: none;
+}
+
+td > small {
+    display: block;
+    text-align: center;
+}
+
+td.bg-blue, th.bg-blue,
+td.bg-green, th.bg-green,
+td.bg-yellow, th.bg-yellow,
+td.bg-red, th.bg-red,
+td.bg-gray, th.bg-gray
+{
+    width: 8em;
+}
+
+td.bg-blue > small, th.bg-blue > small {
     background: var(--bg-blue);
     color: white;
+    border-radius: 0.4em;
 }
 
-tr:has(td.bg-blue) {
-    background: var(--bg-blue-op);
-}
-
-td.bg-green, th.bg-green {
+td.bg-green > small, th.bg-green > small {
     background: var(--bg-green);
     color: white;
+    border-radius: 0.4em;
 }
 
-tr:has(td.bg-green) {
-    background: var(--bg-green-op);
-}
-
-td.bg-yellow, th.bg-yellow {
+td.bg-yellow > small, th.bg-yellow > small {
     background: var(--bg-yellow);
     color: white;
+    border-radius: 0.4em;
 }
 
-tr:has(td.bg-yellow) {
-    background: var(--bg-yellow-op);
-}
-
-td.bg-red, th.bg-red {
+td.bg-red > small, th.bg-red > small {
     background: var(--bg-red);
     color: white;
+    border-radius: 0.4em;
 }
 
-tr:has(td.bg-red) {
-    background: var(--bg-red-op);
-}
-
-td.bg-gray, th.bg-gray {
+td.bg-gray > small, th.bg-gray > small {
     background: var(--bg-gray);
     color: white;
+    border-radius: 0.4em;
 }
 
 .bg-path {
@@ -341,12 +387,6 @@ input.inline:focus-visible {
 }
 
 .chart {
-    padding: 1rem;
-    margin: .2rem;
-
-    border: 1px solid var(--table-border);
-    border-radius: 3px;
-
     width: calc(100% - 2.4rem - 4px);
     height: 320px;
 

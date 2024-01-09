@@ -15,6 +15,7 @@
             <thead>
                 <tr>
                     <th>Status</th>
+                    <th>Typ</th>
                     <th>ID</th>
                     <th>Datum</th>
                     <th>Patienten-ID</th>
@@ -27,6 +28,7 @@
                     <td th:if="${request.status.value == 'error'}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
                     <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                    <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
                     <td>[[ ${request.uuid} ]]</td>
                     <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
                     <td>[[ ${request.patientId} ]]</td>
@@ -36,12 +38,16 @@
 
         <h2 th:text="${request.report.description}"></h2>
 
-        <table th:if="not ${issues.isEmpty()}">
+        <p th:if="${issues.isEmpty()}">
+            Keine weiteren Angaben.
+        </p>
+
+        <table th:if="${not issues.isEmpty()}">
             <thead>
-            <tr>
-                <th>Schweregrad</th>
-                <th>Beschreibung</th>
-            </tr>
+                <tr>
+                    <th>Schweregrad</th>
+                    <th>Beschreibung</th>
+                </tr>
             </thead>
             <tbody>
             <tr th:each="issue : ${issues}">

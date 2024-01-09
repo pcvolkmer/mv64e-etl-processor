@@ -7,6 +7,10 @@
 <body>
     <div th:fragment="nav">
         <nav>
+            <a class="nav-home" th:href="@{/}">
+                <img th:src="@{/icon.svg}" alt="Icon" />
+                <span>ETL-Processor</span>
+            </a>
             <ul>
                 <li><a th:href="@{/}">Übersicht</a></li>
                 <li><a th:href="@{/statistics}">Statistiken</a></li>

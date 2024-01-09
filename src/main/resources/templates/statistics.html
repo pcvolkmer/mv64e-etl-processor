@@ -13,25 +13,29 @@
             Hier sehen Sie eine Übersicht über eingegangene Anfragen.
         </p>
 
-        <h2>MTB-File-Anfragen</h2>
-        <p>
-            Anfragen zur Aktualisierung von Patientendaten durch Übermittlung eines MTB-Files.
-        </p>
-        <div>
-            <div id="piechart1" class="chart chart-50pc"></div>
-            <div id="piechart2" class="chart chart-50pc"></div>
-        </div>
-        <div id="barchart" class="chart"></div>
+        <section>
+            <h2>MTB-File-Anfragen</h2>
+            <p>
+                Anfragen zur Aktualisierung von Patientendaten durch Übermittlung eines MTB-Files.
+            </p>
+            <div>
+                <div id="piechart1" class="chart chart-50pc"></div>
+                <div id="piechart2" class="chart chart-50pc"></div>
+            </div>
+            <div id="barchart" class="chart"></div>
+        </section>
 
-        <h2>Löschanfragen</h2>
-        <p>
-            Anfragen zur Löschung von Patientendaten, wenn kein Consent vorliegt.
-        </p>
-        <div>
-            <div id="piechartdel1" class="chart chart-50pc"></div>
-            <div id="piechartdel2" class="chart chart-50pc"></div>
-        </div>
-        <div id="barchartdel" class="chart"></div>
+        <section>
+            <h2>Löschanfragen</h2>
+            <p>
+                Anfragen zur Löschung von Patientendaten, wenn kein Consent vorliegt.
+            </p>
+            <div>
+                <div id="piechartdel1" class="chart chart-50pc"></div>
+                <div id="piechartdel2" class="chart chart-50pc"></div>
+            </div>
+            <div id="barchartdel" class="chart"></div>
+        </section>
 
     </main>
     <script th:src="@{/echarts.min.js}"></script>
