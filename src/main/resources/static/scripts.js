@@ -4,14 +4,14 @@ const dateFormat = new Intl.DateTimeFormat('de-DE', dateFormatOptions);
 const dateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: 'numeric', second: 'numeric' };
 const dateTimeFormat = new Intl.DateTimeFormat('de-DE', dateTimeFormatOptions);
 
-window.onload = () => {
+window.addEventListener('load', () => {
     Array.from(document.getElementsByTagName('time')).forEach((timeTag) => {
         let date = Date.parse(timeTag.getAttribute('datetime'));
         if (! isNaN(date)) {
             timeTag.innerText = dateTimeFormat.format(date);
         }
     });
-};
+});
 
 function drawPieChart(url, elemId, title, data) {
     if (data) {
