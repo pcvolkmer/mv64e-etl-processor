@@ -23,6 +23,9 @@ import dev.dnpm.etl.processor.NotFoundException
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestId
 import dev.dnpm.etl.processor.monitoring.RequestRepository
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,8 +40,8 @@ class HomeController(
 ) {
 
     @GetMapping
-    fun index(model: Model): String {
-        val requests = requestRepository.findAll().sortedByDescending { it.processedAt }.take(25)
+    fun index(@PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable, model: Model): String {
+        val requests = requestRepository.findAll(pageable)
         model.addAttribute("requests", requests)
 
         return "index"

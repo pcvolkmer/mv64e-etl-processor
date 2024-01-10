@@ -92,6 +92,10 @@ nav li a:hover {
     text-decoration: underline;
 }
 
+a {
+    color: var(--bg-blue);
+}
+
 .breadcrumps {
     margin: 0 auto;
     max-width: 1140px;
@@ -186,6 +190,41 @@ table, .chart {
 table {
     min-width: 100%;
     font-family: sans-serif;
+}
+
+.paged-table {
+    border: 1px solid var(--table-border);
+    border-radius: .5em;
+    background: white;
+}
+
+.paged-table > table {
+    border: none;
+    background: transparent;
+}
+
+.page-control {
+    border-radius: .5em;
+    padding: 1em 2em;
+    text-align: center;
+
+    line-height: 1.75em;
+}
+
+.page-control a {
+    padding: 0 .25em;
+    font-size: 1.75em;
+    color: var(--bg-gray);
+    text-decoration: none;
+}
+
+.page-control a[href] {
+    color: var(--bg-blue);
+}
+
+.page-control span {
+    padding: 0 .5em;
+    vertical-align: text-bottom;
 }
 
 #samples-table.max {

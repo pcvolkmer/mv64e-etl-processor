@@ -11,35 +11,62 @@
 
         <h1>Letzte Anfragen</h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Typ</th>
-                    <th>ID</th>
-                    <th>Datum</th>
-                    <th>Patienten-ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="request : ${requests}">
-                    <td th:if="${request.status.value.contains('success')}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="${request.status.value.contains('warning')}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="${request.status.value.contains('error')}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
-                    <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
-                    <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
-                    <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
-                    <td th:if="${request.report}">
-                        <a th:href="@{/report/{id}(id=${request.uuid})}">[[ ${request.uuid} ]]</a>
-                    </td>
-                    <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
-                    <td>[[ ${request.patientId} ]]</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="paged-table">
+            <div class="page-control">
+                <a id="first-page-link" th:href="@{/(page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
+                <a id="prev-page-link" th:href="@{/(page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
+                <span>Seite [[ ${requests.getNumber() + 1} ]] von [[ ${requests.getTotalPages()} ]]</span>
+                <a id="next-page-link" th:href="@{/(page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
+                <a id="last-page-link" th:href="@{/(page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
+            </div>
+            <table class="paged">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Typ</th>
+                        <th>ID</th>
+                        <th>Datum</th>
+                        <th>Patienten-ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="request : ${requests}">
+                        <td th:if="${request.status.value.contains('success')}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
+                        <td th:if="${request.status.value.contains('warning')}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
+                        <td th:if="${request.status.value.contains('error')}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
+                        <td th:if="${request.status.value == 'unknown'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                        <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                        <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
+                        <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
+                        <td th:if="${request.report}">
+                            <a th:href="@{/report/{id}(id=${request.uuid})}">[[ ${request.uuid} ]]</a>
+                        </td>
+                        <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
+                        <td>[[ ${request.patientId} ]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
     </main>
     <script th:src="@{/scripts.js}"></script>
+    <script>
+        window.onload = () => {
+            let keyBindings = {
+                'w': 'first-page-link',
+                'a': 'prev-page-link',
+                'd': 'next-page-link',
+                's': 'last-page-link'
+            };
+            window.onkeydown = (event) => {
+                for (const [key, elemId] of Object.entries(keyBindings)) {
+                    if (event.key === key && document.getElementById(elemId)) {
+                        document.getElementById(elemId).style.background = 'yellow';
+                        document.getElementById(elemId).click();
+                    }
+                }
+            };
+        };
+    </script>
 </body>
 </html>

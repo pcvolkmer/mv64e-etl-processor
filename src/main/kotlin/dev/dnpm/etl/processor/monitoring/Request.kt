@@ -24,6 +24,7 @@ import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.PagingAndSortingRepository
 import java.time.Instant
 import java.util.*
 
@@ -52,7 +53,7 @@ data class CountedState(
     val status: RequestStatus,
 )
 
-interface RequestRepository : CrudRepository<Request, Long> {
+interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRepository<Request, Long> {
 
     fun findAllByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
 
