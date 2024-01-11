@@ -2,7 +2,7 @@
 
 Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisiert die Patienten-ID.
 
-### Einordnung innerhalb einer DNPM-ETL-Strecke
+## Einordnung innerhalb einer DNPM-ETL-Strecke
 
 Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
 
@@ -15,18 +15,20 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
-#### HTTP/REST-Konfiguration
+### Datenübermittlung über HTTP/REST
 
 Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an das bwHC-Backend gesendet.
 
-#### Konfiguration für Apache Kafka
+### Datenübermittlung mit Apache Kafka
 
 Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung an Apache Kafka übergeben.
 Eine Antwort wird dabei ebenfalls mithilfe von Apache Kafka übermittelt und nach der Entgegennahme verarbeitet.
 
 Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
-## Pseudonymisierung der Patienten-ID
+## Konfiguration
+
+### Pseudonymisierung der Patienten-ID
 
 Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) angegeben ist, wird diese verwendet.
 Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgenommen.
@@ -34,24 +36,23 @@ Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgen
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
 
-### Eingebaute Pseudonymisierung
+#### Eingebaute Anonymisierung
 
-Wurde keine oder die Verwendung der eingebauten Pseudonymisierung konfiguriert, so wird für die Patienten-ID der
+Wurde keine oder die Verwendung der eingebauten Anonymisierung konfiguriert, so wird für die Patienten-ID der
 entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende "=" - zuzüglich des konfigurierten Prefixes
 als Patienten-Pseudonym verwendet.
 
-### Pseudonymisierung mit gPAS
+#### Pseudonymisierung mit gPAS
 
 Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren.
 
-* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (
-  z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$$pseudonymizeAllowCreate`) 
+* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (z.B. `http://localhost:8080/ttp-fhir/fhir/gpas/$$pseudonymizeAllowCreate`)
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
 * `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
 
-## Transformation von Werten
+### Transformation von Werten
 
 In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,
 der vom bwHC-Backend akzeptiert wird.
@@ -65,20 +66,20 @@ Hier ein Beispiel für die erste (Index 0 - weitere dann mit 1,2,...) Transforma
 * `APP_TRANSFORMATIONS_0_FROM`: Angabe des Werts, der ersetzt werden soll. Andere Werte bleiben dabei unverändert.
 * `APP_TRANSFORMATIONS_0_TO`: Angabe des neuen Werts.
 
-## Mögliche Endpunkte
+### Mögliche Endpunkte zur Datenübermittlung
 
 Für REST-Requests als auch zur Nutzung von Kafka-Topics können Endpunkte konfiguriert werden.
 
 Es ist dabei nur die Konfiguration eines Endpunkts zulässig.
 Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpunkt verwendet.
 
-### REST
+#### REST
 
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das bwHC-Backend gesendet wird:
 
 * `APP_REST_URI`: URI der zu benutzenden API der bwHC-Backend-Instanz. z.B.: `http://localhost:9000/bwhc/etl/api`
 
-### Kafka-Topics
+#### Kafka-Topics
 
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein Kafka-Topic übermittelt wird:
 
@@ -94,7 +95,7 @@ Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert 
 Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
 für HTTP nicht gibt.
 
-#### Retention Time
+##### Retention Time
 
 Generell werden in Apache Kafka alle Records entsprechend der Konfiguration vorgehalten.
 So wird ohne spezielle Konfiguration ein Record für 7 Tage in Apache Kafka gespeichert.
@@ -107,7 +108,7 @@ Beispiel - auszuführen innerhalb des Kafka-Containers: Löschen alter Records n
 kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-config retention.ms=86400000
 ```
 
-#### Key based Retention
+##### Key based Retention
 
 Möchten Sie hingegen immer nur die letzte Meldung für einen Patienten und eine Erkrankung in Apache Kafka vorhalten,
 so ist die nachfolgend genannte Konfiguration der Kafka-Topics hilfreich.
