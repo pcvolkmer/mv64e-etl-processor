@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -17,15 +17,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor
+package dev.dnpm.etl.processor.web
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-import org.springframework.boot.runApplication
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.GetMapping
 
-@SpringBootApplication(exclude = [SecurityAutoConfiguration::class])
-class EtlProcessorApplication
+@Controller
+class LoginController {
 
-fun main(args: Array<String>) {
-    runApplication<EtlProcessorApplication>(*args)
+    @GetMapping(path = ["/login"])
+    fun login(): String {
+        return "login"
+    }
+
 }

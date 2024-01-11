@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" th:href="@{/style.css}" />
@@ -14,7 +14,15 @@
             <ul>
                 <li><a th:href="@{/}">Übersicht</a></li>
                 <li><a th:href="@{/statistics}">Statistiken</a></li>
-                <li><a th:href="@{/configs}">Konfiguration</a></li>
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/configs}">Konfiguration</a>
+                </li>
+                <li class="login" sec:authorize="not isAuthenticated()">
+                    <a th:href="@{/login}">Login</a>
+                </li>
+                <li class="login" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/logout}">Abmelden</a>
+                </li>
             </ul>
         </nav>
     </div>

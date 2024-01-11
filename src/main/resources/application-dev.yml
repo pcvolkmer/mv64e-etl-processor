@@ -10,6 +10,9 @@ app:
     topic: test
     response-topic: test_response
     servers: localhost:9094
+  #security:
+  #  admin-user: admin
+  #  admin-password: very-secret
 
 server:
   port: 8000
