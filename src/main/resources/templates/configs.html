@@ -29,8 +29,9 @@
                         <td>[[ ${mtbFileSender} ]]</td>
                     </tr>
                     <tr>
-                        <td>Endpunkt</td>
-                        <td>[[ ${mtbFileSender} ]]</td>
+                        <td th:if="${mtbFileSender.startsWith('Rest')}">REST-Endpunkt</td>
+                        <td th:if="${mtbFileSender.startsWith('Kafka')}">Kafka-Broker und Topics</td>
+                        <td>[[ ${mtbFileEndpoint} ]]</td>
                     </tr>
                 </tbody>
             </table>
@@ -43,7 +44,7 @@
                 <strong th:if="${connectionAvailable}" style="color: green">verfügbar.</strong>
                 <strong th:if="${not(connectionAvailable)}" style="color: red">nicht verfügbar.</strong>
             </div>
-            <div class="connection-display">
+            <div class="connection-display border">
                 <img th:src="@{/server.png}" alt="ETL-Processor" />
                 <span class="connection" th:styleappend="${connectionAvailable ? 'available' : ''}"></span>
                 <img th:if="${mtbFileSender.startsWith('Rest')}" th:src="@{/server.png}" alt="bwHC-Backend" />

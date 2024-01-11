@@ -90,4 +90,8 @@ class RestMtbFileSender(
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
 
+    override fun endpoint(): String {
+        return this.restTargetProperties.uri.orEmpty()
+    }
+
 }

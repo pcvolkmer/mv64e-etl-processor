@@ -89,6 +89,10 @@ class KafkaMtbFileSender(
         }
     }
 
+    override fun endpoint(): String {
+        return "${this.kafkaTargetProperties.servers} (${this.kafkaTargetProperties.topic}/${this.kafkaTargetProperties.responseTopic})"
+    }
+
     private fun key(request: MtbFileSender.MtbFileRequest): String {
         return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
                 "\"eid\": \"${request.mtbFile.episode.id}\"}"

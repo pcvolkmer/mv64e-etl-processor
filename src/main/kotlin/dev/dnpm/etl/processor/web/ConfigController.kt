@@ -42,6 +42,7 @@ class ConfigController(
     fun index(model: Model): String {
         model.addAttribute("pseudonymGenerator", pseudonymGenerator.javaClass.simpleName)
         model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
         model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
         model.addAttribute("transformations", transformationService.getTransformations())
 

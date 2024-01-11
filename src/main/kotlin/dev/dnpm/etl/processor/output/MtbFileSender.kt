@@ -28,6 +28,8 @@ interface MtbFileSender {
 
     fun send(request: DeleteRequest): Response
 
+    fun endpoint(): String
+
     data class Response(val status: RequestStatus, val body: String = "")
 
     data class MtbFileRequest(val requestId: String, val mtbFile: MtbFile)
