@@ -58,16 +58,17 @@ class AppSecurityConfiguration(
         } else {
             securityConfigProperties.adminUser
         }
+
         val adminPassword = if (securityConfigProperties.adminPassword.isNullOrBlank()) {
             val random = UUID.randomUUID().toString()
             logger.warn("Using random Admin Passwort: {}", random)
-            random
+            passwordEncoder.encode(random)
         } else {
             securityConfigProperties.adminPassword
         }
 
         val user: UserDetails = User.withUsername(adminUser)
-            .password(passwordEncoder.encode(adminPassword))
+            .password(adminPassword)
             .roles("ADMIN")
             .build()
 

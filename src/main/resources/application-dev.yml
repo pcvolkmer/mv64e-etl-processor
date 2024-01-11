@@ -12,7 +12,7 @@ app:
     servers: localhost:9094
   #security:
   #  admin-user: admin
-  #  admin-password: very-secret
+  #  admin-password: "{noop}very-secret"
 
 server:
   port: 8000

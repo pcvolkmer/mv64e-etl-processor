@@ -60,6 +60,14 @@ einem erfolgreichen Login erreichbar sind.
 * `APP_SECURITY_ADMIN_USER`: Muss angegeben werden zur Aktivierung der Zugriffsbeschränkung.
 * `APP_SECURITY_ADMIN_PASSWORD`: Das Passwort für den Administrator (Empfohlen).
 
+Ein Administrator-Passwort muss inklusive des Encoding-Prefixes vorliegen.
+
+Hier Beispiele für das Beispielpasswort `very-secret`:
+
+* `{noop}very-secret` (Das Passwort liegt im Klartext vor - nicht empfohlen!)
+* `{bcrypt}$2y$05$CCkfsMr/wbTleMyjVIK8g.Aa3RCvrvoLXVAsL.f6KeouS88vXD9b6`
+* `{sha256}9a34717f0646b5e9cfcba70055de62edb026ff4f68671ba3db96aa29297d2df5f1a037d58c745657`
+
 Wird kein Administrator-Passwort angegeben, wird ein zufälliger Wert generiert und beim Start der Anwendung in den Logs
 angezeigt.
 
