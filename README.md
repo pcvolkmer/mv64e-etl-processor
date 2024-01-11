@@ -52,6 +52,24 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
 * `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
 
+### Anmeldung mit einem Passwort
+
+Ein initialer Administrator-Account kann optional konfiguriert werden und sorgt dafür, dass bestimmte Bereiche nur nach
+einem erfolgreichen Login erreichbar sind.
+
+* `APP_SECURITY_ADMIN_USER`: Muss angegeben werden zur Aktivierung der Zugriffsbeschränkung.
+* `APP_SECURITY_ADMIN_PASSWORD`: Das Passwort für den Administrator (Empfohlen).
+
+Wird kein Administrator-Passwort angegeben, wird ein zufälliger Wert generiert und beim Start der Anwendung in den Logs
+angezeigt.
+
+#### Auswirkungen auf den dargestellten Inhalt
+
+Nur Administratoren haben Zugriff auf den Konfigurationsbereich, nur angemeldete Benutzer können die anonymisierte oder
+pseudonymisierte Patienten-ID einsehen.
+
+Wurde kein Administrator-Account konfiguriert, sind diese Inhalte generell nicht verfügbar.
+
 ### Transformation von Werten
 
 In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,

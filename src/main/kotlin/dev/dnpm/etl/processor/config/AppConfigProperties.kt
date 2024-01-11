@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -73,6 +73,16 @@ data class KafkaTargetProperties(
 ) {
     companion object {
         const val NAME = "app.kafka"
+    }
+}
+
+@ConfigurationProperties(SecurityConfigProperties.NAME)
+data class SecurityConfigProperties(
+    val adminUser: String?,
+    val adminPassword: String?,
+) {
+    companion object {
+        const val NAME = "app.security"
     }
 }
 

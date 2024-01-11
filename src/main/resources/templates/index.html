@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>ETL-Prozessor</title>
@@ -42,7 +42,8 @@
                             <a th:href="@{/report/{id}(id=${request.uuid})}">[[ ${request.uuid} ]]</a>
                         </td>
                         <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
-                        <td>[[ ${request.patientId} ]]</td>
+                        <td class="patient-id" sec:authorize="authenticated">[[ ${request.patientId} ]]</td>
+                        <td class="patient-id" sec:authorize="not authenticated">***</td>
                     </tr>
                 </tbody>
             </table>

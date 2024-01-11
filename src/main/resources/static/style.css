@@ -74,18 +74,23 @@ nav > ul {
 nav > ul > li {
     display: inline-block;
     padding: 0 1rem;
+}
+
+nav > ul > li.login {
+    margin: 0 0 0 1em;
+    padding: 0 0 0 2em;
     border-left: 1px solid var(--table-border);
 }
 
-nav > ul > li:first-of-type {
-    border-left: none;
-}
-
 nav li a {
-    color: #004a8f;
+    color: var(--bg-blue);
     text-transform: uppercase;
     text-decoration: none;
     font-weight: 700;
+}
+
+nav li.login a {
+    color: var(--bg-red);
 }
 
 nav li a:hover {
@@ -177,6 +182,39 @@ form.samplecode-input input:focus-visible {
     background: lightgreen;
 }
 
+.login-form {
+    width: fit-content;
+    margin: 3em auto;
+    padding: 2em 5em;
+
+    border: 1px solid var(--table-border);
+    border-radius: .5em;
+    background: white;
+}
+
+.login-form form {
+    width: 20em;
+    margin: 0 auto;
+    display: grid;
+    grid-gap: .5em;
+
+    border: none;
+    background: none;
+}
+
+.login-form form * {
+    padding: 0.5em;
+    border: 1px solid var(--table-border);
+    border-radius: 3px;
+}
+
+.login-form button {
+    margin: 1em 0;
+    background: var(--bg-blue);
+    color: white;
+    border: none;
+}
+
 .border {
     padding: 1.5em;
     border: 1px solid var(--table-border);
@@ -200,6 +238,7 @@ table {
 }
 
 .border > table {
+    padding: 0;
     border: none;
     background: transparent;
 }
@@ -270,6 +309,13 @@ tr:last-of-type > td {
 td > small {
     display: block;
     text-align: center;
+}
+
+td.patient-id {
+    width: 32em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
 }
 
 td.bg-blue, th.bg-blue,
@@ -459,4 +505,19 @@ input.inline:focus-visible {
 
 .connection-display .connection.available {
     background: var(--bg-green);
+}
+
+.notification {
+    margin: 1em;
+    padding: .5em;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.notification.success {
+    color: var(--bg-green);
+}
+
+.notification.error {
+    color: var(--bg-red);
 }

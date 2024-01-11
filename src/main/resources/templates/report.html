@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>ETL-Prozessor</title>
@@ -31,7 +31,8 @@
                     <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
                     <td>[[ ${request.uuid} ]]</td>
                     <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
-                    <td>[[ ${request.patientId} ]]</td>
+                    <td class="patient-id" sec:authorize="authenticated">[[ ${request.patientId} ]]</td>
+                    <td class="patient-id" sec:authorize="not authenticated">***</td>
                 </tr>
             </tbody>
         </table>
