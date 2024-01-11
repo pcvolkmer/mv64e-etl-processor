@@ -177,6 +177,13 @@ form.samplecode-input input:focus-visible {
     background: lightgreen;
 }
 
+.border {
+    padding: 1.5em;
+    border: 1px solid var(--table-border);
+    border-radius: .5em;
+    background: white;
+}
+
 table, .chart {
     border: 1px solid var(--table-border);
     padding: 1.5em;
@@ -192,13 +199,7 @@ table {
     font-family: sans-serif;
 }
 
-.paged-table {
-    border: 1px solid var(--table-border);
-    border-radius: .5em;
-    background: white;
-}
-
-.paged-table > table {
+.border > table {
     border: none;
     background: transparent;
 }
