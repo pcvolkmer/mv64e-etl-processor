@@ -46,7 +46,7 @@
             </div>
             <div class="connection-display border">
                 <img th:src="@{/server.png}" alt="ETL-Processor" />
-                <span class="connection" th:styleappend="${connectionAvailable ? 'available' : ''}"></span>
+                <span class="connection" th:classappend="${connectionAvailable ? 'available' : ''}"></span>
                 <img th:if="${mtbFileSender.startsWith('Rest')}" th:src="@{/server.png}" alt="bwHC-Backend" />
                 <img th:if="${mtbFileSender.startsWith('Kafka')}" th:src="@{/kafka.png}" alt="Kafka-Broker" />
                 <span>ETL-Processor</span>
