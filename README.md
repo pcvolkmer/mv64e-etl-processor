@@ -36,6 +36,9 @@ Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgen
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
 
+**Hinweise**: Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht
+mehr verwendet werden.
+
 #### Eingebaute Anonymisierung
 
 Wurde keine oder die Verwendung der eingebauten Anonymisierung konfiguriert, so wird für die Patienten-ID der

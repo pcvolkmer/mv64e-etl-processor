@@ -20,11 +20,16 @@
 package dev.dnpm.etl.processor.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
     var bwhcUri: String?,
-    var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN,
+    @get:DeprecatedConfigurationProperty(
+        reason = "Deprecated in favor of 'app.pseudonymize.generator'",
+        replacement = "app.pseudonymize.generator"
+    )
+    var pseudonymizer: PseudonymGenerator = PseudonymGenerator.BUILDIN,
     var transformations: List<TransformationProperties> = listOf()
 ) {
     companion object {
@@ -34,6 +39,7 @@ data class AppConfigProperties(
 
 @ConfigurationProperties(PseudonymizeConfigProperties.NAME)
 data class PseudonymizeConfigProperties(
+    var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN,
     val prefix: String = "UNKNOWN",
 ) {
     companion object {

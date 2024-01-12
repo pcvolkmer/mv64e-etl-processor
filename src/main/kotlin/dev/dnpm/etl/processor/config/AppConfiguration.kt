@@ -28,6 +28,7 @@ import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -54,15 +55,29 @@ class AppConfiguration {
 
     private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)
 
-    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
     fun gpasPseudonymGenerator(configProperties: GPasConfigProperties): Generator {
         return GpasPseudonymGenerator(configProperties)
     }
 
-    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "BUILDIN", matchIfMissing = true)
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN")
     @Bean
     fun buildinPseudonymGenerator(): Generator {
+        return AnonymizingGenerator()
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
+    @ConditionalOnMissingBean
+    @Bean
+    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties): Generator {
+        return GpasPseudonymGenerator(configProperties)
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "BUILDIN")
+    @ConditionalOnMissingBean
+    @Bean
+    fun buildinPseudonymGeneratorOnDeprecatedProperty(): Generator {
         return AnonymizingGenerator()
     }
 
