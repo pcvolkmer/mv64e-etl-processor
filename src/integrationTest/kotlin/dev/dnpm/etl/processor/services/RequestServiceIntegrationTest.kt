@@ -46,6 +46,7 @@ import java.util.*
 @MockBean(MtbFileSender::class)
 @TestPropertySource(
     properties = [
+        "app.pseudonymize.generator=buildin",
         "app.rest.uri=http://example.com"
     ]
 )
