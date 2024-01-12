@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
+import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
+import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -38,6 +40,11 @@ import org.springframework.test.context.TestPropertySource
 @SpringBootTest
 @ContextConfiguration(classes = [AppConfiguration::class, KafkaAutoConfiguration::class, AppKafkaConfiguration::class, AppRestConfiguration::class])
 @MockBean(ObjectMapper::class)
+@TestPropertySource(
+    properties = [
+        "app.pseudonymize.generator=BUILDIN",
+    ]
+)
 class AppConfigurationTest {
 
     @Nested
@@ -112,6 +119,75 @@ class AppConfigurationTest {
 
             assertThat(appConfigProperties).isNotNull
             assertThat(appConfigProperties.transformations).hasSize(1)
+        }
+
+    }
+
+    @Nested
+    inner class AppConfigurationPseudonymizeTest {
+
+        @Nested
+        @TestPropertySource(
+            properties = [
+                "app.pseudonymize.generator=",
+                "app.pseudonymizer=buildin",
+            ]
+        )
+        inner class AppConfigurationPseudonymizerBuildinTest(private val context: ApplicationContext) {
+
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean(AnonymizingGenerator::class.java)).isNotNull
+            }
+
+        }
+
+        @Nested
+        @TestPropertySource(
+            properties = [
+                "app.pseudonymize.generator=",
+                "app.pseudonymizer=gpas",
+            ]
+        )
+        inner class AppConfigurationPseudonymizerGpasTest(private val context: ApplicationContext) {
+
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
+            }
+
+        }
+
+        @Nested
+        @TestPropertySource(
+            properties = [
+                "app.pseudonymize.generator=buildin",
+                "app.pseudonymizer=",
+            ]
+        )
+        inner class AppConfigurationPseudonymizeGeneratorBuildinTest(private val context: ApplicationContext) {
+
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean(AnonymizingGenerator::class.java)).isNotNull
+            }
+
+        }
+
+        @Nested
+        @TestPropertySource(
+            properties = [
+                "app.pseudonymize.generator=gpas",
+                "app.pseudonymizer=",
+            ]
+        )
+        inner class AppConfigurationPseudonymizeGeneratorGpasTest(private val context: ApplicationContext) {
+
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
+            }
+
         }
 
     }
