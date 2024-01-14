@@ -89,7 +89,7 @@ der vom bwHC-Backend akzeptiert wird.
 Diese Anwendung bietet daher die Möglichkeit, eine Transformation vorzunehmen. Hierzu muss der "Pfad" innerhalb des JSON-MTB-Files angegeben werden und
 welcher Wert wie ersetzt werden soll.
 
-Hier ein Beispiel für die erste (Index 0 - weitere dann mit 1,2,...) Transformationsregel:
+Hier ein Beispiel für die erste (Index 0 - weitere dann mit 1,2, ...) Transformationsregel:
 
 * `APP_TRANSFORMATIONS_0_PATH`: Pfad zum Wert in der JSON-MTB-Datei. Beispiel: `diagnoses[*].icd10.version` für **alle** Diagnosen
 * `APP_TRANSFORMATIONS_0_FROM`: Angabe des Werts, der ersetzt werden soll. Andere Werte bleiben dabei unverändert.
@@ -174,7 +174,7 @@ Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/
 ```
 
 ## Deployment
-*Ausführen als Docker Conatiner:*
+*Ausführen als Docker Container:*
 
 ```bash
 cd ./deploy
