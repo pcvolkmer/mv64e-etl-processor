@@ -17,7 +17,9 @@ var versions = mapOf(
     "bwhc-dto-java" to "0.2.0",
     "hapi-fhir" to "6.10.2",
     "httpclient5" to "5.2.1",
-    "mockito-kotlin" to "5.2.1"
+    "mockito-kotlin" to "5.2.1",
+    // Webjars
+    "echarts" to "5.4.3",
 )
 
 java {
@@ -66,6 +68,8 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient5"]}")
     implementation("com.jayway.jsonpath:json-path")
+    implementation("org.webjars:webjars-locator:0.50")
+    implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
