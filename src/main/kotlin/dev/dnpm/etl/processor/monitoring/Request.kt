@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.monitoring
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
@@ -58,6 +60,8 @@ interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRep
     fun findAllByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
 
     fun findByUuidEquals(uuid: String): Optional<Request>
+
+    fun findRequestByPatientId(patientId: String, pageable: Pageable): Page<Request>
 
     @Query("SELECT count(*) AS count, status FROM request WHERE type = 'MTB_FILE' GROUP BY status ORDER BY status, count DESC;")
     fun countStates(): List<CountedState>
