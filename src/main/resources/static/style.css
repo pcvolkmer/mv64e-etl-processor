@@ -521,3 +521,18 @@ input.inline:focus-visible {
 .notification.error {
     color: var(--bg-red);
 }
+
+a.reload {
+    display: none;
+    position: absolute;
+    height: 1.2em;
+    width: 1.2em;
+    background: var(--bg-red);
+    border-radius: 50%;
+
+    color: white;
+    text-decoration: none;
+    font-size: .6em;
+    align-content: center;
+    justify-content: center;
+}

@@ -132,6 +132,7 @@ class StatisticsRestController(
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun updater(): Flux<ServerSentEvent<Any>> {
         return statisticsUpdateProducer.asFlux().flatMap {
+            println(it)
             Flux.fromIterable(
                 listOf(
                     ServerSentEvent.builder<Any>()
@@ -152,6 +153,10 @@ class StatisticsRestController(
                         .build(),
                     ServerSentEvent.builder<Any>()
                         .event("deleterequestpatientstates").id("none").data(this.requestPatientStates(true))
+                        .build(),
+
+                    ServerSentEvent.builder<Any>()
+                        .event("newrequest").id("none").data("newrequest")
                         .build()
                 )
             )

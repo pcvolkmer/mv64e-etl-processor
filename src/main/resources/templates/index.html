@@ -9,7 +9,7 @@
     <div th:replace="~{fragments.html :: nav}"></div>
     <main>
 
-        <h1>Letzte Anfragen</h1>
+        <h1>Letzte Anfragen<a id="reload-notify" class="reload" title="Neue Anfragen" th:href="@{/}">⟳</a></h1>
 
         <div class="border">
             <div class="page-control">
@@ -67,6 +67,12 @@
                     }
                 }
             };
+        });
+
+        const eventSource = new EventSource('statistics/events');
+        eventSource.addEventListener('newrequest', event => {
+            console.log(event);
+            document.getElementById('reload-notify').style.display = 'inline-flex';
         });
     </script>
 </body>
