@@ -40,8 +40,24 @@ class HomeController(
 ) {
 
     @GetMapping
-    fun index(@PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable, model: Model): String {
+    fun index(
+        @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
+        model: Model
+    ): String {
         val requests = requestRepository.findAll(pageable)
+        model.addAttribute("requests", requests)
+
+        return "index"
+    }
+
+    @GetMapping(path = ["patient/{patientId}"])
+    fun byPatient(
+        @PathVariable patientId: String,
+        @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
+        model: Model
+    ): String {
+        val requests = requestRepository.findRequestByPatientId(patientId, pageable)
+        model.addAttribute("patientId", patientId)
         model.addAttribute("requests", requests)
 
         return "index"
