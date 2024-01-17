@@ -20,6 +20,7 @@ var versions = mapOf(
     "mockito-kotlin" to "5.2.1",
     // Webjars
     "echarts" to "5.4.3",
+    "htmx.org" to "1.9.10"
 )
 
 java {
@@ -70,6 +71,7 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path")
     implementation("org.webjars:webjars-locator:0.50")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
+    implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
