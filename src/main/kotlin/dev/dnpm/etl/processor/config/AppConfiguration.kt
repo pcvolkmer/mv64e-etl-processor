@@ -95,11 +95,6 @@ class AppConfiguration {
     }
 
     @Bean
-    fun statisticsUpdateProducer(): Sinks.Many<Any> {
-        return Sinks.many().multicast().directBestEffort()
-    }
-
-    @Bean
     fun transformationService(
         objectMapper: ObjectMapper,
         configProperties: AppConfigProperties
@@ -117,6 +112,16 @@ class AppConfiguration {
             .fixedBackoff(5.seconds.toJavaDuration())
             .customPolicy(SimpleRetryPolicy(3))
             .build()
+    }
+
+    @Bean
+    fun statisticsUpdateProducer(): Sinks.Many<Any> {
+        return Sinks.many().multicast().directBestEffort()
+    }
+
+    @Bean
+    fun configsUpdateProducer(): Sinks.Many<Boolean> {
+        return Sinks.many().multicast().directBestEffort()
     }
 
 }

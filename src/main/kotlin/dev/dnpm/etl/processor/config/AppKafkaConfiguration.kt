@@ -38,6 +38,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.retry.support.RetryTemplate
+import reactor.core.publisher.Sinks
 
 @Configuration
 @EnableConfigurationProperties(
@@ -81,8 +82,8 @@ class AppKafkaConfiguration {
     }
 
     @Bean
-    fun connectionCheckService(consumerFactory: ConsumerFactory<String, String>): ConnectionCheckService {
-        return KafkaConnectionCheckService(consumerFactory.createConsumer())
+    fun connectionCheckService(consumerFactory: ConsumerFactory<String, String>, configsUpdateProducer: Sinks.Many<Boolean>): ConnectionCheckService {
+        return KafkaConnectionCheckService(consumerFactory.createConsumer(), configsUpdateProducer)
     }
 
 }

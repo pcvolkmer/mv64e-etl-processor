@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.bind.annotation.GetMapping
@@ -38,6 +39,7 @@ import java.time.temporal.ChronoUnit
 @RestController
 @RequestMapping(path = ["/statistics"])
 class StatisticsRestController(
+    @Qualifier("statisticsUpdateProducer")
     private val statisticsUpdateProducer: Sinks.Many<Any>,
     private val requestRepository: RequestRepository
 ) {

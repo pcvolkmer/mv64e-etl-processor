@@ -24,9 +24,11 @@ import dev.dnpm.etl.processor.config.RestTargetProperties
 import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.errors.TimeoutException
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.client.RestTemplate
+import reactor.core.publisher.Sinks
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
@@ -37,7 +39,9 @@ interface ConnectionCheckService {
 }
 
 class KafkaConnectionCheckService(
-    private val consumer: Consumer<String, String>
+    private val consumer: Consumer<String, String>,
+    @Qualifier("configsUpdateProducer")
+    private val configsUpdateProducer: Sinks.Many<Boolean>
 ) : ConnectionCheckService {
 
     private var connectionAvailable: Boolean = false
@@ -51,6 +55,7 @@ class KafkaConnectionCheckService(
         } catch (e: TimeoutException) {
             false
         }
+        configsUpdateProducer.emitNext(connectionAvailable, Sinks.EmitFailureHandler.FAIL_FAST)
     }
 
     override fun connectionAvailable(): Boolean {
@@ -61,7 +66,9 @@ class KafkaConnectionCheckService(
 
 class RestConnectionCheckService(
     private val restTemplate: RestTemplate,
-    private val restTargetProperties: RestTargetProperties
+    private val restTargetProperties: RestTargetProperties,
+    @Qualifier("configsUpdateProducer")
+    private val configsUpdateProducer: Sinks.Many<Boolean>
 ) : ConnectionCheckService {
 
     private var connectionAvailable: Boolean = false
@@ -77,6 +84,7 @@ class RestConnectionCheckService(
         } catch (e: Exception) {
             false
         }
+        configsUpdateProducer.emitNext(connectionAvailable, Sinks.EmitFailureHandler.FAIL_FAST)
     }
 
     override fun connectionAvailable(): Boolean {

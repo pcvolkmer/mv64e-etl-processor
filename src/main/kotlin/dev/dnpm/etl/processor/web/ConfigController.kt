@@ -23,14 +23,21 @@ import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.services.TransformationService
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.MediaType
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Sinks
 
 @Controller
 @RequestMapping(path = ["configs"])
 class ConfigController(
+    @Qualifier("configsUpdateProducer")
+    private val configsUpdateProducer: Sinks.Many<Boolean>,
     private val transformationService: TransformationService,
     private val pseudonymGenerator: Generator,
     private val mtbFileSender: MtbFileSender,
@@ -56,6 +63,15 @@ class ConfigController(
         model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
 
         return "configs/connectionAvailable"
+    }
+
+    @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun events(): Flux<ServerSentEvent<Any>> {
+        return configsUpdateProducer.asFlux().map {
+            ServerSentEvent.builder<Any>()
+                .event("connection-available").id("none").data("")
+                .build()
+        }
     }
 
 }

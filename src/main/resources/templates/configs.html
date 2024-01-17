@@ -37,7 +37,10 @@
             </table>
         </section>
 
-        <section th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="every 20s"></section>
+        <section hx-ext="sse" th:sse-connect="@{/configs/events}">
+            <div th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="sse:connection-available">
+            </div>
+        </section>
 
         <section>
             <h2><span th:if="${not transformations.isEmpty()}">✅</span><span th:if="${transformations.isEmpty()}">⛔</span> Transformationen</h2>
@@ -84,5 +87,6 @@
         </section>
     </main>
     <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+    <script th:src="@{/webjars/htmx.org/dist/ext/sse.js}"></script>
 </body>
 </html>

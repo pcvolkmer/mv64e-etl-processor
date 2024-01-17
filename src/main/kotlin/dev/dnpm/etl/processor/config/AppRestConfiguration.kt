@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestTemplate
+import reactor.core.publisher.Sinks
 
 @Configuration
 @EnableConfigurationProperties(
@@ -64,9 +65,10 @@ class AppRestConfiguration {
     @Bean
     fun connectionCheckService(
         restTemplate: RestTemplate,
-        restTargetProperties: RestTargetProperties
+        restTargetProperties: RestTargetProperties,
+        configsUpdateProducer: Sinks.Many<Boolean>
     ): ConnectionCheckService {
-        return RestConnectionCheckService(restTemplate, restTargetProperties)
+        return RestConnectionCheckService(restTemplate, restTargetProperties, configsUpdateProducer)
     }
 
 }
