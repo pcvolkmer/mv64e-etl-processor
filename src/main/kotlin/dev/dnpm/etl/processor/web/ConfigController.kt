@@ -49,4 +49,13 @@ class ConfigController(
         return "configs"
     }
 
+    @GetMapping(params = ["connectionAvailable"])
+    fun connectionAvailable(model: Model): String {
+        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+        model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
+
+        return "configs/connectionAvailable"
+    }
+
 }
