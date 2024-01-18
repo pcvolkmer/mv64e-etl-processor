@@ -22,14 +22,15 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
+import dev.dnpm.etl.processor.services.Token
+import dev.dnpm.etl.processor.services.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
 
@@ -41,8 +42,8 @@ class ConfigController(
     private val transformationService: TransformationService,
     private val pseudonymGenerator: Generator,
     private val mtbFileSender: MtbFileSender,
-    private val connectionCheckService: ConnectionCheckService
-
+    private val connectionCheckService: ConnectionCheckService,
+    private val tokenService: TokenService?
 ) {
 
     @GetMapping
@@ -51,6 +52,12 @@ class ConfigController(
         model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
         model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
         model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
+        model.addAttribute("tokensEnabled", tokenService != null)
+        if (tokenService != null) {
+            model.addAttribute("tokens", tokenService.findAll())
+        } else {
+            model.addAttribute("tokens", listOf<Token>())
+        }
         model.addAttribute("transformations", transformationService.getTransformations())
 
         return "configs"
@@ -61,8 +68,48 @@ class ConfigController(
         model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
         model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
         model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
+        if (tokenService != null) {
+            model.addAttribute("tokensEnabled", true)
+            model.addAttribute("tokens", tokenService.findAll())
+        } else {
+            model.addAttribute("tokens", listOf<Token>())
+        }
 
         return "configs/connectionAvailable"
+    }
+
+    @PostMapping(path = ["tokens"])
+    fun addToken(@ModelAttribute("name") name: String, model: Model): String {
+        if (tokenService == null) {
+            model.addAttribute("tokensEnabled", false)
+            model.addAttribute("success", false)
+        } else {
+            model.addAttribute("tokensEnabled", true)
+            val result = tokenService.addToken(name)
+            if (result.isSuccess) {
+                model.addAttribute("newTokenValue", result.getOrDefault(""))
+                model.addAttribute("success", true)
+            } else {
+                model.addAttribute("success", false)
+            }
+            model.addAttribute("tokens", tokenService.findAll())
+        }
+
+        return "configs/tokens"
+    }
+
+    @DeleteMapping(path = ["tokens/{id}"])
+    fun deleteToken(@PathVariable id: Long, model: Model): String {
+        if (tokenService != null) {
+            tokenService.deleteToken(id)
+
+            model.addAttribute("tokensEnabled", true)
+            model.addAttribute("tokens", tokenService.findAll())
+        } else {
+            model.addAttribute("tokensEnabled", false)
+            model.addAttribute("tokens", listOf<Token>())
+        }
+        return "configs/tokens"
     }
 
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])

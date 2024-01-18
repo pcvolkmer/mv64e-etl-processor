@@ -25,6 +25,8 @@ import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.services.TokenRepository
+import dev.dnpm.etl.processor.services.TokenService
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.slf4j.LoggerFactory
@@ -37,6 +39,9 @@ import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.provisioning.InMemoryUserDetailsManager
+import org.springframework.security.provisioning.UserDetailsManager
 import reactor.core.publisher.Sinks
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -112,6 +117,12 @@ class AppConfiguration {
             .fixedBackoff(5.seconds.toJavaDuration())
             .customPolicy(SimpleRetryPolicy(3))
             .build()
+    }
+
+    @ConditionalOnProperty(value = ["app.security.enable-tokens"], havingValue = "true")
+    @Bean
+    fun tokenService(userDetailsManager: InMemoryUserDetailsManager, passwordEncoder: PasswordEncoder, tokenRepository: TokenRepository): TokenService {
+        return TokenService(userDetailsManager, passwordEncoder, tokenRepository)
     }
 
     @Bean

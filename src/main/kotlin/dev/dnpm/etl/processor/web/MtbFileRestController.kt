@@ -27,13 +27,19 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping(path = ["mtbfile"])
 class MtbFileRestController(
     private val requestProcessor: RequestProcessor,
 ) {
 
     private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
 
-    @PostMapping(path = ["/mtbfile"])
+    @GetMapping
+    fun info(): ResponseEntity<String> {
+        return ResponseEntity.ok("Test")
+    }
+
+    @PostMapping
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Void> {
         if (mtbFile.consent.status == Consent.Status.ACTIVE) {
             logger.debug("Accepted MTB File for processing")
@@ -45,7 +51,7 @@ class MtbFileRestController(
         return ResponseEntity.accepted().build()
     }
 
-    @DeleteMapping(path = ["/mtbfile/{patientId}"])
+    @DeleteMapping(path = ["{patientId}"])
     fun deleteData(@PathVariable patientId: String): ResponseEntity<Void> {
         logger.debug("Accepted patient ID to process deletion")
         requestProcessor.processDeletion(patientId)
