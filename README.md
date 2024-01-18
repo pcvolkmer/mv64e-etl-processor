@@ -81,6 +81,26 @@ pseudonymisierte Patienten-ID einsehen.
 
 Wurde kein Administrator-Account konfiguriert, sind diese Inhalte generell nicht verfügbar.
 
+### Tokenbasierte Authentifizierung für MTBFile-Endpunkt
+
+Die Anwendung unterstützt das Erstellen und Nutzen einer tokenbasierten Authentifizierung für den MTB-File-Endpunkt.
+
+Dies kann mit der Umgebungsvariable `APP_SECURITY_ENABLE_TOKENS` aktiviert (`true` oder `false`) werden
+und ist als Standardeinstellung nicht aktiv.
+
+Ist diese Einstellung aktiviert worden, ist es Administratoren möglich, Zugriffstokens für Onkostar zu erstellen, die
+zur Nutzung des MTB-File-Endpunkts eine HTTP-Basic-Authentifizierung voraussetzen.
+
+![Tokenverwaltung](docs/tokens.png)
+
+In diesem Fall können den Endpunkt für das Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)** wie folgt konfigurieren:
+
+```
+https://testonkostar:MTg1NTL...NGU4@etl.example.com/mtbfile
+```
+
+Ist die Verwendung von Tokens aktiv, werden Anfragen ohne die Angabe der Token-Information abgelehnt.
+
 ### Transformation von Werten
 
 In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,
