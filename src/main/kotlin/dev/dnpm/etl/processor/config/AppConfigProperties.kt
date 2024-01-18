@@ -86,6 +86,7 @@ data class KafkaTargetProperties(
 data class SecurityConfigProperties(
     val adminUser: String?,
     val adminPassword: String?,
+    val enableTokens: Boolean = false
 ) {
     companion object {
         const val NAME = "app.security"

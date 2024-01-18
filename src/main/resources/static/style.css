@@ -202,13 +202,15 @@ form.samplecode-input input:focus-visible {
     background: none;
 }
 
-.login-form form * {
+.login-form form *,
+.token-form form * {
     padding: 0.5em;
     border: 1px solid var(--table-border);
     border-radius: 3px;
 }
 
-.login-form button {
+.login-form button,
+.token-form button {
     margin: 1em 0;
     background: var(--bg-blue);
     color: white;
@@ -535,4 +537,22 @@ a.reload {
     font-size: .6em;
     align-content: center;
     justify-content: center;
+}
+
+.new-token {
+    padding: 1em;
+    background: var(--bg-green-op);
+}
+
+.new-token > pre {
+    margin: 0;
+    border: 1px solid var(--bg-green);
+    padding: .5em;
+    width: max-content;
+    display: inline-block;
+}
+
+.no-token {
+    padding: 1em;
+    background: var(--bg-red-op);
 }

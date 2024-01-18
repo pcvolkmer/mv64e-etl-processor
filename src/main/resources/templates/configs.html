@@ -37,6 +37,9 @@
             </table>
         </section>
 
+        <section th:insert="~{configs/tokens.html}">
+        </section>
+
         <section hx-ext="sse" th:sse-connect="@{/configs/events}">
             <div th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="sse:connection-available">
             </div>
@@ -86,6 +89,7 @@
             </th:block>
         </section>
     </main>
+    <script th:src="@{/scripts.js}"></script>
     <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
     <script th:src="@{/webjars/htmx.org/dist/ext/sse.js}"></script>
 </body>
