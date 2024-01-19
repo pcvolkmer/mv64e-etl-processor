@@ -25,6 +25,8 @@ import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
+import dev.dnpm.etl.processor.services.TokenRepository
+import dev.dnpm.etl.processor.services.TokenService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,12 +35,21 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.MockBeans
 import org.springframework.context.ApplicationContext
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 
 @SpringBootTest
-@ContextConfiguration(classes = [AppConfiguration::class, KafkaAutoConfiguration::class, AppKafkaConfiguration::class, AppRestConfiguration::class])
+@ContextConfiguration(classes = [
+    AppConfiguration::class,
+    AppSecurityConfiguration::class,
+    KafkaAutoConfiguration::class,
+    AppKafkaConfiguration::class,
+    AppRestConfiguration::class
+])
 @MockBean(ObjectMapper::class)
 @TestPropertySource(
     properties = [
@@ -186,6 +197,41 @@ class AppConfigurationTest {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
+            }
+
+        }
+
+        @Nested
+        @TestPropertySource(
+            properties = [
+                "app.security.enable-tokens=true"
+            ]
+        )
+        @MockBeans(value = [
+            MockBean(InMemoryUserDetailsManager::class),
+            MockBean(PasswordEncoder::class),
+            MockBean(TokenRepository::class)
+        ])
+        inner class AppConfigurationTokenEnabledTest(private val context: ApplicationContext) {
+
+            @Test
+            fun checkTokenService() {
+                assertThat(context.getBean(TokenService::class.java)).isNotNull
+            }
+
+        }
+
+        @Nested
+        @MockBeans(value = [
+            MockBean(InMemoryUserDetailsManager::class),
+            MockBean(PasswordEncoder::class),
+            MockBean(TokenRepository::class)
+        ])
+        inner class AppConfigurationTokenDisabledTest(private val context: ApplicationContext) {
+
+            @Test
+            fun checkTokenService() {
+                assertThrows<NoSuchBeanDefinitionException> { context.getBean(TokenService::class.java) }
             }
 
         }
