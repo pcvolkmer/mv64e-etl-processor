@@ -17,14 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor
+package dev.dnpm.etl.processor.web
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.services.TokenRepository
-import dev.dnpm.etl.processor.web.MtbFileRestController
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,10 +48,12 @@ import org.springframework.test.web.servlet.post
 
 @WebMvcTest(controllers = [MtbFileRestController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
-@ContextConfiguration(classes = [
-    MtbFileRestController::class,
-    AppSecurityConfiguration::class
-])
+@ContextConfiguration(
+    classes = [
+        MtbFileRestController::class,
+        AppSecurityConfiguration::class
+    ]
+)
 @MockBean(TokenRepository::class, RequestProcessor::class)
 @TestPropertySource(
     properties = [
