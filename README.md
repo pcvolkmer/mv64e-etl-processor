@@ -36,8 +36,14 @@ Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgen
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
 
-**Hinweise**: Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht
+**Hinweise**: 
+
+* Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht
 mehr verwendet werden.
+* Die Pseudonymisierung erfolgt im ETL-Prozessor nur für die Patienten-ID.
+Andere Referenz-IDs werden nicht anonymisiert.
+Dies erfolgt bei Nutzung von **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**
+bereits im Plugin selbst.
 
 #### Eingebaute Anonymisierung
 
