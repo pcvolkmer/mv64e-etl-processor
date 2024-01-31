@@ -21,6 +21,11 @@
                     <a th:href="@{/login}">Login</a>
                 </li>
                 <li class="login" sec:authorize="isAuthenticated()">
+                    <span>
+                        <span>👤</span>
+                        <span sec:authentication="name">?</span>
+                    </span>
+                    &nbsp;
                     <a th:href="@{/logout}">Abmelden</a>
                 </li>
             </ul>

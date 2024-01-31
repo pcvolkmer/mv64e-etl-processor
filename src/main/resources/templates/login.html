@@ -13,9 +13,11 @@
             <div class="centered notification error" th:if="${param.error}">Anmeldung nicht erfolgreich</div>
             <div class="centered notification success" th:if="${param.logout}">Sie haben sich abgemeldet</div>
             <form method="post" th:action="@{/login}">
-                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="" autofocus="">
-                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="">
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="" autofocus="" />
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="" />
                 <button type="submit">Anmelden</button>
+                <hr th:if="${not oidcLogins.isEmpty()}" />
+                <a th:each="oidcLogin : ${oidcLogins}" class="btn" th:href="@{/oauth2/authorization/{provider}(provider=${oidcLogin.component1()})}">OIDC Login - [[ ${oidcLogin.component2()} ]]</a>
             </form>
         </div>
     </main>

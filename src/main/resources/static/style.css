@@ -209,7 +209,14 @@ form.samplecode-input input:focus-visible {
     border-radius: 3px;
 }
 
+.login-form form hr,
+.token-form form hr {
+    padding: 0;
+    width: 100%;
+}
+
 .login-form button,
+.login-form a.btn,
 .token-form button {
     margin: 1em 0;
     background: var(--bg-blue);
