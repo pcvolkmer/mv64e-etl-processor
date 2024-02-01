@@ -80,6 +80,32 @@ Hier Beispiele für das Beispielpasswort `very-secret`:
 Wird kein Administrator-Passwort angegeben, wird ein zufälliger Wert generiert und beim Start der Anwendung in den Logs
 angezeigt.
 
+#### Weitere (nicht administrative) Nutzer mit OpenID Connect
+
+Die folgenden Konfigurationsparameter werden benötigt, um die Authentifizierung weiterer Benutzer an einen OIDC-Provider
+zu delegieren.
+Ein Admin-Benutzer muss dabei konfiguriert sein.
+
+* `APP_SECURITY_ENABLE_OIDC`: Aktiviert die Nutzung von OpenID Connect. Damit sind weitere Parameter erforderlich
+* `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CUSTOM_CLIENT_NAME`: Name. Wird beim zusätzlichen Loginbutton angezeigt.
+* `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CUSTOM_CLIENT_ID`: Client-ID
+* `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CUSTOM_CLIENT_SECRET`: Client-Secret
+* `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_CUSTOM_CLIENT_SCOPE[0]`: Hier sollte immer `openid` angegeben werden.
+* `SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_CUSTOM_ISSUER_URI`: Die URI des Providers,
+  z.B. `https://auth.example.com/realm/example`
+* `SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_CUSTOM_USER_NAME_ATTRIBUTE`: Name des Attributes, welches den Benutzernamen
+  enthält.
+  Oft verwendet: `preferred_username`
+
+Ist die Nutzung von OpenID Connect konfiguriert, erscheint ein zusätzlicher Login-Button zur Nutzung mit OpenID Connect
+und dem konfigurierten `CLIENT_NAME`.
+
+![Login mit OpenID Connect](docs/login.png)
+
+Weitere Informationen zur Konfiguration des OIDC-Providers
+sind [hier](https://docs.spring.io/spring-security/reference/servlet/oauth2/index.html#oauth2-client)
+zu finden.
+
 #### Auswirkungen auf den dargestellten Inhalt
 
 Nur Administratoren haben Zugriff auf den Konfigurationsbereich, nur angemeldete Benutzer können die anonymisierte oder
