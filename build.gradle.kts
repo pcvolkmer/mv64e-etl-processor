@@ -113,7 +113,14 @@ task<Test>("integrationTest") {
 tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("ghcr.io/ccc-mf/etl-processor")
 
+    // Binding for CA Certs
+    bindings.set(listOf(
+        "$rootDir/bindings/ca-certificates/:/platform/bindings/ca-certificates"
+    ))
+
     environment.set(environment.get() + mapOf(
+        // Enable this line to embed CA Certs into image on build time
+        //"BP_EMBED_CERTS" to "true",
         "BP_OCI_SOURCE" to "https://github.com/CCC-MF/etl-processor",
         "BP_OCI_LICENSES" to "AGPLv3",
         "BP_OCI_DESCRIPTION" to "ETL Processor for bwHC MTB files"

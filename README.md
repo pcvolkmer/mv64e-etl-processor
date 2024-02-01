@@ -199,6 +199,35 @@ Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/
 ./gradlew bootBuildImage
 ```
 
+### Integration eines eigenen Root CA Zertifikats
+
+Wird eine eigene Root CA verwendet, die nicht offiziell signiert ist, wird es zu Problemen beim SSL-Handshake kommen, wenn z.B. gPAS zur Generierung von Pseudonymen verwendet wird.
+
+Hier bietet es sich an, das Root CA Zertifikat in das Image zu integrieren.
+
+#### Integration beim Bauen des Images
+
+Hier muss die Zeile `"BP_EMBED_CERTS" to "true"` in der Datei `build.gradle.kts` verwendet werden und darf nicht als Kommentar verwendet werden.
+
+Die PEM-Datei mit dem/den Root CA Zertifikat(en) muss dabei im vorbereiteten Verzeichnis [`bindings/ca-certificates`](bindings/ca-certificates) enthalten sein.
+
+#### Integration zur Laufzeit
+
+Hier muss die Umgebungsvariable `SERVICE_BINDING_ROOT` z.B. auf den Wert `/bindings` gesetzt sein.
+Zudem muss ein Verzeichnis `bindings/ca-certificates` - analog zum Verzeichnis [`bindings/ca-certificates`](bindings/ca-certificates) mit einer PEM-Datei als Docker-Volume eingebunden werden.
+
+Beispiel für Docker-Compose:
+
+```
+...  
+  environment:
+    SERVICE_BINDING_ROOT: /bindings
+    ...
+  volumes:
+    - "/path/to/bindings/ca-certificates/:/bindings/ca-certificates/:ro"
+...
+```
+
 ## Deployment
 *Ausführen als Docker Container:*
 
