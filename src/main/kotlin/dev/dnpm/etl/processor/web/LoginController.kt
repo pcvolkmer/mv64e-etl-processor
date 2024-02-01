@@ -24,17 +24,16 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2Clien
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import java.security.Principal
 
 @Controller
 class LoginController(
-    private val securityConfigProperties: SecurityConfigProperties,
+    private val securityConfigProperties: SecurityConfigProperties?,
     private val oAuth2ClientProperties: OAuth2ClientProperties?
 ) {
 
     @GetMapping(path = ["/login"])
-    fun login(principal: Principal?, model: Model): String {
-        if (securityConfigProperties.enableOidc) {
+    fun login(model: Model): String {
+        if (securityConfigProperties?.enableOidc == true) {
             model.addAttribute(
                 "oidcLogins",
                 oAuth2ClientProperties?.registration?.map { (key, value) -> Pair(key, value.clientName) }.orEmpty()
