@@ -109,7 +109,7 @@ zu finden.
 #### Auswirkungen auf den dargestellten Inhalt
 
 Nur Administratoren haben Zugriff auf den Konfigurationsbereich, nur angemeldete Benutzer können die anonymisierte oder
-pseudonymisierte Patienten-ID einsehen.
+pseudonymisierte Patienten-ID sowie den Qualitätsbericht des bwHC-Backends einsehen.
 
 Wurde kein Administrator-Account konfiguriert, sind diese Inhalte generell nicht verfügbar.
 
