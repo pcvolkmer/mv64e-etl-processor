@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "de.ukw.ccc"
-version = "0.6.0-SNAPSHOT"
+version = "0.7.0"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.2.0",
