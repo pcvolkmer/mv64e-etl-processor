@@ -82,6 +82,7 @@ class AppSecurityConfiguration(
             authorizeRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
                 authorize("/mtbfile/**", hasAnyRole("MTBFILE"))
+                authorize("/report/**", fullyAuthenticated)
                 authorize(anyRequest, permitAll)
             }
             httpBasic {
@@ -105,6 +106,7 @@ class AppSecurityConfiguration(
             authorizeRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
                 authorize("/mtbfile/**", hasAnyRole("MTBFILE"))
+                authorize("/report/**", hasRole("ADMIN"))
                 authorize(anyRequest, permitAll)
             }
             httpBasic {
