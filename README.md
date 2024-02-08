@@ -59,7 +59,10 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
+* ~~`APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`~~: **Veraltet** - Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
+
+Der Konfigurationsparameter `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION` sollte nicht mehr verwendet werden und wird in einer kommenden Version entfernt.
+Stattdessen sollte das Root Zertifikat wie unter [_Integration eines eigenen Root CA Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben eingebunden werden.
 
 ### Anmeldung mit einem Passwort
 
