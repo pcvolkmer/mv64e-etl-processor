@@ -53,9 +53,11 @@ data class GPasConfigProperties(
     val target: String = "etl-processor",
     val username: String?,
     val password: String?,
-    val sslCaLocation: String?,
-
-    ) {
+    @get:DeprecatedConfigurationProperty(
+        reason = "Deprecated in favor of including Root CA"
+    )
+    val sslCaLocation: String?
+) {
     companion object {
         const val NAME = "app.pseudonymize.gpas"
     }
