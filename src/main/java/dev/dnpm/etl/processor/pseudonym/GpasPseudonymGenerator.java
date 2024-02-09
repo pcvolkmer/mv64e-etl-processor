@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -91,7 +91,7 @@ public class GpasPseudonymGenerator implements Generator {
         try {
             if (StringUtils.isNotBlank(gpasCfg.getSslCaLocation())) {
                 customSslContext = getSslContext(gpasCfg.getSslCaLocation());
-                log.debug(String.format("%s has been initialized with SSL certificate %s",
+                log.warn(String.format("%s has been initialized with SSL certificate %s. This is deprecated in favor of including Root CA.",
                     this.getClass().getName(), gpasCfg.getSslCaLocation()));
             }
         } catch (IOException | KeyManagementException | KeyStoreException | CertificateException |
