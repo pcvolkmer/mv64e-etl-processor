@@ -9,6 +9,8 @@ services:
   ### ETL-Processor
   etl-processor:
     image: ghcr.io/ccc-mf/etl-processor:latest
+    ports:
+      - 8080:8080
     environment:
       APP_REST_URI: http://bwhc-backend/bwhc/etl/api
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres/etl
