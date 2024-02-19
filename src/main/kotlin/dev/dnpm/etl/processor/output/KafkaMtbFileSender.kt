@@ -22,7 +22,7 @@ package dev.dnpm.etl.processor.output
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.config.KafkaTargetProperties
+import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -30,7 +30,7 @@ import org.springframework.retry.support.RetryTemplate
 
 class KafkaMtbFileSender(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-    private val kafkaTargetProperties: KafkaTargetProperties,
+    private val kafkaProperties: KafkaProperties,
     private val retryTemplate: RetryTemplate,
     private val objectMapper: ObjectMapper
 ) : MtbFileSender {
@@ -41,7 +41,7 @@ class KafkaMtbFileSender(
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val result = kafkaTemplate.send(
-                    kafkaTargetProperties.topic,
+                    kafkaProperties.topic,
                     key(request),
                     objectMapper.writeValueAsString(Data(request.requestId, request.mtbFile))
                 )
@@ -71,7 +71,7 @@ class KafkaMtbFileSender(
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val result = kafkaTemplate.send(
-                    kafkaTargetProperties.topic,
+                    kafkaProperties.topic,
                     key(request),
                     objectMapper.writeValueAsString(Data(request.requestId, dummyMtbFile))
                 )
@@ -90,7 +90,7 @@ class KafkaMtbFileSender(
     }
 
     override fun endpoint(): String {
-        return "${this.kafkaTargetProperties.servers} (${this.kafkaTargetProperties.topic}/${this.kafkaTargetProperties.responseTopic})"
+        return "${this.kafkaProperties.servers} (${this.kafkaProperties.topic}/${this.kafkaProperties.responseTopic})"
     }
 
     private fun key(request: MtbFileSender.MtbFileRequest): String {

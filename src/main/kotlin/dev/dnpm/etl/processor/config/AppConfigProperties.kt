@@ -72,10 +72,21 @@ data class RestTargetProperties(
     }
 }
 
-@ConfigurationProperties(KafkaTargetProperties.NAME)
-data class KafkaTargetProperties(
-    val topic: String = "etl-processor",
-    val responseTopic: String = "${topic}_response",
+@ConfigurationProperties(KafkaProperties.NAME)
+data class KafkaProperties(
+    val inputTopic: String?,
+    val outputTopic: String = "etl-processor",
+    @get:DeprecatedConfigurationProperty(
+        reason = "Deprecated",
+        replacement = "outputTopic"
+    )
+    val topic: String = outputTopic,
+    val outputResponseTopic: String = "${outputTopic}_response",
+    @get:DeprecatedConfigurationProperty(
+        reason = "Deprecated",
+        replacement = "outputResponseTopic"
+    )
+    val responseTopic: String = outputResponseTopic,
     val groupId: String = "${topic}_group",
     val servers: String = ""
 ) {

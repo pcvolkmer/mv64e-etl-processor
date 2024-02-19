@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
@@ -78,8 +79,8 @@ class AppConfigurationTest {
     @TestPropertySource(
         properties = [
             "app.kafka.servers=localhost:9092",
-            "app.kafka.topic=test",
-            "app.kafka.response-topic=test-response",
+            "app.kafka.output-topic=test",
+            "app.kafka.output-response-topic=test-response",
             "app.kafka.group-id=test"
         ]
     )
@@ -99,8 +100,8 @@ class AppConfigurationTest {
         properties = [
             "app.rest.uri=http://localhost:9000",
             "app.kafka.servers=localhost:9092",
-            "app.kafka.topic=test",
-            "app.kafka.response-topic=test-response",
+            "app.kafka.output-topic=test",
+            "app.kafka.output-response-topic=test-response",
             "app.kafka.group-id=test"
         ]
     )
@@ -110,6 +111,43 @@ class AppConfigurationTest {
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
             assertThat(context.getBean(RestMtbFileSender::class.java)).isNotNull
             assertThrows<NoSuchBeanDefinitionException> { context.getBean(KafkaMtbFileSender::class.java) }
+        }
+
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties = [
+            "app.kafka.servers=localhost:9092",
+            "app.kafka.output-topic=test",
+            "app.kafka.output-response-topic=test-response",
+            "app.kafka.group-id=test"
+        ]
+    )
+    inner class AppConfigurationWithoutKafkaInputTest(private val context: ApplicationContext) {
+
+        @Test
+        fun shouldNotUseKafkaInputListener() {
+            assertThrows<NoSuchBeanDefinitionException> { context.getBean(KafkaInputListener::class.java) }
+        }
+
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties = [
+            "app.kafka.servers=localhost:9092",
+            "app.kafka.input-topic=test_input",
+            "app.kafka.output-topic=test",
+            "app.kafka.output-response-topic=test-response",
+            "app.kafka.group-id=test"
+        ]
+    )
+    inner class AppConfigurationUsingKafkaInputTest(private val context: ApplicationContext) {
+
+        @Test
+        fun shouldUseKafkaInputListener() {
+            assertThat(context.getBean(KafkaInputListener::class.java)).isNotNull
         }
 
     }
