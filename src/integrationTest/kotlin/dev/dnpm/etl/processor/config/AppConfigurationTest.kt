@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
+import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.services.TokenRepository
 import dev.dnpm.etl.processor.services.TokenService
 import org.assertj.core.api.Assertions.assertThat
@@ -144,6 +145,7 @@ class AppConfigurationTest {
             "app.kafka.group-id=test"
         ]
     )
+    @MockBean(RequestProcessor::class)
     inner class AppConfigurationUsingKafkaInputTest(private val context: ApplicationContext) {
 
         @Test
