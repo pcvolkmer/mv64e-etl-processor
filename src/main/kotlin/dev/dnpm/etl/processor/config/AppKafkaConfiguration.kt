@@ -25,6 +25,7 @@ import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.KafkaConnectionCheckService
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.services.kafka.KafkaResponseProcessor
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -97,9 +98,9 @@ class AppKafkaConfiguration {
     @Bean
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
     fun kafkaInputListener(
-        applicationEventPublisher: ApplicationEventPublisher,
+        requestProcessor: RequestProcessor
     ): KafkaInputListener {
-        return KafkaInputListener(applicationEventPublisher)
+        return KafkaInputListener(requestProcessor)
     }
 
     @Bean

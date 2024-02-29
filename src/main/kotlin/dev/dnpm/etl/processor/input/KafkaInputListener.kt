@@ -19,15 +19,25 @@
 
 package dev.dnpm.etl.processor.input
 
+import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.context.ApplicationEventPublisher
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.listener.MessageListener
 
 class KafkaInputListener(
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val requestProcessor: RequestProcessor
 ) : MessageListener<String, MtbFile> {
+    private val logger = LoggerFactory.getLogger(KafkaInputListener::class.java)
+
     override fun onMessage(data: ConsumerRecord<String, MtbFile>) {
-        TODO("Not yet implemented")
+        if (data.value().consent.status == Consent.Status.ACTIVE) {
+            logger.debug("Accepted MTB File for processing")
+            requestProcessor.processMtbFile(data.value())
+        } else {
+            logger.debug("Accepted MTB File and process deletion")
+            requestProcessor.processDeletion(data.value().patient.id)
+        }
     }
 }
