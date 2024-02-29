@@ -98,9 +98,10 @@ class AppKafkaConfiguration {
     @Bean
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
     fun kafkaInputListener(
-        requestProcessor: RequestProcessor
+        requestProcessor: RequestProcessor,
+        objectMapper: ObjectMapper
     ): KafkaInputListener {
-        return KafkaInputListener(requestProcessor)
+        return KafkaInputListener(requestProcessor, objectMapper)
     }
 
     @Bean
