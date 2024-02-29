@@ -35,13 +35,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.retry.RetryCallback
+import org.springframework.retry.RetryContext
+import org.springframework.retry.RetryListener
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
-import org.springframework.security.provisioning.UserDetailsManager
 import reactor.core.publisher.Sinks
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -62,8 +64,8 @@ class AppConfiguration {
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
-    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties): Generator {
-        return GpasPseudonymGenerator(configProperties)
+    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate): Generator {
+        return GpasPseudonymGenerator(configProperties, retryTemplate)
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
@@ -75,8 +77,8 @@ class AppConfiguration {
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
     @ConditionalOnMissingBean
     @Bean
-    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties): Generator {
-        return GpasPseudonymGenerator(configProperties)
+    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate): Generator {
+        return GpasPseudonymGenerator(configProperties, retryTemplate)
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "BUILDIN")
@@ -114,8 +116,17 @@ class AppConfiguration {
     fun retryTemplate(): RetryTemplate {
         return RetryTemplateBuilder()
             .notRetryOn(IllegalArgumentException::class.java)
-            .fixedBackoff(5.seconds.toJavaDuration())
+            .exponentialBackoff(2.seconds.toJavaDuration(), 1.25, 5.seconds.toJavaDuration())
             .customPolicy(SimpleRetryPolicy(3))
+            .withListener(object : RetryListener {
+                override fun <T : Any, E : Throwable> onError(
+                    context: RetryContext,
+                    callback: RetryCallback<T, E>,
+                    throwable: Throwable
+                ) {
+                    logger.warn("Error occured: {}. Retrying {}", throwable.message, context.retryCount)
+                }
+            })
             .build()
     }
 

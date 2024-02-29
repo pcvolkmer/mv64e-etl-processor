@@ -22,21 +22,6 @@ package dev.dnpm.etl.processor.pseudonym;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dnpm.etl.processor.config.GPasConfigProperties;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.HashMap;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -54,21 +39,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.RetryListener;
-import org.springframework.retry.RetryPolicy;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
 
 public class GpasPseudonymGenerator implements Generator {
 
@@ -76,13 +64,14 @@ public class GpasPseudonymGenerator implements Generator {
     private final String gPasUrl;
     private final String psnTargetDomain;
     private final HttpHeaders httpHeader;
-    private final RetryTemplate retryTemplate = defaultTemplate();
+    private final RetryTemplate retryTemplate;
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
 
     private SSLContext customSslContext;
     private RestTemplate restTemplate;
 
-    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg) {
+    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate) {
+        this.retryTemplate = retryTemplate;
 
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
@@ -200,31 +189,6 @@ public class GpasPseudonymGenerator implements Generator {
         }
 
         return headers;
-    }
-
-    protected RetryTemplate defaultTemplate() {
-        RetryTemplate retryTemplate = new RetryTemplate();
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(1000);
-        backOffPolicy.setMultiplier(1.25);
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        HashMap<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
-        retryableExceptions.put(RestClientException.class, true);
-        retryableExceptions.put(ConnectException.class, true);
-        RetryPolicy retryPolicy = new SimpleRetryPolicy(3, retryableExceptions);
-        retryTemplate.setRetryPolicy(retryPolicy);
-
-        retryTemplate.registerListener(new RetryListener() {
-            @Override
-            public <T, E extends Throwable> void onError(RetryContext context,
-                RetryCallback<T, E> callback, Throwable throwable) {
-                log.warn("HTTP Error occurred: {}. Retrying {}", throwable.getMessage(),
-                    context.getRetryCount());
-                RetryListener.super.onError(context, callback, throwable);
-            }
-        });
-
-        return retryTemplate;
     }
 
     /**
