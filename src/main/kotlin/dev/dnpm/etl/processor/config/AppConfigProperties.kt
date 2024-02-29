@@ -30,7 +30,8 @@ data class AppConfigProperties(
         replacement = "app.pseudonymize.generator"
     )
     var pseudonymizer: PseudonymGenerator = PseudonymGenerator.BUILDIN,
-    var transformations: List<TransformationProperties> = listOf()
+    var transformations: List<TransformationProperties> = listOf(),
+    var maxRetryAttempts: Int = 3
 ) {
     companion object {
         const val NAME = "app"
@@ -72,10 +73,21 @@ data class RestTargetProperties(
     }
 }
 
-@ConfigurationProperties(KafkaTargetProperties.NAME)
-data class KafkaTargetProperties(
-    val topic: String = "etl-processor",
-    val responseTopic: String = "${topic}_response",
+@ConfigurationProperties(KafkaProperties.NAME)
+data class KafkaProperties(
+    val inputTopic: String?,
+    val outputTopic: String = "etl-processor",
+    @get:DeprecatedConfigurationProperty(
+        reason = "Deprecated",
+        replacement = "outputTopic"
+    )
+    val topic: String = outputTopic,
+    val outputResponseTopic: String = "${outputTopic}_response",
+    @get:DeprecatedConfigurationProperty(
+        reason = "Deprecated",
+        replacement = "outputResponseTopic"
+    )
+    val responseTopic: String = outputResponseTopic,
     val groupId: String = "${topic}_group",
     val servers: String = ""
 ) {

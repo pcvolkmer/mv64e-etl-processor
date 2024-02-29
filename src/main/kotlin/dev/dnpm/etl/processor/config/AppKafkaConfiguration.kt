@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.KafkaConnectionCheckService
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
@@ -42,9 +43,9 @@ import reactor.core.publisher.Sinks
 
 @Configuration
 @EnableConfigurationProperties(
-    value = [KafkaTargetProperties::class]
+    value = [KafkaProperties::class]
 )
-@ConditionalOnProperty(value = ["app.kafka.topic", "app.kafka.servers"])
+@ConditionalOnProperty(value = ["app.kafka.servers"])
 @ConditionalOnMissingBean(MtbFileSender::class)
 @Order(-5)
 class AppKafkaConfiguration {
@@ -54,21 +55,21 @@ class AppKafkaConfiguration {
     @Bean
     fun kafkaMtbFileSender(
         kafkaTemplate: KafkaTemplate<String, String>,
-        kafkaTargetProperties: KafkaTargetProperties,
+        kafkaProperties: KafkaProperties,
         retryTemplate: RetryTemplate,
         objectMapper: ObjectMapper
     ): MtbFileSender {
         logger.info("Selected 'KafkaMtbFileSender'")
-        return KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, retryTemplate, objectMapper)
+        return KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
     }
 
     @Bean
-    fun kafkaListenerContainer(
+    fun kafkaResponseListenerContainer(
         consumerFactory: ConsumerFactory<String, String>,
-        kafkaTargetProperties: KafkaTargetProperties,
+        kafkaProperties: KafkaProperties,
         kafkaResponseProcessor: KafkaResponseProcessor
     ): KafkaMessageListenerContainer<String, String> {
-        val containerProperties = ContainerProperties(kafkaTargetProperties.responseTopic)
+        val containerProperties = ContainerProperties(kafkaProperties.responseTopic)
         containerProperties.messageListener = kafkaResponseProcessor
         return KafkaMessageListenerContainer(consumerFactory, containerProperties)
     }
@@ -79,6 +80,26 @@ class AppKafkaConfiguration {
         objectMapper: ObjectMapper
     ): KafkaResponseProcessor {
         return KafkaResponseProcessor(applicationEventPublisher, objectMapper)
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = ["app.kafka.input-topic"])
+    fun kafkaInputListenerContainer(
+        consumerFactory: ConsumerFactory<String, String>,
+        kafkaProperties: KafkaProperties,
+        kafkaInputListener: KafkaInputListener
+    ): KafkaMessageListenerContainer<String, String> {
+        val containerProperties = ContainerProperties(kafkaProperties.inputTopic)
+        containerProperties.messageListener = kafkaInputListener
+        return KafkaMessageListenerContainer(consumerFactory, containerProperties)
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = ["app.kafka.input-topic"])
+    fun kafkaInputListener(
+        applicationEventPublisher: ApplicationEventPublisher,
+    ): KafkaInputListener {
+        return KafkaInputListener(applicationEventPublisher)
     }
 
     @Bean

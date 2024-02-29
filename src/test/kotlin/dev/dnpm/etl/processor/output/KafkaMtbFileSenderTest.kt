@@ -21,7 +21,7 @@ package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
-import dev.dnpm.etl.processor.config.KafkaTargetProperties
+import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -53,13 +53,13 @@ class KafkaMtbFileSenderTest {
     fun setup(
         @Mock kafkaTemplate: KafkaTemplate<String, String>
     ) {
-        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val kafkaProperties = KafkaProperties("testtopic")
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
         this.objectMapper = ObjectMapper()
         this.kafkaTemplate = kafkaTemplate
 
-        this.kafkaMtbFileSender = KafkaMtbFileSender(kafkaTemplate, kafkaTargetProperties, retryTemplate, objectMapper)
+        this.kafkaMtbFileSender = KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
     }
 
     @ParameterizedTest
@@ -125,9 +125,9 @@ class KafkaMtbFileSenderTest {
     @ParameterizedTest
     @MethodSource("requestWithResponseSource")
     fun shouldRetryOnMtbFileKafkaSendError(testData: TestData) {
-        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val kafkaProperties = KafkaProperties("testtopic")
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
-        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaTargetProperties, retryTemplate, this.objectMapper)
+        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.objectMapper)
 
         doAnswer {
             if (null != testData.exception) {
@@ -151,9 +151,9 @@ class KafkaMtbFileSenderTest {
     @ParameterizedTest
     @MethodSource("requestWithResponseSource")
     fun shouldRetryOnDeleteKafkaSendError(testData: TestData) {
-        val kafkaTargetProperties = KafkaTargetProperties("testtopic")
+        val kafkaProperties = KafkaProperties("testtopic")
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
-        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaTargetProperties, retryTemplate, this.objectMapper)
+        this.kafkaMtbFileSender = KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.objectMapper)
 
         doAnswer {
             if (null != testData.exception) {
