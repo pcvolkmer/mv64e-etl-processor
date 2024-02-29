@@ -38,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.MockBeans
 import org.springframework.context.ApplicationContext
+import org.springframework.retry.support.RetryTemplate
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.test.context.ContextConfiguration
@@ -272,6 +273,32 @@ class AppConfigurationTest {
                 assertThrows<NoSuchBeanDefinitionException> { context.getBean(TokenService::class.java) }
             }
 
+        }
+
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties = [
+            "app.rest.uri=http://localhost:9000",
+            "app.max-retry-attempts=5"
+        ]
+    )
+    inner class AppConfigurationRetryTest(private val context: ApplicationContext) {
+
+        private val maxRetryAttempts = 5
+
+        @Test
+        fun shouldUseRetryTemplateWithConfiguredMaxAttempts() {
+            val retryTemplate = context.getBean(RetryTemplate::class.java)
+            assertThat(retryTemplate).isNotNull
+
+            assertThrows<RuntimeException> {
+                retryTemplate.execute<Void, RuntimeException> {
+                    assertThat(it.retryCount).isLessThan(maxRetryAttempts)
+                    throw RuntimeException()
+                }
+            }
         }
 
     }
