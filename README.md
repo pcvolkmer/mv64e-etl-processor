@@ -167,8 +167,10 @@ Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das
 
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein Kafka-Topic übermittelt wird:
 
-* `APP_KAFKA_TOPIC`: Zu verwendendes Topic zum Versenden von Anfragen
-* `APP_KAFKA_RESPONSE_TOPIC`: Topic mit Antworten über den Erfolg des Versendens. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_response".
+* `APP_KAFKA_OUTPUT_TOPIC`: Zu verwendendes Topic zum Versenden von Anfragen. 
+  Ersetzt in einer kommenden Version `APP_KAFKA_TOPIC`. 
+* `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`: Topic mit Antworten über den Erfolg des Versendens. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_response".
+  Ersetzt in einer kommenden Version `APP_KAFKA_RESPONSE_TOPIC`.
 * `APP_KAFKA_GROUP_ID`: Kafka GroupID des Consumers. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_group".
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 
@@ -178,6 +180,8 @@ Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert 
 
 Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
 für HTTP nicht gibt.
+
+Wird die Umgebungsvariable `APP_KAFKA_INPUT_TOPIC` gesetzt, kann eine Nachricht auch über dieses Kafka-Topic an den ETL-Prozessor übermittelt werden.
 
 ##### Retention Time
 
