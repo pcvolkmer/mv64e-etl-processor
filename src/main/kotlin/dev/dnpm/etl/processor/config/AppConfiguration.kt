@@ -113,11 +113,11 @@ class AppConfiguration {
     }
 
     @Bean
-    fun retryTemplate(): RetryTemplate {
+    fun retryTemplate(configProperties: AppConfigProperties): RetryTemplate {
         return RetryTemplateBuilder()
             .notRetryOn(IllegalArgumentException::class.java)
             .exponentialBackoff(2.seconds.toJavaDuration(), 1.25, 5.seconds.toJavaDuration())
-            .customPolicy(SimpleRetryPolicy(3))
+            .customPolicy(SimpleRetryPolicy(configProperties.maxRetryAttempts))
             .withListener(object : RetryListener {
                 override fun <T : Any, E : Throwable> onError(
                     context: RetryContext,

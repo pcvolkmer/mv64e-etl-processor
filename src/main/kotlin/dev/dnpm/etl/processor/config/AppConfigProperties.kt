@@ -30,7 +30,8 @@ data class AppConfigProperties(
         replacement = "app.pseudonymize.generator"
     )
     var pseudonymizer: PseudonymGenerator = PseudonymGenerator.BUILDIN,
-    var transformations: List<TransformationProperties> = listOf()
+    var transformations: List<TransformationProperties> = listOf(),
+    var maxRetryAttempts: Int = 3
 ) {
     companion object {
         const val NAME = "app"
