@@ -22,9 +22,12 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
+import dev.dnpm.etl.processor.security.Role
+import dev.dnpm.etl.processor.security.UserRole
 import dev.dnpm.etl.processor.services.Token
 import dev.dnpm.etl.processor.services.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
+import dev.dnpm.etl.processor.services.UserRoleService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
@@ -43,7 +46,8 @@ class ConfigController(
     private val pseudonymGenerator: Generator,
     private val mtbFileSender: MtbFileSender,
     private val connectionCheckService: ConnectionCheckService,
-    private val tokenService: TokenService?
+    private val tokenService: TokenService?,
+    private val userRoleService: UserRoleService?
 ) {
 
     @GetMapping
@@ -56,10 +60,16 @@ class ConfigController(
         if (tokenService != null) {
             model.addAttribute("tokens", tokenService.findAll())
         } else {
-            model.addAttribute("tokens", listOf<Token>())
+            model.addAttribute("tokens", emptyList<Token>())
         }
         model.addAttribute("transformations", transformationService.getTransformations())
-
+        if (userRoleService != null) {
+            model.addAttribute("userRolesEnabled", true)
+            model.addAttribute("userRoles", userRoleService.findAll())
+        } else {
+            model.addAttribute("userRolesEnabled", false)
+            model.addAttribute("userRoles", emptyList<UserRole>())
+        }
         return "configs"
     }
 
@@ -110,6 +120,34 @@ class ConfigController(
             model.addAttribute("tokens", listOf<Token>())
         }
         return "configs/tokens"
+    }
+
+    @DeleteMapping(path = ["userroles/{id}"])
+    fun deleteUserRole(@PathVariable id: Long, model: Model): String {
+        if (userRoleService != null) {
+            userRoleService.deleteUserRole(id)
+
+            model.addAttribute("userRolesEnabled", true)
+            model.addAttribute("userRoles", userRoleService.findAll())
+        } else {
+            model.addAttribute("userRolesEnabled", false)
+            model.addAttribute("userRoles", emptyList<UserRole>())
+        }
+        return "configs/userroles"
+    }
+
+    @PutMapping(path = ["userroles/{id}"])
+    fun updateUserRole(@PathVariable id: Long, @ModelAttribute("role") role: Role, model: Model): String {
+        if (userRoleService != null) {
+            userRoleService.updateUserRole(id, role)
+
+            model.addAttribute("userRolesEnabled", true)
+            model.addAttribute("userRoles", userRoleService.findAll())
+        } else {
+            model.addAttribute("userRolesEnabled", false)
+            model.addAttribute("userRoles", emptyList<UserRole>())
+        }
+        return "configs/userroles"
     }
 
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])

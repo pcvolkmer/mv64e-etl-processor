@@ -19,6 +19,9 @@
 
 package dev.dnpm.etl.processor.config
 
+import dev.dnpm.etl.processor.security.UserRole
+import dev.dnpm.etl.processor.security.UserRoleRepository
+import dev.dnpm.etl.processor.services.UserRoleService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -27,10 +30,15 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
+import org.springframework.security.core.session.SessionRegistry
+import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 import java.util.*
@@ -77,12 +85,19 @@ class AppSecurityConfiguration(
 
     @Bean
     @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "true")
-    fun filterChainOidc(http: HttpSecurity, passwordEncoder: PasswordEncoder): SecurityFilterChain {
+    fun filterChainOidc(http: HttpSecurity, passwordEncoder: PasswordEncoder, userRoleRepository: UserRoleRepository, sessionRegistry: SessionRegistry): SecurityFilterChain {
         http {
             authorizeRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
                 authorize("/mtbfile/**", hasAnyRole("MTBFILE"))
-                authorize("/report/**", fullyAuthenticated)
+                authorize("/report/**", hasAnyRole("ADMIN", "USER"))
+                authorize("*.css", permitAll)
+                authorize("*.ico", permitAll)
+                authorize("*.jpeg", permitAll)
+                authorize("*.js", permitAll)
+                authorize("*.svg", permitAll)
+                authorize("*.css", permitAll)
+                authorize("/login/**", permitAll)
                 authorize(anyRequest, permitAll)
             }
             httpBasic {
@@ -94,9 +109,37 @@ class AppSecurityConfiguration(
             oauth2Login {
                 loginPage = "/login"
             }
+            sessionManagement {
+                sessionConcurrency {
+                    maximumSessions = 1
+                    maxSessionsPreventsLogin = true
+                    expiredUrl = "/login?expired"
+                }
+                sessionFixation {
+                    newSession()
+                }
+            }
             csrf { disable() }
         }
         return http.build()
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "true")
+    fun grantedAuthoritiesMapper(userRoleRepository: UserRoleRepository, appSecurityConfigProperties: SecurityConfigProperties): GrantedAuthoritiesMapper {
+        return GrantedAuthoritiesMapper { grantedAuthority ->
+            grantedAuthority.filterIsInstance<OidcUserAuthority>()
+                .onEach {
+                    val userRole = userRoleRepository.findByUsername(it.userInfo.preferredUsername)
+                    if (userRole.isEmpty) {
+                        userRoleRepository.save(UserRole(null, it.userInfo.preferredUsername, appSecurityConfigProperties.defaultNewUserRole))
+                    }
+                }
+                .map {
+                    val userRole = userRoleRepository.findByUsername(it.userInfo.preferredUsername)
+                    SimpleGrantedAuthority("ROLE_${userRole.get().role.toString().uppercase()}")
+                }
+        }
     }
 
     @Bean
@@ -121,9 +164,18 @@ class AppSecurityConfiguration(
     }
 
     @Bean
+    fun sessionRegistry(): SessionRegistry {
+        return SessionRegistryImpl()
+    }
+
+    @Bean
     fun passwordEncoder(): PasswordEncoder {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 
+    @Bean
+    @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "true")
+    fun userRoleService(userRoleRepository: UserRoleRepository, sessionRegistry: SessionRegistry): UserRoleService {
+        return UserRoleService(userRoleRepository, sessionRegistry)
+    }
 }
-

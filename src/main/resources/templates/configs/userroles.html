@@ -1,0 +1,39 @@
+<div th:if="${not userRolesEnabled}">
+    <h2><span>⛔</span> Benutzerberechtigungen</h2>
+    <p>Die Verwendung von rollenbasierten Benutzerberechtigungen ist nicht aktiviert.</p>
+</div>
+
+<div id="userroles" th:if="${userRolesEnabled}">
+    <h2><span>✅</span> Benutzerberechtigungen</h2>
+    <div class="border">
+        <div th:if="${userRoles.isEmpty()}">Noch keine Benutzerberechtigungen vorhanden.</div>
+        <table th:if="${not userRoles.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>Benutzername</th>
+                    <th>Rolle</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="userRole : ${userRoles}">
+                    <td>[[ ${userRole.username} ]]</td>
+                    <td>
+                        <div class="userrole-form">
+                            <form th:hx-put="@{/configs/userroles/{id}(id=${userRole.id})}" hx-target="#userroles">
+                                <select name="role">
+                                    <option th:selected="${userRole.role.value == 'guest'}" value="GUEST">Gast</option>
+                                    <option th:selected="${userRole.role.value == 'user'}" value="USER">Benutzer</option>
+                                </select>
+                                <button class="btn btn-blue">Übernehmen</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-red" th:hx-delete="@{/configs/userroles/{id}(id=${userRole.id})}" hx-target="#userroles">Löschen</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -40,6 +40,9 @@
         <section th:insert="~{configs/tokens.html}">
         </section>
 
+        <section th:insert="~{configs/userroles.html}">
+        </section>
+
         <section hx-ext="sse" th:sse-connect="@{/configs/events}">
             <div th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="sse:connection-available">
             </div>

@@ -114,6 +114,23 @@ Weitere Informationen zur Konfiguration des OIDC-Providers
 sind [hier](https://docs.spring.io/spring-security/reference/servlet/oauth2/index.html#oauth2-client)
 zu finden.
 
+#### Rollenbasierte Berechtigungen
+
+Wird OpenID Connect verwendet, gibt es eine rollenbasierte Berechtigungszuweisung. 
+
+Die Standardrolle für neue OIDC-Benutzer kann mit der Option `APP_SECURITY_DEFAULT_USER_ROLE` festgelegt werden.
+Mögliche Werte sind `user` oder `guest`. Standardwert ist `user`.
+
+Benutzer mit der Rolle "Gast" sehen nur die Inhalte, die auch nicht angemeldete Benutzer sehen.
+
+Hierdurch ist es möglich, einzelne Benutzer einzuschränken oder durch Änderung der Standardrolle auf `guest` nur
+einzelne Benutzer als vollwertige Nutzer zuzulassen.
+
+![Rollenverwaltung](docs/userroles.png)
+
+Benutzer werden nach dem Entfernen oder der Änderung der vergebenen Rolle automatisch abgemeldet und müssen sich neu anmelden.
+Sie bekommen dabei wieder die Standardrolle zugewiesen.
+
 #### Auswirkungen auf den dargestellten Inhalt
 
 Nur Administratoren haben Zugriff auf den Konfigurationsbereich, nur angemeldete Benutzer können die anonymisierte oder

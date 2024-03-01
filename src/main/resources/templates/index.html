@@ -53,17 +53,17 @@
                         <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
                         <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
                         <td th:if="${request.report}">
-                            <th:block sec:authorize="not authenticated">[[ ${request.uuid} ]]</th:block>
-                            <a th:href="@{/report/{id}(id=${request.uuid})}" sec:authorize="authenticated">[[ ${request.uuid} ]]</a>
+                            <a th:href="@{/report/{id}(id=${request.uuid})}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">[[ ${request.uuid} ]]</a>
+                            <th:block sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">[[ ${request.uuid} ]]</th:block>
                         </td>
                         <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
-                        <td class="patient-id" th:if="${patientId != null}" sec:authorize="authenticated">
+                        <td class="patient-id" th:if="${patientId != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
                             [[ ${request.patientId} ]]
                         </td>
-                        <td class="patient-id" th:if="${patientId == null}" sec:authorize="authenticated">
+                        <td class="patient-id" th:if="${patientId == null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
                             <a th:href="@{/patient/{pid}(pid=${request.patientId})}">[[ ${request.patientId} ]]</a>
                         </td>
-                        <td class="patient-id" sec:authorize="not authenticated">***</td>
+                        <td class="patient-id" sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">***</td>
                     </tr>
                 </tbody>
             </table>
