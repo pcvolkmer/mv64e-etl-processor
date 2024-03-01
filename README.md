@@ -15,6 +15,11 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
+### Duplikaterkennung
+
+Die Erkennung von Duplikaten ist normalerweise immer aktiv, kann jedoch über den Konfigurationsparameter
+`APP_DUPLICATION_DETECTION=false` deaktiviert werden.
+
 ### Datenübermittlung über HTTP/REST
 
 Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an das bwHC-Backend gesendet.
