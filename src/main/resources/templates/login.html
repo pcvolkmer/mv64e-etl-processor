@@ -11,6 +11,7 @@
         <div class="login-form">
             <h2 class="centered">Anmelden</h2>
             <div class="centered notification error" th:if="${param.error}">Anmeldung nicht erfolgreich</div>
+            <div class="centered notification notice" th:if="${param.expired}">Sitzung abgelaufen oder von einem Administrator beendet.</div>
             <div class="centered notification success" th:if="${param.logout}">Sie haben sich abgemeldet</div>
             <form method="post" th:action="@{/login}">
                 <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="" autofocus="" />

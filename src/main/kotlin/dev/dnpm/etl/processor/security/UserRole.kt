@@ -23,13 +23,13 @@ package dev.dnpm.etl.processor.security
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
-import java.util.Optional
+import java.util.*
 
 @Table("user_role")
 data class UserRole(
     @Id val id: Long? = null,
     val username: String,
-    val role: Role = Role.GUEST
+    var role: Role = Role.GUEST
 )
 
 enum class Role(val value: String) {

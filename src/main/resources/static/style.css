@@ -202,6 +202,17 @@ form.samplecode-input input:focus-visible {
     background: none;
 }
 
+.userrole-form form {
+    margin: 0;
+    padding: 0;
+
+    border: none;
+    border-radius: 0;
+    background: none;
+
+    text-align: inherit;
+}
+
 .login-form form *,
 .token-form form * {
     padding: 0.5em;
@@ -210,7 +221,8 @@ form.samplecode-input input:focus-visible {
 }
 
 .login-form form hr,
-.token-form form hr {
+.token-form form hr,
+.userrole-form form hr {
     padding: 0;
     width: 100%;
 }
@@ -222,6 +234,14 @@ form.samplecode-input input:focus-visible {
     background: var(--bg-blue);
     color: white;
     border: none;
+}
+
+.userrole-form form select {
+    padding: 0.5em;
+    border: none;
+    border-radius: 3px;
+    line-height: 1.2rem;
+    font-size: 0.8rem;
 }
 
 .border {
@@ -525,6 +545,10 @@ input.inline:focus-visible {
 
 .notification.success {
     color: var(--bg-green);
+}
+
+.notification.notice {
+    color: var(--bg-yellow);
 }
 
 .notification.error {
