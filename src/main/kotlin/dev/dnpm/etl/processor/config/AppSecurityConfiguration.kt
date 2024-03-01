@@ -19,7 +19,6 @@
 
 package dev.dnpm.etl.processor.config
 
-import dev.dnpm.etl.processor.security.Role
 import dev.dnpm.etl.processor.security.UserRole
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import org.slf4j.LoggerFactory
@@ -114,13 +113,13 @@ class AppSecurityConfiguration(
 
     @Bean
     @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "true")
-    fun grantedAuthoritiesMapper(userRoleRepository: UserRoleRepository): GrantedAuthoritiesMapper {
+    fun grantedAuthoritiesMapper(userRoleRepository: UserRoleRepository, appSecurityConfigProperties: SecurityConfigProperties): GrantedAuthoritiesMapper {
         return GrantedAuthoritiesMapper { grantedAuthority ->
             grantedAuthority.filterIsInstance<OidcUserAuthority>()
                 .onEach {
                     val userRole = userRoleRepository.findByUsername(it.userInfo.preferredUsername)
                     if (userRole.isEmpty) {
-                        userRoleRepository.save(UserRole(null, it.userInfo.preferredUsername, Role.GUEST))
+                        userRoleRepository.save(UserRole(null, it.userInfo.preferredUsername, appSecurityConfigProperties.defaultNewUserRole))
                     }
                 }
                 .map {

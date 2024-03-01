@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.config
 
+import dev.dnpm.etl.processor.security.Role
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty
 
@@ -102,7 +103,8 @@ data class SecurityConfigProperties(
     val adminUser: String?,
     val adminPassword: String?,
     val enableTokens: Boolean = false,
-    val enableOidc: Boolean = false
+    val enableOidc: Boolean = false,
+    val defaultNewUserRole: Role = Role.USER
 ) {
     companion object {
         const val NAME = "app.security"
