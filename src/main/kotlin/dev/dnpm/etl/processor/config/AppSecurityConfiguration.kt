@@ -112,7 +112,6 @@ class AppSecurityConfiguration(
             sessionManagement {
                 sessionConcurrency {
                     maximumSessions = 1
-                    maxSessionsPreventsLogin = true
                     expiredUrl = "/login?expired"
                 }
                 sessionFixation {
