@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -42,7 +43,8 @@ class RequestProcessor(
     private val sender: MtbFileSender,
     private val requestService: RequestService,
     private val objectMapper: ObjectMapper,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val appConfigProperties: AppConfigProperties
 ) {
 
     fun processMtbFile(mtbFile: MtbFile) {
@@ -64,7 +66,7 @@ class RequestProcessor(
             )
         )
 
-        if (isDuplication(mtbFile)) {
+        if (appConfigProperties.duplicationDetection && isDuplication(mtbFile)) {
             applicationEventPublisher.publishEvent(
                 ResponseEvent(
                     requestId,

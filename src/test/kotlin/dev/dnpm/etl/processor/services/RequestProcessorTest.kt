@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
@@ -51,6 +52,7 @@ class RequestProcessorTest {
     private lateinit var sender: MtbFileSender
     private lateinit var requestService: RequestService
     private lateinit var applicationEventPublisher: ApplicationEventPublisher
+    private lateinit var appConfigProperties: AppConfigProperties
 
     private lateinit var requestProcessor: RequestProcessor
 
@@ -67,6 +69,7 @@ class RequestProcessorTest {
         this.sender = sender
         this.requestService = requestService
         this.applicationEventPublisher = applicationEventPublisher
+        this.appConfigProperties = AppConfigProperties(null)
 
         val objectMapper = ObjectMapper()
 
@@ -76,7 +79,8 @@ class RequestProcessorTest {
             sender,
             requestService,
             objectMapper,
-            applicationEventPublisher
+            applicationEventPublisher,
+            appConfigProperties
         )
     }
 
@@ -388,6 +392,54 @@ class RequestProcessorTest {
         verify(requestService, times(1)).save(requestCaptor.capture())
         assertThat(requestCaptor.firstValue).isNotNull
         assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+    }
+
+    @Test
+    fun testShouldNotDetectMtbFileDuplicationIfDuplicationNotConfigured() {
+        this.appConfigProperties.duplicationDetection = false
+
+        doAnswer {
+            it.arguments[0] as String
+        }.`when`(pseudonymizeService).patientPseudonym(any())
+
+        doAnswer {
+            it.arguments[0]
+        }.whenever(transformationService).transform(any())
+
+        doAnswer {
+            MtbFileSender.Response(status = RequestStatus.SUCCESS)
+        }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
+
+        val mtbFile = MtbFile.builder()
+            .withPatient(
+                Patient.builder()
+                    .withId("1")
+                    .withBirthDate("2000-08-08")
+                    .withGender(Patient.Gender.MALE)
+                    .build()
+            )
+            .withConsent(
+                Consent.builder()
+                    .withId("1")
+                    .withStatus(Consent.Status.ACTIVE)
+                    .withPatient("123")
+                    .build()
+            )
+            .withEpisode(
+                Episode.builder()
+                    .withId("1")
+                    .withPatient("1")
+                    .withPeriod(PeriodStart("2023-08-08"))
+                    .build()
+            )
+            .build()
+
+        this.requestProcessor.processMtbFile(mtbFile)
+
+        val eventCaptor = argumentCaptor<ResponseEvent>()
+        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+        assertThat(eventCaptor.firstValue).isNotNull
+        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
     }
 
 }
