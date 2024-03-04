@@ -449,7 +449,7 @@ td.clipboard.clipped {
 }
 
 .btn.btn-red:hover, .btn.btn-red:active {
-    background: darkred !important;
+    background: darkred;
 }
 
 .btn.btn-blue {
@@ -458,12 +458,20 @@ td.clipboard.clipped {
 }
 
 .btn.btn-blue:hover, .btn.btn-blue:active {
-    background: darkslategray !important;
+    background: darkslategray;
 }
 
 .btn.btn-delete:before {
     content: '\1F5D1';
     padding: .2rem;
+}
+
+button:disabled,
+.btn:disabled {
+    background: slategray !important;
+    color: lightgray;
+    filter: none;
+    cursor: default;
 }
 
 input.inline {
