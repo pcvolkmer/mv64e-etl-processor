@@ -7,10 +7,12 @@
 <body>
     <div th:fragment="nav">
         <nav>
-            <a class="nav-home" th:href="@{/}">
-                <img th:src="@{/icon.svg}" alt="Icon" />
-                <span>ETL-Processor</span>
-            </a>
+            <span>
+                <a class="nav-home" th:href="@{/}">
+                    <img th:src="@{/icon.svg}" alt="Icon" />
+                    <span>ETL-Processor</span>
+                </a>
+            </span>
             <ul>
                 <li><a th:href="@{/}">Übersicht</a></li>
                 <li><a th:href="@{/statistics}">Statistiken</a></li>
@@ -18,15 +20,19 @@
                     <a th:href="@{/configs}">Konfiguration</a>
                 </li>
                 <li class="login" sec:authorize="not isAuthenticated()">
-                    <a th:href="@{/login}">Login</a>
+                    <a class="btn btn-blue" th:href="@{/login}">Login</a>
                 </li>
                 <li class="login" sec:authorize="isAuthenticated()">
                     <span>
-                        <span>👤</span>
-                        <span sec:authentication="name">?</span>
+                        <div class="user-icon">
+                            <img th:src="@{user.svg}" alt="User-Image">
+                            <span sec:authorize="hasRole('ADMIN')" class="user-role admin">Admin</span>
+                            <span sec:authorize="hasRole('USER')" class="user-role user">User</span>
+                            <span sec:authorize="hasRole('GUEST')" class="user-role guest">Guest</span>
+                        </div>
+                        <span class="user-name" sec:authentication="name">?</span>
                     </span>
-                    &nbsp;
-                    <a th:href="@{/logout}">Abmelden</a>
+                    <a class="btn btn-red" th:href="@{/logout}">Abmelden</a>
                 </li>
             </ul>
         </nav>
