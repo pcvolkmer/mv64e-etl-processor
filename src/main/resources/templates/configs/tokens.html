@@ -7,19 +7,20 @@
     <h2><span>✅</span> Tokens</h2>
     <div class="border">
         <div th:if="${tokens.isEmpty()}">Noch keine Tokens vorhanden.</div>
-        <table th:if="${not tokens.isEmpty()}">
+        <table th:if="${not tokens.isEmpty()}" class="config-table">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Erstellt</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="token : ${tokens}">
                     <td>[[ ${token.name} ]]</td>
-                    <td><time th:datetime="${token.createdAt}">[[ ${token.createdAt} ]]</time></td>
-                    <td><button class="btn btn-red" th:hx-delete="@{/configs/tokens/{id}(id=${token.id})}" hx-target="#tokens">Löschen</button></td>
+                    <td>
+                        <time th:datetime="${token.createdAt}">[[ ${token.createdAt} ]]</time>
+                        <button class="btn btn-red" th:hx-delete="@{/configs/tokens/{id}(id=${token.id})}" hx-target="#tokens">Löschen</button>
+                    </td>
                 </tr>
             </tbody>
         </table>

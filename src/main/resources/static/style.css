@@ -257,6 +257,10 @@ form.samplecode-input input:focus-visible {
     display: block;
 }
 
+.userrole-form {
+    display: inline-block;
+}
+
 .userrole-form form {
     margin: 0;
     padding: 0;
@@ -319,6 +323,15 @@ table, .chart {
 table {
     min-width: 100%;
     font-family: sans-serif;
+}
+
+table.config-table td:first-child {
+    width: 24em;
+    min-width: fit-content;
+}
+
+table.config-table td > button:last-of-type {
+    float: right;
 }
 
 .border > table {
