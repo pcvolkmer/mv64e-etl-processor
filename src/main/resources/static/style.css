@@ -490,7 +490,7 @@ td.clipboard.clipped {
 
 .btn:active,
 .btn:hover {
-    filter: drop-shadow(1px 1px 1px gray) var(--dark);
+    filter: drop-shadow(0px 1px 1px var(--bg-gray)) var(--dark);
 }
 
 .btn:active {
@@ -555,15 +555,24 @@ input.inline:focus-visible {
     font-weight: bold;
 }
 
-.chart {
-    width: calc(100% - 2.4rem - 4px);
-    height: 320px;
-
-    display: inline-block;
+.charts {
+    display: grid;
+    grid-gap: 1em;
+    grid-template:
+            "a b" 28em
+            "c c" 28em / 1fr 1fr;
 }
 
-.chart-50pc {
-    width: calc(50% - 2.4rem - 4px);
+.charts > .grid-left {
+    grid-area: a;
+}
+
+.charts > .grid-right {
+    grid-area: b;
+}
+
+.charts > .grid-full {
+    grid-area: c;
 }
 
 .connection-display {
@@ -571,7 +580,7 @@ input.inline:focus-visible {
     grid-template-columns: 10em 16em 10em;
     place-items: center;
     width: fit-content;
-    margin: 1em 0;
+    margin: 1em auto;
 }
 
 .connection-display > * {
