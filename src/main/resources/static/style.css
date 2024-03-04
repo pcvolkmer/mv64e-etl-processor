@@ -2,6 +2,8 @@
     --text: #333;
     --table-border: rgba(16, 24, 40, .1);
 
+    --dark: brightness(.90);
+
     --bg-blue: rgb(0, 74, 157);
     --bg-blue-op: rgba(0, 74, 157, .35);
 
@@ -249,6 +251,12 @@ form.samplecode-input input:focus-visible {
     background: none;
 }
 
+.login-form img {
+    margin: 0 auto;
+    width: 4em;
+    display: block;
+}
+
 .userrole-form form {
     margin: 0;
     padding: 0;
@@ -469,7 +477,6 @@ td.clipboard.clipped {
     padding: 4px 8px;
 
     line-height: 1.2rem;
-    vertical-align: middle;
 
     border: 0 solid transparent;
     border-radius: 3px;
@@ -481,31 +488,23 @@ td.clipboard.clipped {
     cursor: pointer;
 }
 
+.btn:active,
 .btn:hover {
-    filter: drop-shadow(1px 2px 2px gray);
+    filter: drop-shadow(1px 1px 1px gray) var(--dark);
 }
 
 .btn:active {
-    filter: drop-shadow(1px 1px 2px gray);
     translate: 0 1px;
 }
 
 .btn.btn-red {
-    background: red;
+    background: var(--bg-red);
     color: white;
-}
-
-.btn.btn-red:hover, .btn.btn-red:active {
-    background: darkred;
 }
 
 .btn.btn-blue {
-    background: slategray;
+    background: var(--bg-blue);
     color: white;
-}
-
-.btn.btn-blue:hover, .btn.btn-blue:active {
-    background: darkslategray;
 }
 
 .btn.btn-delete:before {

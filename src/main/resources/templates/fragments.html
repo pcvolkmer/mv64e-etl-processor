@@ -25,7 +25,7 @@
                 <li class="login" sec:authorize="isAuthenticated()">
                     <span>
                         <div class="user-icon">
-                            <img th:src="@{user.svg}" alt="User-Image">
+                            <img th:src="@{/user.svg}" alt="User-Image">
                             <span sec:authorize="hasRole('ADMIN')" class="user-role admin">Admin</span>
                             <span sec:authorize="hasRole('USER')" class="user-role user">User</span>
                             <span sec:authorize="hasRole('GUEST')" class="user-role guest">Guest</span>
