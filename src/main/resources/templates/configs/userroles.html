@@ -21,16 +21,17 @@
                     <td>
                         <div class="userrole-form">
                             <form th:hx-put="@{/configs/userroles/{id}(id=${userRole.id})}" hx-target="#userroles">
-                                <select name="role">
+                                <select name="role" th:disabled="${#authorization.authentication.getName() == userRole.username}">
                                     <option th:selected="${userRole.role.value == 'guest'}" value="GUEST">Gast</option>
                                     <option th:selected="${userRole.role.value == 'user'}" value="USER">Benutzer</option>
+                                    <option th:selected="${userRole.role.value == 'admin'}" value="ADMIN">Administrator</option>
                                 </select>
-                                <button class="btn btn-blue">Übernehmen</button>
+                                <button class="btn btn-blue" th:disabled="${#authorization.authentication.getName() == userRole.username}">Übernehmen</button>
                             </form>
                         </div>
                     </td>
                     <td>
-                        <button class="btn btn-red" th:hx-delete="@{/configs/userroles/{id}(id=${userRole.id})}" hx-target="#userroles">Löschen</button>
+                        <button class="btn btn-red" th:hx-delete="@{/configs/userroles/{id}(id=${userRole.id})}" hx-target="#userroles" th:disabled="${#authorization.authentication.getName() == userRole.username}">Löschen</button>
                     </td>
                 </tr>
             </tbody>

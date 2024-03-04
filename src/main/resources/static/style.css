@@ -40,7 +40,7 @@ body {
 
 nav {
     margin: 0 auto;
-    padding: 2em 0;
+    padding: 1em 0;
 
     line-height: 1.5rem;
     max-width: 1140px;
@@ -48,18 +48,18 @@ nav {
     border-bottom: 1px solid var(--table-border);
 }
 
-nav > a.nav-home {
+nav a.nav-home {
     float: left;
 
     color: var(--text);
     line-height: 1.5em;
     text-decoration: none;
 
-    font-size: 1.5em;
+    font-size: 2em;
     font-weight: bold;
 }
 
-nav > a.nav-home > img {
+nav a.nav-home > img {
     width: 1.5em;
     vertical-align: middle;
 }
@@ -80,6 +80,57 @@ nav > ul > li.login {
     margin: 0 0 0 1em;
     padding: 0 0 0 2em;
     border-left: 1px solid var(--table-border);
+    line-height: 3.5em;
+}
+
+nav > ul > li.login a {
+    text-decoration: none;
+    text-transform: none;
+    padding: 1em;
+}
+
+nav .login .user-name {
+    font-weight: bold;
+}
+
+nav > ul > li.login > span {
+    display: inline-block;
+    margin: 0 .5em;
+}
+
+nav > ul > li.login .user-icon {
+    flex-direction: column;
+    display: inline flex;
+    vertical-align: middle;
+    inline-size: 4em;
+}
+
+nav > ul > li.login .user-icon img {
+    margin: 0 0 -1em 0;
+    width: 80%;
+    align-self: center;
+}
+
+nav > ul > li.login .user-icon span {
+    padding: 0 .6em;
+    color: white;
+    font-size: .8em;
+    font-weight: bold;
+    border-radius: 4px;
+    line-height: normal;
+    text-align: center;
+}
+
+nav > ul > li.login .user-icon span.guest {
+    background: darkslategray;
+}
+
+nav > ul > li.login .user-icon span.user {
+    background: darkgreen;
+}
+
+nav > ul > li.login .user-icon span.admin {
+    background: darkred;
 }
 
 nav li a {
@@ -87,10 +138,6 @@ nav li a {
     text-transform: uppercase;
     text-decoration: none;
     font-weight: 700;
-}
-
-nav li.login a {
-    color: var(--bg-red);
 }
 
 nav li a:hover {
@@ -449,7 +496,7 @@ td.clipboard.clipped {
 }
 
 .btn.btn-red:hover, .btn.btn-red:active {
-    background: darkred !important;
+    background: darkred;
 }
 
 .btn.btn-blue {
@@ -458,12 +505,20 @@ td.clipboard.clipped {
 }
 
 .btn.btn-blue:hover, .btn.btn-blue:active {
-    background: darkslategray !important;
+    background: darkslategray;
 }
 
 .btn.btn-delete:before {
     content: '\1F5D1';
     padding: .2rem;
+}
+
+button:disabled,
+.btn:disabled {
+    background: slategray !important;
+    color: lightgray;
+    filter: none;
+    cursor: default;
 }
 
 input.inline {

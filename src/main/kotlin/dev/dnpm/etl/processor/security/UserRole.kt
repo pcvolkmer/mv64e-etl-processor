@@ -34,7 +34,8 @@ data class UserRole(
 
 enum class Role(val value: String) {
     GUEST("guest"),
-    USER("user")
+    USER("user"),
+    ADMIN("admin")
 }
 
 interface UserRoleRepository : CrudRepository<UserRole, Long> {
