@@ -67,11 +67,13 @@ public class GpasPseudonymGenerator implements Generator {
     private final RetryTemplate retryTemplate;
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
 
+    private final RestTemplate restTemplate;
+
     private SSLContext customSslContext;
-    private RestTemplate restTemplate;
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate) {
         this.retryTemplate = retryTemplate;
+        this.restTemplate = getRestTemplete();
 
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
@@ -139,7 +141,6 @@ public class GpasPseudonymGenerator implements Generator {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(gPasRequestBody, this.httpHeader);
         ResponseEntity<String> responseEntity;
-        var restTemplate = getRestTemplete();
 
         try {
             responseEntity = retryTemplate.execute(
@@ -226,14 +227,8 @@ public class GpasPseudonymGenerator implements Generator {
     }
 
     protected RestTemplate getRestTemplete() {
-
-        if (restTemplate != null) {
-            return restTemplate;
-        }
-
         if (customSslContext == null) {
-            restTemplate = new RestTemplate();
-            return restTemplate;
+            return new RestTemplate();
         }
         final var sslsf = new SSLConnectionSocketFactory(customSslContext);
         final Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
@@ -246,7 +241,6 @@ public class GpasPseudonymGenerator implements Generator {
 
         final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(
             httpClient);
-        restTemplate = new RestTemplate(requestFactory);
-        return restTemplate;
+        return new RestTemplate(requestFactory);
     }
 }
