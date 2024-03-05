@@ -7,12 +7,11 @@
     <h2><span>✅</span> Benutzerberechtigungen</h2>
     <div class="border">
         <div th:if="${userRoles.isEmpty()}">Noch keine Benutzerberechtigungen vorhanden.</div>
-        <table th:if="${not userRoles.isEmpty()}">
+        <table th:if="${not userRoles.isEmpty()}" class="config-table">
             <thead>
                 <tr>
                     <th>Benutzername</th>
                     <th>Rolle</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -29,8 +28,6 @@
                                 <button class="btn btn-blue" th:disabled="${#authorization.authentication.getName() == userRole.username}">Übernehmen</button>
                             </form>
                         </div>
-                    </td>
-                    <td>
                         <button class="btn btn-red" th:hx-delete="@{/configs/userroles/{id}(id=${userRole.id})}" hx-target="#userroles" th:disabled="${#authorization.authentication.getName() == userRole.username}">Löschen</button>
                     </td>
                 </tr>

@@ -257,6 +257,10 @@ form.samplecode-input input:focus-visible {
     display: block;
 }
 
+.userrole-form {
+    display: inline-block;
+}
+
 .userrole-form form {
     margin: 0;
     padding: 0;
@@ -319,6 +323,15 @@ table, .chart {
 table {
     min-width: 100%;
     font-family: sans-serif;
+}
+
+table.config-table td:first-child {
+    width: 24em;
+    min-width: fit-content;
+}
+
+table.config-table td > button:last-of-type {
+    float: right;
 }
 
 .border > table {
@@ -616,6 +629,32 @@ input.inline:focus-visible {
 
 .notification.error {
     color: var(--bg-red);
+}
+
+.tab {
+    padding: 1em;
+    border: none;
+    border-radius: 3px 3px 0 0;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    font-weight: bold;
+}
+
+.tab:hover,
+.tab.active {
+    background: var(--table-border);
+}
+
+.tabcontent {
+    border: 1px solid var(--table-border);
+    border-radius: 0 .5em .5em .5em;
+    display: none;
+    padding: 1em;
+}
+
+.tabcontent.active {
+    display: block;
 }
 
 a.reload {
