@@ -10,90 +10,111 @@
     <main>
         <h1>Konfiguration</h1>
 
-        <section>
-            <h2>🔧 Allgemeine Konfiguration</h2>
-            <table class="config-table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Wert</th>
-                </tr>
-                </thead>
-                <tbody>
+        <div class="tabs">
+            <button class="tab active" onclick="selectTab(this, 'common');">Allgemeine Informationen</button>
+            <button class="tab" onclick="selectTab(this, 'security');">Sicherheit</button>
+            <button class="tab" onclick="selectTab(this, 'transformation');">Transformationen</button>
+        </div>
+
+        <div id="common" class="tabcontent active">
+            <section>
+                <h2>🔧 Allgemeine Konfiguration</h2>
+                <table class="config-table">
+                    <thead>
                     <tr>
-                        <td>Pseudonym erzeugt über</td>
-                        <td>[[ ${pseudonymGenerator} ]]</td>
+                        <th>Name</th>
+                        <th>Wert</th>
                     </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Pseudonym erzeugt über</td>
+                            <td>[[ ${pseudonymGenerator} ]]</td>
+                        </tr>
+                        <tr>
+                            <td>MTBFile-Sender</td>
+                            <td>[[ ${mtbFileSender} ]]</td>
+                        </tr>
+                        <tr>
+                            <td th:if="${mtbFileSender.startsWith('Rest')}">REST-Endpunkt</td>
+                            <td th:if="${mtbFileSender.startsWith('Kafka')}">Kafka-Broker und Topics</td>
+                            <td>[[ ${mtbFileEndpoint} ]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section hx-ext="sse" th:sse-connect="@{/configs/events}">
+                <div th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="sse:connection-available">
+                </div>
+            </section>
+        </div>
+
+        <div id="security" class="tabcontent">
+            <section th:insert="~{configs/tokens.html}">
+            </section>
+
+            <section th:insert="~{configs/userroles.html}">
+            </section>
+        </div>
+
+        <div id="transformation" class="tabcontent">
+            <section>
+                <h2><span th:if="${not transformations.isEmpty()}">✅</span><span th:if="${transformations.isEmpty()}">⛔</span> Transformationen</h2>
+
+                <h3>Syntax</h3>
+                Hier einige Beispiele zum Syntax des JSON-Path
+                <ul>
+                    <li style="padding: 0.6rem 0;"><span class="bg-path">diagnoses[*].icdO3T.version</span>: Ersetze die ICD-O3T-Version in allen Diagnosen, z.B. zur Version der deutschen Übersetzung</li>
+                    <li style="padding: 0.6rem 0;"><span class="bg-path">patient.gender</span>: Ersetze das Geschlecht des Patienten, z.B. in das von bwHC verlangte Format</li>
+                </ul>
+
+                <h3>Konfigurierte Transformationen</h3>
+                <th:block th:if="${transformations.isEmpty()}">
+                <p>
+                    Keine konfigurierten Transformationen.
+                </p>
+                </th:block>
+                <th:block th:if="${not transformations.isEmpty()}">
+                <p>
+                    Hier sehen Sie eine Übersicht der konfigurierten Transformationen.
+                </p>
+
+                <table class="config-table">
+                    <thead>
                     <tr>
-                        <td>MTBFile-Sender</td>
-                        <td>[[ ${mtbFileSender} ]]</td>
+                        <th>JSON-Path</th>
+                        <th>Transformation von &rArr; nach</th>
                     </tr>
-                    <tr>
-                        <td th:if="${mtbFileSender.startsWith('Rest')}">REST-Endpunkt</td>
-                        <td th:if="${mtbFileSender.startsWith('Kafka')}">Kafka-Broker und Topics</td>
-                        <td>[[ ${mtbFileEndpoint} ]]</td>
+                    </thead>
+                    <tbody>
+                    <tr th:each="transformation : ${transformations}">
+                        <td>
+                            <span class="bg-path" title="Ersetze Wert(e) an dieser Stelle im MTB-File">[[ ${transformation.path} ]]</span>
+                        </td>
+                        <td>
+                            <span class="bg-from" title="Ersetze immer dann, wenn dieser Wert enthalten ist">[[ ${transformation.existingValue} ]]</span>
+                            <strong>&rArr;</strong>
+                            <span class="bg-to" title="Ersetze durch diesen Wert">[[ ${transformation.newValue} ]]</span>
+                        </td>
                     </tr>
-                </tbody>
-            </table>
-        </section>
-
-        <section th:insert="~{configs/tokens.html}">
-        </section>
-
-        <section th:insert="~{configs/userroles.html}">
-        </section>
-
-        <section hx-ext="sse" th:sse-connect="@{/configs/events}">
-            <div th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="sse:connection-available">
-            </div>
-        </section>
-
-        <section>
-            <h2><span th:if="${not transformations.isEmpty()}">✅</span><span th:if="${transformations.isEmpty()}">⛔</span> Transformationen</h2>
-
-            <h3>Syntax</h3>
-            Hier einige Beispiele zum Syntax des JSON-Path
-            <ul>
-                <li style="padding: 0.6rem 0;"><span class="bg-path">diagnoses[*].icdO3T.version</span>: Ersetze die ICD-O3T-Version in allen Diagnosen, z.B. zur Version der deutschen Übersetzung</li>
-                <li style="padding: 0.6rem 0;"><span class="bg-path">patient.gender</span>: Ersetze das Geschlecht des Patienten, z.B. in das von bwHC verlangte Format</li>
-            </ul>
-
-            <h3>Konfigurierte Transformationen</h3>
-            <th:block th:if="${transformations.isEmpty()}">
-            <p>
-                Keine konfigurierten Transformationen.
-            </p>
-            </th:block>
-            <th:block th:if="${not transformations.isEmpty()}">
-            <p>
-                Hier sehen Sie eine Übersicht der konfigurierten Transformationen.
-            </p>
-
-            <table class="config-table">
-                <thead>
-                <tr>
-                    <th>JSON-Path</th>
-                    <th>Transformation von &rArr; nach</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="transformation : ${transformations}">
-                    <td>
-                        <span class="bg-path" title="Ersetze Wert(e) an dieser Stelle im MTB-File">[[ ${transformation.path} ]]</span>
-                    </td>
-                    <td>
-                        <span class="bg-from" title="Ersetze immer dann, wenn dieser Wert enthalten ist">[[ ${transformation.existingValue} ]]</span>
-                        <strong>&rArr;</strong>
-                        <span class="bg-to" title="Ersetze durch diesen Wert">[[ ${transformation.newValue} ]]</span>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            </th:block>
-        </section>
+                    </tbody>
+                </table>
+                </th:block>
+            </section>
+        </div>
     </main>
     <script th:src="@{/scripts.js}"></script>
     <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
     <script th:src="@{/webjars/htmx.org/dist/ext/sse.js}"></script>
+    <script>
+        function selectTab(self, elem) {
+            Array.from(document.getElementsByClassName('tab')).forEach(e => e.className = 'tab');
+            self.className = 'tab active';
+
+            Array.from(document.getElementsByClassName('tabcontent')).forEach(e => e.className = 'tabcontent');
+            document.getElementById(elem).className = 'tabcontent active';
+        }
+    </script>
 </body>
 </html>

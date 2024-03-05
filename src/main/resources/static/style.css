@@ -631,6 +631,32 @@ input.inline:focus-visible {
     color: var(--bg-red);
 }
 
+.tab {
+    padding: 1em;
+    border: none;
+    border-radius: 3px 3px 0 0;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    font-weight: bold;
+}
+
+.tab:hover,
+.tab.active {
+    background: var(--table-border);
+}
+
+.tabcontent {
+    border: 1px solid var(--table-border);
+    border-radius: 0 .5em .5em .5em;
+    display: none;
+    padding: 1em;
+}
+
+.tabcontent.active {
+    display: block;
+}
+
 a.reload {
     display: none;
     position: absolute;
