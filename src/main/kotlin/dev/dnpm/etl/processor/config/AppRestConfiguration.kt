@@ -49,11 +49,6 @@ class AppRestConfiguration {
     private val logger = LoggerFactory.getLogger(AppRestConfiguration::class.java)
 
     @Bean
-    fun restTemplate(): RestTemplate {
-        return RestTemplate()
-    }
-
-    @Bean
     fun restMtbFileSender(
         restTemplate: RestTemplate,
         restTargetProperties: RestTargetProperties,

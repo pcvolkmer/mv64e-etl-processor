@@ -63,6 +63,11 @@ class AppConfiguration {
 
     private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)
 
+    @Bean
+    fun restTemplate(): RestTemplate {
+        return RestTemplate()
+    }
+
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
     fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate): Generator {
