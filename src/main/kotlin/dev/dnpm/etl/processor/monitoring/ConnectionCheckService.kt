@@ -20,14 +20,21 @@
 
 package dev.dnpm.etl.processor.monitoring
 
+import dev.dnpm.etl.processor.config.GPasConfigProperties
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.errors.TimeoutException
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.RequestEntity
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Sinks
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -38,11 +45,22 @@ interface ConnectionCheckService {
 
 }
 
+interface OutputConnectionCheckService : ConnectionCheckService
+
+sealed class ConnectionCheckResult {
+
+    abstract val available: Boolean
+
+    data class KafkaConnectionCheckResult(override val available: Boolean) : ConnectionCheckResult()
+    data class RestConnectionCheckResult(override val available: Boolean) : ConnectionCheckResult()
+    data class GPasConnectionCheckResult(override val available: Boolean) : ConnectionCheckResult()
+}
+
 class KafkaConnectionCheckService(
     private val consumer: Consumer<String, String>,
-    @Qualifier("configsUpdateProducer")
-    private val configsUpdateProducer: Sinks.Many<Boolean>
-) : ConnectionCheckService {
+    @Qualifier("connectionCheckUpdateProducer")
+    private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+) : OutputConnectionCheckService {
 
     private var connectionAvailable: Boolean = false
 
@@ -55,7 +73,10 @@ class KafkaConnectionCheckService(
         } catch (e: TimeoutException) {
             false
         }
-        configsUpdateProducer.emitNext(connectionAvailable, Sinks.EmitFailureHandler.FAIL_FAST)
+        connectionCheckUpdateProducer.emitNext(
+            ConnectionCheckResult.KafkaConnectionCheckResult(connectionAvailable),
+            Sinks.EmitFailureHandler.FAIL_FAST
+        )
     }
 
     override fun connectionAvailable(): Boolean {
@@ -67,9 +88,9 @@ class KafkaConnectionCheckService(
 class RestConnectionCheckService(
     private val restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
-    @Qualifier("configsUpdateProducer")
-    private val configsUpdateProducer: Sinks.Many<Boolean>
-) : ConnectionCheckService {
+    @Qualifier("connectionCheckUpdateProducer")
+    private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+) : OutputConnectionCheckService {
 
     private var connectionAvailable: Boolean = false
 
@@ -84,7 +105,55 @@ class RestConnectionCheckService(
         } catch (e: Exception) {
             false
         }
-        configsUpdateProducer.emitNext(connectionAvailable, Sinks.EmitFailureHandler.FAIL_FAST)
+        connectionCheckUpdateProducer.emitNext(
+            ConnectionCheckResult.RestConnectionCheckResult(connectionAvailable),
+            Sinks.EmitFailureHandler.FAIL_FAST
+        )
+    }
+
+    override fun connectionAvailable(): Boolean {
+        return this.connectionAvailable
+    }
+}
+
+class GPasConnectionCheckService(
+    private val restTemplate: RestTemplate,
+    private val gPasConfigProperties: GPasConfigProperties,
+    @Qualifier("connectionCheckUpdateProducer")
+    private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+) : ConnectionCheckService {
+
+    private var connectionAvailable: Boolean = false
+
+    @PostConstruct
+    @Scheduled(cron = "0 * * * * *")
+    fun check() {
+        connectionAvailable = try {
+            val uri = UriComponentsBuilder.fromUriString(
+                gPasConfigProperties.uri?.replace("/\$pseudonymizeAllowCreate", "/\$pseudonymize").toString()
+            )
+                .queryParam("target", gPasConfigProperties.target)
+                .queryParam("original", "???")
+                .build().toUri()
+
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+            if (!gPasConfigProperties.username.isNullOrBlank() && !gPasConfigProperties.password.isNullOrBlank()) {
+                headers.setBasicAuth(gPasConfigProperties.username, gPasConfigProperties.password)
+            }
+            restTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<Void>(headers),
+                Void::class.java
+            ).statusCode == HttpStatus.OK
+        } catch (e: Exception) {
+            false
+        }
+        connectionCheckUpdateProducer.emitNext(
+            ConnectionCheckResult.GPasConnectionCheckResult(connectionAvailable),
+            Sinks.EmitFailureHandler.FAIL_FAST
+        )
     }
 
     override fun connectionAvailable(): Boolean {

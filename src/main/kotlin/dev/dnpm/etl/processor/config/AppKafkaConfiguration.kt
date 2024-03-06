@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.input.KafkaInputListener
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.KafkaConnectionCheckService
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
@@ -105,8 +106,11 @@ class AppKafkaConfiguration {
     }
 
     @Bean
-    fun connectionCheckService(consumerFactory: ConsumerFactory<String, String>, configsUpdateProducer: Sinks.Many<Boolean>): ConnectionCheckService {
-        return KafkaConnectionCheckService(consumerFactory.createConsumer(), configsUpdateProducer)
+    fun kafkaConnectionCheckService(
+        consumerFactory: ConsumerFactory<String, String>,
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+    ): ConnectionCheckService {
+        return KafkaConnectionCheckService(consumerFactory.createConsumer(), connectionCheckUpdateProducer)
     }
 
 }

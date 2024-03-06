@@ -1,0 +1,19 @@
+<th:block th:if="${gPasConnectionAvailable == null}">
+    <h2><span>🟦</span> gPAS nicht konfiguriert - Patienten-IDs werden intern anonymisiert</h2>
+</th:block>
+<th:block th:if="${gPasConnectionAvailable != null}">
+    <h2><span th:if="${gPasConnectionAvailable}">✅</span><span th:if="${not(gPasConnectionAvailable)}">⚡</span> Verbindung zu gPAS</h2>
+    <div>
+        Die Verbindung ist aktuell
+        <strong th:if="${gPasConnectionAvailable}" style="color: green">verfügbar.</strong>
+        <strong th:if="${not(gPasConnectionAvailable)}" style="color: red">nicht verfügbar.</strong>
+    </div>
+    <div class="connection-display border">
+        <img th:src="@{/server.png}" alt="ETL-Processor" />
+        <span class="connection" th:classappend="${gPasConnectionAvailable ? 'available' : ''}"></span>
+        <img th:src="@{/server.png}" alt="gPAS" />
+        <span>ETL-Processor</span>
+        <span></span>
+        <span>gPAS</span>
+    </div>
+</th:block>

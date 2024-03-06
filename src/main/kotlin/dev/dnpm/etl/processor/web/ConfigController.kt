@@ -19,7 +19,10 @@
 
 package dev.dnpm.etl.processor.web
 
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.OutputConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.security.Role
@@ -40,22 +43,29 @@ import reactor.core.publisher.Sinks
 @Controller
 @RequestMapping(path = ["configs"])
 class ConfigController(
-    @Qualifier("configsUpdateProducer")
-    private val configsUpdateProducer: Sinks.Many<Boolean>,
+    @Qualifier("connectionCheckUpdateProducer")
+    private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
     private val transformationService: TransformationService,
     private val pseudonymGenerator: Generator,
     private val mtbFileSender: MtbFileSender,
-    private val connectionCheckService: ConnectionCheckService,
+    private val connectionCheckServices: List<ConnectionCheckService>,
     private val tokenService: TokenService?,
     private val userRoleService: UserRoleService?
 ) {
 
     @GetMapping
     fun index(model: Model): String {
+        val outputConnectionAvailable =
+            connectionCheckServices.filterIsInstance<OutputConnectionCheckService>().first().connectionAvailable()
+
+        val gPasConnectionAvailable =
+            connectionCheckServices.filterIsInstance<GPasConnectionCheckService>().firstOrNull()?.connectionAvailable()
+
         model.addAttribute("pseudonymGenerator", pseudonymGenerator.javaClass.simpleName)
         model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
         model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
-        model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
+        model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
+        model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
         model.addAttribute("tokensEnabled", tokenService != null)
         if (tokenService != null) {
             model.addAttribute("tokens", tokenService.findAll())
@@ -73,11 +83,14 @@ class ConfigController(
         return "configs"
     }
 
-    @GetMapping(params = ["connectionAvailable"])
-    fun connectionAvailable(model: Model): String {
+    @GetMapping(params = ["outputConnectionAvailable"])
+    fun outputConnectionAvailable(model: Model): String {
+        val outputConnectionAvailable =
+            connectionCheckServices.filterIsInstance<OutputConnectionCheckService>().first().connectionAvailable()
+
         model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
         model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
-        model.addAttribute("connectionAvailable", connectionCheckService.connectionAvailable())
+        model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
         if (tokenService != null) {
             model.addAttribute("tokensEnabled", true)
             model.addAttribute("tokens", tokenService.findAll())
@@ -85,7 +98,25 @@ class ConfigController(
             model.addAttribute("tokens", listOf<Token>())
         }
 
-        return "configs/connectionAvailable"
+        return "configs/outputConnectionAvailable"
+    }
+
+    @GetMapping(params = ["gPasConnectionAvailable"])
+    fun gPasConnectionAvailable(model: Model): String {
+        val gPasConnectionAvailable =
+            connectionCheckServices.filterIsInstance<GPasConnectionCheckService>().firstOrNull()?.connectionAvailable()
+
+        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+        model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
+        if (tokenService != null) {
+            model.addAttribute("tokensEnabled", true)
+            model.addAttribute("tokens", tokenService.findAll())
+        } else {
+            model.addAttribute("tokens", listOf<Token>())
+        }
+
+        return "configs/gPasConnectionAvailable"
     }
 
     @PostMapping(path = ["tokens"])
@@ -152,9 +183,15 @@ class ConfigController(
 
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun events(): Flux<ServerSentEvent<Any>> {
-        return configsUpdateProducer.asFlux().map {
+        return connectionCheckUpdateProducer.asFlux().map {
+            val event = when (it) {
+                is ConnectionCheckResult.KafkaConnectionCheckResult -> "output-connection-check"
+                is ConnectionCheckResult.RestConnectionCheckResult -> "output-connection-check"
+                is ConnectionCheckResult.GPasConnectionCheckResult -> "gpas-connection-check"
+            }
+
             ServerSentEvent.builder<Any>()
-                .event("connection-available").id("none").data("")
+                .event(event).id("none").data(it)
                 .build()
         }
     }
