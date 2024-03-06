@@ -19,11 +19,14 @@
 
 package dev.dnpm.etl.processor.web
 
+import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.dnpm.etl.processor.services.TokenRepository
 import dev.dnpm.etl.processor.services.TransformationService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,6 +53,7 @@ abstract class MockSink : Sinks.Many<Boolean>
 @ContextConfiguration(
     classes = [
         ConfigController::class,
+        AppConfiguration::class,
         AppSecurityConfiguration::class
     ]
 )
@@ -67,7 +71,9 @@ abstract class MockSink : Sinks.Many<Boolean>
     MtbFileSender::class,
     ConnectionCheckService::class,
     RequestProcessor::class,
-    TransformationService::class
+    TransformationService::class,
+    TokenRepository::class,
+    RestConnectionCheckService::class
 )
 class ConfigControllerTest {
 

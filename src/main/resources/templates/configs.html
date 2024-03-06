@@ -45,7 +45,12 @@
             </section>
 
             <section hx-ext="sse" th:sse-connect="@{/configs/events}">
-                <div th:insert="~{configs/connectionAvailable.html}" th:hx-get="@{/configs?connectionAvailable}" hx-trigger="sse:connection-available">
+                <div th:insert="~{configs/gPasConnectionAvailable.html}" th:hx-get="@{/configs?gPasConnectionAvailable}" hx-trigger="sse:gpas-connection-check">
+                </div>
+            </section>
+
+            <section hx-ext="sse" th:sse-connect="@{/configs/events}">
+                <div th:insert="~{configs/outputConnectionAvailable.html}" th:hx-get="@{/configs?outputConnectionAvailable}" hx-trigger="sse:output-connection-check">
                 </div>
             </section>
         </div>

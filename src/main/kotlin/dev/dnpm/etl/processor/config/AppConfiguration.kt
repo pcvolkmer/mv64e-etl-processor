@@ -20,7 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
@@ -44,6 +44,7 @@ import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
+import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -61,6 +62,11 @@ import kotlin.time.toJavaDuration
 class AppConfiguration {
 
     private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)
+
+    @Bean
+    fun restTemplate(): RestTemplate {
+        return RestTemplate()
+    }
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
@@ -142,8 +148,29 @@ class AppConfiguration {
     }
 
     @Bean
-    fun configsUpdateProducer(): Sinks.Many<Boolean> {
-        return Sinks.many().multicast().directBestEffort()
+    fun connectionCheckUpdateProducer(): Sinks.Many<ConnectionCheckResult> {
+        return Sinks.many().multicast().onBackpressureBuffer()
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
+    @Bean
+    fun gPasConnectionCheckService(
+        restTemplate: RestTemplate,
+        gPasConfigProperties: GPasConfigProperties,
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+    ): ConnectionCheckService {
+        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
+    @ConditionalOnMissingBean
+    @Bean
+    fun gPasConnectionCheckServiceOnDeprecatedProperty(
+        restTemplate: RestTemplate,
+        gPasConfigProperties: GPasConfigProperties,
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+    ): ConnectionCheckService {
+        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
     }
 
 }

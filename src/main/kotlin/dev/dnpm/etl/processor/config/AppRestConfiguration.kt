@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.config
 
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
@@ -48,11 +49,6 @@ class AppRestConfiguration {
     private val logger = LoggerFactory.getLogger(AppRestConfiguration::class.java)
 
     @Bean
-    fun restTemplate(): RestTemplate {
-        return RestTemplate()
-    }
-
-    @Bean
     fun restMtbFileSender(
         restTemplate: RestTemplate,
         restTargetProperties: RestTargetProperties,
@@ -63,12 +59,12 @@ class AppRestConfiguration {
     }
 
     @Bean
-    fun connectionCheckService(
+    fun restConnectionCheckService(
         restTemplate: RestTemplate,
         restTargetProperties: RestTargetProperties,
-        configsUpdateProducer: Sinks.Many<Boolean>
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ): ConnectionCheckService {
-        return RestConnectionCheckService(restTemplate, restTargetProperties, configsUpdateProducer)
+        return RestConnectionCheckService(restTemplate, restTargetProperties, connectionCheckUpdateProducer)
     }
 
 }
