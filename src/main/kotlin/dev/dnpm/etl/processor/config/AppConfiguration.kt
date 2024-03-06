@@ -157,5 +157,16 @@ class AppConfiguration {
         return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
     }
 
+    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
+    @ConditionalOnMissingBean
+    @Bean
+    fun gPasConnectionCheckServiceOnDeprecatedProperty(
+        restTemplate: RestTemplate,
+        gPasConfigProperties: GPasConfigProperties,
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+    ): ConnectionCheckService {
+        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
+    }
+
 }
 
