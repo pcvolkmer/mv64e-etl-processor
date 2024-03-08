@@ -35,12 +35,27 @@ class KafkaInputListener(
 
     override fun onMessage(data: ConsumerRecord<String, String>) {
         val mtbFile = objectMapper.readValue(data.value(), MtbFile::class.java)
+        val firstRequestIdHeader = data.headers().headers("requestId")?.firstOrNull()
+        val requestId = if (null != firstRequestIdHeader) {
+            String(firstRequestIdHeader.value())
+        } else {
+            ""
+        }
+
         if (mtbFile.consent.status == Consent.Status.ACTIVE) {
             logger.debug("Accepted MTB File for processing")
-            requestProcessor.processMtbFile(mtbFile)
+            if (requestId.isBlank()) {
+                requestProcessor.processMtbFile(mtbFile)
+            } else {
+                requestProcessor.processMtbFile(mtbFile, requestId)
+            }
         } else {
             logger.debug("Accepted MTB File and process deletion")
-            requestProcessor.processDeletion(mtbFile.patient.id)
+            if (requestId.isBlank()) {
+                requestProcessor.processDeletion(mtbFile.patient.id)
+            } else {
+                requestProcessor.processDeletion(mtbFile.patient.id, requestId)
+            }
         }
     }
 }

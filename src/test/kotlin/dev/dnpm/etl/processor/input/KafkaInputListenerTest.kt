@@ -25,6 +25,9 @@ import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
+import org.apache.kafka.common.header.internals.RecordHeaders
+import org.apache.kafka.common.record.TimestampType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -34,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class KafkaInputListenerTest {
@@ -74,6 +78,35 @@ class KafkaInputListenerTest {
         kafkaInputListener.onMessage(ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile)))
 
         verify(requestProcessor, times(1)).processDeletion(anyString())
+    }
+
+    @Test
+    fun shouldProcessMtbFileRequestWithExistingRequestId() {
+        val mtbFile = MtbFile.builder()
+            .withPatient(Patient.builder().withId("DUMMY_12345678").build())
+            .withConsent(Consent.builder().withStatus(Consent.Status.ACTIVE).build())
+            .build()
+
+        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
+        kafkaInputListener.onMessage(
+            ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
+        )
+
+        verify(requestProcessor, times(1)).processMtbFile(any(), anyString())
+    }
+
+    @Test
+    fun shouldProcessDeleteRequestWithExistingRequestId() {
+        val mtbFile = MtbFile.builder()
+            .withPatient(Patient.builder().withId("DUMMY_12345678").build())
+            .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
+            .build()
+
+        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
+        kafkaInputListener.onMessage(
+            ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
+        )
+        verify(requestProcessor, times(1)).processDeletion(anyString(), anyString())
     }
 
 }

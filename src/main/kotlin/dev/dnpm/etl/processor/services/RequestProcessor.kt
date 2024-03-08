@@ -48,7 +48,10 @@ class RequestProcessor(
 ) {
 
     fun processMtbFile(mtbFile: MtbFile) {
-        val requestId = UUID.randomUUID().toString()
+        processMtbFile(mtbFile, UUID.randomUUID().toString())
+    }
+
+    fun processMtbFile(mtbFile: MtbFile, requestId: String) {
         val pid = mtbFile.patient.id
 
         mtbFile pseudonymizeWith pseudonymizeService
@@ -103,8 +106,10 @@ class RequestProcessor(
     }
 
     fun processDeletion(patientId: String) {
-        val requestId = UUID.randomUUID().toString()
+        processDeletion(patientId, UUID.randomUUID().toString())
+    }
 
+    fun processDeletion(patientId: String, requestId: String) {
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
