@@ -94,8 +94,7 @@ class KafkaMtbFileSender(
     }
 
     private fun key(request: MtbFileSender.MtbFileRequest): String {
-        return "{\"pid\": \"${request.mtbFile.patient.id}\", " +
-                "\"eid\": \"${request.mtbFile.episode.id}\"}"
+        return "{\"pid\": \"${request.mtbFile.patient.id}\"}"
     }
 
     private fun key(request: MtbFileSender.DeleteRequest): String {
