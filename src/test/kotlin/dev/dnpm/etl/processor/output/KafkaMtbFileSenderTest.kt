@@ -101,7 +101,7 @@ class KafkaMtbFileSenderTest {
         val captor = argumentCaptor<String>()
         verify(kafkaTemplate, times(1)).send(anyString(), captor.capture(), captor.capture())
         assertThat(captor.firstValue).isNotNull
-        assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\", \"eid\": \"1\"}")
+        assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\"}")
         assertThat(captor.secondValue).isNotNull
         assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.ACTIVE)))
     }
