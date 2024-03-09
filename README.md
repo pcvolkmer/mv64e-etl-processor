@@ -234,15 +234,17 @@ kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-co
 kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-config cleanup.policy=[delete,compact]
 ```
 
-Da als Key eines Records die (pseudonymisierte) Patienten-ID und die (anonymisierte) Erkrankungs-ID verwendet wird,
-stehen mit obiger Konfiguration der Kafka-Topics nach 10 Sekunden nur noch der jeweils letzte Eintrag für den entsprechenden
-Key zur Verfügung.
+Da als Key eines Records die (pseudonymisierte) Patienten-ID verwendet wird, stehen mit obiger Konfiguration 
+der Kafka-Topics nach 10 Sekunden nur noch der jeweils letzte Eintrag für den entsprechenden Key zur Verfügung.
 
 Da der Key sowohl für die Records in Richtung bwHC-Backend für die Rückantwort identisch aufgebaut ist, lassen sich so
 auch im Falle eines Consent-Widerspruchs die enthaltenen Daten als auch die Offenlegung durch Verifikationsdaten in der
 Antwort effektiv verhindern, da diese nach 10 Sekunden gelöscht werden.
+
 Es steht dann nur noch die jeweils letzten Information zur Verfügung, dass für einen Patienten/eine Erkrankung
 ein Consent-Widerspruch erfolgte.
+
+Dieses Vorgehen empfiehlt sich, wenn Sie gespeicherte Records nachgelagert für andere Auswertungen verwenden möchten.
 
 ## Docker-Images
 
