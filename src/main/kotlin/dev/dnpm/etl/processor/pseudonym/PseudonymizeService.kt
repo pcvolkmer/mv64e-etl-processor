@@ -33,4 +33,8 @@ class PseudonymizeService(
         }
     }
 
+    fun prefix(): String {
+        return configProperties.prefix
+    }
+
 }

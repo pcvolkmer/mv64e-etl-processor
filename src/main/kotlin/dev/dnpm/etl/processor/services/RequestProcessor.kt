@@ -28,6 +28,7 @@ import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
@@ -55,6 +56,7 @@ class RequestProcessor(
         val pid = mtbFile.patient.id
 
         mtbFile pseudonymizeWith pseudonymizeService
+        mtbFile anonymizeContentWith pseudonymizeService
 
         val request = MtbFileSender.MtbFileRequest(requestId, transformationService.transform(mtbFile))
 
