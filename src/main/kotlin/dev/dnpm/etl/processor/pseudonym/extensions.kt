@@ -74,150 +74,152 @@ infix fun MtbFile.anonymizeContentWith(pseudonymizeService: PseudonymizeService)
     }
 
     this.episode?.apply {
-        id?.apply { anonymize(this) }
+        id = id?.let {
+            anonymize(it)
+        }
     }
     this.carePlans?.onEach { carePlan ->
         carePlan?.apply {
-            id?.apply { anonymize(this) }
-            diagnosis?.apply { anonymize(this) }
-            geneticCounsellingRequest?.apply { anonymize(this) }
-            rebiopsyRequests = rebiopsyRequests.map { it?.apply { anonymize(this) } }
-            recommendations = recommendations.map { it?.apply { anonymize(this) } }
-            studyInclusionRequests = studyInclusionRequests.map { it?.apply { anonymize(this) } }
+            id = id?.let { anonymize(it) }
+            diagnosis = diagnosis?.let { anonymize(it) }
+            geneticCounsellingRequest = geneticCounsellingRequest?.let { anonymize(it) }
+            rebiopsyRequests = rebiopsyRequests.map { it?.let { anonymize(it) } }
+            recommendations = recommendations.map { it?.let { anonymize(it) } }
+            studyInclusionRequests = studyInclusionRequests.map { it?.let { anonymize(it) } }
         }
     }
     this.claims?.onEach { claim ->
         claim?.apply {
-            id?.apply { anonymize(this) }
-            therapy?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            therapy = therapy?.let { anonymize(it) }
         }
     }
     this.claimResponses?.onEach { claimResponse ->
         claimResponse?.apply {
-            id?.apply { anonymize(this) }
-            claim?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            claim = claim?.let { anonymize(it) }
         }
     }
     this.consent?.apply {
-        id?.apply { anonymize(this) }
+        id = id?.let { anonymize(it) }
     }
     this.diagnoses?.onEach { diagnosis ->
         diagnosis?.apply {
-            id?.apply { anonymize(this) }
-            histologyResults = histologyResults?.map { it?.apply { anonymize(this) } }
+            id = id?.let { anonymize(it) }
+            histologyResults = histologyResults?.map { it?.let { anonymize(it) } }
         }
     }
     this.ecogStatus?.onEach { ecogStatus ->
         ecogStatus?.apply {
-            id?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
         }
     }
     this.familyMemberDiagnoses?.onEach { familyMemberDiagnosis ->
         familyMemberDiagnosis?.apply {
-            id?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
         }
     }
     this.geneticCounsellingRequests?.onEach { geneticCounsellingRequest -> 
         geneticCounsellingRequest?.apply { 
-            id?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
         }
     }
     this.histologyReevaluationRequests?.onEach { histologyReevaluationRequest ->
         histologyReevaluationRequest?.apply {
-            id?.apply { anonymize(this) }
-            specimen?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            specimen = specimen?.let { anonymize(it) }
         }
     }
     this.histologyReports?.onEach { histologyReport ->
         histologyReport?.apply {
-            id?.apply { anonymize(this) }
-            specimen?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            specimen = specimen?.let { anonymize(it) }
             tumorMorphology?.apply {
-                id?.apply { anonymize(this) }
-                specimen?.apply { anonymize(this) }
+                id = id?.let { anonymize(it) }
+                specimen = specimen?.let { anonymize(it) }
             }
             tumorCellContent?.apply {
-                id?.apply { anonymize(this) }
-                specimen?.apply { anonymize(this) }
+                id = id?.let { anonymize(it) }
+                specimen = specimen?.let { anonymize(it) }
             }
         }
     }
     this.lastGuidelineTherapies?.onEach { lastGuidelineTherapy ->
         lastGuidelineTherapy?.apply {
-            id?.apply { anonymize(this) }
-            diagnosis?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            diagnosis = diagnosis?.let { anonymize(it) }
         }
     }
     this.molecularPathologyFindings?.onEach { molecularPathologyFinding ->
         molecularPathologyFinding?.apply {
-            id?.apply { anonymize(this) }
-            specimen?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            specimen = specimen?.let { anonymize(it) }
         }
     }
     this.molecularTherapies?.onEach { molecularTherapy ->
         molecularTherapy?.apply {
             history?.onEach { history ->
                 history?.apply {
-                    id?.apply { anonymize(this) }
-                    basedOn?.apply { anonymize(this) }
+                    id = id?.let { anonymize(it) }
+                    basedOn = basedOn?.let { anonymize(it) }
                 }
             }
         }
     }
     this.ngsReports?.onEach { ngsReport ->
         ngsReport?.apply {
-            id?.apply { anonymize(this) }
-            specimen?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            specimen = specimen?.let { anonymize(it) }
             tumorCellContent?.apply {
-                id?.apply { anonymize(this) }
-                specimen?.apply { anonymize(this) }
+                id = id?.let { anonymize(it) }
+                specimen = specimen?.let { anonymize(it) }
             }
             simpleVariants?.onEach { simpleVariant ->
                 simpleVariant?.apply {
-                    id?.apply { anonymize(this) }
+                    id = id?.let { anonymize(it) }
                 }
             }
         }
     }
     this.previousGuidelineTherapies?.onEach { previousGuidelineTherapy ->
         previousGuidelineTherapy?.apply {
-            id?.apply { anonymize(this) }
-            diagnosis?.apply { anonymize(this) }
-            this.medication.forEach { medication ->
+            id = id?.let { anonymize(it) }
+            diagnosis = diagnosis?.let { anonymize(it) }
+            medication.forEach { medication ->
                 medication?.apply {
-                    id?.apply { anonymize(this) }
+                    id = id?.let { anonymize(it) }
                 }
             }
         }
     }
     this.rebiopsyRequests?.onEach { rebiopsyRequest ->
         rebiopsyRequest?.apply {
-            id?.apply { anonymize(this) }
-            specimen?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            specimen = specimen?.let { anonymize(it) }
         }
     }
     this.recommendations?.onEach { recommendation ->
         recommendation?.apply {
-            id?.apply { anonymize(this) }
-            diagnosis?.apply { anonymize(this) }
-            ngsReport?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            diagnosis = diagnosis?.let { anonymize(it) }
+            ngsReport = ngsReport?.let { anonymize(it) }
         }
     }
     this.responses?.onEach { response ->
         response?.apply {
-            id?.apply { anonymize(this) }
-            therapy?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            therapy = therapy?.let { anonymize(it) }
         }
     }
     this.studyInclusionRequests?.onEach { studyInclusionRequest ->
         studyInclusionRequest?.apply {
-            id?.apply { anonymize(this) }
-            reason?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
+            reason = reason?.let { anonymize(it) }
         }
     }
     this.specimens?.onEach { specimen ->
         specimen?.apply {
-            id?.apply { anonymize(this) }
+            id = id?.let { anonymize(it) }
         }
     }
 }
