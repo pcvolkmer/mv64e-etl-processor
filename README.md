@@ -38,22 +38,21 @@ Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) angegeben ist, wird diese verwendet.
 Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgenommen.
 
-* `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Prefix - `UNKNOWN`, wenn nicht gesetzt
+* `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Präfix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
 
 **Hinweise**: 
 
-* Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht
-mehr verwendet werden.
+* Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht mehr verwendet
+  werden.
 * Die Pseudonymisierung erfolgt im ETL-Prozessor nur für die Patienten-ID.
-Andere Referenz-IDs werden nicht anonymisiert.
-Dies erfolgt bei Nutzung von **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**
-bereits im Plugin selbst.
+  Andere IDs werden mithilfe des standortbezogenen Präfixes (erneut) anonymisiert, um für den aktuellen Kontext nicht
+  vergleichbare IDs bereitzustellen.
 
 #### Eingebaute Anonymisierung
 
 Wurde keine oder die Verwendung der eingebauten Anonymisierung konfiguriert, so wird für die Patienten-ID der
-entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende "=" - zuzüglich des konfigurierten Prefixes
+entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende "=" - zuzüglich des konfigurierten Präfixes
 als Patienten-Pseudonym verwendet.
 
 #### Pseudonymisierung mit gPAS
@@ -77,7 +76,7 @@ einem erfolgreichen Login erreichbar sind.
 * `APP_SECURITY_ADMIN_USER`: Muss angegeben werden zur Aktivierung der Zugriffsbeschränkung.
 * `APP_SECURITY_ADMIN_PASSWORD`: Das Passwort für den Administrator (Empfohlen).
 
-Ein Administrator-Passwort muss inklusive des Encoding-Prefixes vorliegen.
+Ein Administrator-Passwort muss inklusive des Encoding-Präfixes vorliegen.
 
 Hier Beispiele für das Beispielpasswort `very-secret`:
 
@@ -307,7 +306,7 @@ auf Docker-Compose mit der gestartet werden kann.
 
 Die Anwendung verarbeitet `X-Forwarded`-HTTP-Header und kann daher auch hinter einem Reverse-Proxy betrieben werden.
 
-Dabei werden, je nachdem welche Header durch den Reverse-Proxy gesendet werden auch Protokoll, Host oder auch Path-Prefix
+Dabei werden, je nachdem welche Header durch den Reverse-Proxy gesendet werden auch Protokoll, Host oder auch Path-Präfix
 automatisch erkannt und verwendet werden. Dadurch ist z.B. eine abweichende Angabe des Pfads problemlos möglich.
 
 #### Beispiel *Traefik* (mit Docker-Labels):
