@@ -73,151 +73,151 @@ infix fun MtbFile.anonymizeContentWith(pseudonymizeService: PseudonymizeService)
         return "$prefix$hash"
     }
 
-    this.episode.apply {
-        id = anonymize(id)
+    this.episode?.apply {
+        id?.apply { anonymize(this) }
     }
-    this.carePlans.onEach { carePlan ->
-        carePlan.apply {
-            id = anonymize(id)
-            diagnosis = anonymize(diagnosis)
-            geneticCounsellingRequest = anonymize(geneticCounsellingRequest)
-            rebiopsyRequests = rebiopsyRequests.map { anonymize(it) }
-            recommendations = recommendations.map { anonymize(it) }
-            studyInclusionRequests = studyInclusionRequests.map { anonymize(it) }
+    this.carePlans?.onEach { carePlan ->
+        carePlan?.apply {
+            id?.apply { anonymize(this) }
+            diagnosis?.apply { anonymize(this) }
+            geneticCounsellingRequest?.apply { anonymize(this) }
+            rebiopsyRequests = rebiopsyRequests.map { it?.apply { anonymize(this) } }
+            recommendations = recommendations.map { it?.apply { anonymize(this) } }
+            studyInclusionRequests = studyInclusionRequests.map { it?.apply { anonymize(this) } }
         }
     }
-    this.claims.onEach { claim ->
-        claim.apply {
-            id = anonymize(id)
-            therapy = anonymize(therapy)
+    this.claims?.onEach { claim ->
+        claim?.apply {
+            id?.apply { anonymize(this) }
+            therapy?.apply { anonymize(this) }
         }
     }
-    this.claimResponses.onEach { claimResponse ->
-        claimResponse.apply {
-            id = anonymize(id)
-            claim = anonymize(claim)
+    this.claimResponses?.onEach { claimResponse ->
+        claimResponse?.apply {
+            id?.apply { anonymize(this) }
+            claim?.apply { anonymize(this) }
         }
     }
-    this.consent.apply {
-        id = anonymize(id)
+    this.consent?.apply {
+        id?.apply { anonymize(this) }
     }
-    this.diagnoses.onEach { diagnosis ->
-        diagnosis.apply {
-            id = anonymize(id)
-            histologyResults = histologyResults.map { anonymize(it) }
+    this.diagnoses?.onEach { diagnosis ->
+        diagnosis?.apply {
+            id?.apply { anonymize(this) }
+            histologyResults = histologyResults?.map { it?.apply { anonymize(this) } }
         }
     }
-    this.ecogStatus.onEach { ecogStatus ->
-        ecogStatus.apply {
-            id = anonymize(id)
+    this.ecogStatus?.onEach { ecogStatus ->
+        ecogStatus?.apply {
+            id?.apply { anonymize(this) }
         }
     }
-    this.familyMemberDiagnoses.onEach { familyMemberDiagnosis ->
-        familyMemberDiagnosis.apply {
-            id = anonymize(id)
+    this.familyMemberDiagnoses?.onEach { familyMemberDiagnosis ->
+        familyMemberDiagnosis?.apply {
+            id?.apply { anonymize(this) }
         }
     }
-    this.geneticCounsellingRequests.onEach { geneticCounsellingRequest -> 
-        geneticCounsellingRequest.apply { 
-            id = anonymize(id)
+    this.geneticCounsellingRequests?.onEach { geneticCounsellingRequest -> 
+        geneticCounsellingRequest?.apply { 
+            id?.apply { anonymize(this) }
         }
     }
-    this.histologyReevaluationRequests.onEach { histologyReevaluationRequest ->
-        histologyReevaluationRequest.apply {
-            id = anonymize(id)
-            specimen = anonymize(specimen)
+    this.histologyReevaluationRequests?.onEach { histologyReevaluationRequest ->
+        histologyReevaluationRequest?.apply {
+            id?.apply { anonymize(this) }
+            specimen?.apply { anonymize(this) }
         }
     }
-    this.histologyReports.onEach { histologyReport ->
-        histologyReport.apply {
-            id = anonymize(id)
-            specimen = anonymize(specimen)
-            tumorMorphology.apply {
-                id = anonymize(id)
-                specimen = anonymize(specimen)
+    this.histologyReports?.onEach { histologyReport ->
+        histologyReport?.apply {
+            id?.apply { anonymize(this) }
+            specimen?.apply { anonymize(this) }
+            tumorMorphology?.apply {
+                id?.apply { anonymize(this) }
+                specimen?.apply { anonymize(this) }
             }
-            tumorCellContent.apply {
-                id = anonymize(id)
-                specimen = anonymize(specimen)
+            tumorCellContent?.apply {
+                id?.apply { anonymize(this) }
+                specimen?.apply { anonymize(this) }
             }
         }
     }
-    this.lastGuidelineTherapies.onEach { lastGuidelineTherapy ->
-        lastGuidelineTherapy.apply {
-            id = anonymize(id)
-            diagnosis = anonymize(diagnosis)
+    this.lastGuidelineTherapies?.onEach { lastGuidelineTherapy ->
+        lastGuidelineTherapy?.apply {
+            id?.apply { anonymize(this) }
+            diagnosis?.apply { anonymize(this) }
         }
     }
-    this.molecularPathologyFindings.onEach { molecularPathologyFinding ->
-        molecularPathologyFinding.apply {
-            id = anonymize(id)
-            specimen = anonymize(specimen)
+    this.molecularPathologyFindings?.onEach { molecularPathologyFinding ->
+        molecularPathologyFinding?.apply {
+            id?.apply { anonymize(this) }
+            specimen?.apply { anonymize(this) }
         }
     }
-    this.molecularTherapies.onEach { molecularTherapy ->
-        molecularTherapy.apply {
-            history.onEach { history ->
-                history.apply {
-                    id = anonymize(id)
-                    basedOn = anonymize(basedOn)
+    this.molecularTherapies?.onEach { molecularTherapy ->
+        molecularTherapy?.apply {
+            history?.onEach { history ->
+                history?.apply {
+                    id?.apply { anonymize(this) }
+                    basedOn?.apply { anonymize(this) }
                 }
             }
         }
     }
-    this.ngsReports.onEach { ngsReport ->
-        ngsReport.apply {
-            id = anonymize(id)
-            specimen = anonymize(specimen)
-            tumorCellContent.apply {
-                id = anonymize(id)
-                specimen = anonymize(specimen)
+    this.ngsReports?.onEach { ngsReport ->
+        ngsReport?.apply {
+            id?.apply { anonymize(this) }
+            specimen?.apply { anonymize(this) }
+            tumorCellContent?.apply {
+                id?.apply { anonymize(this) }
+                specimen?.apply { anonymize(this) }
             }
-            simpleVariants.onEach { simpleVariant ->
-                simpleVariant.apply {
-                    id = anonymize(id)
+            simpleVariants?.onEach { simpleVariant ->
+                simpleVariant?.apply {
+                    id?.apply { anonymize(this) }
                 }
             }
         }
     }
-    this.previousGuidelineTherapies.onEach { previousGuidelineTherapy ->
-        previousGuidelineTherapy.apply {
-            id = anonymize(id)
-            diagnosis = anonymize(diagnosis)
+    this.previousGuidelineTherapies?.onEach { previousGuidelineTherapy ->
+        previousGuidelineTherapy?.apply {
+            id?.apply { anonymize(this) }
+            diagnosis?.apply { anonymize(this) }
             this.medication.forEach { medication ->
-                medication.apply {
-                    id = anonymize(id)
+                medication?.apply {
+                    id?.apply { anonymize(this) }
                 }
             }
         }
     }
-    this.rebiopsyRequests.onEach { rebiopsyRequest ->
-        rebiopsyRequest.apply {
-            id = anonymize(id)
-            specimen = anonymize(specimen)
+    this.rebiopsyRequests?.onEach { rebiopsyRequest ->
+        rebiopsyRequest?.apply {
+            id?.apply { anonymize(this) }
+            specimen?.apply { anonymize(this) }
         }
     }
-    this.recommendations.onEach { recommendation ->
-        recommendation.apply {
-            id = anonymize(id)
-            diagnosis = anonymize(diagnosis)
-            ngsReport = anonymize(ngsReport)
+    this.recommendations?.onEach { recommendation ->
+        recommendation?.apply {
+            id?.apply { anonymize(this) }
+            diagnosis?.apply { anonymize(this) }
+            ngsReport?.apply { anonymize(this) }
         }
     }
-    this.responses.onEach { response ->
-        response.apply {
-            id = anonymize(id)
-            therapy = anonymize(therapy)
+    this.responses?.onEach { response ->
+        response?.apply {
+            id?.apply { anonymize(this) }
+            therapy?.apply { anonymize(this) }
         }
     }
-    this.studyInclusionRequests.onEach { studyInclusionRequest ->
-        studyInclusionRequest.apply {
-            id = anonymize(id)
-            reason = anonymize(reason)
+    this.studyInclusionRequests?.onEach { studyInclusionRequest ->
+        studyInclusionRequest?.apply {
+            id?.apply { anonymize(this) }
+            reason?.apply { anonymize(this) }
         }
     }
-    this.specimens.onEach { specimen ->
-        specimen.apply {
-            id = anonymize(id)
+    this.specimens?.onEach { specimen ->
+        specimen?.apply {
+            id?.apply { anonymize(this) }
         }
     }
 }
