@@ -92,7 +92,7 @@ class RequestProcessorTest {
                 uuid = UUID.randomUUID().toString(),
                 patientId = "TEST_12345678901",
                 pid = "P1",
-                fingerprint = "xrysxpozhbs2lnrjgf3yq4fzj33kxr7xr5c2cbuskmelfdmckl3a",
+                fingerprint = "zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga",
                 type = RequestType.MTB_FILE,
                 status = RequestStatus.SUCCESS,
                 processedAt = Instant.parse("2023-08-08T02:00:00Z")
@@ -151,7 +151,7 @@ class RequestProcessorTest {
                 uuid = UUID.randomUUID().toString(),
                 patientId = "TEST_12345678901",
                 pid = "P1",
-                fingerprint = "xrysxpozhbs2lnrjgf3yq4fzj33kxr7xr5c2cbuskmelfdmckl3a",
+                fingerprint = "zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga",
                 type = RequestType.MTB_FILE,
                 status = RequestStatus.SUCCESS,
                 processedAt = Instant.parse("2023-08-08T02:00:00Z")
