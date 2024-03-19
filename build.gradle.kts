@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "de.ukw.ccc"
-version = "0.9.1"
+version = "0.9.2"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.2.0",
@@ -22,6 +22,9 @@ var versions = mapOf(
     "echarts" to "5.4.3",
     "htmx.org" to "1.9.10"
 )
+
+// Fixes and version overrides
+ext["spring-security.version"] = "6.2.3"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
