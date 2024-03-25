@@ -651,6 +651,7 @@ input.inline:focus-visible {
     border-radius: 0 .5em .5em .5em;
     display: none;
     padding: 1em;
+    background: white;
 }
 
 .tabcontent.active {
