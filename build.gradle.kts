@@ -4,7 +4,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.2.3"
+    id("org.springframework.boot") version "3.2.4"
     id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
@@ -22,9 +22,6 @@ var versions = mapOf(
     "echarts" to "5.4.3",
     "htmx.org" to "1.9.10"
 )
-
-// Fixes and version overrides
-ext["spring-security.version"] = "6.2.3"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
