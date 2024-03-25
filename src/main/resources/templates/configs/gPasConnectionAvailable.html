@@ -5,6 +5,8 @@
     <h2><span th:if="${gPasConnectionAvailable.available}">✅</span><span th:if="${not(gPasConnectionAvailable.available)}">⚡</span> Verbindung zu gPAS</h2>
     <div>
         Stand: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(gPasConnectionAvailable.timestamp)}" th:text="${#temporals.formatISO(gPasConnectionAvailable.timestamp)}"></time>
+        &nbsp;|&nbsp;
+        Letzte Änderung: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(gPasConnectionAvailable.lastChange)}" th:text="${#temporals.formatISO(gPasConnectionAvailable.lastChange)}"></time>
     </div>
     <div>
         <span>Die Verbindung ist aktuell</span>

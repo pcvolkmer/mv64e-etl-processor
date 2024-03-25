@@ -49,9 +49,25 @@ sealed class ConnectionCheckResult {
 
     abstract val timestamp: Instant
 
-    data class KafkaConnectionCheckResult(override val available: Boolean, override val timestamp: Instant) : ConnectionCheckResult()
-    data class RestConnectionCheckResult(override val available: Boolean, override val timestamp: Instant) : ConnectionCheckResult()
-    data class GPasConnectionCheckResult(override val available: Boolean, override val timestamp: Instant) : ConnectionCheckResult()
+    abstract val lastChange: Instant
+
+    data class KafkaConnectionCheckResult(
+        override val available: Boolean,
+        override val timestamp: Instant,
+        override val lastChange: Instant
+    ) : ConnectionCheckResult()
+
+    data class RestConnectionCheckResult(
+        override val available: Boolean,
+        override val timestamp: Instant,
+        override val lastChange: Instant
+    ) : ConnectionCheckResult()
+
+    data class GPasConnectionCheckResult(
+        override val available: Boolean,
+        override val timestamp: Instant,
+        override val lastChange: Instant
+    ) : ConnectionCheckResult()
 }
 
 class KafkaConnectionCheckService(
@@ -60,17 +76,24 @@ class KafkaConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : OutputConnectionCheckService {
 
-    private var result = ConnectionCheckResult.KafkaConnectionCheckResult(false, Instant.now())
-
+    private var result = ConnectionCheckResult.KafkaConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
     @Scheduled(cron = "0 * * * * *")
     fun check() {
         result = try {
             val available = null != consumer.listTopics(5.seconds.toJavaDuration())
-            ConnectionCheckResult.KafkaConnectionCheckResult(available, Instant.now())
+            ConnectionCheckResult.KafkaConnectionCheckResult(
+                available,
+                Instant.now(),
+                if (result.available == available) { result.lastChange } else { Instant.now() }
+            )
         } catch (e: TimeoutException) {
-            ConnectionCheckResult.KafkaConnectionCheckResult(false, Instant.now())
+            ConnectionCheckResult.KafkaConnectionCheckResult(
+                false,
+                Instant.now(),
+                if (!result.available) { result.lastChange } else { Instant.now() }
+            )
         }
         connectionCheckUpdateProducer.emitNext(
             result,
@@ -91,7 +114,7 @@ class RestConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : OutputConnectionCheckService {
 
-    private var result: ConnectionCheckResult.RestConnectionCheckResult = ConnectionCheckResult.RestConnectionCheckResult(false, Instant.now())
+    private var result = ConnectionCheckResult.RestConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
     @Scheduled(cron = "0 * * * * *")
@@ -102,9 +125,17 @@ class RestConnectionCheckService(
                 String::class.java
             ).statusCode == HttpStatus.OK
 
-            ConnectionCheckResult.RestConnectionCheckResult(available, Instant.now())
+            ConnectionCheckResult.RestConnectionCheckResult(
+                available,
+                Instant.now(),
+                if (result.available == available) { result.lastChange } else { Instant.now() }
+            )
         } catch (e: Exception) {
-            ConnectionCheckResult.RestConnectionCheckResult(false, Instant.now())
+            ConnectionCheckResult.RestConnectionCheckResult(
+                false,
+                Instant.now(),
+                if (!result.available) { result.lastChange } else { Instant.now() }
+            )
         }
         connectionCheckUpdateProducer.emitNext(
             result,
@@ -124,7 +155,7 @@ class GPasConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : ConnectionCheckService {
 
-    private var result: ConnectionCheckResult.GPasConnectionCheckResult = ConnectionCheckResult.GPasConnectionCheckResult(false, Instant.now())
+    private var result = ConnectionCheckResult.GPasConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
     @Scheduled(cron = "0 * * * * *")
@@ -150,9 +181,17 @@ class GPasConnectionCheckService(
                 Void::class.java
             ).statusCode == HttpStatus.OK
 
-            ConnectionCheckResult.GPasConnectionCheckResult(available, Instant.now())
+            ConnectionCheckResult.GPasConnectionCheckResult(
+                available,
+                Instant.now(),
+                if (result.available == available) { result.lastChange } else { Instant.now() }
+            )
         } catch (e: Exception) {
-            ConnectionCheckResult.GPasConnectionCheckResult(false, Instant.now())
+            ConnectionCheckResult.GPasConnectionCheckResult(
+                false,
+                Instant.now(),
+                if (!result.available) { result.lastChange } else { Instant.now() }
+            )
         }
         connectionCheckUpdateProducer.emitNext(
             result,

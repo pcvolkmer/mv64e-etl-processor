@@ -1,9 +1,11 @@
 <h2><span th:if="${outputConnectionAvailable.available}">✅</span><span th:if="${not(outputConnectionAvailable.available)}">⚡</span> MTB-File Verbindung</h2>
 <div>
     Stand: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(outputConnectionAvailable.timestamp)}" th:text="${#temporals.formatISO(outputConnectionAvailable.timestamp)}"></time>
+    &nbsp;|&nbsp;
+    Letzte Änderung: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(outputConnectionAvailable.lastChange)}" th:text="${#temporals.formatISO(outputConnectionAvailable.lastChange)}"></time>
 </div>
 <div>
-    Verbindung über <code>[[ ${mtbFileSender} ]]</code>. Die Verbindung ist aktuell.
+    Verbindung über <code>[[ ${mtbFileSender} ]]</code>. Die Verbindung ist aktuell
     <strong th:if="${outputConnectionAvailable.available}" style="color: green">verfügbar.</strong>
     <strong th:if="${not(outputConnectionAvailable.available)}" style="color: red">nicht verfügbar.</strong>
 </div>
