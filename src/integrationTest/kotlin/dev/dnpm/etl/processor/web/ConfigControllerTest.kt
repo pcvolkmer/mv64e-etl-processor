@@ -21,7 +21,7 @@ package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
@@ -69,10 +69,10 @@ abstract class MockSink : Sinks.Many<Boolean>
 @MockBean(
     Generator::class,
     MtbFileSender::class,
-    ConnectionCheckService::class,
     RequestProcessor::class,
     TransformationService::class,
     TokenRepository::class,
+    GPasConnectionCheckService::class,
     RestConnectionCheckService::class
 )
 class ConfigControllerTest {

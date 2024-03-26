@@ -56,7 +56,7 @@ class ConfigController(
     @GetMapping
     fun index(model: Model): String {
         val outputConnectionAvailable =
-            connectionCheckServices.filterIsInstance<OutputConnectionCheckService>().first().connectionAvailable()
+            connectionCheckServices.filterIsInstance<OutputConnectionCheckService>().firstOrNull()?.connectionAvailable()
 
         val gPasConnectionAvailable =
             connectionCheckServices.filterIsInstance<GPasConnectionCheckService>().firstOrNull()?.connectionAvailable()

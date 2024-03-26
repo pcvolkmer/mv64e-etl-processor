@@ -1,16 +1,26 @@
-<h2><span th:if="${outputConnectionAvailable}">✅</span><span th:if="${not(outputConnectionAvailable)}">⚡</span> MTB-File Verbindung</h2>
-<div>
-    Verbindung über <code>[[ ${mtbFileSender} ]]</code>. Die Verbindung ist aktuell
-    <strong th:if="${outputConnectionAvailable}" style="color: green">verfügbar.</strong>
-    <strong th:if="${not(outputConnectionAvailable)}" style="color: red">nicht verfügbar.</strong>
-</div>
-<div class="connection-display border">
-    <img th:src="@{/server.png}" alt="ETL-Processor" />
-    <span class="connection" th:classappend="${outputConnectionAvailable ? 'available' : ''}"></span>
-    <img th:if="${mtbFileSender.startsWith('Rest')}" th:src="@{/server.png}" alt="bwHC-Backend" />
-    <img th:if="${mtbFileSender.startsWith('Kafka')}" th:src="@{/kafka.png}" alt="Kafka-Broker" />
-    <span>ETL-Processor</span>
-    <span></span>
-    <span th:if="${mtbFileSender.startsWith('Rest')}">bwHC-Backend</span>
-    <span th:if="${mtbFileSender.startsWith('Kafka')}">Kafka-Broker</span>
-</div>
+<th:block th:if="${outputConnectionAvailable == null}">
+    <h2><span>🟦</span> Keine Ausgabenkonfiguration</h2>
+</th:block>
+<th:block th:if="${outputConnectionAvailable != null}">
+    <h2><span th:if="${outputConnectionAvailable.available}">✅</span><span th:if="${not(outputConnectionAvailable.available)}">⚡</span> MTB-File Verbindung</h2>
+    <div>
+        Stand: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(outputConnectionAvailable.timestamp)}" th:text="${#temporals.formatISO(outputConnectionAvailable.timestamp)}"></time>
+        &nbsp;|&nbsp;
+        Letzte Änderung: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(outputConnectionAvailable.lastChange)}" th:text="${#temporals.formatISO(outputConnectionAvailable.lastChange)}"></time>
+    </div>
+    <div>
+        Verbindung über <code>[[ ${mtbFileSender} ]]</code>. Die Verbindung ist aktuell
+        <strong th:if="${outputConnectionAvailable.available}" style="color: green">verfügbar.</strong>
+        <strong th:if="${not(outputConnectionAvailable.available)}" style="color: red">nicht verfügbar.</strong>
+    </div>
+    <div class="connection-display border">
+        <img th:src="@{/server.png}" alt="ETL-Processor" />
+        <span class="connection" th:classappend="${outputConnectionAvailable.available ? 'available' : ''}"></span>
+        <img th:if="${mtbFileSender.startsWith('Rest')}" th:src="@{/server.png}" alt="bwHC-Backend" />
+        <img th:if="${mtbFileSender.startsWith('Kafka')}" th:src="@{/kafka.png}" alt="Kafka-Broker" />
+        <span>ETL-Processor</span>
+        <span></span>
+        <span th:if="${mtbFileSender.startsWith('Rest')}">bwHC-Backend</span>
+        <span th:if="${mtbFileSender.startsWith('Kafka')}">Kafka-Broker</span>
+    </div>
+</th:block>
