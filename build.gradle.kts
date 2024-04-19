@@ -4,10 +4,10 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.2.4"
+    id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.4"
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.spring") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
+    kotlin("plugin.spring") version "1.9.23"
 }
 
 group = "de.ukw.ccc"
@@ -20,7 +20,7 @@ var versions = mapOf(
     "mockito-kotlin" to "5.2.1",
     // Webjars
     "echarts" to "5.4.3",
-    "htmx.org" to "1.9.10"
+    "htmx.org" to "1.9.11"
 )
 
 java {
