@@ -56,7 +56,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
 public class GpasPseudonymGenerator implements Generator {
 
@@ -180,15 +179,7 @@ public class GpasPseudonymGenerator implements Generator {
             return headers;
         }
 
-        String authHeader = gPasUserName + ":" + gPasPassword;
-        byte[] authHeaderBytes = authHeader.getBytes();
-        byte[] encodedAuthHeaderBytes = Base64.getEncoder().encode(authHeaderBytes);
-        String encodedAuthHeader = new String(encodedAuthHeaderBytes);
-
-        if (StringUtils.isNotBlank(gPasUserName) && StringUtils.isNotBlank(gPasPassword)) {
-            headers.set("Authorization", "Basic " + encodedAuthHeader);
-        }
-
+        headers.setBasicAuth(gPasUserName, gPasPassword);
         return headers;
     }
 
