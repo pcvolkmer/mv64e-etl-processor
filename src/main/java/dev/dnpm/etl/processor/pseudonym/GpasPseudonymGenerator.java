@@ -72,13 +72,6 @@ public class GpasPseudonymGenerator implements Generator {
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate, RestTemplate restTemplate) {
         this.retryTemplate = retryTemplate;
-
-        if (customSslContext == null) {
-            this.restTemplate = restTemplate;
-        } else {
-            this.restTemplate = getCustomRestTemplate();
-        }
-
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
         httpHeader = getHttpHeaders(gpasCfg.getUsername(), gpasCfg.getPassword());
@@ -88,6 +81,14 @@ public class GpasPseudonymGenerator implements Generator {
                 customSslContext = getSslContext(gpasCfg.getSslCaLocation());
                 log.warn(String.format("%s has been initialized with SSL certificate %s. This is deprecated in favor of including Root CA.",
                     this.getClass().getName(), gpasCfg.getSslCaLocation()));
+
+                if (customSslContext == null) {
+                    this.restTemplate = restTemplate;
+                } else {
+                    this.restTemplate = getCustomRestTemplate();
+                }
+            } else {
+                this.restTemplate = restTemplate;
             }
         } catch (IOException | KeyManagementException | KeyStoreException | CertificateException |
                  NoSuchAlgorithmException e) {
