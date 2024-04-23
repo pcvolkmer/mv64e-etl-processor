@@ -33,6 +33,15 @@ Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
 ## Konfiguration
 
+### Breaking Changes nach Version 0.10
+
+In Versionen des ETL-Processors **nach Version 0.10** werden die folgenden Konfigurationsoptionen entfernt:
+
+* `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Nutzen Sie hier, wie unter [_Integration eines eigenen Root CA
+  Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben, das Einbinden eigener Zertifikate.
+* `APP_KAFKA_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_TOPIC`
+* `APP_KAFKA_RESPONSE_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`
+
 ### Pseudonymisierung der Patienten-ID
 
 Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) angegeben ist, wird diese verwendet.
@@ -64,9 +73,12 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
 * ~~`APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`~~: **Veraltet** - Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
+  **Wird in nach Version 0.10 entfernt**
 
-Der Konfigurationsparameter `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION` sollte nicht mehr verwendet werden und wird in einer kommenden Version entfernt.
-Stattdessen sollte das Root Zertifikat wie unter [_Integration eines eigenen Root CA Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben eingebunden werden.
+Der Konfigurationsparameter `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION` sollte nicht mehr verwendet werden und wird nach
+Version 0.10 entfernt.
+Stattdessen sollte das Root Zertifikat wie unter [_Integration eines eigenen Root CA
+Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben eingebunden werden.
 
 ### Anmeldung mit einem Passwort
 
@@ -189,9 +201,9 @@ Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein Kafka-Topic übermittelt wird:
 
 * `APP_KAFKA_OUTPUT_TOPIC`: Zu verwendendes Topic zum Versenden von Anfragen. 
-  Ersetzt in einer kommenden Version `APP_KAFKA_TOPIC`. 
+  Ersetzt ~~`APP_KAFKA_TOPIC`~~, **welches nach Version 0.10 entfernt wird**. 
 * `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`: Topic mit Antworten über den Erfolg des Versendens. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_response".
-  Ersetzt in einer kommenden Version `APP_KAFKA_RESPONSE_TOPIC`.
+  Ersetzt ~~`APP_KAFKA_RESPONSE_TOPIC`~~, **welches nach Version 0.10 entfernt wird**.
 * `APP_KAFKA_GROUP_ID`: Kafka GroupID des Consumers. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_group".
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 
