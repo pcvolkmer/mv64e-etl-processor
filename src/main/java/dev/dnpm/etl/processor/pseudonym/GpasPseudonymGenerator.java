@@ -70,9 +70,14 @@ public class GpasPseudonymGenerator implements Generator {
 
     private SSLContext customSslContext;
 
-    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate) {
+    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate, RestTemplate restTemplate) {
         this.retryTemplate = retryTemplate;
-        this.restTemplate = getCustomRestTemplate();
+
+        if (customSslContext == null) {
+            this.restTemplate = restTemplate;
+        } else {
+            this.restTemplate = getCustomRestTemplate();
+        }
 
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
@@ -218,9 +223,6 @@ public class GpasPseudonymGenerator implements Generator {
     }
 
     protected RestTemplate getCustomRestTemplate() {
-        if (customSslContext == null) {
-            return new RestTemplate();
-        }
         final var sslsf = new SSLConnectionSocketFactory(customSslContext);
         final Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
             .register("https", sslsf).register("http", new PlainConnectionSocketFactory()).build();
