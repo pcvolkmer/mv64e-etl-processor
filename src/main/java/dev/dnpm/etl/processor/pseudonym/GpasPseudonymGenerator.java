@@ -72,7 +72,7 @@ public class GpasPseudonymGenerator implements Generator {
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate) {
         this.retryTemplate = retryTemplate;
-        this.restTemplate = getCustomRestTemplete();
+        this.restTemplate = getCustomRestTemplate();
 
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
@@ -217,7 +217,7 @@ public class GpasPseudonymGenerator implements Generator {
         return sslContext;
     }
 
-    protected RestTemplate getCustomRestTemplete() {
+    protected RestTemplate getCustomRestTemplate() {
         if (customSslContext == null) {
             return new RestTemplate();
         }
