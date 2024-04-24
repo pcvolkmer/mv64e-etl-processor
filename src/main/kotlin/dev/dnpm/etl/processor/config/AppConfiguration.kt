@@ -88,19 +88,6 @@ class AppConfiguration {
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
     fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
-    }
-
-    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
-    @Bean
-    fun buildinPseudonymGenerator(): Generator {
-        return AnonymizingGenerator()
-    }
-
-    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
-    @ConditionalOnMissingBean
-    @Bean
-    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
         fun getSslContext(certificateLocation: String): SSLContext? {
             val ks = KeyStore.getInstance(KeyStore.getDefaultType())
 
@@ -162,6 +149,19 @@ class AppConfiguration {
         }
 
         return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
+    @Bean
+    fun buildinPseudonymGenerator(): Generator {
+        return AnonymizingGenerator()
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
+    @ConditionalOnMissingBean
+    @Bean
+    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
+        return gpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "BUILDIN")

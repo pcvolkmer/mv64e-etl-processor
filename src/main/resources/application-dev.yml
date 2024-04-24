@@ -3,17 +3,34 @@ spring:
     compose:
       file: ./dev-compose.yml
 
+  security:
+    oauth2:
+      client:
+        registration:
+          custom:
+            client-name: App-Dev
+            client-id: app-dev
+            client-secret: 9MQWatEcgkC1WISSAFUGaFGbyEHh8rAy
+            scope:
+              - openid
+        provider:
+          custom:
+            issuer-uri: https://dnpm.dev/auth/realms/intern
+            user-name-attribute: name
+
 app:
-  #rest:
-  #  uri: http://localhost:9000/bwhc/etl/api
-  kafka:
-    topic: test
-    response-topic: test_response
-    servers: localhost:9094
-  #security:
-  #  admin-user: admin
-  #  admin-password: "{noop}very-secret"
+  rest:
+    uri: http://localhost:9000/bwhc/etl/api
+  #kafka:
+  #  topic: test
+  #  response-topic: test_response
+  #  servers: localhost:9094
+  security:
+    admin-user: admin
+    admin-password: "{noop}very-secret"
+    enable-oidc: "true"
 
 server:
   port: 8000
+
 
