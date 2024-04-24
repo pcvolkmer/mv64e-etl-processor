@@ -88,6 +88,47 @@ class AppConfiguration {
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
     fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
+        try {
+            if (!configProperties.sslCaLocation.isNullOrBlank()) {
+                return GpasPseudonymGenerator(
+                    configProperties,
+                    retryTemplate,
+                    createCustomGpasRestTemplate(configProperties)
+                )
+            }
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
+
+        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
+    @Bean
+    fun buildinPseudonymGenerator(): Generator {
+        return AnonymizingGenerator()
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
+    @ConditionalOnMissingBean
+    @Bean
+    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
+        try {
+            if (!configProperties.sslCaLocation.isNullOrBlank()) {
+                return GpasPseudonymGenerator(
+                    configProperties,
+                    retryTemplate,
+                    createCustomGpasRestTemplate(configProperties)
+                )
+            }
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
+
+        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+    }
+
+    private fun createCustomGpasRestTemplate(configProperties: GPasConfigProperties): RestTemplate {
         fun getSslContext(certificateLocation: String): SSLContext? {
             val ks = KeyStore.getInstance(KeyStore.getDefaultType())
 
@@ -137,31 +178,14 @@ class AppConfiguration {
                 )
 
                 if (customSslContext != null) {
-                    return GpasPseudonymGenerator(
-                        configProperties,
-                        retryTemplate,
-                        getCustomRestTemplate(customSslContext)
-                    )
+                    return getCustomRestTemplate(customSslContext)
                 }
             }
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
 
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
-    }
-
-    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
-    @Bean
-    fun buildinPseudonymGenerator(): Generator {
-        return AnonymizingGenerator()
-    }
-
-    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
-    @ConditionalOnMissingBean
-    @Bean
-    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
-        return gpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+        throw RuntimeException("Custom SSL configuration for gPAS not usable")
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "BUILDIN")
