@@ -20,7 +20,10 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.monitoring.*
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
@@ -29,12 +32,19 @@ import dev.dnpm.etl.processor.services.TokenRepository
 import dev.dnpm.etl.processor.services.TokenService
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
+import org.apache.hc.core5.http.config.RegistryBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
 import org.springframework.retry.RetryListener
@@ -46,6 +56,13 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
+import java.io.BufferedInputStream
+import java.io.FileInputStream
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
@@ -84,6 +101,66 @@ class AppConfiguration {
     @ConditionalOnMissingBean
     @Bean
     fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
+        fun getSslContext(certificateLocation: String): SSLContext? {
+            val ks = KeyStore.getInstance(KeyStore.getDefaultType())
+
+            val fis = FileInputStream(certificateLocation)
+            val ca = CertificateFactory.getInstance("X.509")
+                .generateCertificate(BufferedInputStream(fis)) as X509Certificate
+
+            ks.load(null, null)
+            ks.setCertificateEntry(1.toString(), ca)
+
+            val tmf = TrustManagerFactory.getInstance(
+                TrustManagerFactory.getDefaultAlgorithm()
+            )
+            tmf.init(ks)
+
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(null, tmf.trustManagers, null)
+
+            return sslContext
+        }
+
+        fun getCustomRestTemplate(customSslContext: SSLContext): RestTemplate {
+            val sslsf = SSLConnectionSocketFactory(customSslContext)
+            val socketFactoryRegistry = RegistryBuilder.create<ConnectionSocketFactory>()
+                .register("https", sslsf).register("http", PlainConnectionSocketFactory()).build()
+
+            val connectionManager = BasicHttpClientConnectionManager(
+                socketFactoryRegistry
+            )
+            val httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager).build()
+
+            val requestFactory = HttpComponentsClientHttpRequestFactory(
+                httpClient
+            )
+            return RestTemplate(requestFactory)
+        }
+
+        try {
+            if (!configProperties.sslCaLocation.isNullOrBlank()) {
+                val customSslContext = getSslContext(configProperties.sslCaLocation)
+                logger.warn(
+                    String.format(
+                        "%s has been initialized with SSL certificate %s. This is deprecated in favor of including Root CA.",
+                        this.javaClass.name, configProperties.sslCaLocation
+                    )
+                )
+
+                if (customSslContext != null) {
+                    return GpasPseudonymGenerator(
+                        configProperties,
+                        retryTemplate,
+                        getCustomRestTemplate(customSslContext)
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
+
         return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
     }
 
