@@ -70,7 +70,7 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient5"]}")
     implementation("com.jayway.jsonpath:json-path")
-    implementation("org.webjars:webjars-locator:0.50")
+    implementation("org.webjars:webjars-locator:0.52")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
