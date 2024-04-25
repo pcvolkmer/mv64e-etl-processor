@@ -85,7 +85,7 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
-    // Override dependency version from org.testcontainers:junit-jupiter - CVE-204-26308, CVE-2024-25710
+    // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
     integrationTestImplementation("org.apache.commons:commons-compress:1.26.1")
 }
 
