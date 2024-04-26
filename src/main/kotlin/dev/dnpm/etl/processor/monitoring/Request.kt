@@ -45,11 +45,13 @@ data class Request(
     @Embedded.Nullable var report: Report? = null
 )
 
+@JvmRecord
 data class Report(
     val description: String,
     val dataQualityReport: String = ""
 )
 
+@JvmRecord
 data class CountedState(
     val count: Int,
     val status: RequestStatus,
