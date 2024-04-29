@@ -76,33 +76,33 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
         this.requestRepository.saveAll(
             listOf(
                 Request(
-                    uuid = UUID.randomUUID().toString(),
-                    patientId = "TEST_12345678901",
-                    pid = "P1",
-                    fingerprint = "0123456789abcdef1",
-                    type = RequestType.MTB_FILE,
-                    status = RequestStatus.SUCCESS,
-                    processedAt = Instant.parse("2023-07-07T02:00:00Z")
+                    UUID.randomUUID().toString(),
+                    "TEST_12345678901",
+                    "P1",
+                    "0123456789abcdef1",
+                    RequestType.MTB_FILE,
+                    RequestStatus.SUCCESS,
+                    Instant.parse("2023-07-07T02:00:00Z")
                 ),
                 // Should be ignored - wrong patient ID -->
                 Request(
-                    uuid = UUID.randomUUID().toString(),
-                    patientId = "TEST_12345678902",
-                    pid = "P2",
-                    fingerprint = "0123456789abcdef2",
-                    type = RequestType.MTB_FILE,
-                    status = RequestStatus.WARNING,
-                    processedAt = Instant.parse("2023-08-08T00:00:00Z")
+                    UUID.randomUUID().toString(),
+                    "TEST_12345678902",
+                    "P2",
+                    "0123456789abcdef2",
+                    RequestType.MTB_FILE,
+                    RequestStatus.WARNING,
+                    Instant.parse("2023-08-08T00:00:00Z")
                 ),
                 // <--
                 Request(
-                    uuid = UUID.randomUUID().toString(),
-                    patientId = "TEST_12345678901",
-                    pid = "P2",
-                    fingerprint = "0123456789abcdee1",
-                    type = RequestType.DELETE,
-                    status = RequestStatus.SUCCESS,
-                    processedAt = Instant.parse("2023-08-08T02:00:00Z")
+                    UUID.randomUUID().toString(),
+                    "TEST_12345678901",
+                    "P2",
+                    "0123456789abcdee1",
+                    RequestType.DELETE,
+                    RequestStatus.SUCCESS,
+                    Instant.parse("2023-08-08T02:00:00Z")
                 )
             )
         )

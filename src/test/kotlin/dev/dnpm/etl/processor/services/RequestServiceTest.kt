@@ -41,14 +41,14 @@ class RequestServiceTest {
     private lateinit var requestService: RequestService
 
     private fun anyRequest() = any(Request::class.java) ?: Request(
-        id = 0L,
-        uuid = UUID.randomUUID().toString(),
-        patientId = "TEST_dummy",
-        pid = "PX",
-        fingerprint = "dummy",
-        type = RequestType.MTB_FILE,
-        status = RequestStatus.SUCCESS,
-        processedAt = Instant.parse("2023-08-08T02:00:00Z")
+        0L,
+        UUID.randomUUID().toString(),
+        "TEST_dummy",
+        "PX",
+        "dummy",
+        RequestType.MTB_FILE,
+        RequestStatus.SUCCESS,
+        Instant.parse("2023-08-08T02:00:00Z")
     )
 
     @BeforeEach
@@ -63,34 +63,34 @@ class RequestServiceTest {
     fun shouldIndicateLastRequestIsDeleteRequest() {
         val requests = listOf(
             Request(
-                id = 1L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdef1",
-                type = RequestType.MTB_FILE,
-                status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-07-07T00:00:00Z")
+                1L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdef1",
+                RequestType.MTB_FILE,
+                RequestStatus.WARNING,
+                Instant.parse("2023-07-07T00:00:00Z")
             ),
             Request(
-                id = 2L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdefd",
-                type = RequestType.DELETE,
-                status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-07-07T02:00:00Z")
+                2L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdefd",
+                RequestType.DELETE,
+                RequestStatus.WARNING,
+                Instant.parse("2023-07-07T02:00:00Z")
             ),
             Request(
-                id = 3L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdef1",
-                type = RequestType.MTB_FILE,
-                status = RequestStatus.UNKNOWN,
-                processedAt = Instant.parse("2023-08-11T00:00:00Z")
+                3L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdef1",
+                RequestType.MTB_FILE,
+                RequestStatus.UNKNOWN,
+                Instant.parse("2023-08-11T00:00:00Z")
             )
         )
 
@@ -103,34 +103,34 @@ class RequestServiceTest {
     fun shouldIndicateLastRequestIsNotDeleteRequest() {
         val requests = listOf(
             Request(
-                id = 1L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdef1",
-                type = RequestType.MTB_FILE,
-                status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-07-07T00:00:00Z")
+                1L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdef1",
+                RequestType.MTB_FILE,
+                RequestStatus.WARNING,
+                Instant.parse("2023-07-07T00:00:00Z")
             ),
             Request(
-                id = 2L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdef1",
-                type = RequestType.MTB_FILE,
-                status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-07-07T02:00:00Z")
+                2L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdef1",
+                RequestType.MTB_FILE,
+                RequestStatus.WARNING,
+                Instant.parse("2023-07-07T02:00:00Z")
             ),
             Request(
-                id = 3L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdef1",
-                type = RequestType.MTB_FILE,
-                status = RequestStatus.UNKNOWN,
-                processedAt = Instant.parse("2023-08-11T00:00:00Z")
+                3L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdef1",
+                RequestType.MTB_FILE,
+                RequestStatus.UNKNOWN,
+                Instant.parse("2023-08-11T00:00:00Z")
             )
         )
 
@@ -143,24 +143,24 @@ class RequestServiceTest {
     fun shouldReturnPatientsLastRequest() {
         val requests = listOf(
             Request(
-                id = 1L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678901",
-                pid = "P1",
-                fingerprint = "0123456789abcdef1",
-                type = RequestType.DELETE,
-                status = RequestStatus.SUCCESS,
-                processedAt = Instant.parse("2023-07-07T02:00:00Z")
+                1L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678901",
+                "P1",
+                "0123456789abcdef1",
+                RequestType.DELETE,
+                RequestStatus.SUCCESS,
+                Instant.parse("2023-07-07T02:00:00Z")
             ),
             Request(
-                id = 1L,
-                uuid = UUID.randomUUID().toString(),
-                patientId = "TEST_12345678902",
-                pid = "P2",
-                fingerprint = "0123456789abcdef2",
-                type = RequestType.MTB_FILE,
-                status = RequestStatus.WARNING,
-                processedAt = Instant.parse("2023-08-08T00:00:00Z")
+                1L,
+                UUID.randomUUID().toString(),
+                "TEST_12345678902",
+                "P2",
+                "0123456789abcdef2",
+                RequestType.MTB_FILE,
+                RequestStatus.WARNING,
+                Instant.parse("2023-08-08T00:00:00Z")
             )
         )
 
@@ -187,13 +187,13 @@ class RequestServiceTest {
         }.`when`(requestRepository).save(anyRequest())
 
         val request = Request(
-            uuid = UUID.randomUUID().toString(),
-            patientId = "TEST_12345678901",
-            pid = "P1",
-            fingerprint = "0123456789abcdef1",
-            type = RequestType.DELETE,
-            status = RequestStatus.SUCCESS,
-            processedAt = Instant.parse("2023-07-07T02:00:00Z")
+            UUID.randomUUID().toString(),
+            "TEST_12345678901",
+            "P1",
+            "0123456789abcdef1",
+            RequestType.DELETE,
+            RequestStatus.SUCCESS,
+            Instant.parse("2023-07-07T02:00:00Z")
         )
 
         requestService.save(request)

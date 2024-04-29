@@ -43,7 +43,28 @@ data class Request(
     var status: RequestStatus,
     var processedAt: Instant = Instant.now(),
     @Embedded.Nullable var report: Report? = null
-)
+) {
+    constructor(
+        uuid: String,
+        patientId: String,
+        pid: String,
+        fingerprint: String,
+        type: RequestType,
+        status: RequestStatus
+    ) :
+            this(null, uuid, patientId, pid, fingerprint, type, status, Instant.now())
+
+    constructor(
+        uuid: String,
+        patientId: String,
+        pid: String,
+        fingerprint: String,
+        type: RequestType,
+        status: RequestStatus,
+        processedAt: Instant
+    ) :
+            this(null, uuid, patientId, pid, fingerprint, type, status, processedAt)
+}
 
 @JvmRecord
 data class Report(

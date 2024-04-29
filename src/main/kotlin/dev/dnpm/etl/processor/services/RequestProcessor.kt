@@ -62,12 +62,12 @@ class RequestProcessor(
 
         requestService.save(
             Request(
-                uuid = requestId,
-                patientId = request.mtbFile.patient.id,
-                pid = pid,
-                fingerprint = fingerprint(request.mtbFile),
-                status = RequestStatus.UNKNOWN,
-                type = RequestType.MTB_FILE
+                requestId,
+                request.mtbFile.patient.id,
+                pid,
+                fingerprint(request.mtbFile),
+                RequestType.MTB_FILE,
+                RequestStatus.UNKNOWN
             )
         )
 
@@ -117,12 +117,12 @@ class RequestProcessor(
 
             requestService.save(
                 Request(
-                    uuid = requestId,
-                    patientId = patientPseudonym,
-                    pid = patientId,
-                    fingerprint = fingerprint(patientPseudonym),
-                    status = RequestStatus.UNKNOWN,
-                    type = RequestType.DELETE
+                    requestId,
+                    patientPseudonym,
+                    patientId,
+                    fingerprint(patientPseudonym),
+                    RequestType.DELETE,
+                    RequestStatus.UNKNOWN
                 )
             )
 
