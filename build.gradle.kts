@@ -17,7 +17,7 @@ var versions = mapOf(
     "bwhc-dto-java" to "0.2.0",
     "hapi-fhir" to "6.10.2",
     "httpclient5" to "5.2.1",
-    "mockito-kotlin" to "5.2.1",
+    "mockito-kotlin" to "5.3.1",
     // Webjars
     "echarts" to "5.4.3",
     "htmx.org" to "1.9.11"
