@@ -33,7 +33,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.Instant
-import java.util.*
 
 @Testcontainers
 @ExtendWith(SpringExtension::class)
@@ -61,7 +60,7 @@ class RequestRepositoryTest : AbstractTestcontainerTest() {
     @Test
     fun shouldSaveRequest() {
         val request = Request(
-            UUID.randomUUID().toString(),
+            RequestId.randomUUID().toString(),
             "TEST_12345678901",
             "P1",
             "0123456789abcdef1",
