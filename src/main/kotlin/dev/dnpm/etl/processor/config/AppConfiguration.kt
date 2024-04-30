@@ -44,6 +44,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
@@ -274,5 +275,9 @@ class AppConfiguration {
         return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
     }
 
+    @Bean
+    fun jdbcConfiguration(): AbstractJdbcConfiguration {
+        return AppJdbcConfiguration()
+    }
 }
 

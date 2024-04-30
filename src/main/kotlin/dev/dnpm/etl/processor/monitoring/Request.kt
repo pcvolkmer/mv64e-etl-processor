@@ -19,10 +19,12 @@
 
 package dev.dnpm.etl.processor.monitoring
 
+import dev.dnpm.etl.processor.Fingerprint
 import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jdbc.repository.query.Query
+import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
@@ -38,7 +40,8 @@ data class Request(
     val uuid: String = RequestId.randomUUID().toString(),
     val patientId: String,
     val pid: String,
-    val fingerprint: String,
+    @Column("fingerprint")
+    val fingerprint: Fingerprint,
     val type: RequestType,
     var status: RequestStatus,
     var processedAt: Instant = Instant.now(),
@@ -48,7 +51,7 @@ data class Request(
         uuid: String,
         patientId: String,
         pid: String,
-        fingerprint: String,
+        fingerprint: Fingerprint,
         type: RequestType,
         status: RequestStatus
     ) :
@@ -58,7 +61,7 @@ data class Request(
         uuid: String,
         patientId: String,
         pid: String,
-        fingerprint: String,
+        fingerprint: Fingerprint,
         type: RequestType,
         status: RequestStatus,
         processedAt: Instant

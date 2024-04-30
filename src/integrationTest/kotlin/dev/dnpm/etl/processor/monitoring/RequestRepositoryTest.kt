@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.monitoring
 
 import dev.dnpm.etl.processor.AbstractTestcontainerTest
+import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.output.MtbFileSender
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -63,7 +64,7 @@ class RequestRepositoryTest : AbstractTestcontainerTest() {
             RequestId.randomUUID().toString(),
             "TEST_12345678901",
             "P1",
-            "0123456789abcdef1",
+            Fingerprint("0123456789abcdef1"),
             RequestType.MTB_FILE,
             RequestStatus.WARNING,
             Instant.parse("2023-07-07T00:00:00Z")

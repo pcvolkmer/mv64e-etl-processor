@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.output.MtbFileSender
@@ -90,7 +91,7 @@ class RequestProcessorTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga",
+                Fingerprint("zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
@@ -149,7 +150,7 @@ class RequestProcessorTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga",
+                Fingerprint("zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
@@ -208,7 +209,7 @@ class RequestProcessorTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "different",
+                Fingerprint("different"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
@@ -271,7 +272,7 @@ class RequestProcessorTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "different",
+                Fingerprint("different"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")

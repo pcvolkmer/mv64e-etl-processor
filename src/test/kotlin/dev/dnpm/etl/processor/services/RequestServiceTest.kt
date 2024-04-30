@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
+import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -45,7 +46,7 @@ class RequestServiceTest {
         UUID.randomUUID().toString(),
         "TEST_dummy",
         "PX",
-        "dummy",
+        Fingerprint("dummy"),
         RequestType.MTB_FILE,
         RequestStatus.SUCCESS,
         Instant.parse("2023-08-08T02:00:00Z")
@@ -67,7 +68,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdef1",
+                Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T00:00:00Z")
@@ -77,7 +78,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdefd",
+                Fingerprint("0123456789abcdefd"),
                 RequestType.DELETE,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T02:00:00Z")
@@ -87,7 +88,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdef1",
+                Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.UNKNOWN,
                 Instant.parse("2023-08-11T00:00:00Z")
@@ -107,7 +108,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdef1",
+                Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T00:00:00Z")
@@ -117,7 +118,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdef1",
+                Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T02:00:00Z")
@@ -127,7 +128,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdef1",
+                Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.UNKNOWN,
                 Instant.parse("2023-08-11T00:00:00Z")
@@ -147,7 +148,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678901",
                 "P1",
-                "0123456789abcdef1",
+                Fingerprint("0123456789abcdef1"),
                 RequestType.DELETE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-07-07T02:00:00Z")
@@ -157,7 +158,7 @@ class RequestServiceTest {
                 UUID.randomUUID().toString(),
                 "TEST_12345678902",
                 "P2",
-                "0123456789abcdef2",
+                Fingerprint("0123456789abcdef2"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
                 Instant.parse("2023-08-08T00:00:00Z")
@@ -167,7 +168,7 @@ class RequestServiceTest {
         val actual = RequestService.lastMtbFileRequestForPatientPseudonym(requests)
 
         assertThat(actual).isInstanceOf(Request::class.java)
-        assertThat(actual?.fingerprint).isEqualTo("0123456789abcdef2")
+        assertThat(actual?.fingerprint).isEqualTo(Fingerprint("0123456789abcdef2"))
     }
 
     @Test
@@ -190,7 +191,7 @@ class RequestServiceTest {
             UUID.randomUUID().toString(),
             "TEST_12345678901",
             "P1",
-            "0123456789abcdef1",
+            Fingerprint("0123456789abcdef1"),
             RequestType.DELETE,
             RequestStatus.SUCCESS,
             Instant.parse("2023-07-07T02:00:00Z")

@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.AbstractTestcontainerTest
+import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -79,7 +80,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                     UUID.randomUUID().toString(),
                     "TEST_12345678901",
                     "P1",
-                    "0123456789abcdef1",
+                    Fingerprint("0123456789abcdef1"),
                     RequestType.MTB_FILE,
                     RequestStatus.SUCCESS,
                     Instant.parse("2023-07-07T02:00:00Z")
@@ -89,7 +90,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                     UUID.randomUUID().toString(),
                     "TEST_12345678902",
                     "P2",
-                    "0123456789abcdef2",
+                    Fingerprint("0123456789abcdef2"),
                     RequestType.MTB_FILE,
                     RequestStatus.WARNING,
                     Instant.parse("2023-08-08T00:00:00Z")
@@ -99,7 +100,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                     UUID.randomUUID().toString(),
                     "TEST_12345678901",
                     "P2",
-                    "0123456789abcdee1",
+                    Fingerprint("0123456789abcdee1"),
                     RequestType.DELETE,
                     RequestStatus.SUCCESS,
                     Instant.parse("2023-08-08T02:00:00Z")
@@ -115,8 +116,8 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
         val actual = requestService.allRequestsByPatientPseudonym("TEST_12345678901")
 
         assertThat(actual).hasSize(2)
-        assertThat(actual[0].fingerprint).isEqualTo("0123456789abcdee1")
-        assertThat(actual[1].fingerprint).isEqualTo("0123456789abcdef1")
+        assertThat(actual[0].fingerprint).isEqualTo(Fingerprint("0123456789abcdee1"))
+        assertThat(actual[1].fingerprint).isEqualTo(Fingerprint("0123456789abcdef1"))
     }
 
     @Test
@@ -135,7 +136,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
         val actual = requestService.lastMtbFileRequestForPatientPseudonym("TEST_12345678901")
 
         assertThat(actual).isNotNull
-        assertThat(actual?.fingerprint).isEqualTo("0123456789abcdef1")
+        assertThat(actual?.fingerprint).isEqualTo(Fingerprint("0123456789abcdef1"))
     }
 
 }

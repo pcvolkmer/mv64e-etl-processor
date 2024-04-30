@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
@@ -146,7 +147,7 @@ class RequestProcessor(
                     uuid = requestId,
                     patientId = "???",
                     pid = patientId,
-                    fingerprint = "",
+                    fingerprint = Fingerprint.empty(),
                     status = RequestStatus.ERROR,
                     type = RequestType.DELETE,
                     report = Report("Fehler bei der Pseudonymisierung")
@@ -155,14 +156,16 @@ class RequestProcessor(
         }
     }
 
-    private fun fingerprint(mtbFile: MtbFile): String {
+    private fun fingerprint(mtbFile: MtbFile): Fingerprint {
         return fingerprint(objectMapper.writeValueAsString(mtbFile))
     }
 
-    private fun fingerprint(s: String): String {
-        return Base32().encodeAsString(DigestUtils.sha256(s))
-            .replace("=", "")
-            .lowercase()
+    private fun fingerprint(s: String): Fingerprint {
+        return Fingerprint(
+            Base32().encodeAsString(DigestUtils.sha256(s))
+                .replace("=", "")
+                .lowercase()
+        )
     }
 
 }

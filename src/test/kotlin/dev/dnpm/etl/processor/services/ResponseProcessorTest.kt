@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
+import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -50,7 +51,7 @@ class ResponseProcessorTest {
         "TestID1234",
         "PSEUDONYM-A",
         "1",
-        "dummyfingerprint",
+        Fingerprint("dummyfingerprint"),
         RequestType.MTB_FILE,
         RequestStatus.UNKNOWN
     )
