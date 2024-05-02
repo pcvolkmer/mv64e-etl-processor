@@ -20,7 +20,6 @@
 package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.monitoring.Report
-import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
@@ -31,7 +30,7 @@ import java.util.*
 
 @Service
 class ResponseProcessor(
-    private val requestRepository: RequestRepository,
+    private val requestService: RequestService,
     private val statisticsUpdateProducer: Sinks.Many<Any>
 ) {
 
@@ -39,7 +38,7 @@ class ResponseProcessor(
 
     @EventListener(classes = [ResponseEvent::class])
     fun handleResponseEvent(event: ResponseEvent) {
-        requestRepository.findByUuidEquals(event.requestUuid).ifPresentOrElse({
+        requestService.findByUuid(event.requestUuid).ifPresentOrElse({
             it.processedAt = event.timestamp
             it.status = event.status
 
@@ -76,7 +75,7 @@ class ResponseProcessor(
                 }
             }
 
-            requestRepository.save(it)
+            requestService.save(it)
 
             statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
         }, {

@@ -21,7 +21,6 @@ package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.monitoring.Request
-import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import org.assertj.core.api.Assertions.assertThat
@@ -41,7 +40,7 @@ import java.util.*
 @ExtendWith(MockitoExtension::class)
 class ResponseProcessorTest {
 
-    private lateinit var requestRepository: RequestRepository
+    private lateinit var requestService: RequestService
     private lateinit var statisticsUpdateProducer: Sinks.Many<Any>
 
     private lateinit var responseProcessor: ResponseProcessor
@@ -58,20 +57,20 @@ class ResponseProcessorTest {
 
     @BeforeEach
     fun setup(
-        @Mock requestRepository: RequestRepository,
+        @Mock requestService: RequestService,
         @Mock statisticsUpdateProducer: Sinks.Many<Any>
     ) {
-        this.requestRepository = requestRepository
+        this.requestService = requestService
         this.statisticsUpdateProducer = statisticsUpdateProducer
 
-        this.responseProcessor = ResponseProcessor(requestRepository, statisticsUpdateProducer)
+        this.responseProcessor = ResponseProcessor(requestService, statisticsUpdateProducer)
     }
 
     @Test
     fun shouldNotSaveStatusForUnknownRequest() {
         doAnswer {
             Optional.empty<Request>()
-        }.whenever(requestRepository).findByUuidEquals(anyString())
+        }.whenever(requestService).findByUuid(anyString())
 
         val event = ResponseEvent(
             "TestID1234",
@@ -81,14 +80,14 @@ class ResponseProcessorTest {
 
         this.responseProcessor.handleResponseEvent(event)
 
-        verify(requestRepository, never()).save(any())
+        verify(requestService, never()).save(any())
     }
 
     @Test
     fun shouldNotSaveStatusWithUnknownState() {
         doAnswer {
             Optional.of(testRequest)
-        }.whenever(requestRepository).findByUuidEquals(anyString())
+        }.whenever(requestService).findByUuid(anyString())
 
         val event = ResponseEvent(
             "TestID1234",
@@ -98,7 +97,7 @@ class ResponseProcessorTest {
 
         this.responseProcessor.handleResponseEvent(event)
 
-        verify(requestRepository, never()).save(any())
+        verify(requestService, never()).save(any())
     }
 
     @ParameterizedTest
@@ -106,7 +105,7 @@ class ResponseProcessorTest {
     fun shouldSaveStatusForKnownRequest(requestStatus: RequestStatus) {
         doAnswer {
             Optional.of(testRequest)
-        }.whenever(requestRepository).findByUuidEquals(anyString())
+        }.whenever(requestService).findByUuid(anyString())
 
         val event = ResponseEvent(
             "TestID1234",
@@ -117,7 +116,7 @@ class ResponseProcessorTest {
         this.responseProcessor.handleResponseEvent(event)
 
         val captor = argumentCaptor<Request>()
-        verify(requestRepository, times(1)).save(captor.capture())
+        verify(requestService, times(1)).save(captor.capture())
         assertThat(captor.firstValue).isNotNull
         assertThat(captor.firstValue.status).isEqualTo(requestStatus)
     }
