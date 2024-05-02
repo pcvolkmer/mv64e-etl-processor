@@ -18,6 +18,7 @@ var versions = mapOf(
     "hapi-fhir" to "6.10.2",
     "httpclient5" to "5.2.1",
     "mockito-kotlin" to "5.3.1",
+    "archunit" to "1.3.0",
     // Webjars
     "echarts" to "5.4.3",
     "htmx.org" to "1.9.11"
@@ -85,6 +86,7 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
+    integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
     // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
     integrationTestImplementation("org.apache.commons:commons-compress:1.26.1")
 }
