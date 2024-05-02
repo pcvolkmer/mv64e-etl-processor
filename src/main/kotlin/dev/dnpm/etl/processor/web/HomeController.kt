@@ -22,7 +22,7 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.NotFoundException
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestId
-import dev.dnpm.etl.processor.monitoring.RequestRepository
+import dev.dnpm.etl.processor.services.RequestService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 @RequestMapping(path = ["/"])
 class HomeController(
-    private val requestRepository: RequestRepository,
+    private val requestService: RequestService,
     private val reportService: ReportService
 ) {
 
@@ -44,7 +44,7 @@ class HomeController(
         @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
         model: Model
     ): String {
-        val requests = requestRepository.findAll(pageable)
+        val requests = requestService.findAll(pageable)
         model.addAttribute("requests", requests)
 
         return "index"
@@ -56,7 +56,7 @@ class HomeController(
         @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
         model: Model
     ): String {
-        val requests = requestRepository.findRequestByPatientId(patientId, pageable)
+        val requests = requestService.findRequestByPatientId(patientId, pageable)
         model.addAttribute("patientId", patientId)
         model.addAttribute("requests", requests)
 
@@ -65,7 +65,7 @@ class HomeController(
 
     @GetMapping(path = ["/report/{id}"])
     fun report(@PathVariable id: RequestId, model: Model): String {
-        val request = requestRepository.findByUuidEquals(id.toString()).orElse(null) ?: throw NotFoundException()
+        val request = requestService.findByUuid(id.toString()).orElse(null) ?: throw NotFoundException()
         model.addAttribute("request", request)
         model.addAttribute("issues", reportService.deserialize(request.report?.dataQualityReport))
 

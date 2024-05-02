@@ -19,9 +19,9 @@
 
 package dev.dnpm.etl.processor.web
 
-import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.services.RequestService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
@@ -41,15 +41,15 @@ import java.time.temporal.ChronoUnit
 class StatisticsRestController(
     @Qualifier("statisticsUpdateProducer")
     private val statisticsUpdateProducer: Sinks.Many<Any>,
-    private val requestRepository: RequestRepository
+    private val requestService: RequestService
 ) {
 
     @GetMapping(path = ["requeststates"])
     fun requestStates(@RequestParam(required = false, defaultValue = "false") delete: Boolean): List<NameValue> {
         val states = if (delete) {
-            requestRepository.countDeleteStates()
+            requestService.countDeleteStates()
         } else {
-            requestRepository.countStates()
+            requestService.countStates()
         }
 
         return states
@@ -79,7 +79,7 @@ class StatisticsRestController(
         }
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("Europe/Berlin"))
-        val data = requestRepository.findAll()
+        val data = requestService.findAll()
             .filter { it.type == requestType }
             .filter { it.processedAt.isAfter(Instant.now().minus(30, ChronoUnit.DAYS)) }
             .groupBy { formatter.format(it.processedAt) }
@@ -115,9 +115,9 @@ class StatisticsRestController(
     @GetMapping(path = ["requestpatientstates"])
     fun requestPatientStates(@RequestParam(required = false, defaultValue = "false") delete: Boolean): List<NameValue> {
         val states = if (delete) {
-            requestRepository.findPatientUniqueDeleteStates()
+            requestService.findPatientUniqueDeleteStates()
         } else {
-            requestRepository.findPatientUniqueStates()
+            requestService.findPatientUniqueStates()
         }
 
         return states.map {

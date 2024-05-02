@@ -19,11 +19,11 @@
 
 package dev.dnpm.etl.processor.services
 
-import dev.dnpm.etl.processor.monitoring.Request
-import dev.dnpm.etl.processor.monitoring.RequestRepository
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class RequestService(
@@ -31,6 +31,15 @@ class RequestService(
 ) {
 
     fun save(request: Request) = requestRepository.save(request)
+
+    fun findAll(): Iterable<Request> = requestRepository.findAll()
+
+    fun findAll(pageable: Pageable): Page<Request> = requestRepository.findAll(pageable)
+
+    fun findByUuid(uuid: String): Optional<Request> =
+        requestRepository.findByUuidEquals(uuid)
+
+    fun findRequestByPatientId(patientId: String, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientId(patientId, pageable)
 
     fun allRequestsByPatientPseudonym(patientPseudonym: String) = requestRepository
         .findAllByPatientIdOrderByProcessedAtDesc(patientPseudonym)
@@ -40,6 +49,14 @@ class RequestService(
 
     fun isLastRequestWithKnownStatusDeletion(patientPseudonym: String) =
         Companion.isLastRequestWithKnownStatusDeletion(allRequestsByPatientPseudonym(patientPseudonym))
+
+    fun countStates(): Iterable<CountedState> = requestRepository.countStates()
+
+    fun countDeleteStates(): Iterable<CountedState> = requestRepository.countDeleteStates()
+
+    fun findPatientUniqueStates(): List<CountedState> = requestRepository.findPatientUniqueStates()
+
+    fun findPatientUniqueDeleteStates(): List<CountedState> = requestRepository.findPatientUniqueDeleteStates()
 
     companion object {
 
