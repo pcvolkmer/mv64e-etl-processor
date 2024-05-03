@@ -114,6 +114,10 @@ task<Test>("integrationTest") {
     shouldRunAfter("test")
 }
 
+tasks.register("allTests") {
+    dependsOn(tasks.withType<Test>())
+}
+
 tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("ghcr.io/ccc-mf/etl-processor")
 
