@@ -88,6 +88,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
+    integrationTestImplementation("net.sourceforge.htmlunit:htmlunit")
     // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
     integrationTestImplementation("org.apache.commons:commons-compress:1.26.1")
 }
