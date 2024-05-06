@@ -74,6 +74,7 @@ class LoginControllerTest {
     fun testShouldRequestLoginPage() {
         mockMvc.get("/login").andExpect {
             status { isOk() }
+            view { name("login") }
         }
     }
 

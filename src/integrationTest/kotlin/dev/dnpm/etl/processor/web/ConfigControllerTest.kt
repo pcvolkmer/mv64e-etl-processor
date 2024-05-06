@@ -105,12 +105,13 @@ class ConfigControllerTest {
     }
 
     @Test
-    fun testShouldShowConfigPageIfLoggedIn() {
+    fun testShouldRequestConfigPageIfLoggedIn() {
         mockMvc.get("/configs") {
             with(user("admin").roles("ADMIN"))
             accept(MediaType.TEXT_HTML)
         }.andExpect {
             status { isOk() }
+            view { name("configs") }
         }
     }
 
@@ -136,6 +137,7 @@ class ConfigControllerTest {
             content = "name=Testtoken"
         }.andExpect {
             status { is2xxSuccessful() }
+            view { name("configs/tokens") }
         }
 
         val captor = argumentCaptor<String>()
@@ -155,6 +157,7 @@ class ConfigControllerTest {
             content = "name=Testtoken"
         }.andExpect {
             status { is2xxSuccessful() }
+            view { name("configs/tokens") }
         }
 
         val captor = argumentCaptor<String>()
@@ -170,6 +173,7 @@ class ConfigControllerTest {
             accept(MediaType.TEXT_HTML)
         }.andExpect {
             status { is2xxSuccessful() }
+            view { name("configs/tokens") }
         }
 
         val captor = argumentCaptor<Long>()
@@ -185,6 +189,7 @@ class ConfigControllerTest {
             accept(MediaType.TEXT_HTML)
         }.andExpect {
             status { is2xxSuccessful() }
+            view { name("configs/userroles") }
         }
 
         val captor = argumentCaptor<Long>()
@@ -202,6 +207,7 @@ class ConfigControllerTest {
             content = "role=ADMIN"
         }.andExpect {
             status { is2xxSuccessful() }
+            view { name("configs/userroles") }
         }
 
         val idCaptor = argumentCaptor<Long>()
