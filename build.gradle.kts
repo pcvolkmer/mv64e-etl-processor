@@ -8,6 +8,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.23"
     kotlin("plugin.spring") version "1.9.23"
+    jacoco
 }
 
 group = "de.ukw.ccc"
@@ -116,6 +117,16 @@ task<Test>("integrationTest") {
 
 tasks.register("allTests") {
     dependsOn(tasks.withType<Test>())
+}
+
+tasks.jacocoTestReport {
+    dependsOn("allTests")
+
+    executionData(fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec"))
+
+    reports {
+        xml.required = true
+    }
 }
 
 tasks.named<BootBuildImage>("bootBuildImage") {
