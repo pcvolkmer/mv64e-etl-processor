@@ -25,9 +25,11 @@ import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
+import dev.dnpm.etl.processor.security.Role
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.services.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
+import dev.dnpm.etl.processor.services.UserRoleService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -48,10 +50,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.delete
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.*
 import reactor.core.publisher.Sinks
 
 abstract class MockSink : Sinks.Many<Boolean>
@@ -82,6 +81,7 @@ abstract class MockSink : Sinks.Many<Boolean>
     GPasConnectionCheckService::class,
     RestConnectionCheckService::class,
     TokenService::class,
+    UserRoleService::class
 )
 class ConfigControllerTest {
 
@@ -89,16 +89,19 @@ class ConfigControllerTest {
 
     private lateinit var requestProcessor: RequestProcessor
     private lateinit var tokenService: TokenService
+    private lateinit var userRoleService: UserRoleService
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
         @Autowired requestProcessor: RequestProcessor,
         @Autowired tokenService: TokenService,
+        @Autowired userRoleService: UserRoleService
     ) {
         this.mockMvc = mockMvc
         this.requestProcessor = requestProcessor
         this.tokenService = tokenService
+        this.userRoleService = userRoleService
     }
 
     @Test
@@ -173,5 +176,39 @@ class ConfigControllerTest {
         verify(tokenService, times(1)).deleteToken(captor.capture())
 
         assertThat(captor.firstValue).isEqualTo(42)
+    }
+
+    @Test
+    fun testShouldDeleteUserRole() {
+        mockMvc.delete("/configs/userroles/42") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        val captor = argumentCaptor<Long>()
+        verify(userRoleService, times(1)).deleteUserRole(captor.capture())
+
+        assertThat(captor.firstValue).isEqualTo(42)
+    }
+
+    @Test
+    fun testShouldUpdateUserRole() {
+        mockMvc.put("/configs/userroles/42") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            content = "role=ADMIN"
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        val idCaptor = argumentCaptor<Long>()
+        val roleCaptor = argumentCaptor<Role>()
+        verify(userRoleService, times(1)).updateUserRole(idCaptor.capture(), roleCaptor.capture())
+
+        assertThat(idCaptor.firstValue).isEqualTo(42)
+        assertThat(roleCaptor.firstValue).isEqualTo(Role.ADMIN)
     }
 }
