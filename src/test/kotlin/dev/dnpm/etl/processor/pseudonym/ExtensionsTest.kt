@@ -134,4 +134,65 @@ class ExtensionsTest {
            .isEqualTo("TESTDOMAIN44e20a53bbbf9f3ae39626d05df7014dcd77d6098")
     }
 
+    @Test
+    fun shouldNotThrowExceptionOnNullValues(@Mock pseudonymizeService: PseudonymizeService) {
+        doAnswer {
+            it.arguments[0]
+            "PSEUDO-ID"
+        }.whenever(pseudonymizeService).patientPseudonym(ArgumentMatchers.anyString())
+
+        doAnswer {
+            "TESTDOMAIN"
+        }.whenever(pseudonymizeService).prefix()
+
+        val mtbFile = MtbFile.builder()
+            .withPatient(
+                Patient.builder()
+                    .withId("1")
+                    .withBirthDate("2000-08-08")
+                    .withGender(Patient.Gender.MALE)
+                    .build()
+            )
+            .withConsent(
+                Consent.builder()
+                    .withId("1")
+                    .withStatus(Consent.Status.ACTIVE)
+                    .withPatient("123")
+                    .build()
+            )
+            .withEpisode(
+                Episode.builder()
+                    .withId("1")
+                    .withPatient("1")
+                    .withPeriod(PeriodStart("2023-08-08"))
+                    .build()
+            )
+            .withClaims(null)
+            .withDiagnoses(null)
+            .withCarePlans(null)
+            .withClaimResponses(null)
+            .withEcogStatus(null)
+            .withFamilyMemberDiagnoses(null)
+            .withGeneticCounsellingRequests(null)
+            .withHistologyReevaluationRequests(null)
+            .withHistologyReports(null)
+            .withLastGuidelineTherapies(null)
+            .withMolecularPathologyFindings(null)
+            .withMolecularTherapies(null)
+            .withNgsReports(null)
+            .withPreviousGuidelineTherapies(null)
+            .withRebiopsyRequests(null)
+            .withRecommendations(null)
+            .withResponses(null)
+            .withStudyInclusionRequests(null)
+            .withSpecimens(null)
+            .build()
+
+        mtbFile.pseudonymizeWith(pseudonymizeService)
+        mtbFile.anonymizeContentWith(pseudonymizeService)
+
+
+        assertThat(mtbFile.episode.id).isNotNull()
+    }
+
 }

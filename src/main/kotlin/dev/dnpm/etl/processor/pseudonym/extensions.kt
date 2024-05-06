@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -31,31 +31,31 @@ import org.apache.commons.codec.digest.DigestUtils
 infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     val patientPseudonym = pseudonymizeService.patientPseudonym(this.patient.id)
 
-    this.episode.patient = patientPseudonym
-    this.carePlans.forEach { it.patient = patientPseudonym }
+    this.episode?.patient = patientPseudonym
+    this.carePlans?.forEach { it.patient = patientPseudonym }
     this.patient.id = patientPseudonym
-    this.claims.forEach { it.patient = patientPseudonym }
-    this.consent.patient = patientPseudonym
-    this.claimResponses.forEach { it.patient = patientPseudonym }
-    this.diagnoses.forEach { it.patient = patientPseudonym }
-    this.ecogStatus.forEach { it.patient = patientPseudonym }
-    this.familyMemberDiagnoses.forEach { it.patient = patientPseudonym }
-    this.geneticCounsellingRequests.forEach { it.patient = patientPseudonym }
-    this.histologyReevaluationRequests.forEach { it.patient = patientPseudonym }
-    this.histologyReports.forEach {
+    this.claims?.forEach { it.patient = patientPseudonym }
+    this.consent?.patient = patientPseudonym
+    this.claimResponses?.forEach { it.patient = patientPseudonym }
+    this.diagnoses?.forEach { it.patient = patientPseudonym }
+    this.ecogStatus?.forEach { it.patient = patientPseudonym }
+    this.familyMemberDiagnoses?.forEach { it.patient = patientPseudonym }
+    this.geneticCounsellingRequests?.forEach { it.patient = patientPseudonym }
+    this.histologyReevaluationRequests?.forEach { it.patient = patientPseudonym }
+    this.histologyReports?.forEach {
         it.patient = patientPseudonym
-        it.tumorMorphology.patient = patientPseudonym
+        it.tumorMorphology?.patient = patientPseudonym
     }
-    this.lastGuidelineTherapies.forEach { it.patient = patientPseudonym }
-    this.molecularPathologyFindings.forEach { it.patient = patientPseudonym }
-    this.molecularTherapies.forEach { molecularTherapy -> molecularTherapy.history.forEach { it.patient = patientPseudonym } }
-    this.ngsReports.forEach { it.patient = patientPseudonym }
-    this.previousGuidelineTherapies.forEach { it.patient = patientPseudonym }
-    this.rebiopsyRequests.forEach { it.patient = patientPseudonym }
-    this.recommendations.forEach { it.patient = patientPseudonym }
-    this.responses.forEach { it.patient = patientPseudonym }
-    this.studyInclusionRequests.forEach { it.patient = patientPseudonym }
-    this.specimens.forEach { it.patient = patientPseudonym }
+    this.lastGuidelineTherapies?.forEach { it.patient = patientPseudonym }
+    this.molecularPathologyFindings?.forEach { it.patient = patientPseudonym }
+    this.molecularTherapies?.forEach { molecularTherapy -> molecularTherapy.history.forEach { it.patient = patientPseudonym } }
+    this.ngsReports?.forEach { it.patient = patientPseudonym }
+    this.previousGuidelineTherapies?.forEach { it.patient = patientPseudonym }
+    this.rebiopsyRequests?.forEach { it.patient = patientPseudonym }
+    this.recommendations?.forEach { it.patient = patientPseudonym }
+    this.responses?.forEach { it.patient = patientPseudonym }
+    this.studyInclusionRequests?.forEach { it.patient = patientPseudonym }
+    this.specimens?.forEach { it.patient = patientPseudonym }
 }
 
 /**
