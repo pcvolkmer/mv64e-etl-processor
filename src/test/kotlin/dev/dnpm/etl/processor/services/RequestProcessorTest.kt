@@ -96,15 +96,15 @@ class RequestProcessorTest {
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.`when`(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             it.arguments[0] as String
-        }.`when`(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(any())
 
         doAnswer {
             it.arguments[0]
@@ -155,15 +155,15 @@ class RequestProcessorTest {
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.`when`(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             it.arguments[0] as String
-        }.`when`(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(any())
 
         doAnswer {
             it.arguments[0]
@@ -214,19 +214,19 @@ class RequestProcessorTest {
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.`when`(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
+        }.whenever(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         doAnswer {
             it.arguments[0] as String
-        }.`when`(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(any())
 
         doAnswer {
             it.arguments[0]
@@ -277,19 +277,19 @@ class RequestProcessorTest {
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.`when`(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
 
         doAnswer {
             false
-        }.`when`(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
+        }.whenever(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         doAnswer {
             it.arguments[0] as String
-        }.`when`(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(any())
 
         doAnswer {
             it.arguments[0]
@@ -331,11 +331,11 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestAndSaveUnknownRequestStatusAtFirst() {
         doAnswer {
             "PSEUDONYM"
-        }.`when`(pseudonymizeService).patientPseudonym(anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.UNKNOWN)
-        }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
+        }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
         this.requestProcessor.processDeletion("TEST_12345678901")
 
@@ -349,11 +349,11 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestAndSendSuccessEvent() {
         doAnswer {
             "PSEUDONYM"
-        }.`when`(pseudonymizeService).patientPseudonym(anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
+        }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
         this.requestProcessor.processDeletion("TEST_12345678901")
 
@@ -367,11 +367,11 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestAndSendErrorEvent() {
         doAnswer {
             "PSEUDONYM"
-        }.`when`(pseudonymizeService).patientPseudonym(anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyString())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.`when`(sender).send(any<MtbFileSender.DeleteRequest>())
+        }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
         this.requestProcessor.processDeletion("TEST_12345678901")
 
@@ -383,7 +383,7 @@ class RequestProcessorTest {
 
     @Test
     fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
-        doThrow(RuntimeException()).`when`(pseudonymizeService).patientPseudonym(anyString())
+        doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyString())
 
         this.requestProcessor.processDeletion("TEST_12345678901")
 
@@ -399,7 +399,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0] as String
-        }.`when`(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(any())
 
         doAnswer {
             it.arguments[0]
@@ -407,7 +407,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.`when`(sender).send(any<MtbFileSender.MtbFileRequest>())
+        }.whenever(sender).send(any<MtbFileSender.MtbFileRequest>())
 
         val mtbFile = MtbFile.builder()
             .withPatient(

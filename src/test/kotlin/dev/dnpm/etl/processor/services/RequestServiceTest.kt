@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.whenever
 import java.time.Instant
 import java.util.*
 
@@ -185,7 +186,7 @@ class RequestServiceTest {
         doAnswer {
             val obj = it.arguments[0] as Request
             obj.copy(id = 1L)
-        }.`when`(requestRepository).save(anyRequest())
+        }.whenever(requestRepository).save(anyRequest())
 
         val request = Request(
             UUID.randomUUID().toString(),
