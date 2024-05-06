@@ -127,10 +127,11 @@ class ConfigController(
         } else {
             model.addAttribute("tokensEnabled", true)
             val result = tokenService.addToken(name)
-            if (result.isSuccess) {
-                model.addAttribute("newTokenValue", result.getOrDefault(""))
+            result.onSuccess {
+                model.addAttribute("newTokenValue", it)
                 model.addAttribute("success", true)
-            } else {
+            }
+            result.onFailure {
                 model.addAttribute("success", false)
             }
             model.addAttribute("tokens", tokenService.findAll())

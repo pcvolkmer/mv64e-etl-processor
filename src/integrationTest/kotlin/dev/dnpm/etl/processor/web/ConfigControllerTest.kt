@@ -26,12 +26,18 @@ import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.dnpm.etl.processor.services.TokenRepository
+import dev.dnpm.etl.processor.services.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -43,7 +49,9 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import reactor.core.publisher.Sinks
 
 abstract class MockSink : Sinks.Many<Boolean>
@@ -71,23 +79,26 @@ abstract class MockSink : Sinks.Many<Boolean>
     MtbFileSender::class,
     RequestProcessor::class,
     TransformationService::class,
-    TokenRepository::class,
     GPasConnectionCheckService::class,
-    RestConnectionCheckService::class
+    RestConnectionCheckService::class,
+    TokenService::class,
 )
 class ConfigControllerTest {
 
     private lateinit var mockMvc: MockMvc
 
     private lateinit var requestProcessor: RequestProcessor
+    private lateinit var tokenService: TokenService
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
-        @Autowired requestProcessor: RequestProcessor
+        @Autowired requestProcessor: RequestProcessor,
+        @Autowired tokenService: TokenService,
     ) {
         this.mockMvc = mockMvc
         this.requestProcessor = requestProcessor
+        this.tokenService = tokenService
     }
 
     @Test
@@ -113,4 +124,54 @@ class ConfigControllerTest {
         }
     }
 
+    @Test
+    fun testShouldSaveNewToken() {
+        mockMvc.post("/configs/tokens") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            content = "name=Testtoken"
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        val captor = argumentCaptor<String>()
+        verify(tokenService, times(1)).addToken(captor.capture())
+
+        assertThat(captor.firstValue).isEqualTo("Testtoken")
+    }
+
+    @Test
+    fun testShouldNotSaveTokenWithExstingName() {
+        whenever(tokenService.addToken(anyString())).thenReturn(Result.failure(RuntimeException("Testfailure")))
+
+        mockMvc.post("/configs/tokens") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            content = "name=Testtoken"
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        val captor = argumentCaptor<String>()
+        verify(tokenService, times(1)).addToken(captor.capture())
+
+        assertThat(captor.firstValue).isEqualTo("Testtoken")
+    }
+
+    @Test
+    fun testShouldDeleteToken() {
+        mockMvc.delete("/configs/tokens/42") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        val captor = argumentCaptor<Long>()
+        verify(tokenService, times(1)).deleteToken(captor.capture())
+
+        assertThat(captor.firstValue).isEqualTo(42)
+    }
 }
