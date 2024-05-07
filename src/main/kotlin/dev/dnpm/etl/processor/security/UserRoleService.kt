@@ -17,11 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.services
+package dev.dnpm.etl.processor.security
 
-import dev.dnpm.etl.processor.security.Role
-import dev.dnpm.etl.processor.security.UserRole
-import dev.dnpm.etl.processor.security.UserRoleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.oauth2.core.oidc.user.OidcUser

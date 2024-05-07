@@ -21,7 +21,7 @@ package dev.dnpm.etl.processor.config
 
 import dev.dnpm.etl.processor.security.UserRole
 import dev.dnpm.etl.processor.security.UserRoleRepository
-import dev.dnpm.etl.processor.services.UserRoleService
+import dev.dnpm.etl.processor.security.UserRoleService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties

@@ -29,9 +29,9 @@ import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.security.Role
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.dnpm.etl.processor.services.TokenService
+import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
-import dev.dnpm.etl.processor.services.UserRoleService
+import dev.dnpm.etl.processor.security.UserRoleService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

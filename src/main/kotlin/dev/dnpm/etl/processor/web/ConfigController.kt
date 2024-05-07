@@ -27,10 +27,10 @@ import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.security.Role
 import dev.dnpm.etl.processor.security.UserRole
-import dev.dnpm.etl.processor.services.Token
-import dev.dnpm.etl.processor.services.TokenService
+import dev.dnpm.etl.processor.security.Token
+import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
-import dev.dnpm.etl.processor.services.UserRoleService
+import dev.dnpm.etl.processor.security.UserRoleService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent

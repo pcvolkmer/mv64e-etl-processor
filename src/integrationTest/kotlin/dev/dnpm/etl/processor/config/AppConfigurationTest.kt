@@ -27,8 +27,8 @@ import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.dnpm.etl.processor.services.TokenRepository
-import dev.dnpm.etl.processor.services.TokenService
+import dev.dnpm.etl.processor.security.TokenRepository
+import dev.dnpm.etl.processor.security.TokenService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

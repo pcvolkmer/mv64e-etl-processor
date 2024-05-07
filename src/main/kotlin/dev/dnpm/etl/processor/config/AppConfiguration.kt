@@ -28,8 +28,8 @@ import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
-import dev.dnpm.etl.processor.services.TokenRepository
-import dev.dnpm.etl.processor.services.TokenService
+import dev.dnpm.etl.processor.security.TokenRepository
+import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.apache.hc.client5.http.impl.classic.HttpClients
