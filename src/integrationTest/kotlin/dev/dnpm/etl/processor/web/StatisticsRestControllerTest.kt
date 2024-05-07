@@ -39,14 +39,21 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType.TEXT_EVENT_STREAM
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient
 import org.springframework.test.web.servlet.get
+import org.springframework.web.context.WebApplicationContext
+import reactor.core.publisher.Sinks
+import reactor.test.StepVerifier
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
+
 
 @WebMvcTest(controllers = [StatisticsRestController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
@@ -65,21 +72,23 @@ import java.util.*
     ]
 )
 @MockBean(
-    RequestService::class,
-    MockSink::class
+    RequestService::class
 )
 class StatisticsRestControllerTest {
 
     private lateinit var mockMvc: MockMvc
 
+    private lateinit var statisticsUpdateProducer: Sinks.Many<Any>
     private lateinit var requestService: RequestService
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
+        @Autowired statisticsUpdateProducer: Sinks.Many<Any>,
         @Autowired requestService: RequestService
     ) {
         this.mockMvc = mockMvc
+        this.statisticsUpdateProducer = statisticsUpdateProducer
         this.requestService = requestService
     }
 
@@ -268,6 +277,33 @@ class StatisticsRestControllerTest {
                     jsonPath("$[30].nameValues.unknown", equalTo(1))
                 }
             }
+        }
+    }
+
+    @Nested
+    inner class SseTest {
+        private lateinit var webClient: WebTestClient
+
+        @BeforeEach
+        fun setup(
+            applicationContext: WebApplicationContext,
+        ) {
+            this.webClient = MockMvcWebTestClient
+                .bindToApplicationContext(applicationContext).build()
+        }
+
+        @Test
+        fun testShouldRequestSSE() {
+            statisticsUpdateProducer.emitComplete { _, _ -> true }
+
+            val result = webClient.get().uri("http://localhost/statistics/events").accept(TEXT_EVENT_STREAM).exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(TEXT_EVENT_STREAM)
+                .returnResult(String::class.java)
+
+            StepVerifier.create(result.responseBody)
+                .expectComplete()
+                .verify()
         }
     }
 

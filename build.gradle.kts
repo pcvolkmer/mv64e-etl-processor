@@ -89,6 +89,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:postgresql")
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
     integrationTestImplementation("net.sourceforge.htmlunit:htmlunit")
+    integrationTestImplementation("org.springframework:spring-webflux")
     // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
     integrationTestImplementation("org.apache.commons:commons-compress:1.26.1")
 }
