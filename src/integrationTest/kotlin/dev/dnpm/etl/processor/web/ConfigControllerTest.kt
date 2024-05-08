@@ -89,7 +89,6 @@ abstract class MockSink : Sinks.Many<Boolean>
     TransformationService::class,
     GPasConnectionCheckService::class,
     RestConnectionCheckService::class,
-    UserRoleService::class
 )
 class ConfigControllerTest {
 
@@ -97,20 +96,17 @@ class ConfigControllerTest {
     private lateinit var webClient: WebClient
 
     private lateinit var requestProcessor: RequestProcessor
-    private lateinit var userRoleService: UserRoleService
     private lateinit var connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
         @Autowired requestProcessor: RequestProcessor,
-        @Autowired userRoleService: UserRoleService,
         @Autowired connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ) {
         this.mockMvc = mockMvc
         this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
         this.requestProcessor = requestProcessor
-        this.userRoleService = userRoleService
         this.connectionCheckUpdateProducer = connectionCheckUpdateProducer
 
         webClient.options.isThrowExceptionOnScriptError = false
@@ -256,10 +252,19 @@ class ConfigControllerTest {
             "app.security.admin-password={noop}very-secret"
         ]
     )
+    @MockBean(
+        UserRoleService::class
+    )
     inner class WithUserRolesEnabled {
+        private lateinit var userRoleService: UserRoleService
+
         @BeforeEach
-        fun setup() {
+        fun setup(
+            @Autowired userRoleService: UserRoleService
+        ) {
             webClient.options.isThrowExceptionOnScriptError = false
+
+            this.userRoleService = userRoleService
         }
 
         @Test
