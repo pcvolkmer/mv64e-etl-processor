@@ -18,7 +18,11 @@
             </h2>
         </div>
 
-        <div class="border">
+        <div class="border" th:if="${requests.totalElements == 0}">
+            <div class="notification info">Noch keine Anfragen eingegangen</div>
+        </div>
+
+        <div class="border" th:if="${requests.totalElements > 0}">
             <div th:if="${patientId == null}" class="page-control">
                 <a id="first-page-link" th:href="@{/(page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
                 <a id="prev-page-link" th:href="@{/(page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>

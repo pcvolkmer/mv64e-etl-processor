@@ -140,9 +140,8 @@ class HomeControllerTest {
             )
 
             val page = webClient.getPage<HtmlPage>("http://localhost/")
-            assertThat(
-                page.querySelectorAll("tbody tr")
-            ).hasSize(2)
+            assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
+            assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
         }
 
         @Test
@@ -167,9 +166,8 @@ class HomeControllerTest {
             )
 
             val page = webClient.getPage<HtmlPage>("http://localhost/report/${requestId}")
-            assertThat(
-                page.querySelectorAll("tbody tr")
-            ).hasSize(1)
+            assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
+            assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
         }
 
         @Test
@@ -201,9 +199,8 @@ class HomeControllerTest {
             )
 
             val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-            assertThat(
-                page.querySelectorAll("tbody tr")
-            ).hasSize(2)
+            assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
+            assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
         }
 
     }
@@ -225,9 +222,8 @@ class HomeControllerTest {
         @Test
         fun testShouldShowHomePage() {
             val page = webClient.getPage<HtmlPage>("http://localhost/")
-            assertThat(
-                page.querySelectorAll("tbody tr")
-            ).isEmpty()
+            assertThat(page.querySelectorAll("tbody tr")).isEmpty()
+            assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
         }
 
         @Test
@@ -252,9 +248,8 @@ class HomeControllerTest {
             whenever(requestService.findRequestByPatientId(anyString(), any<Pageable>())).thenReturn(Page.empty())
 
             val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-            assertThat(
-                page.querySelectorAll("tbody tr")
-            ).hasSize(0)
+            assertThat(page.querySelectorAll("tbody tr")).isEmpty()
+            assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
         }
     }
 

@@ -619,6 +619,10 @@ input.inline:focus-visible {
     text-align: center;
 }
 
+.notification.info {
+    color: var(--bg-blue);
+}
+
 .notification.success {
     color: var(--bg-green);
 }
