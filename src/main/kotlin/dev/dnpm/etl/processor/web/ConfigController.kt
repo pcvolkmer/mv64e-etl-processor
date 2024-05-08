@@ -183,6 +183,7 @@ class ConfigController(
     }
 
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @ResponseBody
     fun events(): Flux<ServerSentEvent<Any>> {
         return connectionCheckUpdateProducer.asFlux().map {
             val event = when (it) {

@@ -23,6 +23,7 @@ import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
+import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
@@ -48,15 +49,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.TEXT_EVENT_STREAM
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.*
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
+import org.springframework.web.context.WebApplicationContext
 import reactor.core.publisher.Sinks
+import reactor.test.StepVerifier
+import java.time.Instant
 
 abstract class MockSink : Sinks.Many<Boolean>
 
@@ -91,17 +98,20 @@ class ConfigControllerTest {
 
     private lateinit var requestProcessor: RequestProcessor
     private lateinit var userRoleService: UserRoleService
+    private lateinit var connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
         @Autowired requestProcessor: RequestProcessor,
-        @Autowired userRoleService: UserRoleService
+        @Autowired userRoleService: UserRoleService,
+        @Autowired connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ) {
         this.mockMvc = mockMvc
         this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
         this.requestProcessor = requestProcessor
         this.userRoleService = userRoleService
+        this.connectionCheckUpdateProducer = connectionCheckUpdateProducer
 
         webClient.options.isThrowExceptionOnScriptError = false
     }
@@ -311,6 +321,37 @@ class ConfigControllerTest {
             assertThat(
                 page.getElementById("userroles")
             ).isNull()
+        }
+    }
+
+    @Nested
+    inner class SseTest {
+        private lateinit var webClient: WebTestClient
+
+        @BeforeEach
+        fun setup(
+            applicationContext: WebApplicationContext,
+        ) {
+            this.webClient = MockMvcWebTestClient
+                .bindToApplicationContext(applicationContext).build()
+        }
+
+        @Test
+        fun testShouldRequestSSE() {
+            val expectedEvent = ConnectionCheckResult.GPasConnectionCheckResult(true, Instant.now(), Instant.now())
+
+            connectionCheckUpdateProducer.tryEmitNext(expectedEvent)
+            connectionCheckUpdateProducer.emitComplete { _, _ -> true }
+
+            val result = webClient.get().uri("http://localhost/configs/events").accept(TEXT_EVENT_STREAM).exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(TEXT_EVENT_STREAM)
+                .returnResult(ConnectionCheckResult.GPasConnectionCheckResult::class.java)
+
+            StepVerifier.create(result.responseBody)
+                .expectNext(expectedEvent)
+                .expectComplete()
+                .verify()
         }
     }
 
