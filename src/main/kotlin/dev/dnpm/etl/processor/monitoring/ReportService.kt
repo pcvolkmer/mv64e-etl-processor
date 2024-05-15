@@ -57,6 +57,7 @@ class ReportService(
     data class Issue(val severity: Severity, val message: String)
 
     enum class Severity(@JsonValue val value: String) {
+        FATAL("fatal"),
         ERROR("error"),
         WARNING("warning"),
         INFO("info")

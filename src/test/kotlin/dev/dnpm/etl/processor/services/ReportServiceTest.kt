@@ -43,20 +43,23 @@ class ReportServiceTest {
                 "issues": [
                     { "severity": "info", "message": "Info Message" },
                     { "severity": "warning", "message": "Warning Message" },
-                    { "severity": "error", "message": "Error Message" }
+                    { "severity": "error", "message": "Error Message" },
+                    { "severity": "fatal", "message": "Fatal Message" }
                 ]
             }
         """.trimIndent()
 
         val actual = this.reportService.deserialize(json)
 
-        assertThat(actual).hasSize(3)
-        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[0].message).isEqualTo("Error Message")
-        assertThat(actual[1].severity).isEqualTo(ReportService.Severity.WARNING)
-        assertThat(actual[1].message).isEqualTo("Warning Message")
-        assertThat(actual[2].severity).isEqualTo(ReportService.Severity.INFO)
-        assertThat(actual[2].message).isEqualTo("Info Message")
+        assertThat(actual).hasSize(4)
+        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.FATAL)
+        assertThat(actual[0].message).isEqualTo("Fatal Message")
+        assertThat(actual[1].severity).isEqualTo(ReportService.Severity.ERROR)
+        assertThat(actual[1].message).isEqualTo("Error Message")
+        assertThat(actual[2].severity).isEqualTo(ReportService.Severity.WARNING)
+        assertThat(actual[2].message).isEqualTo("Warning Message")
+        assertThat(actual[3].severity).isEqualTo(ReportService.Severity.INFO)
+        assertThat(actual[3].message).isEqualTo("Info Message")
     }
 
     @Test
