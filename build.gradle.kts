@@ -14,7 +14,7 @@ group = "de.ukw.ccc"
 version = "0.9-SNAPSHOT"
 
 var versions = mapOf(
-    "bwhc-dto-java" to "0.2.0",
+    "bwhc-dto-java" to "0.3.0",
     "hapi-fhir" to "6.10.5",
     "httpclient5" to "5.2.3",
     "mockito-kotlin" to "5.3.1",
