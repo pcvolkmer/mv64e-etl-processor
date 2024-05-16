@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.monitoring
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.JsonParseException
@@ -54,7 +55,7 @@ class ReportService(
     private data class DataQualityReport(val issues: List<Issue>)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Issue(val severity: Severity, val message: String)
+    data class Issue(val severity: Severity, @JsonAlias("details") val message: String)
 
     enum class Severity(@JsonValue val value: String) {
         FATAL("fatal"),
