@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
@@ -95,9 +96,9 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "21"
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
