@@ -169,6 +169,8 @@ https://testonkostar:MTg1NTL...NGU4@etl.example.com/mtbfile
 
 Ist die Verwendung von Tokens aktiv, werden Anfragen ohne die Angabe der Token-Information abgelehnt.
 
+Alternativ kann eine Authentifizierung über Benutzername/Passwort oder OIDC erfolgen.
+
 ### Transformation von Werten
 
 In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,
