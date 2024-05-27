@@ -6,7 +6,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 plugins {
     war
     id("org.springframework.boot") version "3.2.6"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "1.9.23"
     kotlin("plugin.spring") version "1.9.23"
     jacoco
