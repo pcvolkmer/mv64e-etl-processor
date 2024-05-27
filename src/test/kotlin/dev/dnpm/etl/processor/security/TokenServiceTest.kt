@@ -23,7 +23,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
@@ -96,11 +95,11 @@ class TokenServiceTest {
 
         val actual = this.tokenService.addToken("Test Token")
 
-        val captor = ArgumentCaptor.forClass(Token::class.java)
+        val captor = argumentCaptor<Token>()
         verify(tokenRepository, times(1)).save(captor.capture())
 
         assertThat(actual).satisfies(Consumer { assertThat(it.isSuccess).isTrue() })
-        assertThat(captor.value).satisfies(
+        assertThat(captor.firstValue).satisfies(
             Consumer { assertThat(it.name).isEqualTo("Test Token") },
             Consumer { assertThat(it.username).isEqualTo("testtoken") },
             Consumer { assertThat(it.password).isEqualTo("{test}verysecret") }
@@ -116,13 +115,13 @@ class TokenServiceTest {
 
         this.tokenService.deleteToken(42)
 
-        val stringCaptor = ArgumentCaptor.forClass(String::class.java)
+        val stringCaptor = argumentCaptor<String>()
         verify(userDetailsManager, times(1)).deleteUser(stringCaptor.capture())
-        assertThat(stringCaptor.value).isEqualTo("testtoken")
+        assertThat(stringCaptor.firstValue).isEqualTo("testtoken")
 
-        val tokenCaptor = ArgumentCaptor.forClass(Token::class.java)
+        val tokenCaptor = argumentCaptor<Token>()
         verify(tokenRepository, times(1)).delete(tokenCaptor.capture())
-        assertThat(tokenCaptor.value.id).isEqualTo(42)
+        assertThat(tokenCaptor.firstValue.id).isEqualTo(42)
     }
 
     @Test
