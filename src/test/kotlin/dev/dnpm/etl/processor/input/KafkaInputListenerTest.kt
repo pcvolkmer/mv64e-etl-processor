@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -92,7 +93,7 @@ class KafkaInputListenerTest {
             ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any(), anyString())
+        verify(requestProcessor, times(1)).processMtbFile(any(), anyValueClass())
     }
 
     @Test
@@ -106,7 +107,7 @@ class KafkaInputListenerTest {
         kafkaInputListener.onMessage(
             ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
         )
-        verify(requestProcessor, times(1)).processDeletion(anyString(), anyString())
+        verify(requestProcessor, times(1)).processDeletion(anyString(), anyValueClass())
     }
 
 }

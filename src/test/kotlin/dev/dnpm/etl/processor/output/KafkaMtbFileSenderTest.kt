@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.assertj.core.api.Assertions.assertThat
@@ -72,7 +73,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        val response = kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile(Consent.Status.ACTIVE)))
+        val response = kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile(Consent.Status.ACTIVE)))
         assertThat(response.status).isEqualTo(testData.requestStatus)
     }
 
@@ -86,7 +87,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        val response = kafkaMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+        val response = kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
         assertThat(response.status).isEqualTo(testData.requestStatus)
     }
 
@@ -96,14 +97,14 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile(Consent.Status.ACTIVE)))
+        kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile(Consent.Status.ACTIVE)))
 
         val captor = argumentCaptor<String>()
         verify(kafkaTemplate, times(1)).send(anyString(), captor.capture(), captor.capture())
         assertThat(captor.firstValue).isNotNull
         assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\"}")
         assertThat(captor.secondValue).isNotNull
-        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.ACTIVE)))
+        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData(TEST_REQUEST_ID, Consent.Status.ACTIVE)))
     }
 
     @Test
@@ -112,14 +113,14 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
 
         val captor = argumentCaptor<String>()
         verify(kafkaTemplate, times(1)).send(anyString(), captor.capture(), captor.capture())
         assertThat(captor.firstValue).isNotNull
         assertThat(captor.firstValue).isEqualTo("{\"pid\": \"PID\"}")
         assertThat(captor.secondValue).isNotNull
-        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData("TestID", Consent.Status.REJECTED)))
+        assertThat(captor.secondValue).isEqualTo(objectMapper.writeValueAsString(kafkaRecordData(TEST_REQUEST_ID, Consent.Status.REJECTED)))
     }
 
     @ParameterizedTest
@@ -136,7 +137,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile(Consent.Status.ACTIVE)))
+        kafkaMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile(Consent.Status.ACTIVE)))
 
         val expectedCount = when (testData.exception) {
             // OK - No Retry
@@ -162,7 +163,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
 
         val expectedCount = when (testData.exception) {
             // OK - No Retry
@@ -175,6 +176,8 @@ class KafkaMtbFileSenderTest {
     }
 
     companion object {
+        val TEST_REQUEST_ID = RequestId("TestId")
+
         fun mtbFile(consentStatus: Consent.Status): MtbFile {
             return if (consentStatus == Consent.Status.ACTIVE) {
                 MtbFile.builder()
@@ -210,7 +213,7 @@ class KafkaMtbFileSenderTest {
             }.build()
         }
 
-        fun kafkaRecordData(requestId: String, consentStatus: Consent.Status): KafkaMtbFileSender.Data {
+        fun kafkaRecordData(requestId: RequestId, consentStatus: Consent.Status): KafkaMtbFileSender.Data {
             return KafkaMtbFileSender.Data(requestId, mtbFile(consentStatus))
         }
 

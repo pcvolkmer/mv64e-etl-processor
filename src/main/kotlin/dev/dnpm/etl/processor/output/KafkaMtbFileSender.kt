@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.output
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.slf4j.LoggerFactory
@@ -101,5 +102,5 @@ class KafkaMtbFileSender(
         return "{\"pid\": \"${request.patientId}\"}"
     }
 
-    data class Data(val requestId: String, val content: MtbFile)
+    data class Data(val requestId: RequestId, val content: MtbFile)
 }

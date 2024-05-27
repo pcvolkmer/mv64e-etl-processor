@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.output
 
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.assertj.core.api.Assertions.assertThat
@@ -64,7 +65,7 @@ class RestMtbFileSenderTest {
             withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
         }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -79,7 +80,7 @@ class RestMtbFileSenderTest {
             withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
         }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile))
+        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -108,7 +109,7 @@ class RestMtbFileSenderTest {
             withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
         }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest("TestID", mtbFile))
+        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -137,7 +138,7 @@ class RestMtbFileSenderTest {
             withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
         }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest("TestID", "PID"))
+        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -148,6 +149,8 @@ class RestMtbFileSenderTest {
             val body: String,
             val response: MtbFileSender.Response
         )
+
+        val TEST_REQUEST_ID = RequestId("TestId")
 
         private val warningBody = """
                 {

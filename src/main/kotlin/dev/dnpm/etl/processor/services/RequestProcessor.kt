@@ -22,6 +22,8 @@ package dev.dnpm.etl.processor.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.randomRequestId
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
@@ -50,10 +52,10 @@ class RequestProcessor(
 ) {
 
     fun processMtbFile(mtbFile: MtbFile) {
-        processMtbFile(mtbFile, UUID.randomUUID().toString())
+        processMtbFile(mtbFile, randomRequestId())
     }
 
-    fun processMtbFile(mtbFile: MtbFile, requestId: String) {
+    fun processMtbFile(mtbFile: MtbFile, requestId: RequestId) {
         val pid = mtbFile.patient.id
 
         mtbFile pseudonymizeWith pseudonymizeService
@@ -109,10 +111,10 @@ class RequestProcessor(
     }
 
     fun processDeletion(patientId: String) {
-        processDeletion(patientId, UUID.randomUUID().toString())
+        processDeletion(patientId, randomRequestId())
     }
 
-    fun processDeletion(patientId: String, requestId: String) {
+    fun processDeletion(patientId: String, requestId: RequestId) {
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 

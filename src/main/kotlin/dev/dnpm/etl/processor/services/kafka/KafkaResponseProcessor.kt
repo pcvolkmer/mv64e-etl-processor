@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.services.kafka
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.output.asRequestStatus
 import dev.dnpm.etl.processor.services.ResponseEvent
@@ -47,7 +48,7 @@ class KafkaResponseProcessor(
             Optional.empty()
         }.ifPresentOrElse({ responseBody ->
             val event = ResponseEvent(
-                responseBody.requestId,
+                RequestId(responseBody.requestId),
                 Instant.ofEpochMilli(data.timestamp()),
                 responseBody.statusCode.asRequestStatus(),
                 when (responseBody.statusCode.asRequestStatus()) {

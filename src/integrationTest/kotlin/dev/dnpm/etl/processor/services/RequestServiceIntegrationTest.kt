@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.randomRequestId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,7 +39,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.Instant
-import java.util.*
 
 @Testcontainers
 @ExtendWith(SpringExtension::class)
@@ -77,7 +77,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
         this.requestRepository.saveAll(
             listOf(
                 Request(
-                    UUID.randomUUID().toString(),
+                    randomRequestId(),
                     "TEST_12345678901",
                     "P1",
                     Fingerprint("0123456789abcdef1"),
@@ -87,7 +87,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 ),
                 // Should be ignored - wrong patient ID -->
                 Request(
-                    UUID.randomUUID().toString(),
+                    randomRequestId(),
                     "TEST_12345678902",
                     "P2",
                     Fingerprint("0123456789abcdef2"),
@@ -97,7 +97,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 ),
                 // <--
                 Request(
-                    UUID.randomUUID().toString(),
+                    randomRequestId(),
                     "TEST_12345678901",
                     "P2",
                     Fingerprint("0123456789abcdee1"),

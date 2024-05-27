@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
@@ -29,7 +31,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
@@ -47,7 +48,7 @@ class ResponseProcessorTest {
 
     private val testRequest = Request(
         1L,
-        "TestID1234",
+        RequestId("TestID1234"),
         "PSEUDONYM-A",
         "1",
         Fingerprint("dummyfingerprint"),
@@ -70,10 +71,10 @@ class ResponseProcessorTest {
     fun shouldNotSaveStatusForUnknownRequest() {
         doAnswer {
             Optional.empty<Request>()
-        }.whenever(requestService).findByUuid(anyString())
+        }.whenever(requestService).findByUuid(anyValueClass())
 
         val event = ResponseEvent(
-            "TestID1234",
+            RequestId("TestID1234"),
             Instant.parse("2023-09-09T00:00:00Z"),
             RequestStatus.SUCCESS
         )
@@ -87,17 +88,17 @@ class ResponseProcessorTest {
     fun shouldNotSaveStatusWithUnknownState() {
         doAnswer {
             Optional.of(testRequest)
-        }.whenever(requestService).findByUuid(anyString())
+        }.whenever(requestService).findByUuid(anyValueClass())
 
         val event = ResponseEvent(
-            "TestID1234",
+            RequestId("TestID1234"),
             Instant.parse("2023-09-09T00:00:00Z"),
             RequestStatus.UNKNOWN
         )
 
         this.responseProcessor.handleResponseEvent(event)
 
-        verify(requestService, never()).save(any())
+        verify(requestService, never()).save(any<Request>())
     }
 
     @ParameterizedTest
@@ -105,10 +106,10 @@ class ResponseProcessorTest {
     fun shouldSaveStatusForKnownRequest(requestStatus: RequestStatus) {
         doAnswer {
             Optional.of(testRequest)
-        }.whenever(requestService).findByUuid(anyString())
+        }.whenever(requestService).findByUuid(anyValueClass())
 
         val event = ResponseEvent(
-            "TestID1234",
+            RequestId("TestID1234"),
             Instant.parse("2023-09-09T00:00:00Z"),
             requestStatus
         )

@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.input
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -37,9 +38,9 @@ class KafkaInputListener(
         val mtbFile = objectMapper.readValue(data.value(), MtbFile::class.java)
         val firstRequestIdHeader = data.headers().headers("requestId")?.firstOrNull()
         val requestId = if (null != firstRequestIdHeader) {
-            String(firstRequestIdHeader.value())
+            RequestId(String(firstRequestIdHeader.value()))
         } else {
-            ""
+            RequestId("")
         }
 
         if (mtbFile.consent.status == Consent.Status.ACTIVE) {

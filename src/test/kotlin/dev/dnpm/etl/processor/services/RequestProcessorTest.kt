@@ -22,8 +22,11 @@ package dev.dnpm.etl.processor.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.randomRequestId
 import dev.dnpm.etl.processor.config.AppConfigProperties
-import dev.dnpm.etl.processor.monitoring.*
+import dev.dnpm.etl.processor.monitoring.Request
+import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
@@ -40,7 +43,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
-import java.util.*
 
 
 @ExtendWith(MockitoExtension::class)
@@ -88,7 +90,7 @@ class RequestProcessorTest {
         doAnswer {
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga"),
@@ -147,7 +149,7 @@ class RequestProcessorTest {
         doAnswer {
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga"),
@@ -206,7 +208,7 @@ class RequestProcessorTest {
         doAnswer {
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("different"),
@@ -269,7 +271,7 @@ class RequestProcessorTest {
         doAnswer {
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("different"),

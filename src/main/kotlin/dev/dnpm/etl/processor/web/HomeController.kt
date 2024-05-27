@@ -20,8 +20,8 @@
 package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.NotFoundException
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.monitoring.RequestId
 import dev.dnpm.etl.processor.services.RequestService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -65,7 +65,7 @@ class HomeController(
 
     @GetMapping(path = ["/report/{id}"])
     fun report(@PathVariable id: RequestId, model: Model): String {
-        val request = requestService.findByUuid(id.toString()).orElse(null) ?: throw NotFoundException()
+        val request = requestService.findByUuid(id).orElse(null) ?: throw NotFoundException()
         model.addAttribute("request", request)
         model.addAttribute("issues", reportService.deserialize(request.report?.dataQualityReport))
 

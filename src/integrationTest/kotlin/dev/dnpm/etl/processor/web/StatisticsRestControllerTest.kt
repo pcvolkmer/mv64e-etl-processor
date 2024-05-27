@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.monitoring.CountedState
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.randomRequestId
 import dev.dnpm.etl.processor.services.RequestService
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
@@ -52,7 +53,6 @@ import reactor.core.publisher.Sinks
 import reactor.test.StepVerifier
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 
 @WebMvcTest(controllers = [StatisticsRestController::class])
@@ -187,7 +187,7 @@ class StatisticsRestControllerTest {
                 listOf(
                     Request(
                         1,
-                        UUID.randomUUID().toString(),
+                        randomRequestId(),
                         "TEST_12345678901",
                         "P1",
                         Fingerprint("0123456789abcdef1"),
@@ -197,7 +197,7 @@ class StatisticsRestControllerTest {
                     ),
                     Request(
                         2,
-                        UUID.randomUUID().toString(),
+                        randomRequestId(),
                         "TEST_12345678902",
                         "P2",
                         Fingerprint("0123456789abcdef2"),
@@ -207,7 +207,7 @@ class StatisticsRestControllerTest {
                     ),
                     Request(
                         3,
-                        UUID.randomUUID().toString(),
+                        randomRequestId(),
                         "TEST_12345678901",
                         "P2",
                         Fingerprint("0123456789abcdee1"),
@@ -217,7 +217,7 @@ class StatisticsRestControllerTest {
                     ),
                     Request(
                         4,
-                        UUID.randomUUID().toString(),
+                        randomRequestId(),
                         "TEST_12345678902",
                         "P2",
                         Fingerprint("0123456789abcdef2"),
@@ -227,7 +227,7 @@ class StatisticsRestControllerTest {
                     ),
                     Request(
                         5,
-                        UUID.randomUUID().toString(),
+                        randomRequestId(),
                         "TEST_12345678902",
                         "P2",
                         Fingerprint("0123456789abcdef2"),

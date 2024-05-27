@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.monitoring
 
 import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.randomRequestId
+import dev.dnpm.etl.processor.RequestId
 import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -32,12 +34,10 @@ import org.springframework.data.repository.PagingAndSortingRepository
 import java.time.Instant
 import java.util.*
 
-typealias RequestId = UUID
-
 @Table("request")
 data class Request(
     @Id val id: Long? = null,
-    val uuid: String = RequestId.randomUUID().toString(),
+    val uuid: RequestId = randomRequestId(),
     val patientId: String,
     val pid: String,
     @Column("fingerprint")
@@ -48,7 +48,7 @@ data class Request(
     @Embedded.Nullable var report: Report? = null
 ) {
     constructor(
-        uuid: String,
+        uuid: RequestId,
         patientId: String,
         pid: String,
         fingerprint: Fingerprint,
@@ -58,7 +58,7 @@ data class Request(
             this(null, uuid, patientId, pid, fingerprint, type, status, Instant.now())
 
     constructor(
-        uuid: String,
+        uuid: RequestId,
         patientId: String,
         pid: String,
         fingerprint: Fingerprint,
@@ -85,7 +85,7 @@ interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRep
 
     fun findAllByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
 
-    fun findByUuidEquals(uuid: String): Optional<Request>
+    fun findByUuidEquals(uuid: RequestId): Optional<Request>
 
     fun findRequestByPatientId(patientId: String, pageable: Pageable): Page<Request>
 

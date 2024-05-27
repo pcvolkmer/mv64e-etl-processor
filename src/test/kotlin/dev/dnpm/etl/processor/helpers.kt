@@ -19,23 +19,11 @@
 
 package dev.dnpm.etl.processor
 
-import java.util.*
+import org.mockito.ArgumentMatchers
 
-class Fingerprint(val value: String) {
-    override fun hashCode() = value.hashCode()
-
-    override fun equals(other: Any?) = other is Fingerprint && other.value == value
-
-    companion object {
-        fun empty() = Fingerprint("")
-    }
+inline fun <reified T> anyValueClass(): T {
+    val unboxedClass = T::class.java.declaredFields.first().type
+    return ArgumentMatchers.any(unboxedClass as Class<T>)
+        ?: T::class.java.getDeclaredMethod("box-impl", unboxedClass)
+            .invoke(null, null) as T
 }
-
-@JvmInline
-value class RequestId(val value: String) {
-
-    fun isBlank() = value.isBlank()
-
-}
-
-fun randomRequestId() = RequestId(UUID.randomUUID().toString())

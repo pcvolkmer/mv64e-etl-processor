@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.output
 
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.springframework.http.HttpStatusCode
 
@@ -32,9 +33,9 @@ interface MtbFileSender {
 
     data class Response(val status: RequestStatus, val body: String = "")
 
-    data class MtbFileRequest(val requestId: String, val mtbFile: MtbFile)
+    data class MtbFileRequest(val requestId: RequestId, val mtbFile: MtbFile)
 
-    data class DeleteRequest(val requestId: String, val patientId: String)
+    data class DeleteRequest(val requestId: RequestId, val patientId: String)
 
 }
 

@@ -29,6 +29,7 @@ import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.randomRequestId
 import dev.dnpm.etl.processor.services.RequestService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -81,6 +83,13 @@ class HomeControllerTest {
     private lateinit var mockMvc: MockMvc
     private lateinit var webClient: WebClient
 
+    inline fun <reified T> anyValueClass(): T {
+        val unboxedClass = T::class.java.declaredFields.first().type
+        return ArgumentMatchers.any(unboxedClass as Class<T>)
+            ?: T::class.java.getDeclaredMethod("box-impl", unboxedClass)
+                .invoke(null, null) as T
+    }
+
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
@@ -119,7 +128,7 @@ class HomeControllerTest {
                     listOf(
                         Request(
                             2L,
-                            UUID.randomUUID().toString(),
+                            randomRequestId(),
                             "PSEUDO1",
                             "PATIENT1",
                             Fingerprint("ashdkasdh"),
@@ -128,7 +137,7 @@ class HomeControllerTest {
                         ),
                         Request(
                             1L,
-                            UUID.randomUUID().toString(),
+                            randomRequestId(),
                             "PSEUDO1",
                             "PATIENT1",
                             Fingerprint("asdasdasd"),
@@ -147,9 +156,9 @@ class HomeControllerTest {
         @Test
         @WithMockUser(username = "admin", roles = ["ADMIN"])
         fun testShouldShowRequestDetails() {
-            val requestId = UUID.randomUUID().toString()
+            val requestId = randomRequestId()
 
-            whenever(requestService.findByUuid(any())).thenReturn(
+            whenever(requestService.findByUuid(anyValueClass())).thenReturn(
                 Optional.of(
                     Request(
                         2L,
@@ -165,7 +174,7 @@ class HomeControllerTest {
                 )
             )
 
-            val page = webClient.getPage<HtmlPage>("http://localhost/report/${requestId}")
+            val page = webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
             assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
             assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
         }
@@ -178,7 +187,7 @@ class HomeControllerTest {
                     listOf(
                         Request(
                             2L,
-                            UUID.randomUUID().toString(),
+                            randomRequestId(),
                             "PSEUDO1",
                             "PATIENT1",
                             Fingerprint("ashdkasdh"),
@@ -187,7 +196,7 @@ class HomeControllerTest {
                         ),
                         Request(
                             1L,
-                            UUID.randomUUID().toString(),
+                            randomRequestId(),
                             "PSEUDO1",
                             "PATIENT1",
                             Fingerprint("asdasdasd"),
@@ -229,14 +238,14 @@ class HomeControllerTest {
         @Test
         @WithMockUser(username = "admin", roles = ["ADMIN"])
         fun testShouldThrowNotFoundExceptionForUnknownReport() {
-            val requestId = UUID.randomUUID().toString()
+            val requestId = randomRequestId()
 
-            whenever(requestService.findByUuid(any())).thenReturn(
+            whenever(requestService.findByUuid(anyValueClass())).thenReturn(
                 Optional.empty()
             )
 
             assertThrows<IOException> {
-                webClient.getPage<HtmlPage>("http://localhost/report/${requestId}")
+                webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
             }.also {
                 assertThat(it).hasRootCauseInstanceOf(NotFoundException::class.java)
             }

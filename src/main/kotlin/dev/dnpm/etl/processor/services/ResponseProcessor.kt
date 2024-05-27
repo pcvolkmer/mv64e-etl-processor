@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.slf4j.LoggerFactory
@@ -86,7 +87,7 @@ class ResponseProcessor(
 }
 
 data class ResponseEvent(
-    val requestUuid: String,
+    val requestUuid: RequestId,
     val timestamp: Instant,
     val status: RequestStatus,
     val body: Optional<String> = Optional.empty()

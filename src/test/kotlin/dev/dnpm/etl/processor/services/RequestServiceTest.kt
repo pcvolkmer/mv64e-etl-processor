@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.randomRequestId
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -33,7 +34,6 @@ import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import java.time.Instant
-import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class RequestServiceTest {
@@ -44,7 +44,7 @@ class RequestServiceTest {
 
     private fun anyRequest() = any(Request::class.java) ?: Request(
         0L,
-        UUID.randomUUID().toString(),
+        randomRequestId(),
         "TEST_dummy",
         "PX",
         Fingerprint("dummy"),
@@ -66,7 +66,7 @@ class RequestServiceTest {
         val requests = listOf(
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdef1"),
@@ -76,7 +76,7 @@ class RequestServiceTest {
             ),
             Request(
                 2L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdefd"),
@@ -86,7 +86,7 @@ class RequestServiceTest {
             ),
             Request(
                 3L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdef1"),
@@ -106,7 +106,7 @@ class RequestServiceTest {
         val requests = listOf(
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdef1"),
@@ -116,7 +116,7 @@ class RequestServiceTest {
             ),
             Request(
                 2L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdef1"),
@@ -126,7 +126,7 @@ class RequestServiceTest {
             ),
             Request(
                 3L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdef1"),
@@ -146,7 +146,7 @@ class RequestServiceTest {
         val requests = listOf(
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678901",
                 "P1",
                 Fingerprint("0123456789abcdef1"),
@@ -156,7 +156,7 @@ class RequestServiceTest {
             ),
             Request(
                 1L,
-                UUID.randomUUID().toString(),
+                randomRequestId(),
                 "TEST_12345678902",
                 "P2",
                 Fingerprint("0123456789abcdef2"),
@@ -189,7 +189,7 @@ class RequestServiceTest {
         }.whenever(requestRepository).save(anyRequest())
 
         val request = Request(
-            UUID.randomUUID().toString(),
+            randomRequestId(),
             "TEST_12345678901",
             "P1",
             Fingerprint("0123456789abcdef1"),

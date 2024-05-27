@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.monitoring
 import dev.dnpm.etl.processor.AbstractTestcontainerTest
 import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.randomRequestId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -61,7 +62,7 @@ class RequestRepositoryTest : AbstractTestcontainerTest() {
     @Test
     fun shouldSaveRequest() {
         val request = Request(
-            RequestId.randomUUID().toString(),
+            randomRequestId(),
             "TEST_12345678901",
             "P1",
             Fingerprint("0123456789abcdef1"),

@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -36,7 +37,7 @@ class RequestService(
 
     fun findAll(pageable: Pageable): Page<Request> = requestRepository.findAll(pageable)
 
-    fun findByUuid(uuid: String): Optional<Request> =
+    fun findByUuid(uuid: RequestId): Optional<Request> =
         requestRepository.findByUuidEquals(uuid)
 
     fun findRequestByPatientId(patientId: String, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientId(patientId, pageable)
