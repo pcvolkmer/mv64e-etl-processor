@@ -89,7 +89,7 @@ class AppSecurityConfiguration(
         http {
             authorizeRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
-                authorize("/mtbfile/**", hasAnyRole("MTBFILE"))
+                authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
                 authorize("/report/**", hasAnyRole("ADMIN", "USER"))
                 authorize("*.css", permitAll)
                 authorize("*.ico", permitAll)
@@ -147,7 +147,7 @@ class AppSecurityConfiguration(
         http {
             authorizeRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
-                authorize("/mtbfile/**", hasAnyRole("MTBFILE"))
+                authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
                 authorize("/report/**", hasRole("ADMIN"))
                 authorize(anyRequest, permitAll)
             }

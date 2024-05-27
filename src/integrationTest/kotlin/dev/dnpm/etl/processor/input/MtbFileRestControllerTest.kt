@@ -22,9 +22,11 @@ package dev.dnpm.etl.processor.input
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
-import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.security.TokenRepository
+import dev.dnpm.etl.processor.security.UserRoleRepository
+import dev.dnpm.etl.processor.services.RequestProcessor
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyString
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
@@ -92,6 +95,19 @@ class MtbFileRestControllerTest {
     }
 
     @Test
+    fun testShouldGrantPermissionToSendMtbFileToAdminUser() {
+        mockMvc.post("/mtbfile") {
+            with(user("onkostarserver").roles("ADMIN"))
+            contentType = MediaType.APPLICATION_JSON
+            content = ObjectMapper().writeValueAsString(mtbFile)
+        }.andExpect {
+            status { isAccepted() }
+        }
+
+        verify(requestProcessor, times(1)).processMtbFile(any())
+    }
+
+    @Test
     fun testShouldDenyPermissionToSendMtbFile() {
         mockMvc.post("/mtbfile") {
             with(anonymous())
@@ -99,6 +115,19 @@ class MtbFileRestControllerTest {
             content = ObjectMapper().writeValueAsString(mtbFile)
         }.andExpect {
             status { isUnauthorized() }
+        }
+
+        verify(requestProcessor, never()).processMtbFile(any())
+    }
+
+    @Test
+    fun testShouldDenyPermissionToSendMtbFileForUser() {
+        mockMvc.post("/mtbfile") {
+            with(user("fakeuser").roles("USER"))
+            contentType = MediaType.APPLICATION_JSON
+            content = ObjectMapper().writeValueAsString(mtbFile)
+        }.andExpect {
+            status { isForbidden() }
         }
 
         verify(requestProcessor, never()).processMtbFile(any())
@@ -124,6 +153,45 @@ class MtbFileRestControllerTest {
         }
 
         verify(requestProcessor, never()).processDeletion(anyString())
+    }
+
+    @Nested
+    @MockBean(UserRoleRepository::class, ClientRegistrationRepository::class)
+    @TestPropertySource(
+        properties = [
+            "app.pseudonymize.generator=BUILDIN",
+            "app.security.admin-user=admin",
+            "app.security.admin-password={noop}very-secret",
+            "app.security.enable-tokens=true",
+            "app.security.enable-oidc=true"
+        ]
+    )
+    inner class WithOidcEnabled {
+        @Test
+        fun testShouldGrantPermissionToSendMtbFileToAdminUser() {
+            mockMvc.post("/mtbfile") {
+                with(user("onkostarserver").roles("ADMIN"))
+                contentType = MediaType.APPLICATION_JSON
+                content = ObjectMapper().writeValueAsString(mtbFile)
+            }.andExpect {
+                status { isAccepted() }
+            }
+
+            verify(requestProcessor, times(1)).processMtbFile(any())
+        }
+
+        @Test
+        fun testShouldGrantPermissionToSendMtbFileToUser() {
+            mockMvc.post("/mtbfile") {
+                with(user("onkostarserver").roles("USER"))
+                contentType = MediaType.APPLICATION_JSON
+                content = ObjectMapper().writeValueAsString(mtbFile)
+            }.andExpect {
+                status { isAccepted() }
+            }
+
+            verify(requestProcessor, times(1)).processMtbFile(any())
+        }
     }
 
     companion object {
