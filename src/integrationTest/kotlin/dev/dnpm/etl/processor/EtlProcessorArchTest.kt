@@ -1,10 +1,7 @@
 package dev.dnpm.etl.processor
 
-import com.tngtech.archunit.base.DescribedPredicate.doNot
-import com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith
 import com.tngtech.archunit.core.domain.JavaClasses
 import com.tngtech.archunit.core.importer.ClassFileImporter
-import com.tngtech.archunit.lang.conditions.ArchPredicates.have
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import org.junit.jupiter.api.BeforeEach
@@ -17,8 +14,9 @@ class EtlProcessorArchTest {
 
     @BeforeEach
     fun setUp() {
-        this.noTestClasses = ClassFileImporter().importPackages("dev.dnpm.etl.processor")
-            .that(doNot(have(simpleNameEndingWith("Test").or(simpleNameEndingWith("Tests")))))
+        this.noTestClasses = ClassFileImporter()
+            .withImportOption { !(it.contains("/test/") || it.contains("/integrationTest/")) }
+            .importPackages("dev.dnpm.etl.processor")
     }
 
     @Test
