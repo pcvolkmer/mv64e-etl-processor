@@ -17,8 +17,8 @@ version = "0.10.0-SNAPSHOT"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.3.0",
-    "hapi-fhir" to "6.10.2",
-    "httpclient5" to "5.2.1",
+    "hapi-fhir" to "6.10.5",
+    "httpclient5" to "5.2.3",
     "mockito-kotlin" to "5.3.1",
     "archunit" to "1.3.0",
     // Webjars
