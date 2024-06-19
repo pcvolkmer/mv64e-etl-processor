@@ -22,7 +22,7 @@ var versions = mapOf(
     "mockito-kotlin" to "5.3.1",
     "archunit" to "1.3.0",
     // Webjars
-    "echarts" to "5.5.0",
+    "echarts" to "5.4.3",
     "htmx.org" to "1.9.12"
 )
 
