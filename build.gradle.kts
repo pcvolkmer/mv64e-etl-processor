@@ -19,8 +19,8 @@ var versions = mapOf(
     "httpclient5" to "5.2.3",
     "mockito-kotlin" to "5.3.1",
     // Webjars
-    "echarts" to "5.4.3",
-    "htmx.org" to "1.9.11"
+    "echarts" to "5.5.0",
+    "htmx.org" to "1.9.12"
 )
 
 java {
