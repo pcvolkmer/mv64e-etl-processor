@@ -18,7 +18,7 @@ version = "0.10.0-SNAPSHOT"
 var versions = mapOf(
     "bwhc-dto-java" to "0.3.0",
     "hapi-fhir" to "6.10.5",
-    "httpclient5" to "5.2.3",
+    "commons-codec" to "2.26.1",
     "mockito-kotlin" to "5.3.1",
     "archunit" to "1.3.0",
     // Webjars
@@ -72,7 +72,7 @@ dependencies {
     implementation("de.ukw.ccc:bwhc-dto-java:${versions["bwhc-dto-java"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
-    implementation("org.apache.httpcomponents.client5:httpclient5:${versions["httpclient5"]}")
+    implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("com.jayway.jsonpath:json-path")
     implementation("org.webjars:webjars-locator:0.52")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
@@ -93,7 +93,7 @@ dependencies {
     integrationTestImplementation("net.sourceforge.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
     // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:1.26.1")
+    integrationTestImplementation("org.apache.commons:commons-compress:${versions["commons-codec"]}")
 }
 
 tasks.withType<KotlinCompile> {
