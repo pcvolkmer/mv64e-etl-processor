@@ -22,6 +22,10 @@
     --bg-gray-op: rgba(112, 128, 144, .35);
 }
 
+* {
+    font-family: sans-serif;
+}
+
 html {
     background: linear-gradient(-5deg, var(--bg-blue-op), transparent 10em);
     min-height: 100vh;
@@ -30,7 +34,6 @@ html {
 
 body {
     margin: 0 0 5em 0;
-    font-family: sans-serif;
     font-size: .8rem;
     color: var(--text);
 
