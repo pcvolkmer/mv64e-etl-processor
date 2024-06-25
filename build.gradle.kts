@@ -18,7 +18,7 @@ version = "0.10.0-SNAPSHOT"
 var versions = mapOf(
     "bwhc-dto-java" to "0.3.0",
     "hapi-fhir" to "6.10.5",
-    "commons-codec" to "2.26.1",
+    "commons-compress" to "1.26.2",
     "mockito-kotlin" to "5.3.1",
     "archunit" to "1.3.0",
     // Webjars
@@ -93,7 +93,7 @@ dependencies {
     integrationTestImplementation("net.sourceforge.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
     // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:${versions["commons-codec"]}")
+    integrationTestImplementation("org.apache.commons:commons-compress:${versions["commons-compress"]}")
 }
 
 tasks.withType<KotlinCompile> {
