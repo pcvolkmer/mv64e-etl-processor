@@ -10,7 +10,7 @@ spring:
           custom:
             client-name: App-Dev
             client-id: app-dev
-            client-secret: 9MQWatEcgkC1WISSAFUGaFGbyEHh8rAy
+            client-secret: very-secret-ae3f7a-5a9f-1190
             scope:
               - openid
         provider:
