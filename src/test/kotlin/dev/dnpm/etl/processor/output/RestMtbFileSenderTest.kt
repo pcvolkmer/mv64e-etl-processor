@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.output
 
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -65,7 +66,7 @@ class RestMtbFileSenderTest {
             withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
         }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
+        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -138,7 +139,7 @@ class RestMtbFileSenderTest {
             withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
         }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
+        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -151,6 +152,7 @@ class RestMtbFileSenderTest {
         )
 
         val TEST_REQUEST_ID = RequestId("TestId")
+        val TEST_PATIENT_PSEUDONYM = PatientPseudonym("PID")
 
         private val warningBody = """
                 {

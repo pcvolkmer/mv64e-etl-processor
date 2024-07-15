@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -87,7 +88,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        val response = kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
+        val response = kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(testData.requestStatus)
     }
 
@@ -113,7 +114,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
+        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
 
         val captor = argumentCaptor<String>()
         verify(kafkaTemplate, times(1)).send(anyString(), captor.capture(), captor.capture())
@@ -163,7 +164,7 @@ class KafkaMtbFileSenderTest {
             completedFuture(SendResult<String, String>(null, null))
         }.whenever(kafkaTemplate).send(anyString(), anyString(), anyString())
 
-        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, "PID"))
+        kafkaMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
 
         val expectedCount = when (testData.exception) {
             // OK - No Retry
@@ -177,6 +178,7 @@ class KafkaMtbFileSenderTest {
 
     companion object {
         val TEST_REQUEST_ID = RequestId("TestId")
+        val TEST_PATIENT_PSEUDONYM = PatientPseudonym("PID")
 
         fun mtbFile(consentStatus: Consent.Status): MtbFile {
             return if (consentStatus == Consent.Status.ACTIVE) {

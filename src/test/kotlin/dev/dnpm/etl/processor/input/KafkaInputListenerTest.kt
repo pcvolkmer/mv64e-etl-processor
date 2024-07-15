@@ -32,7 +32,6 @@ import org.apache.kafka.common.record.TimestampType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -78,7 +77,7 @@ class KafkaInputListenerTest {
 
         kafkaInputListener.onMessage(ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile)))
 
-        verify(requestProcessor, times(1)).processDeletion(anyString())
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
     }
 
     @Test
@@ -107,7 +106,7 @@ class KafkaInputListenerTest {
         kafkaInputListener.onMessage(
             ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
         )
-        verify(requestProcessor, times(1)).processDeletion(anyString(), anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass())
     }
 
 }

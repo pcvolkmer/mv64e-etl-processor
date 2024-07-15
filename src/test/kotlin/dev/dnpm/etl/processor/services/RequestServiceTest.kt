@@ -19,8 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
-import dev.dnpm.etl.processor.Fingerprint
-import dev.dnpm.etl.processor.randomRequestId
+import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -45,8 +44,8 @@ class RequestServiceTest {
     private fun anyRequest() = any(Request::class.java) ?: Request(
         0L,
         randomRequestId(),
-        "TEST_dummy",
-        "PX",
+        PatientPseudonym("TEST_dummy"),
+        PatientId("PX"),
         Fingerprint("dummy"),
         RequestType.MTB_FILE,
         RequestStatus.SUCCESS,
@@ -67,8 +66,8 @@ class RequestServiceTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
@@ -77,8 +76,8 @@ class RequestServiceTest {
             Request(
                 2L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdefd"),
                 RequestType.DELETE,
                 RequestStatus.WARNING,
@@ -87,8 +86,8 @@ class RequestServiceTest {
             Request(
                 3L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.UNKNOWN,
@@ -107,8 +106,8 @@ class RequestServiceTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
@@ -117,8 +116,8 @@ class RequestServiceTest {
             Request(
                 2L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
@@ -127,8 +126,8 @@ class RequestServiceTest {
             Request(
                 3L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
                 RequestStatus.UNKNOWN,
@@ -147,8 +146,8 @@ class RequestServiceTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.DELETE,
                 RequestStatus.SUCCESS,
@@ -157,8 +156,8 @@ class RequestServiceTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678902",
-                "P2",
+                PatientPseudonym("TEST_12345678902"),
+                PatientId("P2"),
                 Fingerprint("0123456789abcdef2"),
                 RequestType.MTB_FILE,
                 RequestStatus.WARNING,
@@ -190,8 +189,8 @@ class RequestServiceTest {
 
         val request = Request(
             randomRequestId(),
-            "TEST_12345678901",
-            "P1",
+            PatientPseudonym("TEST_12345678901"),
+            PatientId("P1"),
             Fingerprint("0123456789abcdef1"),
             RequestType.DELETE,
             RequestStatus.SUCCESS,
@@ -205,23 +204,23 @@ class RequestServiceTest {
 
     @Test
     fun allRequestsByPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
-        requestService.allRequestsByPatientPseudonym("TEST_12345678901")
+        requestService.allRequestsByPatientPseudonym(PatientPseudonym("TEST_12345678901"))
 
-        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyString())
+        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyValueClass())
     }
 
     @Test
     fun lastMtbFileRequestForPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
-        requestService.lastMtbFileRequestForPatientPseudonym("TEST_12345678901")
+        requestService.lastMtbFileRequestForPatientPseudonym(PatientPseudonym("TEST_12345678901"))
 
-        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyString())
+        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyValueClass())
     }
 
     @Test
     fun isLastRequestDeletionShouldRequestAllRequestsForPatientPseudonym() {
-        requestService.isLastRequestWithKnownStatusDeletion("TEST_12345678901")
+        requestService.isLastRequestWithKnownStatusDeletion(PatientPseudonym("TEST_12345678901"))
 
-        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyString())
+        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyValueClass())
     }
 
 }

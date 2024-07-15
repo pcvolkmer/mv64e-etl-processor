@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.pseudonym
 
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.PatientId
 import org.apache.commons.codec.digest.DigestUtils
 
 /** Replaces patient ID with generated patient pseudonym
@@ -29,7 +30,7 @@ import org.apache.commons.codec.digest.DigestUtils
  * @return The MTB file containing patient pseudonymes
  */
 infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
-    val patientPseudonym = pseudonymizeService.patientPseudonym(this.patient.id)
+    val patientPseudonym = pseudonymizeService.patientPseudonym(PatientId(this.patient.id)).value
 
     this.episode?.patient = patientPseudonym
     this.carePlans?.forEach { it.patient = patientPseudonym }

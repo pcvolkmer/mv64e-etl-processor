@@ -63,7 +63,7 @@ class KafkaMtbFileSender(
         val dummyMtbFile = MtbFile.builder()
             .withConsent(
                 Consent.builder()
-                    .withPatient(request.patientId)
+                    .withPatient(request.patientId.value)
                     .withStatus(Consent.Status.REJECTED)
                     .build()
             )
@@ -99,7 +99,7 @@ class KafkaMtbFileSender(
     }
 
     private fun key(request: MtbFileSender.DeleteRequest): String {
-        return "{\"pid\": \"${request.patientId}\"}"
+        return "{\"pid\": \"${request.patientId.value}\"}"
     }
 
     data class Data(val requestId: RequestId, val content: MtbFile)

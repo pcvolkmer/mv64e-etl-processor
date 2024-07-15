@@ -19,9 +19,7 @@
 
 package dev.dnpm.etl.processor.monitoring
 
-import dev.dnpm.etl.processor.Fingerprint
-import dev.dnpm.etl.processor.randomRequestId
-import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.*
 import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -38,8 +36,8 @@ import java.util.*
 data class Request(
     @Id val id: Long? = null,
     val uuid: RequestId = randomRequestId(),
-    val patientId: String,
-    val pid: String,
+    val patientId: PatientPseudonym,
+    val pid: PatientId,
     @Column("fingerprint")
     val fingerprint: Fingerprint,
     val type: RequestType,
@@ -49,8 +47,8 @@ data class Request(
 ) {
     constructor(
         uuid: RequestId,
-        patientId: String,
-        pid: String,
+        patientId: PatientPseudonym,
+        pid: PatientId,
         fingerprint: Fingerprint,
         type: RequestType,
         status: RequestStatus
@@ -59,8 +57,8 @@ data class Request(
 
     constructor(
         uuid: RequestId,
-        patientId: String,
-        pid: String,
+        patientId: PatientPseudonym,
+        pid: PatientId,
         fingerprint: Fingerprint,
         type: RequestType,
         status: RequestStatus,
@@ -83,11 +81,11 @@ data class CountedState(
 
 interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRepository<Request, Long> {
 
-    fun findAllByPatientIdOrderByProcessedAtDesc(patientId: String): List<Request>
+    fun findAllByPatientIdOrderByProcessedAtDesc(patientId: PatientPseudonym): List<Request>
 
     fun findByUuidEquals(uuid: RequestId): Optional<Request>
 
-    fun findRequestByPatientId(patientId: String, pageable: Pageable): Page<Request>
+    fun findRequestByPatientId(patientId: PatientPseudonym, pageable: Pageable): Page<Request>
 
     @Query("SELECT count(*) AS count, status FROM request WHERE type = 'MTB_FILE' GROUP BY status ORDER BY status, count DESC;")
     fun countStates(): List<CountedState>

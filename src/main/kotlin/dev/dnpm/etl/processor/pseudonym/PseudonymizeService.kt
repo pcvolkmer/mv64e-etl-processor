@@ -19,6 +19,8 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
+import dev.dnpm.etl.processor.PatientId
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 
 class PseudonymizeService(
@@ -26,10 +28,10 @@ class PseudonymizeService(
     private val configProperties: PseudonymizeConfigProperties
 ) {
 
-    fun patientPseudonym(patientId: String): String {
+    fun patientPseudonym(patientId: PatientId): PatientPseudonym {
         return when (generator) {
-            is GpasPseudonymGenerator -> generator.generate(patientId)
-            else -> "${configProperties.prefix}_${generator.generate(patientId)}"
+            is GpasPseudonymGenerator -> PatientPseudonym(generator.generate(patientId.value))
+            else -> PatientPseudonym("${configProperties.prefix}_${generator.generate(patientId.value)}")
         }
     }
 

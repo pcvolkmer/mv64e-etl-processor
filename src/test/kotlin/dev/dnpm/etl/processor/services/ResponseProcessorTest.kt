@@ -19,9 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
-import dev.dnpm.etl.processor.Fingerprint
-import dev.dnpm.etl.processor.RequestId
-import dev.dnpm.etl.processor.anyValueClass
+import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
@@ -49,8 +47,8 @@ class ResponseProcessorTest {
     private val testRequest = Request(
         1L,
         RequestId("TestID1234"),
-        "PSEUDONYM-A",
-        "1",
+        PatientPseudonym("PSEUDONYM-A"),
+        PatientId("1"),
         Fingerprint("dummyfingerprint"),
         RequestType.MTB_FILE,
         RequestStatus.UNKNOWN

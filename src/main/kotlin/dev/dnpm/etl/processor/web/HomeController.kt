@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.NotFoundException
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.services.RequestService
@@ -56,7 +57,7 @@ class HomeController(
         @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
         model: Model
     ): String {
-        val requests = requestService.findRequestByPatientId(patientId, pageable)
+        val requests = requestService.findRequestByPatientId(PatientPseudonym(patientId), pageable)
         model.addAttribute("patientId", patientId)
         model.addAttribute("requests", requests)
 

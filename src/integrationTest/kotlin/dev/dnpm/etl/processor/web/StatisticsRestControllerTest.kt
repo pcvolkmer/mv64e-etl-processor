@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.PatientId
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.monitoring.CountedState
@@ -188,8 +190,8 @@ class StatisticsRestControllerTest {
                     Request(
                         1,
                         randomRequestId(),
-                        "TEST_12345678901",
-                        "P1",
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
                         Fingerprint("0123456789abcdef1"),
                         RequestType.MTB_FILE,
                         RequestStatus.SUCCESS,
@@ -198,8 +200,8 @@ class StatisticsRestControllerTest {
                     Request(
                         2,
                         randomRequestId(),
-                        "TEST_12345678902",
-                        "P2",
+                        PatientPseudonym("TEST_12345678902"),
+                        PatientId("P2"),
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
                         RequestStatus.WARNING,
@@ -208,8 +210,8 @@ class StatisticsRestControllerTest {
                     Request(
                         3,
                         randomRequestId(),
-                        "TEST_12345678901",
-                        "P2",
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P2"),
                         Fingerprint("0123456789abcdee1"),
                         RequestType.DELETE,
                         RequestStatus.ERROR,
@@ -218,8 +220,8 @@ class StatisticsRestControllerTest {
                     Request(
                         4,
                         randomRequestId(),
-                        "TEST_12345678902",
-                        "P2",
+                        PatientPseudonym("TEST_12345678902"),
+                        PatientId("P2"),
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
                         RequestStatus.DUPLICATION,
@@ -228,8 +230,8 @@ class StatisticsRestControllerTest {
                     Request(
                         5,
                         randomRequestId(),
-                        "TEST_12345678902",
-                        "P2",
+                        PatientPseudonym("TEST_12345678902"),
+                        PatientId("P2"),
                         Fingerprint("0123456789abcdef2"),
                         RequestType.DELETE,
                         RequestStatus.UNKNOWN,

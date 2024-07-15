@@ -19,14 +19,12 @@
 
 package dev.dnpm.etl.processor.services
 
-import dev.dnpm.etl.processor.AbstractTestcontainerTest
-import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.randomRequestId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -67,7 +65,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
 
     @Test
     fun shouldResultInEmptyRequestList() {
-        val actual = requestService.allRequestsByPatientPseudonym("TEST_12345678901")
+        val actual = requestService.allRequestsByPatientPseudonym(TEST_PATIENT_PSEUDONYM)
 
         assertThat(actual).isEmpty()
     }
@@ -78,8 +76,8 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
             listOf(
                 Request(
                     randomRequestId(),
-                    "TEST_12345678901",
-                    "P1",
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
                     Fingerprint("0123456789abcdef1"),
                     RequestType.MTB_FILE,
                     RequestStatus.SUCCESS,
@@ -88,8 +86,8 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 // Should be ignored - wrong patient ID -->
                 Request(
                     randomRequestId(),
-                    "TEST_12345678902",
-                    "P2",
+                    PatientPseudonym("TEST_12345678902"),
+                    PatientId("P2"),
                     Fingerprint("0123456789abcdef2"),
                     RequestType.MTB_FILE,
                     RequestStatus.WARNING,
@@ -98,8 +96,8 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 // <--
                 Request(
                     randomRequestId(),
-                    "TEST_12345678901",
-                    "P2",
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P2"),
                     Fingerprint("0123456789abcdee1"),
                     RequestType.DELETE,
                     RequestStatus.SUCCESS,
@@ -113,7 +111,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
     fun shouldResultInSortedRequestList() {
         setupTestData()
 
-        val actual = requestService.allRequestsByPatientPseudonym("TEST_12345678901")
+        val actual = requestService.allRequestsByPatientPseudonym(TEST_PATIENT_PSEUDONYM)
 
         assertThat(actual).hasSize(2)
         assertThat(actual[0].fingerprint).isEqualTo(Fingerprint("0123456789abcdee1"))
@@ -124,7 +122,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
     fun shouldReturnDeleteRequestAsLastRequest() {
         setupTestData()
 
-        val actual = requestService.isLastRequestWithKnownStatusDeletion("TEST_12345678901")
+        val actual = requestService.isLastRequestWithKnownStatusDeletion(TEST_PATIENT_PSEUDONYM)
 
         assertThat(actual).isTrue()
     }
@@ -133,10 +131,14 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
     fun shouldReturnLastMtbFileRequest() {
         setupTestData()
 
-        val actual = requestService.lastMtbFileRequestForPatientPseudonym("TEST_12345678901")
+        val actual = requestService.lastMtbFileRequestForPatientPseudonym(TEST_PATIENT_PSEUDONYM)
 
         assertThat(actual).isNotNull
         assertThat(actual?.fingerprint).isEqualTo(Fingerprint("0123456789abcdef1"))
+    }
+
+    companion object {
+        val TEST_PATIENT_PSEUDONYM = PatientPseudonym("TEST_12345678901")
     }
 
 }

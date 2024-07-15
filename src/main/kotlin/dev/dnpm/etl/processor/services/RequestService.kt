@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.services
 
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.*
 import org.springframework.data.domain.Page
@@ -40,15 +41,15 @@ class RequestService(
     fun findByUuid(uuid: RequestId): Optional<Request> =
         requestRepository.findByUuidEquals(uuid)
 
-    fun findRequestByPatientId(patientId: String, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientId(patientId, pageable)
+    fun findRequestByPatientId(patientId: PatientPseudonym, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientId(patientId, pageable)
 
-    fun allRequestsByPatientPseudonym(patientPseudonym: String) = requestRepository
+    fun allRequestsByPatientPseudonym(patientPseudonym: PatientPseudonym) = requestRepository
         .findAllByPatientIdOrderByProcessedAtDesc(patientPseudonym)
 
-    fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: String) =
+    fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: PatientPseudonym) =
         Companion.lastMtbFileRequestForPatientPseudonym(allRequestsByPatientPseudonym(patientPseudonym))
 
-    fun isLastRequestWithKnownStatusDeletion(patientPseudonym: String) =
+    fun isLastRequestWithKnownStatusDeletion(patientPseudonym: PatientPseudonym) =
         Companion.isLastRequestWithKnownStatusDeletion(allRequestsByPatientPseudonym(patientPseudonym))
 
     fun countStates(): Iterable<CountedState> = requestRepository.countStates()

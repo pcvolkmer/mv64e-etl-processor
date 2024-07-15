@@ -21,8 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
-import dev.dnpm.etl.processor.Fingerprint
-import dev.dnpm.etl.processor.randomRequestId
+import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -34,7 +33,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
@@ -91,22 +89,22 @@ class RequestProcessorTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
         doAnswer {
             false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
 
         doAnswer {
             it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             it.arguments[0]
@@ -150,22 +148,22 @@ class RequestProcessorTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("zdlzv5s5ydmd4ktw2v5piohegc4jcyrm6j66bq6tv2uxuerndmga"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
         doAnswer {
             false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
 
         doAnswer {
             it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             it.arguments[0]
@@ -209,18 +207,18 @@ class RequestProcessorTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("different"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
         doAnswer {
             false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
@@ -228,7 +226,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             it.arguments[0]
@@ -272,18 +270,18 @@ class RequestProcessorTest {
             Request(
                 1L,
                 randomRequestId(),
-                "TEST_12345678901",
-                "P1",
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
                 Fingerprint("different"),
                 RequestType.MTB_FILE,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z")
             )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyString())
+        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
         doAnswer {
             false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyString())
+        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
@@ -291,7 +289,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             it.arguments[0]
@@ -333,13 +331,13 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestAndSaveUnknownRequestStatusAtFirst() {
         doAnswer {
             "PSEUDONYM"
-        }.whenever(pseudonymizeService).patientPseudonym(anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.UNKNOWN)
         }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
-        this.requestProcessor.processDeletion("TEST_12345678901")
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
@@ -351,13 +349,13 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestAndSendSuccessEvent() {
         doAnswer {
             "PSEUDONYM"
-        }.whenever(pseudonymizeService).patientPseudonym(anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
         }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
-        this.requestProcessor.processDeletion("TEST_12345678901")
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -369,13 +367,13 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestAndSendErrorEvent() {
         doAnswer {
             "PSEUDONYM"
-        }.whenever(pseudonymizeService).patientPseudonym(anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
         }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
-        this.requestProcessor.processDeletion("TEST_12345678901")
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -385,9 +383,9 @@ class RequestProcessorTest {
 
     @Test
     fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
-        doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyString())
+        doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        this.requestProcessor.processDeletion("TEST_12345678901")
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
@@ -401,7 +399,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(any())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             it.arguments[0]
@@ -441,6 +439,10 @@ class RequestProcessorTest {
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
         assertThat(eventCaptor.firstValue).isNotNull
         assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+    }
+
+    companion object {
+        val TEST_PATIENT_ID = PatientId("TEST_12345678901")
     }
 
 }

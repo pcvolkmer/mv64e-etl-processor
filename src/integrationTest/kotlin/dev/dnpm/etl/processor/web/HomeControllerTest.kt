@@ -21,15 +21,13 @@ package dev.dnpm.etl.processor.web
 
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
-import dev.dnpm.etl.processor.Fingerprint
-import dev.dnpm.etl.processor.NotFoundException
+import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
-import dev.dnpm.etl.processor.randomRequestId
 import dev.dnpm.etl.processor.services.RequestService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -37,8 +35,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -83,13 +79,6 @@ class HomeControllerTest {
     private lateinit var mockMvc: MockMvc
     private lateinit var webClient: WebClient
 
-    inline fun <reified T> anyValueClass(): T {
-        val unboxedClass = T::class.java.declaredFields.first().type
-        return ArgumentMatchers.any(unboxedClass as Class<T>)
-            ?: T::class.java.getDeclaredMethod("box-impl", unboxedClass)
-                .invoke(null, null) as T
-    }
-
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
@@ -129,8 +118,8 @@ class HomeControllerTest {
                         Request(
                             2L,
                             randomRequestId(),
-                            "PSEUDO1",
-                            "PATIENT1",
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
                             Fingerprint("ashdkasdh"),
                             RequestType.MTB_FILE,
                             RequestStatus.SUCCESS
@@ -138,8 +127,8 @@ class HomeControllerTest {
                         Request(
                             1L,
                             randomRequestId(),
-                            "PSEUDO1",
-                            "PATIENT1",
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
                             Fingerprint("asdasdasd"),
                             RequestType.MTB_FILE,
                             RequestStatus.ERROR
@@ -163,8 +152,8 @@ class HomeControllerTest {
                     Request(
                         2L,
                         requestId,
-                        "PSEUDO1",
-                        "PATIENT1",
+                        PatientPseudonym("PSEUDO1"),
+                        PatientId("PATIENT1"),
                         Fingerprint("ashdkasdh"),
                         RequestType.MTB_FILE,
                         RequestStatus.SUCCESS,
@@ -182,14 +171,14 @@ class HomeControllerTest {
         @Test
         @WithMockUser(username = "admin", roles = ["ADMIN"])
         fun testShouldShowPatientDetails() {
-            whenever(requestService.findRequestByPatientId(anyString(), any<Pageable>())).thenReturn(
+            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(
                 PageImpl(
                     listOf(
                         Request(
                             2L,
                             randomRequestId(),
-                            "PSEUDO1",
-                            "PATIENT1",
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
                             Fingerprint("ashdkasdh"),
                             RequestType.MTB_FILE,
                             RequestStatus.SUCCESS
@@ -197,8 +186,8 @@ class HomeControllerTest {
                         Request(
                             1L,
                             randomRequestId(),
-                            "PSEUDO1",
-                            "PATIENT1",
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
                             Fingerprint("asdasdasd"),
                             RequestType.MTB_FILE,
                             RequestStatus.ERROR
@@ -254,7 +243,7 @@ class HomeControllerTest {
         @Test
         @WithMockUser(username = "admin", roles = ["ADMIN"])
         fun testShouldShowEmptyPatientDetails() {
-            whenever(requestService.findRequestByPatientId(anyString(), any<Pageable>())).thenReturn(Page.empty())
+            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(Page.empty())
 
             val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
             assertThat(page.querySelectorAll("tbody tr")).isEmpty()

@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.input
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -36,6 +37,7 @@ class KafkaInputListener(
 
     override fun onMessage(data: ConsumerRecord<String, String>) {
         val mtbFile = objectMapper.readValue(data.value(), MtbFile::class.java)
+        val patientId = PatientId(mtbFile.patient.id)
         val firstRequestIdHeader = data.headers().headers("requestId")?.firstOrNull()
         val requestId = if (null != firstRequestIdHeader) {
             RequestId(String(firstRequestIdHeader.value()))
@@ -53,9 +55,9 @@ class KafkaInputListener(
         } else {
             logger.debug("Accepted MTB File and process deletion")
             if (requestId.isBlank()) {
-                requestProcessor.processDeletion(mtbFile.patient.id)
+                requestProcessor.processDeletion(patientId)
             } else {
-                requestProcessor.processDeletion(mtbFile.patient.id, requestId)
+                requestProcessor.processDeletion(patientId, requestId)
             }
         }
     }

@@ -21,9 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.Fingerprint
-import dev.dnpm.etl.processor.randomRequestId
-import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
@@ -56,17 +54,19 @@ class RequestProcessor(
     }
 
     fun processMtbFile(mtbFile: MtbFile, requestId: RequestId) {
-        val pid = mtbFile.patient.id
+        val pid = PatientId(mtbFile.patient.id)
 
         mtbFile pseudonymizeWith pseudonymizeService
         mtbFile anonymizeContentWith pseudonymizeService
 
         val request = MtbFileSender.MtbFileRequest(requestId, transformationService.transform(mtbFile))
 
+        val patientPseudonym = PatientPseudonym(request.mtbFile.patient.id)
+
         requestService.save(
             Request(
                 requestId,
-                request.mtbFile.patient.id,
+                patientPseudonym,
                 pid,
                 fingerprint(request.mtbFile),
                 RequestType.MTB_FILE,
@@ -101,20 +101,22 @@ class RequestProcessor(
     }
 
     private fun isDuplication(pseudonymizedMtbFile: MtbFile): Boolean {
+        val patientPseudonym = PatientPseudonym(pseudonymizedMtbFile.patient.id)
+
         val lastMtbFileRequestForPatient =
-            requestService.lastMtbFileRequestForPatientPseudonym(pseudonymizedMtbFile.patient.id)
-        val isLastRequestDeletion = requestService.isLastRequestWithKnownStatusDeletion(pseudonymizedMtbFile.patient.id)
+            requestService.lastMtbFileRequestForPatientPseudonym(patientPseudonym)
+        val isLastRequestDeletion = requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
 
         return null != lastMtbFileRequestForPatient
                 && !isLastRequestDeletion
                 && lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFile)
     }
 
-    fun processDeletion(patientId: String) {
+    fun processDeletion(patientId: PatientId) {
         processDeletion(patientId, randomRequestId())
     }
 
-    fun processDeletion(patientId: String, requestId: RequestId) {
+    fun processDeletion(patientId: PatientId, requestId: RequestId) {
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
@@ -123,7 +125,7 @@ class RequestProcessor(
                     requestId,
                     patientPseudonym,
                     patientId,
-                    fingerprint(patientPseudonym),
+                    fingerprint(patientPseudonym.value),
                     RequestType.DELETE,
                     RequestStatus.UNKNOWN
                 )
@@ -147,7 +149,7 @@ class RequestProcessor(
             requestService.save(
                 Request(
                     uuid = requestId,
-                    patientId = "???",
+                    patientId = emptyPatientPseudonym(),
                     pid = patientId,
                     fingerprint = Fingerprint.empty(),
                     status = RequestStatus.ERROR,

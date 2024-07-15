@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -141,7 +141,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processDeletion(anyString())
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
     }
 
     @Test
@@ -152,7 +152,7 @@ class MtbFileRestControllerTest {
             status { isUnauthorized() }
         }
 
-        verify(requestProcessor, never()).processDeletion(anyString())
+        verify(requestProcessor, never()).processDeletion(anyValueClass())
     }
 
     @Nested

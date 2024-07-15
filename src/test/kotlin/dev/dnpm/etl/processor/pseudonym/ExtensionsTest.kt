@@ -21,11 +21,11 @@ package dev.dnpm.etl.processor.pseudonym
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.anyValueClass
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doAnswer
@@ -52,7 +52,7 @@ class ExtensionsTest {
         doAnswer {
             it.arguments[0]
             "PSEUDO-ID"
-        }.whenever(pseudonymizeService).patientPseudonym(ArgumentMatchers.anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         val mtbFile = fakeMtbFile()
 
@@ -67,7 +67,7 @@ class ExtensionsTest {
         doAnswer {
             it.arguments[0]
             "PSEUDO-ID"
-        }.whenever(pseudonymizeService).patientPseudonym(ArgumentMatchers.anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             "TESTDOMAIN"
@@ -95,7 +95,7 @@ class ExtensionsTest {
         doAnswer {
             it.arguments[0]
             "PSEUDO-ID"
-        }.whenever(pseudonymizeService).patientPseudonym(ArgumentMatchers.anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             "TESTDOMAIN"
@@ -139,7 +139,7 @@ class ExtensionsTest {
         doAnswer {
             it.arguments[0]
             "PSEUDO-ID"
-        }.whenever(pseudonymizeService).patientPseudonym(ArgumentMatchers.anyString())
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
         doAnswer {
             "TESTDOMAIN"
