@@ -53,12 +53,12 @@ class HomeController(
 
     @GetMapping(path = ["patient/{patientPseudonym}"])
     fun byPatient(
-        @PathVariable patientPseudonym: String,
+        @PathVariable patientPseudonym: PatientPseudonym,
         @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
         model: Model
     ): String {
-        val requests = requestService.findRequestByPatientId(PatientPseudonym(patientPseudonym), pageable)
-        model.addAttribute("patientPseudonym", patientPseudonym)
+        val requests = requestService.findRequestByPatientId(patientPseudonym, pageable)
+        model.addAttribute("patientPseudonym", patientPseudonym.value)
         model.addAttribute("requests", requests)
 
         return "index"

@@ -201,6 +201,39 @@ class HomeControllerTest {
             assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
         }
 
+        @Test
+        @WithMockUser(username = "admin", roles = ["ADMIN"])
+        fun testShouldShowPatientPseudonym() {
+            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(
+                PageImpl(
+                    listOf(
+                        Request(
+                            2L,
+                            randomRequestId(),
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
+                            Fingerprint("ashdkasdh"),
+                            RequestType.MTB_FILE,
+                            RequestStatus.SUCCESS
+                        ),
+                        Request(
+                            1L,
+                            randomRequestId(),
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
+                            Fingerprint("asdasdasd"),
+                            RequestType.MTB_FILE,
+                            RequestStatus.ERROR
+                        )
+                    )
+                )
+            )
+
+            val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
+            assertThat(page.querySelectorAll("h2 > span")).hasSize(1)
+            assertThat(page.querySelectorAll("h2 > span").first().textContent).isEqualTo("PSEUDO1")
+        }
+
     }
 
     @Nested
