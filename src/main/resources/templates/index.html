@@ -12,9 +12,9 @@
         <h1>Alle Anfragen<a id="reload-notify" class="reload" title="Neue Anfragen" th:href="@{/}">⟳</a></h1>
 
         <div>
-            <h2 th:if="${patientId != null}">
-                Betreffend Patienten-Pseudonym <span class="monospace" th:text="${patientId}">***</span>
-                <a class="btn btn-blue" th:if="${patientId != null}" th:href="@{/}">Alle anzeigen</a>
+            <h2 th:if="${patientPseudonym != null}">
+                Betreffend Patienten-Pseudonym <span class="monospace" th:text="${patientPseudonym}">***</span>
+                <a class="btn btn-blue" th:if="${patientPseudonym != null}" th:href="@{/}">Alle anzeigen</a>
             </h2>
         </div>
 
@@ -23,19 +23,19 @@
         </div>
 
         <div class="border" th:if="${requests.totalElements > 0}">
-            <div th:if="${patientId == null}" class="page-control">
+            <div th:if="${patientPseudonym == null}" class="page-control">
                 <a id="first-page-link" th:href="@{/(page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
                 <a id="prev-page-link" th:href="@{/(page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
                 <span>Seite [[ ${requests.getNumber() + 1} ]] von [[ ${requests.getTotalPages()} ]]</span>
                 <a id="next-page-link" th:href="@{/(page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
                 <a id="last-page-link" th:href="@{/(page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
             </div>
-            <div th:if="${patientId != null}" class="page-control">
-                <a id="first-page-link" th:href="@{/patient/{patientId}(patientId=${patientId},page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
-                <a id="prev-page-link" th:href="@{/patient/{patientId}(patientId=${patientId},page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
+            <div th:if="${patientPseudonym != null}" class="page-control">
+                <a id="first-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
+                <a id="prev-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
                 <span>Seite [[ ${requests.getNumber() + 1} ]] von [[ ${requests.getTotalPages()} ]]</span>
-                <a id="next-page-link" th:href="@{/patient/{patientId}(patientId=${patientId},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
-                <a id="last-page-link" th:href="@{/patient/{patientId}(patientId=${patientId},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
+                <a id="next-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
+                <a id="last-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
             </div>
             <table class="paged">
                 <thead>
@@ -61,10 +61,10 @@
                             <th:block sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">[[ ${request.uuid} ]]</th:block>
                         </td>
                         <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
-                        <td class="patient-id" th:if="${patientId != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                        <td class="patient-id" th:if="${patientPseudonym != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
                             [[ ${request.patientPseudonym} ]]
                         </td>
-                        <td class="patient-id" th:if="${patientId == null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                        <td class="patient-id" th:if="${patientPseudonym == null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
                             <a th:href="@{/patient/{pid}(pid=${request.patientPseudonym})}">[[ ${request.patientPseudonym} ]]</a>
                         </td>
                         <td class="patient-id" sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">***</td>
