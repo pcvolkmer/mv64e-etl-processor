@@ -62,10 +62,10 @@
                         </td>
                         <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
                         <td class="patient-id" th:if="${patientId != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
-                            [[ ${request.patientId} ]]
+                            [[ ${request.patientPseudonym} ]]
                         </td>
                         <td class="patient-id" th:if="${patientId == null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
-                            <a th:href="@{/patient/{pid}(pid=${request.patientId})}">[[ ${request.patientId} ]]</a>
+                            <a th:href="@{/patient/{pid}(pid=${request.patientPseudonym})}">[[ ${request.patientPseudonym} ]]</a>
                         </td>
                         <td class="patient-id" sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">***</td>
                     </tr>

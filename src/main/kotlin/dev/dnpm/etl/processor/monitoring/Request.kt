@@ -36,7 +36,7 @@ import java.util.*
 data class Request(
     @Id val id: Long? = null,
     val uuid: RequestId = randomRequestId(),
-    val patientId: PatientPseudonym,
+    val patientPseudonym: PatientPseudonym,
     val pid: PatientId,
     @Column("fingerprint")
     val fingerprint: Fingerprint,
@@ -47,24 +47,24 @@ data class Request(
 ) {
     constructor(
         uuid: RequestId,
-        patientId: PatientPseudonym,
+        patientPseudonym: PatientPseudonym,
         pid: PatientId,
         fingerprint: Fingerprint,
         type: RequestType,
         status: RequestStatus
     ) :
-            this(null, uuid, patientId, pid, fingerprint, type, status, Instant.now())
+            this(null, uuid, patientPseudonym, pid, fingerprint, type, status, Instant.now())
 
     constructor(
         uuid: RequestId,
-        patientId: PatientPseudonym,
+        patientPseudonym: PatientPseudonym,
         pid: PatientId,
         fingerprint: Fingerprint,
         type: RequestType,
         status: RequestStatus,
         processedAt: Instant
     ) :
-            this(null, uuid, patientId, pid, fingerprint, type, status, processedAt)
+            this(null, uuid, patientPseudonym, pid, fingerprint, type, status, processedAt)
 }
 
 @JvmRecord
@@ -81,17 +81,17 @@ data class CountedState(
 
 interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRepository<Request, Long> {
 
-    fun findAllByPatientIdOrderByProcessedAtDesc(patientId: PatientPseudonym): List<Request>
+    fun findAllByPatientPseudonymOrderByProcessedAtDesc(patientId: PatientPseudonym): List<Request>
 
     fun findByUuidEquals(uuid: RequestId): Optional<Request>
 
-    fun findRequestByPatientId(patientId: PatientPseudonym, pageable: Pageable): Page<Request>
+    fun findRequestByPatientPseudonym(patientPseudonym: PatientPseudonym, pageable: Pageable): Page<Request>
 
     @Query("SELECT count(*) AS count, status FROM request WHERE type = 'MTB_FILE' GROUP BY status ORDER BY status, count DESC;")
     fun countStates(): List<CountedState>
 
     @Query("SELECT count(*) AS count, status FROM (" +
-            "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request " +
+            "SELECT status, rank() OVER (PARTITION BY patient_pseudonym ORDER BY processed_at DESC) AS rank FROM request " +
             "WHERE type = 'MTB_FILE' AND status NOT IN ('DUPLICATION') " +
             ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
     fun findPatientUniqueStates(): List<CountedState>
@@ -100,7 +100,7 @@ interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRep
     fun countDeleteStates(): List<CountedState>
 
     @Query("SELECT count(*) AS count, status FROM (" +
-            "SELECT status, rank() OVER (PARTITION BY patient_id ORDER BY processed_at DESC) AS rank FROM request " +
+            "SELECT status, rank() OVER (PARTITION BY patient_pseudonym ORDER BY processed_at DESC) AS rank FROM request " +
             "WHERE type = 'DELETE'" +
             ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
     fun findPatientUniqueDeleteStates(): List<CountedState>

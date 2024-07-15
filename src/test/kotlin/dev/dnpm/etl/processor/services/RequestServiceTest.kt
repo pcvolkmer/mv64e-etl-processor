@@ -206,21 +206,21 @@ class RequestServiceTest {
     fun allRequestsByPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
         requestService.allRequestsByPatientPseudonym(PatientPseudonym("TEST_12345678901"))
 
-        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyValueClass())
+        verify(requestRepository, times(1)).findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
     }
 
     @Test
     fun lastMtbFileRequestForPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
         requestService.lastMtbFileRequestForPatientPseudonym(PatientPseudonym("TEST_12345678901"))
 
-        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyValueClass())
+        verify(requestRepository, times(1)).findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
     }
 
     @Test
     fun isLastRequestDeletionShouldRequestAllRequestsForPatientPseudonym() {
         requestService.isLastRequestWithKnownStatusDeletion(PatientPseudonym("TEST_12345678901"))
 
-        verify(requestRepository, times(1)).findAllByPatientIdOrderByProcessedAtDesc(anyValueClass())
+        verify(requestRepository, times(1)).findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
     }
 
 }

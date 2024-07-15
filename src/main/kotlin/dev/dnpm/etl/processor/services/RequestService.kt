@@ -41,10 +41,10 @@ class RequestService(
     fun findByUuid(uuid: RequestId): Optional<Request> =
         requestRepository.findByUuidEquals(uuid)
 
-    fun findRequestByPatientId(patientId: PatientPseudonym, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientId(patientId, pageable)
+    fun findRequestByPatientId(patientPseudonym: PatientPseudonym, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientPseudonym(patientPseudonym, pageable)
 
     fun allRequestsByPatientPseudonym(patientPseudonym: PatientPseudonym) = requestRepository
-        .findAllByPatientIdOrderByProcessedAtDesc(patientPseudonym)
+        .findAllByPatientPseudonymOrderByProcessedAtDesc(patientPseudonym)
 
     fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: PatientPseudonym) =
         Companion.lastMtbFileRequestForPatientPseudonym(allRequestsByPatientPseudonym(patientPseudonym))

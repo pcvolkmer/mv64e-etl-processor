@@ -149,7 +149,7 @@ class RequestProcessor(
             requestService.save(
                 Request(
                     uuid = requestId,
-                    patientId = emptyPatientPseudonym(),
+                    patientPseudonym = emptyPatientPseudonym(),
                     pid = patientId,
                     fingerprint = Fingerprint.empty(),
                     status = RequestStatus.ERROR,
