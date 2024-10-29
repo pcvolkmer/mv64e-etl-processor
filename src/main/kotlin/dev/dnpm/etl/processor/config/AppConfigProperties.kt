@@ -69,6 +69,8 @@ data class GPasConfigProperties(
 @ConfigurationProperties(RestTargetProperties.NAME)
 data class RestTargetProperties(
     val uri: String?,
+    val username: String?,
+    val password: String?,
 ) {
     companion object {
         const val NAME = "app.rest"

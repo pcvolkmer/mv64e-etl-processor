@@ -48,7 +48,7 @@ class RestMtbFileSenderTest {
     @BeforeEach
     fun setup() {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
@@ -90,7 +90,7 @@ class RestMtbFileSenderTest {
     @MethodSource("mtbFileRequestWithResponseSource")
     fun shouldRetryOnMtbFileHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
@@ -119,7 +119,7 @@ class RestMtbFileSenderTest {
     @MethodSource("deleteRequestWithResponseSource")
     fun shouldRetryOnDeleteHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
