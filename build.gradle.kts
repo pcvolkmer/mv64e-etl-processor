@@ -10,7 +10,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.24"
 }
 
-group = "de.ukw.ccc"
+group = "dev.dnpm"
 version = "0.9-SNAPSHOT"
 
 var versions = mapOf(
