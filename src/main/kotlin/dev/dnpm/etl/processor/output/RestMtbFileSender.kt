@@ -40,8 +40,7 @@ class RestMtbFileSender(
     override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = HttpHeaders()
-                headers.contentType = MediaType.APPLICATION_JSON
+                val headers = getHttpHeaders()
                 val entityReq = HttpEntity(request.mtbFile, headers)
                 val response = restTemplate.postForEntity(
                     "${restTargetProperties.uri}/MTBFile",
@@ -70,8 +69,7 @@ class RestMtbFileSender(
     override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = HttpHeaders()
-                headers.contentType = MediaType.APPLICATION_JSON
+                val headers = getHttpHeaders()
                 val entityReq = HttpEntity(null, headers)
                 restTemplate.delete(
                     "${restTargetProperties.uri}/Patient/${request.patientId}",
@@ -92,6 +90,20 @@ class RestMtbFileSender(
 
     override fun endpoint(): String {
         return this.restTargetProperties.uri.orEmpty()
+    }
+
+    private fun getHttpHeaders(): HttpHeaders {
+        val username = restTargetProperties.username
+        val password = restTargetProperties.password
+        val headers = HttpHeaders()
+        headers.setContentType(MediaType.APPLICATION_JSON)
+
+        if (username.isNullOrBlank() || password.isNullOrBlank()) {
+            return headers
+        }
+
+        headers.setBasicAuth(username, password)
+        return headers
     }
 
 }

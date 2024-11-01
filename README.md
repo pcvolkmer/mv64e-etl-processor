@@ -197,6 +197,8 @@ Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpu
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das bwHC-Backend gesendet wird:
 
 * `APP_REST_URI`: URI der zu benutzenden API der bwHC-Backend-Instanz. z.B.: `http://localhost:9000/bwhc/etl/api`
+* `APP_REST_USERNAME`: Basic-Auth-Benutzername für bwHC-Backend
+* `APP_REST_PASSWORD`: Basic-Auth-Passwort für bwHC-Backend
 
 #### Kafka-Topics
 
