@@ -162,11 +162,8 @@ class GPasConnectionCheckService(
     fun check() {
         result = try {
             val uri = UriComponentsBuilder.fromUriString(
-                gPasConfigProperties.uri?.replace("/\$pseudonymizeAllowCreate", "/\$pseudonymize").toString()
-            )
-                .queryParam("target", gPasConfigProperties.target)
-                .queryParam("original", "???")
-                .build().toUri()
+                gPasConfigProperties.uri?.replace("/\$pseudonymizeAllowCreate", "/metadata").toString()
+            ).build().toUri()
 
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
