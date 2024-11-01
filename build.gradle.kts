@@ -113,7 +113,7 @@ task<Test>("integrationTest") {
 }
 
 tasks.named<BootBuildImage>("bootBuildImage") {
-    imageName.set("ghcr.io/ccc-mf/etl-processor")
+    imageName.set("ghcr.io/pcvolkmer/etl-processor")
 
     // Binding for CA Certs
     bindings.set(listOf(
