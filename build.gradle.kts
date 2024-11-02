@@ -22,6 +22,7 @@ var versions = mapOf(
     "mockito-kotlin" to "5.3.1",
     "archunit" to "1.3.0",
     // Webjars
+    "webjars-locator" to "0.52",
     "echarts" to "5.4.3",
     "htmx.org" to "1.9.12"
 )
@@ -74,7 +75,7 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("com.jayway.jsonpath:json-path")
-    implementation("org.webjars:webjars-locator:0.52")
+    implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
