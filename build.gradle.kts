@@ -17,8 +17,9 @@ version = "0.10.0-SNAPSHOT"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.3.0",
-    "hapi-fhir" to "6.10.5",
+    "hapi-fhir" to "7.4.5",
     "commons-compress" to "1.26.2",
+    "commons-io" to "2.17.0",
     "mockito-kotlin" to "5.3.1",
     "archunit" to "1.3.0",
     // Webjars
@@ -78,16 +79,24 @@ dependencies {
     implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
+    // Override dependecy version from ca.uhn.hapi.fhir:hapi-fhir-base - CVE-2024-47554
+    implementation("commons-io:commons-io:${versions["commons-io"]}")
+
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
+
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
+
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
