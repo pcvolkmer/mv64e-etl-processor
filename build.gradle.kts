@@ -130,6 +130,8 @@ task<Test>("integrationTest") {
 }
 
 tasks.register("allTests") {
+    description = "Run all tests"
+    group = JavaBasePlugin.VERIFICATION_GROUP
     dependsOn(tasks.withType<Test>())
 }
 
