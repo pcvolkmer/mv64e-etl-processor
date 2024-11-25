@@ -5,10 +5,10 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.3.5"
+    id("org.springframework.boot") version "3.3.6"
     id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.spring") version "1.9.24"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
     jacoco
 }
 
@@ -17,7 +17,7 @@ version = "0.10.0-SNAPSHOT"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.3.0",
-    "hapi-fhir" to "7.4.5",
+    "hapi-fhir" to "7.6.0",
     "commons-compress" to "1.26.2",
     "commons-io" to "2.17.0",
     "mockito-kotlin" to "5.3.1",
