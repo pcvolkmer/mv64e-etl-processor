@@ -20,7 +20,7 @@ var versions = mapOf(
     "hapi-fhir" to "7.6.0",
     "commons-compress" to "1.26.2",
     "commons-io" to "2.17.0",
-    "mockito-kotlin" to "5.3.1",
+    "mockito-kotlin" to "5.4.0",
     "archunit" to "1.3.0",
     // Webjars
     "webjars-locator" to "0.52",

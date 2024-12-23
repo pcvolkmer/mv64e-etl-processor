@@ -21,13 +21,13 @@ package dev.dnpm.etl.processor.pseudonym
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
-import dev.dnpm.etl.processor.anyValueClass
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource

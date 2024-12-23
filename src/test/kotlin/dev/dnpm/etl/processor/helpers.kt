@@ -18,12 +18,3 @@
  */
 
 package dev.dnpm.etl.processor
-
-import org.mockito.ArgumentMatchers
-
-inline fun <reified T> anyValueClass(): T {
-    val unboxedClass = T::class.java.declaredFields.first().type
-    return ArgumentMatchers.any(unboxedClass as Class<T>)
-        ?: T::class.java.getDeclaredMethod("box-impl", unboxedClass)
-            .invoke(null, null) as T
-}
