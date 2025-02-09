@@ -59,12 +59,12 @@ class RestMtbFileSenderTest {
     @ParameterizedTest
     @MethodSource("deleteRequestWithResponseSource")
     fun shouldReturnExpectedResponseForDelete(requestWithResponse: RequestWithResponse) {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.DELETE)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.DELETE))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/Patient/$TEST_PATIENT_PSEUDONYM"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
         val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
@@ -74,12 +74,12 @@ class RestMtbFileSenderTest {
     @ParameterizedTest
     @MethodSource("mtbFileRequestWithResponseSource")
     fun shouldReturnExpectedResponseForMtbFilePost(requestWithResponse: RequestWithResponse) {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.POST)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.POST))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
         val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
@@ -103,12 +103,12 @@ class RestMtbFileSenderTest {
             else -> ExpectedCount.max(3)
         }
 
-        this.mockRestServiceServer.expect(expectedCount) {
-            method(HttpMethod.POST)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(expectedCount, method(HttpMethod.POST))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
         val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
@@ -132,12 +132,12 @@ class RestMtbFileSenderTest {
             else -> ExpectedCount.max(3)
         }
 
-        this.mockRestServiceServer.expect(expectedCount) {
-            method(HttpMethod.DELETE)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(expectedCount, method(HttpMethod.DELETE))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/Patient/$TEST_PATIENT_PSEUDONYM"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
         val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
