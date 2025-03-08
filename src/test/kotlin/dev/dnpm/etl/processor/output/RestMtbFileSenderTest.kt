@@ -61,7 +61,7 @@ class RestMtbFileSenderTest {
     fun shouldReturnExpectedResponseForDelete(requestWithResponse: RequestWithResponse) {
         this.mockRestServiceServer
             .expect(method(HttpMethod.DELETE))
-            .andExpect(requestTo("http://localhost:9000/patient/$TEST_PATIENT_PSEUDONYM"))
+            .andExpect(requestTo("http://localhost:9000/patient/${TEST_PATIENT_PSEUDONYM.value}"))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
@@ -134,7 +134,7 @@ class RestMtbFileSenderTest {
 
         this.mockRestServiceServer
             .expect(expectedCount, method(HttpMethod.DELETE))
-            .andExpect(requestTo("http://localhost:9000/patient/$TEST_PATIENT_PSEUDONYM"))
+            .andExpect(requestTo("http://localhost:9000/patient/${TEST_PATIENT_PSEUDONYM.value}"))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
