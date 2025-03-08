@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,7 +23,8 @@ import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.RestMtbFileSender
+import dev.dnpm.etl.processor.output.RestBwhcMtbFileSender
+import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -54,8 +55,13 @@ class AppRestConfiguration {
         restTargetProperties: RestTargetProperties,
         retryTemplate: RetryTemplate
     ): MtbFileSender {
-        logger.info("Selected 'RestMtbFileSender'")
-        return RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        if (restTargetProperties.isBwhc) {
+            logger.info("Selected 'RestBwhcMtbFileSender'")
+            return RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        }
+
+        logger.info("Selected 'RestDipMtbFileSender'")
+        return RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
     }
 
     @Bean

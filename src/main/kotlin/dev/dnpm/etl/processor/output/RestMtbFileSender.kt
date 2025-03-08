@@ -30,7 +30,7 @@ import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
-class RestMtbFileSender(
+abstract class RestMtbFileSender(
     private val restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
     private val retryTemplate: RetryTemplate
@@ -38,21 +38,9 @@ class RestMtbFileSender(
 
     private val logger = LoggerFactory.getLogger(RestMtbFileSender::class.java)
 
-    fun sendUrl(): String {
-        return if(restTargetProperties.isBwhc) {
-            "${restTargetProperties.uri}/MTBFile"
-        } else {
-            "${restTargetProperties.uri}/patient-record"
-        }
-    }
+    abstract fun sendUrl(): String
 
-    fun deleteUrl(patientId: PatientPseudonym): String {
-        return if(restTargetProperties.isBwhc) {
-            "${restTargetProperties.uri}/Patient/${patientId.value}"
-        } else {
-            "${restTargetProperties.uri}/patient/${patientId.value}"
-        }
-    }
+    abstract fun deleteUrl(patientId: PatientPseudonym): String
 
     override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
         try {

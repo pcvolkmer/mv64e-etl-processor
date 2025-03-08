@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -39,7 +39,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
 
-class RestMtbFileSenderTest {
+class RestBwhcMtbFileSenderTest {
 
     private lateinit var mockRestServiceServer: MockRestServiceServer
 
@@ -48,12 +48,12 @@ class RestMtbFileSenderTest {
     @BeforeEach
     fun setup() {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/", null, null, false)
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        this.restMtbFileSender = RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
     }
 
     @ParameterizedTest
@@ -61,7 +61,7 @@ class RestMtbFileSenderTest {
     fun shouldReturnExpectedResponseForDelete(requestWithResponse: RequestWithResponse) {
         this.mockRestServiceServer
             .expect(method(HttpMethod.DELETE))
-            .andExpect(requestTo("http://localhost:9000/patient/${TEST_PATIENT_PSEUDONYM.value}"))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/Patient/${TEST_PATIENT_PSEUDONYM.value}"))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
@@ -76,7 +76,7 @@ class RestMtbFileSenderTest {
     fun shouldReturnExpectedResponseForMtbFilePost(requestWithResponse: RequestWithResponse) {
         this.mockRestServiceServer
             .expect(method(HttpMethod.POST))
-            .andExpect(requestTo("http://localhost:9000/patient-record"))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
@@ -90,11 +90,11 @@ class RestMtbFileSenderTest {
     @MethodSource("mtbFileRequestWithResponseSource")
     fun shouldRetryOnMtbFileHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/", null, null, false)
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        this.restMtbFileSender = RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
 
         val expectedCount = when (requestWithResponse.httpStatus) {
             // OK - No Retry
@@ -105,7 +105,7 @@ class RestMtbFileSenderTest {
 
         this.mockRestServiceServer
             .expect(expectedCount, method(HttpMethod.POST))
-            .andExpect(requestTo("http://localhost:9000/patient-record"))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
@@ -119,11 +119,11 @@ class RestMtbFileSenderTest {
     @MethodSource("deleteRequestWithResponseSource")
     fun shouldRetryOnDeleteHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/", null, null, false)
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        this.restMtbFileSender = RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
 
         val expectedCount = when (requestWithResponse.httpStatus) {
             // OK - No Retry
@@ -134,7 +134,7 @@ class RestMtbFileSenderTest {
 
         this.mockRestServiceServer
             .expect(expectedCount, method(HttpMethod.DELETE))
-            .andExpect(requestTo("http://localhost:9000/patient/${TEST_PATIENT_PSEUDONYM.value}"))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/Patient/${TEST_PATIENT_PSEUDONYM.value}"))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
