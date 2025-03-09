@@ -4,7 +4,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.2.11"
+    id("org.springframework.boot") version "3.2.12"
     id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "1.9.24"
     kotlin("plugin.spring") version "1.9.24"
@@ -86,7 +86,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
     // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:1.26.1")
+    integrationTestImplementation("org.apache.commons:commons-compress:1.26.2")
 }
 
 tasks.withType<KotlinCompile> {
