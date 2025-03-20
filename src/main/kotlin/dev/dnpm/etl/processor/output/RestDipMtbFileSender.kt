@@ -23,19 +23,31 @@ import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 class RestDipMtbFileSender(
-    private val restTemplate: RestTemplate,
+    restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
-    private val retryTemplate: RetryTemplate
+    retryTemplate: RetryTemplate
 ) : RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate) {
 
     override fun sendUrl(): String {
-        return "${restTargetProperties.uri}/patient-record"
+        return UriComponentsBuilder
+            .fromUriString(restTargetProperties.uri.toString())
+            .pathSegment("mtb")
+            .pathSegment("etl")
+            .pathSegment("patient-record")
+            .toUriString()
     }
 
     override fun deleteUrl(patientId: PatientPseudonym): String {
-        return "${restTargetProperties.uri}/patient/${patientId.value}"
+        return UriComponentsBuilder
+            .fromUriString(restTargetProperties.uri.toString())
+            .pathSegment("mtb")
+            .pathSegment("etl")
+            .pathSegment("patient")
+            .pathSegment(patientId.value)
+            .toUriString()
     }
 
 }
