@@ -121,7 +121,15 @@ class RestConnectionCheckService(
     fun check() {
         result = try {
             val available = restTemplate.getForEntity(
-                restTargetProperties.uri?.replace("/etl/api", "").toString(),
+                if (restTargetProperties.isBwhc) {
+                    UriComponentsBuilder.fromUriString(restTargetProperties.uri.toString()).path("").toUriString()
+                } else {
+                    UriComponentsBuilder.fromUriString(restTargetProperties.uri.toString())
+                        .pathSegment("mtb")
+                        .pathSegment("kaplan-meier")
+                        .pathSegment("config")
+                        .toUriString()
+                },
                 String::class.java
             ).statusCode == HttpStatus.OK
 

@@ -20,7 +20,8 @@
         <img th:if="${mtbFileSender.startsWith('Kafka')}" th:src="@{/kafka.png}" alt="Kafka-Broker" />
         <span>ETL-Processor</span>
         <span></span>
-        <span th:if="${mtbFileSender.startsWith('Rest')}">bwHC-Backend</span>
+        <span th:if="${mtbFileSender.startsWith('RestBwhc')}">bwHC-Backend</span>
+        <span th:if="${mtbFileSender.startsWith('RestDip')}">DNPM:DIP-Backend</span>
         <span th:if="${mtbFileSender.startsWith('Kafka')}">Kafka-Broker</span>
     </div>
 </th:block>
