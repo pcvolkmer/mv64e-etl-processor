@@ -379,3 +379,5 @@ Die Datei `application-dev.yml` enthält hierzu die Konfiguration für das Profi
 
 Beim Ausführen der Integrationstests wird eine Testdatenbank in einem Docker-Container gestartet.
 Siehe hier auch die Klasse `AbstractTestcontainerTest` unter `src/integrationTest`.
+
+Ein einfaches Entwickler-Setup inklusive DNPM:DIP ist mit Hilfe von https://github.com/pcvolkmer/dnpmdip-devenv realisierbar.
