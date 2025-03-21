@@ -16,7 +16,7 @@ group = "dev.dnpm"
 version = "0.10.0-SNAPSHOT"
 
 var versions = mapOf(
-    "bwhc-dto-java" to "0.3.0",
+    "bwhc-dto-java" to "0.4.0",
     "hapi-fhir" to "7.6.0",
     "commons-compress" to "1.26.2",
     "mockito-kotlin" to "5.4.0",
