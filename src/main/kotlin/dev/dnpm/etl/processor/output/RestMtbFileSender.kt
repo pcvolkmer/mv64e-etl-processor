@@ -28,6 +28,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 
 abstract class RestMtbFileSender(
@@ -64,9 +65,10 @@ abstract class RestMtbFileSender(
             }
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
-        } catch (e: RestClientException) {
+        } catch (e: RestClientResponseException) {
             logger.info(restTargetProperties.uri!!.toString())
-            logger.error("Cannot send data to remote system", e)
+            logger.error("Request data not accepted by remote system", e)
+            return MtbFileSender.Response(e.statusCode.asRequestStatus(), e.responseBodyAsString)
         }
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
