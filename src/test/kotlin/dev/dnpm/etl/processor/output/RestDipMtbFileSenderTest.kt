@@ -213,23 +213,23 @@ class RestDipMtbFileSenderTest {
                 ),
                 RequestWithResponse(
                     HttpStatus.BAD_REQUEST,
-                    "??",
+                    ERROR_RESPONSE_BODY,
                     MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 RequestWithResponse(
                     HttpStatus.UNPROCESSABLE_ENTITY,
                     errorBody,
-                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
+                    MtbFileSender.Response(RequestStatus.ERROR, errorBody)
                 ),
                 // Some more errors not mentioned in documentation
                 RequestWithResponse(
                     HttpStatus.NOT_FOUND,
-                    "what????",
+                    ERROR_RESPONSE_BODY,
                     MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 RequestWithResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "what????",
+                    ERROR_RESPONSE_BODY,
                     MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 )
             )

@@ -93,7 +93,7 @@ class RequestProcessor(
                 Instant.now(),
                 responseStatus.status,
                 when (responseStatus.status) {
-                    RequestStatus.WARNING -> Optional.of(responseStatus.body)
+                    RequestStatus.ERROR, RequestStatus.WARNING -> Optional.of(responseStatus.body)
                     else -> Optional.empty()
                 }
             )
