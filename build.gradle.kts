@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "dev.dnpm"
-version = "0.9-SNAPSHOT"
+version = "0.9.8"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.3.0",
