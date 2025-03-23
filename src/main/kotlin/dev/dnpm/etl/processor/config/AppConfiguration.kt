@@ -55,6 +55,7 @@ import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
 import java.io.BufferedInputStream
@@ -224,6 +225,8 @@ class AppConfiguration {
     fun retryTemplate(configProperties: AppConfigProperties): RetryTemplate {
         return RetryTemplateBuilder()
             .notRetryOn(IllegalArgumentException::class.java)
+            .notRetryOn(HttpClientErrorException.BadRequest::class.java)
+            .notRetryOn(HttpClientErrorException.UnprocessableEntity::class.java)
             .exponentialBackoff(2.seconds.toJavaDuration(), 1.25, 5.seconds.toJavaDuration())
             .customPolicy(SimpleRetryPolicy(configProperties.maxRetryAttempts))
             .withListener(object : RetryListener {

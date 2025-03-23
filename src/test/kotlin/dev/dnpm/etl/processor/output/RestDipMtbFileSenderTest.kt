@@ -22,6 +22,8 @@ package dev.dnpm.etl.processor.output
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.assertj.core.api.Assertions.assertThat
@@ -30,6 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.retry.backoff.NoBackOffPolicy
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.test.web.client.ExpectedCount
@@ -91,14 +94,15 @@ class RestDipMtbFileSenderTest {
     fun shouldRetryOnMtbFileHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
         val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
-        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        val retryTemplate = AppConfiguration().retryTemplate(AppConfigProperties("http://localhost:9000"))
+        retryTemplate.setBackOffPolicy(NoBackOffPolicy())
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
         this.restMtbFileSender = RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
 
         val expectedCount = when (requestWithResponse.httpStatus) {
             // OK - No Retry
-            HttpStatus.OK, HttpStatus.CREATED -> ExpectedCount.max(1)
+            HttpStatus.OK, HttpStatus.CREATED, HttpStatus.UNPROCESSABLE_ENTITY, HttpStatus.BAD_REQUEST -> ExpectedCount.max(1)
             // Request failed - Retry max 3 times
             else -> ExpectedCount.max(3)
         }
@@ -120,14 +124,15 @@ class RestDipMtbFileSenderTest {
     fun shouldRetryOnDeleteHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
         val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
-        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        val retryTemplate = AppConfiguration().retryTemplate(AppConfigProperties("http://localhost:9000"))
+        retryTemplate.setBackOffPolicy(NoBackOffPolicy())
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
         this.restMtbFileSender = RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
 
         val expectedCount = when (requestWithResponse.httpStatus) {
             // OK - No Retry
-            HttpStatus.OK, HttpStatus.CREATED -> ExpectedCount.max(1)
+            HttpStatus.OK, HttpStatus.CREATED, HttpStatus.UNPROCESSABLE_ENTITY, HttpStatus.BAD_REQUEST -> ExpectedCount.max(1)
             // Request failed - Retry max 3 times
             else -> ExpectedCount.max(3)
         }
