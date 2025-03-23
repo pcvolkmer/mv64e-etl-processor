@@ -44,6 +44,8 @@ import org.springframework.security.web.SecurityFilterChain
 import java.util.*
 
 
+private const val LOGIN_PATH = "/login"
+
 @Configuration
 @EnableConfigurationProperties(
     value = [
@@ -104,15 +106,15 @@ class AppSecurityConfiguration(
                 realmName = "ETL-Processor"
             }
             formLogin {
-                loginPage = "/login"
+                loginPage = LOGIN_PATH
             }
             oauth2Login {
-                loginPage = "/login"
+                loginPage = LOGIN_PATH
             }
             sessionManagement {
                 sessionConcurrency {
                     maximumSessions = 1
-                    expiredUrl = "/login?expired"
+                    expiredUrl = "$LOGIN_PATH?expired"
                 }
                 sessionFixation {
                     newSession()
@@ -155,7 +157,7 @@ class AppSecurityConfiguration(
                 realmName = "ETL-Processor"
             }
             formLogin {
-                loginPage = "/login"
+                loginPage = LOGIN_PATH
             }
             csrf { disable() }
         }
