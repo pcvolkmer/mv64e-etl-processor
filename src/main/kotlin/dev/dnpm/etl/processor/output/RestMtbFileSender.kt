@@ -103,7 +103,7 @@ abstract class RestMtbFileSender(
         val username = restTargetProperties.username
         val password = restTargetProperties.password
         val headers = HttpHeaders()
-        headers.setContentType(MediaType.APPLICATION_JSON)
+        headers.contentType = MediaType.APPLICATION_JSON
 
         if (username.isNullOrBlank() || password.isNullOrBlank()) {
             return headers
