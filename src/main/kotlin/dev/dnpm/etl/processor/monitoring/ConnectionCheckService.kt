@@ -35,7 +35,7 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-interface ConnectionCheckService {
+fun interface ConnectionCheckService {
 
     fun connectionAvailable(): ConnectionCheckResult
 
