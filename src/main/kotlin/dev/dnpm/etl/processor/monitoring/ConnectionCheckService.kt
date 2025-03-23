@@ -88,7 +88,7 @@ class KafkaConnectionCheckService(
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (e: TimeoutException) {
+        } catch (_: TimeoutException) {
             ConnectionCheckResult.KafkaConnectionCheckResult(
                 false,
                 Instant.now(),
@@ -138,7 +138,7 @@ class RestConnectionCheckService(
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ConnectionCheckResult.RestConnectionCheckResult(
                 false,
                 Instant.now(),
@@ -191,7 +191,7 @@ class GPasConnectionCheckService(
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ConnectionCheckResult.GPasConnectionCheckResult(
                 false,
                 Instant.now(),
