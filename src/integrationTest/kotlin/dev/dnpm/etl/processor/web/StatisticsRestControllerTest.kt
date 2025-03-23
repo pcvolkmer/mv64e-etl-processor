@@ -54,6 +54,7 @@ import org.springframework.web.context.WebApplicationContext
 import reactor.core.publisher.Sinks
 import reactor.test.StepVerifier
 import java.time.Instant
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 
@@ -185,6 +186,7 @@ class StatisticsRestControllerTest {
 
         @BeforeEach
         fun setup() {
+            val zoneId = ZoneId.of("Europe/Berlin")
             doAnswer { _ ->
                 listOf(
                     Request(
@@ -195,7 +197,7 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef1"),
                         RequestType.MTB_FILE,
                         RequestStatus.SUCCESS,
-                        Instant.now().truncatedTo(ChronoUnit.DAYS).minus(2, ChronoUnit.DAYS)
+                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(2, ChronoUnit.DAYS).toInstant()
                     ),
                     Request(
                         2,
@@ -205,7 +207,7 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
                         RequestStatus.WARNING,
-                        Instant.now().truncatedTo(ChronoUnit.DAYS).minus(2, ChronoUnit.DAYS)
+                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(2, ChronoUnit.DAYS).toInstant()
                     ),
                     Request(
                         3,
@@ -215,7 +217,7 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdee1"),
                         RequestType.DELETE,
                         RequestStatus.ERROR,
-                        Instant.now().truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS)
+                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS).toInstant()
                     ),
                     Request(
                         4,
@@ -225,7 +227,7 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
                         RequestStatus.DUPLICATION,
-                        Instant.now().truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS)
+                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS).toInstant()
                     ),
                     Request(
                         5,
@@ -235,7 +237,7 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef2"),
                         RequestType.DELETE,
                         RequestStatus.UNKNOWN,
-                        Instant.now().truncatedTo(ChronoUnit.DAYS)
+                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).toInstant()
                     ),
                 )
             }.whenever(requestService).findAll()
