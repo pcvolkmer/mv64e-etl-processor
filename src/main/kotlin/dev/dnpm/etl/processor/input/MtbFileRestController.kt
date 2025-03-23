@@ -41,7 +41,7 @@ class MtbFileRestController(
     }
 
     @PostMapping
-    fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Void> {
+    fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
         if (mtbFile.consent.status == Consent.Status.ACTIVE) {
             logger.debug("Accepted MTB File for processing")
             requestProcessor.processMtbFile(mtbFile)
@@ -54,7 +54,7 @@ class MtbFileRestController(
     }
 
     @DeleteMapping(path = ["{patientId}"])
-    fun deleteData(@PathVariable patientId: String): ResponseEntity<Void> {
+    fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
         logger.debug("Accepted patient ID to process deletion")
         requestProcessor.processDeletion(PatientId(patientId))
         return ResponseEntity.accepted().build()
