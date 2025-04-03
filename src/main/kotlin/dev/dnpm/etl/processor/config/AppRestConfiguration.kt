@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.config
 
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestBwhcMtbFileSender
@@ -53,15 +54,16 @@ class AppRestConfiguration {
     fun restMtbFileSender(
         restTemplate: RestTemplate,
         restTargetProperties: RestTargetProperties,
-        retryTemplate: RetryTemplate
+        retryTemplate: RetryTemplate,
+        reportService: ReportService,
     ): MtbFileSender {
         if (restTargetProperties.isBwhc) {
             logger.info("Selected 'RestBwhcMtbFileSender'")
-            return RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+            return RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
         }
 
         logger.info("Selected 'RestDipMtbFileSender'")
-        return RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        return RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
     }
 
     @Bean

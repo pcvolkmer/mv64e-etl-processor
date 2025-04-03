@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.output
 
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.RestTargetProperties
+import dev.dnpm.etl.processor.monitoring.ReportService
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
@@ -28,8 +29,9 @@ import org.springframework.web.util.UriComponentsBuilder
 class RestDipMtbFileSender(
     restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
-    retryTemplate: RetryTemplate
-) : RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate) {
+    retryTemplate: RetryTemplate,
+    reportService: ReportService
+) : RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService) {
 
     override fun sendUrl(): String {
         return UriComponentsBuilder
