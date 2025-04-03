@@ -264,6 +264,27 @@ ein Consent-Widerspruch erfolgte.
 
 Dieses Vorgehen empfiehlt sich, wenn Sie gespeicherte Records nachgelagert für andere Auswertungen verwenden möchten.
 
+### Antworten und Statusauswertung
+
+Anfragen and bwHC-Backend aus Versionen bis 0.9.x wurden wie folgt behandelt:
+
+| HTTP-Response  | Status    |
+|----------------|-----------|
+| `HTTP 200`     | `SUCCESS` |
+| `HTTP 201`     | `WARNING` |
+| `HTTP 400-...` | `ERROR`   |
+
+Dies konnte dazu führen, dass zwar mit einem `HTTP 201` geantwortet wurde, aber dennoch in der Issue-Liste die
+Severity `error` aufgetaucht ist.
+
+Ab Version 0.10 wird die Issue-Liste der Antwort verwendet und die darion enthaltene höchste Severity-Stufe als Ergebnis verwendet.
+
+| Höchste Severity | Status    |
+|------------------|-----------|
+| `info`           | `SUCCESS` |
+| `warning`        | `WARNING` |
+| `error`, `fatal` | `ERROR`   |
+
 ## Docker-Images
 
 Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/pcvolkmer/etl-processor/pkgs/container/etl-processor

@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,9 +22,14 @@ package dev.dnpm.etl.processor.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
 class ReportServiceTest {
 
@@ -60,6 +65,15 @@ class ReportServiceTest {
         assertThat(actual[2].message).isEqualTo("Warning Message")
         assertThat(actual[3].severity).isEqualTo(ReportService.Severity.INFO)
         assertThat(actual[3].message).isEqualTo("Info Message")
+
+        assertThat(actual.asRequestStatus()).isEqualTo(RequestStatus.ERROR)
+    }
+
+    @ParameterizedTest
+    @MethodSource("testData")
+    fun shouldParseDataQualityReport(json: String, requestStatus: RequestStatus) {
+        val actual = this.reportService.deserialize(json)
+        assertThat(actual.asRequestStatus()).isEqualTo(requestStatus)
     }
 
     @Test
@@ -71,6 +85,77 @@ class ReportServiceTest {
         assertThat(actual).hasSize(1)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
         assertThat(actual[0].message).isEqualTo("Not parsable data quality report '$invalidResponse'")
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun testData(): Set<Arguments> {
+            return setOf(
+                Arguments.of(
+                    """
+                        {
+                            "patient": "4711",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" },
+                                { "severity": "warning", "message": "Warning Message" },
+                                { "severity": "error", "message": "Error Message" },
+                                { "severity": "fatal", "message": "Fatal Message" }
+                            ]
+                        }
+                    """.trimIndent(),
+                    RequestStatus.ERROR
+                ),
+                Arguments.of(
+                    """
+                        {
+                            "patient": "4711",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" },
+                                { "severity": "warning", "message": "Warning Message" },
+                                { "severity": "error", "message": "Error Message" }
+                            ]
+                        }
+                    """.trimIndent(),
+                    RequestStatus.ERROR
+                ),
+                Arguments.of(
+                    """
+                        {
+                            "patient": "4711",
+                            "issues": [
+                                { "severity": "error", "message": "Error Message" }
+                                { "severity": "info", "message": "Info Message" }
+                            ]
+                        }
+                    """.trimIndent(),
+                    RequestStatus.ERROR
+                ),
+                Arguments.of(
+                    """
+                        {
+                            "patient": "4711",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" },
+                                { "severity": "warning", "message": "Warning Message" }
+                            ]
+                        }
+                    """.trimIndent(),
+                    RequestStatus.WARNING
+                ),
+                Arguments.of(
+                    """
+                        {
+                            "patient": "4711",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" }
+                            ]
+                        }
+                    """.trimIndent(),
+                    RequestStatus.SUCCESS
+                )
+            )
+        }
     }
 
 }

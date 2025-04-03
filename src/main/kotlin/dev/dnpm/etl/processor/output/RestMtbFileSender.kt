@@ -22,6 +22,8 @@ package dev.dnpm.etl.processor.output
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.PatientPseudonym
+import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -34,7 +36,8 @@ import org.springframework.web.client.RestTemplate
 abstract class RestMtbFileSender(
     private val restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
-    private val retryTemplate: RetryTemplate
+    private val retryTemplate: RetryTemplate,
+    private val reportService: ReportService
 ) : MtbFileSender {
 
     private val logger = LoggerFactory.getLogger(RestMtbFileSender::class.java)
@@ -56,19 +59,19 @@ abstract class RestMtbFileSender(
                 if (!response.statusCode.is2xxSuccessful) {
                     logger.warn("Error sending to remote system: {}", response.body)
                     return@execute MtbFileSender.Response(
-                        response.statusCode.asRequestStatus(),
+                        reportService.deserialize(response.body).asRequestStatus(),
                         "Status-Code: ${response.statusCode.value()}"
                     )
                 }
                 logger.debug("Sent file via RestMtbFileSender")
-                return@execute MtbFileSender.Response(response.statusCode.asRequestStatus(), response.body.orEmpty())
+                return@execute MtbFileSender.Response(reportService.deserialize(response.body).asRequestStatus(), response.body.orEmpty())
             }
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientResponseException) {
             logger.info(restTargetProperties.uri!!.toString())
             logger.error("Request data not accepted by remote system", e)
-            return MtbFileSender.Response(e.statusCode.asRequestStatus(), e.responseBodyAsString)
+            return MtbFileSender.Response(reportService.deserialize(e.responseBodyAsString).asRequestStatus(), e.responseBodyAsString)
         }
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
