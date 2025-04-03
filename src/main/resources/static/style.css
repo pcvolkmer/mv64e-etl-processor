@@ -698,3 +698,13 @@ a.reload {
     padding: 1em;
     background: var(--bg-red-op);
 }
+
+.issue-message {
+    font-family: monospace;
+    font-weight: bolder;
+}
+
+.issue-path {
+    font-family: monospace;
+    line-height: 1rem;
+}

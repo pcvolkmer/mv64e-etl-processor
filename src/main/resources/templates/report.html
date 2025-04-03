@@ -47,7 +47,7 @@
             <thead>
                 <tr>
                     <th>Schweregrad</th>
-                    <th>Beschreibung</th>
+                    <th>Beschreibung und Pfad</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,7 +56,11 @@
                 <td th:if="${issue.severity.value == 'warning'}" class="bg-yellow"><small>[[ ${issue.severity} ]]</small></td>
                 <td th:if="${issue.severity.value == 'error'}" class="bg-red"><small>[[ ${issue.severity} ]]</small></td>
                 <td th:if="${issue.severity.value == 'fatal'}" class="bg-red"><small>[[ ${issue.severity} ]]</small></td>
-                <td>[[ ${issue.message} ]]</td>
+                <td>
+                    <div class="issue-message">[[ ${issue.message} ]]</div>
+                    <div class="issue-path" th:if="${issue.path.isPresent()}">[[ ${issue.path.get()} ]]</div>
+                    <div class="issue-path" th:if="${issue.path.isEmpty()}"><i>Keine Angabe</i></div>
+                </td>
             </tr>
             </tbody>
         </table>
