@@ -1,6 +1,6 @@
-# ETL-Processor for bwHC data [![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
+# ETL-Processor for DNPM:DIP [![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
 
-Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisiert die Patienten-ID.
+Diese Anwendung versendet ein bwHC-MTB-File im bwHC-Datenmodell 1.0 an DNPM:DIP und pseudonymisiert die Patienten-ID.
 
 ## Einordnung innerhalb einer DNPM-ETL-Strecke
 
@@ -9,7 +9,7 @@ Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkost
 Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
 
-Löschanfragen werden immer als Löschanfrage an das bwHC-backend weitergeleitet.
+Löschanfragen werden immer als Löschanfrage an DNPM:DIP weitergeleitet.
 
 Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand der Anwendung gewährt.
 
@@ -22,7 +22,7 @@ Die Erkennung von Duplikaten ist normalerweise immer aktiv, kann jedoch über de
 
 ### Datenübermittlung über HTTP/REST
 
-Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an das bwHC-Backend gesendet.
+Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an DNPM:DIP gesendet.
 
 Ein HTTP Request kann, angenommen die Installation erfolgte auf dem Host `dnpm.example.com` an nachfolgende URLs gesendet werden:
 
@@ -163,7 +163,7 @@ Sie bekommen dabei wieder die Standardrolle zugewiesen.
 #### Auswirkungen auf den dargestellten Inhalt
 
 Nur Administratoren haben Zugriff auf den Konfigurationsbereich, nur angemeldete Benutzer können die anonymisierte oder
-pseudonymisierte Patienten-ID sowie den Qualitätsbericht des bwHC-Backends einsehen.
+pseudonymisierte Patienten-ID sowie den Qualitätsbericht von DNPM:DIP einsehen.
 
 Wurde kein Administrator-Account konfiguriert, sind diese Inhalte generell nicht verfügbar.
 
@@ -192,7 +192,7 @@ Alternativ kann eine Authentifizierung über Benutzername/Passwort oder OIDC erf
 ### Transformation von Werten
 
 In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,
-der vom bwHC-Backend akzeptiert wird.
+der von DNPM:DIP akzeptiert wird.
 
 Diese Anwendung bietet daher die Möglichkeit, eine Transformation vorzunehmen. Hierzu muss der "Pfad" innerhalb des JSON-MTB-Files angegeben werden und
 welcher Wert wie ersetzt werden soll.
@@ -212,13 +212,13 @@ Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpu
 
 #### REST
 
-Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das bwHC-Backend gesendet wird:
+Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an DNPM:DIP gesendet wird:
 
-* `APP_REST_URI`: URI der zu benutzenden API der bwHC-Backend-Instanz. Zum Beispiel:
+* `APP_REST_URI`: URI der zu benutzenden API der Backend-Instanz. Zum Beispiel:
   * `http://localhost:9000/bwhc/etl/api` für **bwHC Backend**
   * `http://localhost:9000/api` für **dnpm:dip**
-* `APP_REST_USERNAME`: Basic-Auth-Benutzername für bwHC-Backend
-* `APP_REST_PASSWORD`: Basic-Auth-Passwort für bwHC-Backend
+* `APP_REST_USERNAME`: Basic-Auth-Benutzername für den REST-Endpunkt
+* `APP_REST_PASSWORD`: Basic-Auth-Passwort für den REST-Endpunkt
 * `APP_REST_IS_BWHC`: `true` für **bwHC Backend**, weglassen oder `false` für **dnpm:dip**
 
 #### Kafka-Topics
@@ -236,7 +236,7 @@ Wird keine Rückantwort über Apache Kafka empfangen und es gibt keine weitere M
 
 Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert werden.
 
-Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
+Lässt sich keine Verbindung zu dem Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
 für HTTP nicht gibt.
 
 Wird die Umgebungsvariable `APP_KAFKA_INPUT_TOPIC` gesetzt, kann eine Nachricht auch über dieses Kafka-Topic an den ETL-Prozessor übermittelt werden.
@@ -273,7 +273,7 @@ kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-co
 Da als Key eines Records die (pseudonymisierte) Patienten-ID verwendet wird, stehen mit obiger Konfiguration 
 der Kafka-Topics nach 10 Sekunden nur noch der jeweils letzte Eintrag für den entsprechenden Key zur Verfügung.
 
-Da der Key sowohl für die Records in Richtung bwHC-Backend für die Rückantwort identisch aufgebaut ist, lassen sich so
+Da der Key sowohl für die Records in Richtung DNPM:DIP, als auch für die Rückantwort identisch aufgebaut ist, lassen sich so
 auch im Falle eines Consent-Widerspruchs die enthaltenen Daten als auch die Offenlegung durch Verifikationsdaten in der
 Antwort effektiv verhindern, da diese nach 10 Sekunden gelöscht werden.
 
