@@ -52,8 +52,6 @@ Soll noch das alte bwHC-Backend verwendet werden, so ist die Umgebungsvariable  
 
 In Versionen des ETL-Processors **nach Version 0.10** werden die folgenden Konfigurationsoptionen entfernt:
 
-* `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Nutzen Sie hier, wie unter [_Integration eines eigenen Root CA
-  Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben, das Einbinden eigener Zertifikate.
 * `APP_KAFKA_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_TOPIC`
 * `APP_KAFKA_RESPONSE_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`
 
@@ -90,13 +88,6 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* ~~`APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`~~: **Veraltet** - Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
-  **Wird in nach Version 0.10 entfernt**
-
-Der Konfigurationsparameter `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION` sollte nicht mehr verwendet werden und wird nach
-Version 0.10 entfernt.
-Stattdessen sollte das Root Zertifikat wie unter [_Integration eines eigenen Root CA
-Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben eingebunden werden.
 
 ### Anmeldung mit einem Passwort
 

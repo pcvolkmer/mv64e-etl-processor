@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -56,10 +56,6 @@ data class GPasConfigProperties(
     val target: String = "etl-processor",
     val username: String?,
     val password: String?,
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated in favor of including Root CA"
-    )
-    val sslCaLocation: String?
 ) {
     companion object {
         const val NAME = "app.pseudonymize.gpas"
