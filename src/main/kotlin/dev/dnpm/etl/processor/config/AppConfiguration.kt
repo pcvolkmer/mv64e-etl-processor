@@ -85,20 +85,6 @@ class AppConfiguration {
         return AnonymizingGenerator()
     }
 
-    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
-    @ConditionalOnMissingBean
-    @Bean
-    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
-    }
-
-    @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "BUILDIN")
-    @ConditionalOnMissingBean
-    @Bean
-    fun buildinPseudonymGeneratorOnDeprecatedProperty(): Generator {
-        return AnonymizingGenerator()
-    }
-
     @Bean
     fun pseudonymizeService(
         generator: Generator,
