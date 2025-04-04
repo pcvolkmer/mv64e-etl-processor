@@ -28,9 +28,9 @@ Ein HTTP Request kann, angenommen die Installation erfolgte auf dem Host `dnpm.e
 
 | HTTP-Request | URL                                     | Consent-Status im Datensatz | Bemerkung                                                                       |
 |--------------|-----------------------------------------|-----------------------------|---------------------------------------------------------------------------------|
-| POST         | `https://dnpm.example.com/mtb`          | ACTIVE                      | Die Anwendung verarbeitet den eingehenden Datensatz                             |
-| POST         | `https://dnpm.example.com/mtb`          | REJECT                      | Die Anwendung sendet einen Lösch-Request für die im Datensatz angegebene Pat-ID |
-| DELETE       | `https://dnpm.example.com/mtb/12345678` | -                           | Die Anwendung sendet einen Lösch-Request für Pat-ID `12345678`                  |
+| `POST`       | `https://dnpm.example.com/mtb`          | `ACTIVE`                    | Die Anwendung verarbeitet den eingehenden Datensatz                             |
+| `POST`       | `https://dnpm.example.com/mtb`          | `REJECT`                    | Die Anwendung sendet einen Lösch-Request für die im Datensatz angegebene Pat-ID |
+| `DELETE`     | `https://dnpm.example.com/mtb/12345678` | -                           | Die Anwendung sendet einen Lösch-Request für Pat-ID `12345678`                  |
 
 Anstelle des Pfads `/mtb` kann auch, wie in Version 0.9 und älter üblich, `/mtbfile` verwendet werden.
 
@@ -43,12 +43,12 @@ Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
 ## Konfiguration
 
-### Wichtige Änderungen in Version 0.10
+### 🔥 Wichtige Änderungen in Version 0.10
 
 Ab Version 0.10 wird [DNPM:DIP](https://github.com/dnpm-dip) unterstützt und als Standardendpunkt verwendet.
 Soll noch das alte bwHC-Backend verwendet werden, so ist die Umgebungsvariable  `APP_REST_IS_BWHC` auf `true` zu setzen.
 
-### Breaking Changes nach Version 0.10
+### 🔥 Breaking Changes nach Version 0.10
 
 In Versionen des ETL-Processors **nach Version 0.10** werden die folgenden Konfigurationsoptionen entfernt:
 
