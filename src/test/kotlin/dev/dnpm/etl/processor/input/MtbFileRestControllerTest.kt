@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -40,24 +41,122 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 @ExtendWith(MockitoExtension::class)
 class MtbFileRestControllerTest {
 
-    private lateinit var mockMvc: MockMvc
-
-    private lateinit var requestProcessor: RequestProcessor
-
     private val objectMapper = ObjectMapper()
 
-    @BeforeEach
-    fun setup(
-        @Mock requestProcessor: RequestProcessor
-    ) {
-        this.requestProcessor = requestProcessor
-        val controller = MtbFileRestController(requestProcessor)
-        this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+    @Nested
+    inner class BwhcRequests {
+
+        private lateinit var mockMvc: MockMvc
+
+        private lateinit var requestProcessor: RequestProcessor
+
+        @BeforeEach
+        fun setup(
+            @Mock requestProcessor: RequestProcessor
+        ) {
+            this.requestProcessor = requestProcessor
+            val controller = MtbFileRestController(requestProcessor)
+            this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        }
+
+        @Test
+        fun shouldProcessPostRequest() {
+            mockMvc.post("/mtbfile") {
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.ACTIVE))
+                contentType = MediaType.APPLICATION_JSON
+            }.andExpect {
+                status {
+                    isAccepted()
+                }
+            }
+
+            verify(requestProcessor, times(1)).processMtbFile(any())
+        }
+
+        @Test
+        fun shouldProcessPostRequestWithRejectedConsent() {
+            mockMvc.post("/mtbfile") {
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.REJECTED))
+                contentType = MediaType.APPLICATION_JSON
+            }.andExpect {
+                status {
+                    isAccepted()
+                }
+            }
+
+            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        }
+
+        @Test
+        fun shouldProcessDeleteRequest() {
+            mockMvc.delete("/mtbfile/TEST_12345678").andExpect {
+                status {
+                    isAccepted()
+                }
+            }
+
+            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        }
     }
 
-    @Test
-    fun shouldProcessMtbFilePostRequest() {
-        val mtbFile = MtbFile.builder()
+    @Nested
+    inner class BwhcRequestsWithAlias {
+
+        private lateinit var mockMvc: MockMvc
+
+        private lateinit var requestProcessor: RequestProcessor
+
+        @BeforeEach
+        fun setup(
+            @Mock requestProcessor: RequestProcessor
+        ) {
+            this.requestProcessor = requestProcessor
+            val controller = MtbFileRestController(requestProcessor)
+            this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        }
+
+        @Test
+        fun shouldProcessPostRequest() {
+            mockMvc.post("/mtb") {
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.ACTIVE))
+                contentType = MediaType.APPLICATION_JSON
+            }.andExpect {
+                status {
+                    isAccepted()
+                }
+            }
+
+            verify(requestProcessor, times(1)).processMtbFile(any())
+        }
+
+        @Test
+        fun shouldProcessPostRequestWithRejectedConsent() {
+            mockMvc.post("/mtb") {
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.REJECTED))
+                contentType = MediaType.APPLICATION_JSON
+            }.andExpect {
+                status {
+                    isAccepted()
+                }
+            }
+
+            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        }
+
+        @Test
+        fun shouldProcessDeleteRequest() {
+            mockMvc.delete("/mtb/TEST_12345678").andExpect {
+                status {
+                    isAccepted()
+                }
+            }
+
+            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        }
+    }
+
+    companion object {
+        fun bwhcMtbFileContent(consentStatus: Consent.Status) = MtbFile.builder()
             .withPatient(
                 Patient.builder()
                     .withId("TEST_12345678")
@@ -68,7 +167,7 @@ class MtbFileRestControllerTest {
             .withConsent(
                 Consent.builder()
                     .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
+                    .withStatus(consentStatus)
                     .withPatient("TEST_12345678")
                     .build()
             )
@@ -80,66 +179,5 @@ class MtbFileRestControllerTest {
                     .build()
             )
             .build()
-
-        mockMvc.post("/mtbfile") {
-            content = objectMapper.writeValueAsString(mtbFile)
-            contentType = MediaType.APPLICATION_JSON
-        }.andExpect {
-            status {
-                isAccepted()
-            }
-        }
-
-        verify(requestProcessor, times(1)).processMtbFile(any())
     }
-
-    @Test
-    fun shouldProcessMtbFilePostRequestWithRejectedConsent() {
-        val mtbFile = MtbFile.builder()
-            .withPatient(
-                Patient.builder()
-                    .withId("TEST_12345678")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
-                    .build()
-            )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.REJECTED)
-                    .withPatient("TEST_12345678")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("TEST_12345678")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
-            )
-            .build()
-
-        mockMvc.post("/mtbfile") {
-            content = objectMapper.writeValueAsString(mtbFile)
-            contentType = MediaType.APPLICATION_JSON
-        }.andExpect {
-            status {
-                isAccepted()
-            }
-        }
-
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
-    }
-
-    @Test
-    fun shouldProcessMtbFileDeleteRequest() {
-        mockMvc.delete("/mtbfile/TEST_12345678").andExpect {
-            status {
-                isAccepted()
-            }
-        }
-
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
-    }
-
 }

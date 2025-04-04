@@ -24,6 +24,16 @@ Die Erkennung von Duplikaten ist normalerweise immer aktiv, kann jedoch über de
 
 Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an das bwHC-Backend gesendet.
 
+Ein HTTP Request kann, angenommen die Installation erfolgte auf dem Host `dnpm.example.com` an nachfolgende URLs gesendet werden:
+
+| HTTP-Request | URL                                     | Consent-Status im Datensatz | Bemerkung                                                                       |
+|--------------|-----------------------------------------|-----------------------------|---------------------------------------------------------------------------------|
+| POST         | `https://dnpm.example.com/mtb`          | ACTIVE                      | Die Anwendung verarbeitet den eingehenden Datensatz                             |
+| POST         | `https://dnpm.example.com/mtb`          | REJECT                      | Die Anwendung sendet einen Lösch-Request für die im Datensatz angegebene Pat-ID |
+| DELETE       | `https://dnpm.example.com/mtb/12345678` | -                           | Die Anwendung sendet einen Lösch-Request für Pat-ID `12345678`                  |
+
+Anstelle des Pfads `/mtb` kann auch, wie in Version 0.9 und älter üblich, `/mtbfile` verwendet werden.
+
 ### Datenübermittlung mit Apache Kafka
 
 Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung an Apache Kafka übergeben.
@@ -41,6 +51,9 @@ In Versionen des ETL-Processors **nach Version 0.10** werden die folgenden Konfi
   Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben, das Einbinden eigener Zertifikate.
 * `APP_KAFKA_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_TOPIC`
 * `APP_KAFKA_RESPONSE_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`
+
+Der Pfad zum Versenden von MTB-Daten ist nun offiziell `/mtb`.
+In Versionen **nach Version 0.10** wird die Unterstützung des Pfads `/mtbfile` entfernt.
 
 ### Pseudonymisierung der Patienten-ID
 
@@ -161,7 +174,7 @@ zur Nutzung des MTB-File-Endpunkts eine HTTP-Basic-Authentifizierung voraussetze
 
 ![Tokenverwaltung](docs/tokens.png)
 
-In diesem Fall können den Endpunkt für das Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)** wie folgt konfigurieren:
+In diesem Fall kann der Endpunkt für das Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)** wie folgt konfiguriert werden:
 
 ```
 https://testonkostar:MTg1NTL...NGU4@etl.example.com/mtbfile
@@ -266,7 +279,7 @@ Dieses Vorgehen empfiehlt sich, wenn Sie gespeicherte Records nachgelagert für 
 
 ### Antworten und Statusauswertung
 
-Anfragen and bwHC-Backend aus Versionen bis 0.9.x wurden wie folgt behandelt:
+Anfragen an das bwHC-Backend aus Versionen bis 0.9.x wurden wie folgt behandelt:
 
 | HTTP-Response  | Status    |
 |----------------|-----------|
