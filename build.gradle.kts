@@ -5,7 +5,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.3.10"
+    id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
@@ -13,12 +13,11 @@ plugins {
 }
 
 group = "dev.dnpm"
-version = "0.10.0-SNAPSHOT"
+version = "0.11.0-SNAPSHOT"
 
 var versions = mapOf(
     "bwhc-dto-java" to "0.4.0",
     "hapi-fhir" to "7.6.0",
-    "commons-compress" to "1.26.2",
     "mockito-kotlin" to "5.4.0",
     "archunit" to "1.3.0",
     // Webjars
@@ -99,10 +98,8 @@ dependencies {
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
-    integrationTestImplementation("net.sourceforge.htmlunit:htmlunit")
+    integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
-    // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:${versions["commons-compress"]}")
 }
 
 tasks.withType<KotlinCompile> {
@@ -119,8 +116,9 @@ tasks.withType<Test> {
     }
 }
 
-task<Test>("integrationTest") {
+tasks.register<Test>("integrationTest") {
     description = "Runs integration tests"
+    group = "verification"
 
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
     classpath = sourceSets["integrationTest"].runtimeClasspath

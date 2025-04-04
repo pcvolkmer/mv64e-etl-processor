@@ -19,9 +19,9 @@
 
 package dev.dnpm.etl.processor.web
 
-import com.gargoylesoftware.htmlunit.WebClient
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
+import org.htmlunit.WebClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

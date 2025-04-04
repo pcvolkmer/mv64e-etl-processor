@@ -19,8 +19,6 @@
 
 package dev.dnpm.etl.processor.web
 
-import com.gargoylesoftware.htmlunit.WebClient
-import com.gargoylesoftware.htmlunit.html.HtmlPage
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
@@ -34,6 +32,8 @@ import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.TransformationService
 import dev.dnpm.etl.processor.security.UserRoleService
 import org.assertj.core.api.Assertions.assertThat
+import org.htmlunit.WebClient
+import org.htmlunit.html.HtmlPage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
