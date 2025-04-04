@@ -182,40 +182,7 @@ class AppConfigurationTest {
         @Nested
         @TestPropertySource(
             properties = [
-                "app.pseudonymize.generator=",
-                "app.pseudonymizer=buildin",
-            ]
-        )
-        inner class AppConfigurationPseudonymizerBuildinTest(private val context: ApplicationContext) {
-
-            @Test
-            fun shouldUseConfiguredGenerator() {
-                assertThat(context.getBean(AnonymizingGenerator::class.java)).isNotNull
-            }
-
-        }
-
-        @Nested
-        @TestPropertySource(
-            properties = [
-                "app.pseudonymize.generator=",
-                "app.pseudonymizer=gpas",
-            ]
-        )
-        inner class AppConfigurationPseudonymizerGpasTest(private val context: ApplicationContext) {
-
-            @Test
-            fun shouldUseConfiguredGenerator() {
-                assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
-            }
-
-        }
-
-        @Nested
-        @TestPropertySource(
-            properties = [
-                "app.pseudonymize.generator=buildin",
-                "app.pseudonymizer=",
+                "app.pseudonymize.generator=buildin"
             ]
         )
         inner class AppConfigurationPseudonymizeGeneratorBuildinTest(private val context: ApplicationContext) {
@@ -230,8 +197,7 @@ class AppConfigurationTest {
         @Nested
         @TestPropertySource(
             properties = [
-                "app.pseudonymize.generator=gpas",
-                "app.pseudonymizer=",
+                "app.pseudonymize.generator=gpas"
             ]
         )
         inner class AppConfigurationPseudonymizeGeneratorGpasTest(private val context: ApplicationContext) {
