@@ -27,10 +27,10 @@ import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.security.Role
-import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.security.TokenService
-import dev.dnpm.etl.processor.services.TransformationService
 import dev.dnpm.etl.processor.security.UserRoleService
+import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.dnpm.etl.processor.services.TransformationService
 import org.assertj.core.api.Assertions.assertThat
 import org.htmlunit.WebClient
 import org.htmlunit.html.HtmlPage
@@ -46,7 +46,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.TEXT_EVENT_STREAM
@@ -55,6 +54,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.*
@@ -81,14 +81,16 @@ abstract class MockSink : Sinks.Many<Boolean>
         "app.pseudonymize.generator=BUILDIN"
     ]
 )
-@MockBean(name = "configsUpdateProducer", classes = [MockSink::class])
-@MockBean(
-    Generator::class,
-    MtbFileSender::class,
-    RequestProcessor::class,
-    TransformationService::class,
-    GPasConnectionCheckService::class,
-    RestConnectionCheckService::class,
+@MockitoBean(name = "configsUpdateProducer", types = [MockSink::class])
+@MockitoBean(
+    types = [
+        Generator::class,
+        MtbFileSender::class,
+        RequestProcessor::class,
+        TransformationService::class,
+        GPasConnectionCheckService::class,
+        RestConnectionCheckService::class
+    ]
 )
 class ConfigControllerTest {
 
@@ -143,8 +145,10 @@ class ConfigControllerTest {
             "app.security.admin-user=admin"
         ]
     )
-    @MockBean(
-        TokenService::class
+    @MockitoBean(
+        types = [
+            TokenService::class
+        ]
     )
     inner class WithTokensEnabled {
         private lateinit var tokenService: TokenService
@@ -252,8 +256,10 @@ class ConfigControllerTest {
             "app.security.admin-password={noop}very-secret"
         ]
     )
-    @MockBean(
-        UserRoleService::class
+    @MockitoBean(
+        types = [
+            UserRoleService::class
+        ]
     )
     inner class WithUserRolesEnabled {
         private lateinit var userRoleService: UserRoleService

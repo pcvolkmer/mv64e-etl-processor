@@ -26,9 +26,9 @@ import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
-import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
+import dev.dnpm.etl.processor.services.RequestProcessor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,24 +36,25 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.MockBeans
 import org.springframework.context.ApplicationContext
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
-@ContextConfiguration(classes = [
-    AppConfiguration::class,
-    AppSecurityConfiguration::class,
-    KafkaAutoConfiguration::class,
-    AppKafkaConfiguration::class,
-    AppRestConfiguration::class
-])
-@MockBean(ObjectMapper::class)
+@ContextConfiguration(
+    classes = [
+        AppConfiguration::class,
+        AppSecurityConfiguration::class,
+        KafkaAutoConfiguration::class,
+        AppKafkaConfiguration::class,
+        AppRestConfiguration::class
+    ]
+)
+@MockitoBean(types = [ObjectMapper::class])
 @TestPropertySource(
     properties = [
         "app.pseudonymize.generator=BUILDIN",
@@ -86,7 +87,7 @@ class AppConfigurationTest {
             "app.kafka.group-id=test"
         ]
     )
-    @MockBean(RequestRepository::class)
+    @MockitoBean(types = [RequestRepository::class])
     inner class AppConfigurationKafkaTest(private val context: ApplicationContext) {
 
         @Test
@@ -145,7 +146,7 @@ class AppConfigurationTest {
             "app.kafka.group-id=test"
         ]
     )
-    @MockBean(RequestProcessor::class)
+    @MockitoBean(types = [RequestProcessor::class])
     inner class AppConfigurationUsingKafkaInputTest(private val context: ApplicationContext) {
 
         @Test
@@ -248,11 +249,13 @@ class AppConfigurationTest {
                 "app.security.enable-tokens=true"
             ]
         )
-        @MockBeans(value = [
-            MockBean(InMemoryUserDetailsManager::class),
-            MockBean(PasswordEncoder::class),
-            MockBean(TokenRepository::class)
-        ])
+        @MockitoBean(
+            types = [
+                InMemoryUserDetailsManager::class,
+                PasswordEncoder::class,
+                TokenRepository::class
+            ]
+        )
         inner class AppConfigurationTokenEnabledTest(private val context: ApplicationContext) {
 
             @Test
@@ -263,11 +266,13 @@ class AppConfigurationTest {
         }
 
         @Nested
-        @MockBeans(value = [
-            MockBean(InMemoryUserDetailsManager::class),
-            MockBean(PasswordEncoder::class),
-            MockBean(TokenRepository::class)
-        ])
+        @MockitoBean(
+            types = [
+                InMemoryUserDetailsManager::class,
+                PasswordEncoder::class,
+                TokenRepository::class
+            ]
+        )
         inner class AppConfigurationTokenDisabledTest(private val context: ApplicationContext) {
 
             @Test
