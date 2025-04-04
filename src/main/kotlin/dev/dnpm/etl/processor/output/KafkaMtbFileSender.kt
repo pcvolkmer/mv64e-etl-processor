@@ -42,7 +42,7 @@ class KafkaMtbFileSender(
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val result = kafkaTemplate.send(
-                    kafkaProperties.topic,
+                    kafkaProperties.outputTopic,
                     key(request),
                     objectMapper.writeValueAsString(Data(request.requestId, request.mtbFile))
                 )
@@ -72,7 +72,7 @@ class KafkaMtbFileSender(
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val result = kafkaTemplate.send(
-                    kafkaProperties.topic,
+                    kafkaProperties.outputTopic,
                     key(request),
                     objectMapper.writeValueAsString(Data(request.requestId, dummyMtbFile))
                 )
@@ -91,7 +91,7 @@ class KafkaMtbFileSender(
     }
 
     override fun endpoint(): String {
-        return "${this.kafkaProperties.servers} (${this.kafkaProperties.topic}/${this.kafkaProperties.responseTopic})"
+        return "${this.kafkaProperties.servers} (${this.kafkaProperties.outputTopic}/${this.kafkaProperties.outputResponseTopic})"
     }
 
     private fun key(request: MtbFileSender.MtbFileRequest): String {

@@ -21,16 +21,10 @@ package dev.dnpm.etl.processor.config
 
 import dev.dnpm.etl.processor.security.Role
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.DeprecatedConfigurationProperty
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
     var bwhcUri: String?,
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated in favor of 'app.pseudonymize.generator'",
-        replacement = "app.pseudonymize.generator"
-    )
-    var pseudonymizer: PseudonymGenerator = PseudonymGenerator.BUILDIN,
     var transformations: List<TransformationProperties> = listOf(),
     var maxRetryAttempts: Int = 3,
     var duplicationDetection: Boolean = true
@@ -78,18 +72,8 @@ data class RestTargetProperties(
 data class KafkaProperties(
     val inputTopic: String?,
     val outputTopic: String = "etl-processor",
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated",
-        replacement = "outputTopic"
-    )
-    val topic: String = outputTopic,
     val outputResponseTopic: String = "${outputTopic}_response",
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated",
-        replacement = "outputResponseTopic"
-    )
-    val responseTopic: String = outputResponseTopic,
-    val groupId: String = "${topic}_group",
+    val groupId: String = "${outputTopic}_group",
     val servers: String = ""
 ) {
     companion object {

@@ -66,13 +66,11 @@ Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgen
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Präfix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
 
-**Hinweise**: 
+**Hinweis** 
 
-* Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht mehr verwendet
-  werden.
-* Die Pseudonymisierung erfolgt im ETL-Prozessor nur für die Patienten-ID.
-  Andere IDs werden mithilfe des standortbezogenen Präfixes (erneut) anonymisiert, um für den aktuellen Kontext nicht
-  vergleichbare IDs bereitzustellen.
+Die Pseudonymisierung erfolgt im ETL-Prozessor nur für die Patienten-ID.
+Andere IDs werden mithilfe des standortbezogenen Präfixes (erneut) anonymisiert, um für den aktuellen Kontext nicht
+vergleichbare IDs bereitzustellen.
 
 #### Eingebaute Anonymisierung
 
@@ -217,9 +215,7 @@ Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an DNP
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein Kafka-Topic übermittelt wird:
 
 * `APP_KAFKA_OUTPUT_TOPIC`: Zu verwendendes Topic zum Versenden von Anfragen. 
-  Ersetzt ~~`APP_KAFKA_TOPIC`~~, **welches nach Version 0.10 entfernt wird**. 
 * `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`: Topic mit Antworten über den Erfolg des Versendens. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_response".
-  Ersetzt ~~`APP_KAFKA_RESPONSE_TOPIC`~~, **welches nach Version 0.10 entfernt wird**.
 * `APP_KAFKA_GROUP_ID`: Kafka GroupID des Consumers. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_group".
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 

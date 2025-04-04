@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -71,7 +71,7 @@ class AppKafkaConfiguration {
         kafkaProperties: KafkaProperties,
         kafkaResponseProcessor: KafkaResponseProcessor
     ): KafkaMessageListenerContainer<String, String> {
-        val containerProperties = ContainerProperties(kafkaProperties.responseTopic)
+        val containerProperties = ContainerProperties(kafkaProperties.outputResponseTopic)
         containerProperties.messageListener = kafkaResponseProcessor
         return KafkaMessageListenerContainer(consumerFactory, containerProperties)
     }
