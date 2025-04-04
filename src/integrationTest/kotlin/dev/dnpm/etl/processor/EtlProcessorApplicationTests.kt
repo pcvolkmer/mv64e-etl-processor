@@ -33,10 +33,10 @@ import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
@@ -45,7 +45,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-@MockBean(MtbFileSender::class)
+@MockitoBean(types = [MtbFileSender::class])
 @TestPropertySource(
     properties = [
         "app.rest.uri=http://example.com",
@@ -73,7 +73,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
     )
     inner class TransformationTest {
 
-        @MockBean
+        @MockitoBean
         private lateinit var mtbFileSender: MtbFileSender
 
         @Autowired
