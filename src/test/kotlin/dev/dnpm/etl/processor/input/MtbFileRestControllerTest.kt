@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -182,11 +183,11 @@ class MtbFileRestControllerTest {
                 contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
             }.andExpect {
                 status {
-                    isNotImplemented()
+                    isAccepted()
                 }
             }
 
-            verify(requestProcessor, times(0)).processMtbFile(any<MtbFile>())
+            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
         }
 
     }
