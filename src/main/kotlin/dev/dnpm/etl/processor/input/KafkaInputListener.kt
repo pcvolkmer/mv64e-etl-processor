@@ -85,6 +85,7 @@ class KafkaInputListener(
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
         // Do not handle DNPM-V2 for now
+        logger.warn("Ignoring MTB File in DNPM V2 format: Not implemented yet")
     }
 
 }
