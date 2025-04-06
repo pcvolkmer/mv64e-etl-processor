@@ -21,9 +21,13 @@ package dev.dnpm.etl.processor.input
 
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -40,7 +44,7 @@ class MtbFileRestController(
         return ResponseEntity.ok("Test")
     }
 
-    @PostMapping
+    @PostMapping( consumes = [ MediaType.APPLICATION_JSON_VALUE ] )
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
         if (mtbFile.consent.status == Consent.Status.ACTIVE) {
             logger.debug("Accepted MTB File for processing")
@@ -51,6 +55,11 @@ class MtbFileRestController(
             requestProcessor.processDeletion(patientId)
         }
         return ResponseEntity.accepted().build()
+    }
+
+    @PostMapping( consumes = [ CustomMediaType.APPLICATION_VND_DNPM_V2_JSON_MTB_VALUE] )
+    fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build()
     }
 
     @DeleteMapping(path = ["{patientId}"])
