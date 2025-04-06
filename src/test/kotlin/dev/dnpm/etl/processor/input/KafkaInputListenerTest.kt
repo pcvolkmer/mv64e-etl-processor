@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -63,7 +64,15 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.ACTIVE).build())
             .build()
 
-        kafkaInputListener.onMessage(ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile)))
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile)
+            )
+        )
 
         verify(requestProcessor, times(1)).processMtbFile(any())
     }
@@ -75,7 +84,15 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
             .build()
 
-        kafkaInputListener.onMessage(ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile)))
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile)
+            )
+        )
 
         verify(requestProcessor, times(1)).processDeletion(anyValueClass())
     }
@@ -89,7 +106,19 @@ class KafkaInputListenerTest {
 
         val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
         kafkaInputListener.onMessage(
-            ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                -1L,
+                TimestampType.NO_TIMESTAMP_TYPE,
+                -1,
+                -1,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile),
+                headers,
+                Optional.empty()
+            )
         )
 
         verify(requestProcessor, times(1)).processMtbFile(any(), anyValueClass())
@@ -104,9 +133,52 @@ class KafkaInputListenerTest {
 
         val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
         kafkaInputListener.onMessage(
-            ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                -1L,
+                TimestampType.NO_TIMESTAMP_TYPE,
+                -1,
+                -1,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile),
+                headers,
+                Optional.empty()
+            )
         )
         verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass())
+    }
+
+    @Test
+    fun shouldNotProcessDnpmV2Request() {
+        val mtbFile = MtbFile.builder()
+            .withPatient(Patient.builder().withId("DUMMY_12345678").build())
+            .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
+            .build()
+
+        val headers = RecordHeaders(
+            listOf(
+                RecordHeader("requestId", UUID.randomUUID().toString().toByteArray()),
+                RecordHeader("contentType", CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+            )
+        )
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                -1L,
+                TimestampType.NO_TIMESTAMP_TYPE,
+                -1,
+                -1,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile),
+                headers,
+                Optional.empty()
+            )
+        )
+        verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass())
     }
 
 }
