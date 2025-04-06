@@ -19,25 +19,17 @@
 
 package dev.dnpm.etl.processor.output
 
-import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.PatientPseudonym
-import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.springframework.http.HttpStatusCode
 
 interface MtbFileSender {
-    fun send(request: MtbFileRequest): Response
+    fun <T> send(request: MtbFileRequest<T>): Response
 
     fun send(request: DeleteRequest): Response
 
     fun endpoint(): String
 
     data class Response(val status: RequestStatus, val body: String = "")
-
-    data class MtbFileRequest(val requestId: RequestId, val mtbFile: MtbFile)
-
-    data class DeleteRequest(val requestId: RequestId, val patientId: PatientPseudonym)
-
 }
 
 fun Int.asRequestStatus(): RequestStatus {

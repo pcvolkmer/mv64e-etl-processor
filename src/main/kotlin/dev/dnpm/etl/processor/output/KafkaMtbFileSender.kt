@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,10 +22,12 @@ package dev.dnpm.etl.processor.output
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
-import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.retry.support.RetryTemplate
 
@@ -38,14 +40,20 @@ class KafkaMtbFileSender(
 
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
-    override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
+    override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val result = kafkaTemplate.send(
-                    kafkaProperties.outputTopic,
-                    key(request),
-                    objectMapper.writeValueAsString(Data(request.requestId, request.mtbFile))
-                )
+                val record =
+                    ProducerRecord(kafkaProperties.outputTopic, key(request), objectMapper.writeValueAsString(request))
+                when (request) {
+                    is BwhcV1MtbFileRequest -> record.headers()
+                        .add("contentType", MediaType.APPLICATION_JSON_VALUE.toByteArray())
+
+                    is DnpmV2MtbFileRequest -> record.headers()
+                        .add("contentType", CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+                }
+
+                val result = kafkaTemplate.send(record)
                 if (result.get() != null) {
                     logger.debug("Sent file via KafkaMtbFileSender")
                     MtbFileSender.Response(RequestStatus.UNKNOWN)
@@ -59,7 +67,7 @@ class KafkaMtbFileSender(
         }
     }
 
-    override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
+    override fun send(request: DeleteRequest): MtbFileSender.Response {
         val dummyMtbFile = MtbFile.builder()
             .withConsent(
                 Consent.builder()
@@ -71,12 +79,15 @@ class KafkaMtbFileSender(
 
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val result = kafkaTemplate.send(
-                    kafkaProperties.outputTopic,
-                    key(request),
-                    objectMapper.writeValueAsString(Data(request.requestId, dummyMtbFile))
-                )
+                val record =
+                    ProducerRecord(
+                        kafkaProperties.outputTopic,
+                        key(request),
+                        // Always use old BwhcV1FileRequest with Consent REJECT
+                        objectMapper.writeValueAsString(BwhcV1MtbFileRequest(request.requestId, dummyMtbFile))
+                    )
 
+                val result = kafkaTemplate.send(record)
                 if (result.get() != null) {
                     logger.debug("Sent deletion request via KafkaMtbFileSender")
                     MtbFileSender.Response(RequestStatus.UNKNOWN)
@@ -94,13 +105,12 @@ class KafkaMtbFileSender(
         return "${this.kafkaProperties.servers} (${this.kafkaProperties.outputTopic}/${this.kafkaProperties.outputResponseTopic})"
     }
 
-    private fun key(request: MtbFileSender.MtbFileRequest): String {
-        return "{\"pid\": \"${request.mtbFile.patient.id}\"}"
+    private fun key(request: MtbRequest): String {
+        return when (request) {
+            is BwhcV1MtbFileRequest -> "{\"pid\": \"${request.content.patient.id}\"}"
+            is DnpmV2MtbFileRequest -> "{\"pid\": \"${request.content.patient.id}\"}"
+            is DeleteRequest -> "{\"pid\": \"${request.patientId.value}\"}"
+            else -> throw IllegalArgumentException("Unsupported request type: ${request::class.simpleName}")
+        }
     }
-
-    private fun key(request: MtbFileSender.DeleteRequest): String {
-        return "{\"pid\": \"${request.patientId.value}\"}"
-    }
-
-    data class Data(val requestId: RequestId, val content: MtbFile)
 }

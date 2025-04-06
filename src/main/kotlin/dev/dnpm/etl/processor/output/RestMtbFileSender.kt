@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,10 +19,11 @@
 
 package dev.dnpm.etl.processor.output
 
-import dev.dnpm.etl.processor.config.RestTargetProperties
-import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientPseudonym
+import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -46,11 +47,11 @@ abstract class RestMtbFileSender(
 
     abstract fun deleteUrl(patientId: PatientPseudonym): String
 
-    override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
+    override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = getHttpHeaders()
-                val entityReq = HttpEntity(request.mtbFile, headers)
+                val headers = getHttpHeaders(request)
+                val entityReq = HttpEntity(request.content, headers)
                 val response = restTemplate.postForEntity(
                     sendUrl(),
                     entityReq,
@@ -76,10 +77,10 @@ abstract class RestMtbFileSender(
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
 
-    override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
+    override fun send(request: DeleteRequest): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = getHttpHeaders()
+                val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(null, headers)
                 restTemplate.delete(
                     deleteUrl(request.patientId),
@@ -102,11 +103,15 @@ abstract class RestMtbFileSender(
         return this.restTargetProperties.uri.orEmpty()
     }
 
-    private fun getHttpHeaders(): HttpHeaders {
+    private fun getHttpHeaders(request: MtbRequest): HttpHeaders {
         val username = restTargetProperties.username
         val password = restTargetProperties.password
         val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
+        headers.contentType = when (request) {
+            is BwhcV1MtbFileRequest -> MediaType.APPLICATION_JSON
+            is DnpmV2MtbFileRequest -> CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+            else -> MediaType.APPLICATION_JSON
+        }
 
         if (username.isNullOrBlank() || password.isNullOrBlank()) {
             return headers

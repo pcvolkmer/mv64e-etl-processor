@@ -91,7 +91,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processMtbFile(any())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -104,7 +104,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processMtbFile(any())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -117,7 +117,7 @@ class MtbFileRestControllerTest {
             status { isUnauthorized() }
         }
 
-        verify(requestProcessor, never()).processMtbFile(any())
+        verify(requestProcessor, never()).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -130,7 +130,7 @@ class MtbFileRestControllerTest {
             status { isForbidden() }
         }
 
-        verify(requestProcessor, never()).processMtbFile(any())
+        verify(requestProcessor, never()).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -177,7 +177,7 @@ class MtbFileRestControllerTest {
                 status { isAccepted() }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any())
+            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
         }
 
         @Test
@@ -190,7 +190,7 @@ class MtbFileRestControllerTest {
                 status { isAccepted() }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any())
+            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
         }
     }
 
