@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -32,6 +33,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyValueClass
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
@@ -153,6 +155,40 @@ class MtbFileRestControllerTest {
 
             verify(requestProcessor, times(1)).processDeletion(anyValueClass())
         }
+    }
+
+    @Nested
+    inner class RequestsForDnpmDataModel21 {
+
+        private lateinit var mockMvc: MockMvc
+
+        private lateinit var requestProcessor: RequestProcessor
+
+        @BeforeEach
+        fun setup(
+            @Mock requestProcessor: RequestProcessor
+        ) {
+            this.requestProcessor = requestProcessor
+            val controller = MtbFileRestController(requestProcessor)
+            this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        }
+
+        @Test
+        fun shouldRespondPostRequest() {
+            val mtbFileContent = ClassPathResource("mv64e-mtb-fake-patient.json").inputStream.readAllBytes().toString(Charsets.UTF_8)
+
+            mockMvc.post("/mtb") {
+                content = mtbFileContent
+                contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+            }.andExpect {
+                status {
+                    isNotImplemented()
+                }
+            }
+
+            verify(requestProcessor, times(0)).processMtbFile(any())
+        }
+
     }
 
     companion object {
