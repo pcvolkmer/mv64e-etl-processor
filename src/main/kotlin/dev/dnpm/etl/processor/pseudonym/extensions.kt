@@ -21,12 +21,12 @@ package dev.dnpm.etl.processor.pseudonym
 
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.PatientId
+import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.commons.codec.digest.DigestUtils
 
 /** Replaces patient ID with generated patient pseudonym
  *
  * @param pseudonymizeService The pseudonymizeService to be used
- *
  * @return The MTB file containing patient pseudonymes
  */
 infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
@@ -49,7 +49,11 @@ infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     }
     this.lastGuidelineTherapies?.forEach { it.patient = patientPseudonym }
     this.molecularPathologyFindings?.forEach { it.patient = patientPseudonym }
-    this.molecularTherapies?.forEach { molecularTherapy -> molecularTherapy.history.forEach { it.patient = patientPseudonym } }
+    this.molecularTherapies?.forEach { molecularTherapy ->
+        molecularTherapy.history.forEach {
+            it.patient = patientPseudonym
+        }
+    }
     this.ngsReports?.forEach { it.patient = patientPseudonym }
     this.previousGuidelineTherapies?.forEach { it.patient = patientPseudonym }
     this.rebiopsyRequests?.forEach { it.patient = patientPseudonym }
@@ -63,7 +67,6 @@ infix fun MtbFile.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
  * Creates new hash of content IDs with given prefix except for patient IDs
  *
  * @param pseudonymizeService The pseudonymizeService to be used
- *
  * @return The MTB file containing rehashed content IDs
  */
 infix fun MtbFile.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
@@ -120,8 +123,8 @@ infix fun MtbFile.anonymizeContentWith(pseudonymizeService: PseudonymizeService)
             id = id?.let { anonymize(it) }
         }
     }
-    this.geneticCounsellingRequests?.onEach { geneticCounsellingRequest -> 
-        geneticCounsellingRequest?.apply { 
+    this.geneticCounsellingRequests?.onEach { geneticCounsellingRequest ->
+        geneticCounsellingRequest?.apply {
             id = id?.let { anonymize(it) }
         }
     }
@@ -223,4 +226,90 @@ infix fun MtbFile.anonymizeContentWith(pseudonymizeService: PseudonymizeService)
             id = id?.let { anonymize(it) }
         }
     }
+}
+
+/** Replaces patient ID with generated patient pseudonym
+ *
+ * @since 0.11.0
+ *
+ * @param pseudonymizeService The pseudonymizeService to be used
+ * @return The MTB file containing patient pseudonymes
+ */
+infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
+    val patientPseudonym = pseudonymizeService.patientPseudonym(PatientId(this.patient.id)).value
+
+    this.episodesOfCare?.forEach { it.patient.id = patientPseudonym }
+    this.carePlans?.forEach {
+        it.patient.id = patientPseudonym
+        it.rebiopsyRequests?.forEach { it.patient.id = patientPseudonym }
+        it.histologyReevaluationRequests?.forEach { it.patient.id = patientPseudonym }
+        it.medicationRecommendations.forEach { it.patient.id = patientPseudonym }
+        it.studyEnrollmentRecommendations?.forEach { it.patient.id = patientPseudonym }
+        it.procedureRecommendations?.forEach { it.patient.id = patientPseudonym }
+        it.geneticCounselingRecommendation.patient.id = patientPseudonym
+    }
+    this.diagnoses?.forEach { it.patient.id = patientPseudonym }
+    this.guidelineTherapies?.forEach { it.patient.id = patientPseudonym }
+    this.guidelineProcedures?.forEach { it.patient.id = patientPseudonym }
+    this.patient.id = patientPseudonym
+    this.claims?.forEach { it.patient.id = patientPseudonym }
+    this.claimResponses?.forEach { it.patient.id = patientPseudonym }
+    this.diagnoses?.forEach { it.patient.id = patientPseudonym }
+    this.histologyReports?.forEach {
+        it.patient.id = patientPseudonym
+        it.results.tumorMorphology?.patient?.id = patientPseudonym
+        it.results.tumorCellContent?.patient?.id = patientPseudonym
+    }
+    this.ngsReports?.forEach {
+        it.patient.id = patientPseudonym
+        it.results.simpleVariants?.forEach { it.patient.id = patientPseudonym }
+        it.results.copyNumberVariants?.forEach { it.patient.id = patientPseudonym }
+        it.results.dnaFusions?.forEach { it.patient.id = patientPseudonym }
+        it.results.rnaFusions?.forEach { it.patient.id = patientPseudonym }
+        it.results.tumorCellContent?.patient?.id = patientPseudonym
+        it.results.brcaness?.patient?.id = patientPseudonym
+        it.results.tmb?.patient?.id = patientPseudonym
+        it.results.hrdScore?.patient?.id = patientPseudonym
+    }
+    this.ihcReports?.forEach {
+        it.patient.id = patientPseudonym
+        it.results.msiMmr?.forEach { it.patient.id = patientPseudonym }
+        it.results.proteinExpression?.forEach { it.patient.id = patientPseudonym }
+    }
+    this.responses?.forEach { it.patient.id = patientPseudonym }
+    this.specimens?.forEach { it.patient.id = patientPseudonym }
+    this.priorDiagnosticReports?.forEach { it.patient.id = patientPseudonym }
+    this.performanceStatus.forEach { it.patient.id = patientPseudonym }
+    this.systemicTherapies.forEach {
+        it.history?.forEach {
+            it.patient.id = patientPseudonym
+        }
+    }
+}
+
+/**
+ * Creates new hash of content IDs with given prefix except for patient IDs
+ *
+ * @since 0.11.0
+ *
+ * @param pseudonymizeService The pseudonymizeService to be used
+ * @return The MTB file containing rehashed content IDs
+ */
+infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
+    val prefix = pseudonymizeService.prefix()
+
+    fun anonymize(id: String): String {
+        val hash = DigestUtils.sha256Hex("$prefix-$id").substring(0, 41).lowercase()
+        return "$prefix$hash"
+    }
+
+    this.episodesOfCare?.forEach {
+        it?.apply {
+            id = id?.let {
+                anonymize(it)
+            }
+        }
+    }
+
+    // TODO all other properties
 }
