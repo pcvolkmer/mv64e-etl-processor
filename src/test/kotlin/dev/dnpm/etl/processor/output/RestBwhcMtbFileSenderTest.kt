@@ -31,14 +31,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers.method
-import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
 
@@ -83,6 +84,7 @@ class RestBwhcMtbFileSenderTest {
         this.mockRestServiceServer
             .expect(method(HttpMethod.POST))
             .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
+            .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andRespond {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
