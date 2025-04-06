@@ -57,7 +57,7 @@ class MtbFileRestController(
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping( consumes = [ CustomMediaType.APPLICATION_VND_DNPM_V2_JSON_MTB_VALUE] )
+    @PostMapping( consumes = [ CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE] )
     fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build()
     }

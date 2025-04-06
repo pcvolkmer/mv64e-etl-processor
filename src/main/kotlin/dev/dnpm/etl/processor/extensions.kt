@@ -28,8 +28,8 @@ import org.springframework.http.MediaType
  */
 object CustomMediaType {
     val APPLICATION_VND_DNPM_V2_MTB_JSON = MediaType("application", "vnd.dnpm.v2.mtb+json")
-    const val APPLICATION_VND_DNPM_V2_JSON_MTB_VALUE = "application/vnd.dnpm.v2.mtb+json"
+    const val APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE = "application/vnd.dnpm.v2.mtb+json"
 
     val APPLICATION_VND_DNPM_V2_RD_JSON = MediaType("application", "vnd.dnpm.v2.rd+json")
-    const val APPLICATION_VND_DNPM_V2_JSON_RD_VALUE = "application/vnd.dnpm.v2.rd+json"
+    const val APPLICATION_VND_DNPM_V2_RD_JSON_VALUE = "application/vnd.dnpm.v2.rd+json"
 }
