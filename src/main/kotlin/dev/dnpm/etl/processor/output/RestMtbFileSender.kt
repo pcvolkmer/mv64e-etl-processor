@@ -19,10 +19,10 @@
 
 package dev.dnpm.etl.processor.output
 
-import dev.dnpm.etl.processor.config.RestTargetProperties
-import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.PatientPseudonym
+import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -46,11 +46,11 @@ abstract class RestMtbFileSender(
 
     abstract fun deleteUrl(patientId: PatientPseudonym): String
 
-    override fun send(request: MtbFileSender.MtbFileRequest): MtbFileSender.Response {
+    override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val headers = getHttpHeaders()
-                val entityReq = HttpEntity(request.mtbFile, headers)
+                val entityReq = HttpEntity(request.content, headers)
                 val response = restTemplate.postForEntity(
                     sendUrl(),
                     entityReq,
@@ -76,7 +76,7 @@ abstract class RestMtbFileSender(
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
 
-    override fun send(request: MtbFileSender.DeleteRequest): MtbFileSender.Response {
+    override fun send(request: DeleteRequest): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val headers = getHttpHeaders()

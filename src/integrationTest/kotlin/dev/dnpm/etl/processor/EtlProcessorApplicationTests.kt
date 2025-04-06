@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.output.BwhcV1MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -91,7 +92,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
         fun mtbFileIsTransformed() {
             doAnswer {
                 MtbFileSender.Response(RequestStatus.SUCCESS)
-            }.whenever(mtbFileSender).send(any<MtbFileSender.MtbFileRequest>())
+            }.whenever(mtbFileSender).send(any<BwhcV1MtbFileRequest>())
 
             val mtbFile = MtbFile.builder()
                 .withPatient(
@@ -134,9 +135,9 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
                 }
             }
 
-            val captor = argumentCaptor<MtbFileSender.MtbFileRequest>()
+            val captor = argumentCaptor<BwhcV1MtbFileRequest>()
             verify(mtbFileSender).send(captor.capture())
-            assertThat(captor.firstValue.mtbFile.diagnoses).hasSize(1).allMatch { diagnosis ->
+            assertThat(captor.firstValue.content.diagnoses).hasSize(1).allMatch { diagnosis ->
                 diagnosis.icd10.version == "2014"
             }
         }

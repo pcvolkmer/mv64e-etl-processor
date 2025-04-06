@@ -30,7 +30,6 @@ import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -73,7 +72,7 @@ class RestBwhcMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
+        val response = restMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -88,7 +87,7 @@ class RestBwhcMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
+        val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -118,7 +117,7 @@ class RestBwhcMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
+        val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -148,7 +147,7 @@ class RestBwhcMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
+        val response = restMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }

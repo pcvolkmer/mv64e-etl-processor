@@ -27,6 +27,8 @@ import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.output.BwhcV1MtbFileRequest
+import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
@@ -59,16 +61,16 @@ class RequestProcessor(
         mtbFile pseudonymizeWith pseudonymizeService
         mtbFile anonymizeContentWith pseudonymizeService
 
-        val request = MtbFileSender.MtbFileRequest(requestId, transformationService.transform(mtbFile))
+        val request = BwhcV1MtbFileRequest(requestId, transformationService.transform(mtbFile))
 
-        val patientPseudonym = PatientPseudonym(request.mtbFile.patient.id)
+        val patientPseudonym = PatientPseudonym(request.content.patient.id)
 
         requestService.save(
             Request(
                 requestId,
                 patientPseudonym,
                 pid,
-                fingerprint(request.mtbFile),
+                fingerprint(request.content),
                 RequestType.MTB_FILE,
                 RequestStatus.UNKNOWN
             )
@@ -131,7 +133,7 @@ class RequestProcessor(
                 )
             )
 
-            val responseStatus = sender.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+            val responseStatus = sender.send(DeleteRequest(requestId, patientPseudonym))
 
             applicationEventPublisher.publishEvent(
                 ResponseEvent(

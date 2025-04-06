@@ -29,7 +29,6 @@ import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.output.RestBwhcMtbFileSenderTest.Companion
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
@@ -75,7 +74,7 @@ class RestDipMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
+        val response = restMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -90,7 +89,7 @@ class RestDipMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
+        val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -123,7 +122,7 @@ class RestDipMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
+        val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -156,7 +155,7 @@ class RestDipMtbFileSenderTest {
                 withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
             }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
+        val response = restMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }

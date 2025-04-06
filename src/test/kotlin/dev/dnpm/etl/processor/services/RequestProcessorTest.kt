@@ -21,14 +21,19 @@ package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
-import dev.dnpm.etl.processor.*
+import dev.dnpm.etl.processor.Fingerprint
+import dev.dnpm.etl.processor.PatientId
+import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.output.BwhcV1MtbFileRequest
+import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.randomRequestId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -109,7 +114,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any())
+        }.whenever(transformationService).transform(any<MtbFile>())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -168,7 +173,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any())
+        }.whenever(transformationService).transform(any<MtbFile>())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -223,7 +228,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<MtbFileSender.MtbFileRequest>())
+        }.whenever(sender).send(any<BwhcV1MtbFileRequest>())
 
         doAnswer {
             it.arguments[0] as String
@@ -231,7 +236,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any())
+        }.whenever(transformationService).transform(any<MtbFile>())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -286,7 +291,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.whenever(sender).send(any<MtbFileSender.MtbFileRequest>())
+        }.whenever(sender).send(any<BwhcV1MtbFileRequest>())
 
         doAnswer {
             it.arguments[0] as String
@@ -294,7 +299,7 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any())
+        }.whenever(transformationService).transform(any<MtbFile>())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
@@ -336,7 +341,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.UNKNOWN)
-        }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
+        }.whenever(sender).send(any<DeleteRequest>())
 
         this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
@@ -354,7 +359,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
+        }.whenever(sender).send(any<DeleteRequest>())
 
         this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
@@ -372,7 +377,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
+        }.whenever(sender).send(any<DeleteRequest>())
 
         this.requestProcessor.processDeletion(TEST_PATIENT_ID)
 
@@ -404,11 +409,11 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any())
+        }.whenever(transformationService).transform(any<MtbFile>())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<MtbFileSender.MtbFileRequest>())
+        }.whenever(sender).send(any<BwhcV1MtbFileRequest>())
 
         val mtbFile = MtbFile.builder()
             .withPatient(
