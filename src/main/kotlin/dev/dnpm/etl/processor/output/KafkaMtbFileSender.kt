@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -22,9 +22,12 @@ package dev.dnpm.etl.processor.output
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.retry.support.RetryTemplate
 
@@ -40,11 +43,17 @@ class KafkaMtbFileSender(
     override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val result = kafkaTemplate.send(
-                    kafkaProperties.outputTopic,
-                    key(request),
-                    objectMapper.writeValueAsString(request)
-                )
+                val record =
+                    ProducerRecord(kafkaProperties.outputTopic, key(request), objectMapper.writeValueAsString(request))
+                when (request) {
+                    is BwhcV1MtbFileRequest -> record.headers()
+                        .add("contentType", MediaType.APPLICATION_JSON_VALUE.toByteArray())
+
+                    is DnpmV2MtbFileRequest -> record.headers()
+                        .add("contentType", CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+                }
+
+                val result = kafkaTemplate.send(record)
                 if (result.get() != null) {
                     logger.debug("Sent file via KafkaMtbFileSender")
                     MtbFileSender.Response(RequestStatus.UNKNOWN)
@@ -70,12 +79,15 @@ class KafkaMtbFileSender(
 
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val result = kafkaTemplate.send(
-                    kafkaProperties.outputTopic,
-                    key(request),
-                    objectMapper.writeValueAsString(BwhcV1MtbFileRequest(request.requestId, dummyMtbFile))
-                )
+                val record =
+                    ProducerRecord(
+                        kafkaProperties.outputTopic,
+                        key(request),
+                        // Always use old BwhcV1FileRequest with Consent REJECT
+                        objectMapper.writeValueAsString(BwhcV1MtbFileRequest(request.requestId, dummyMtbFile))
+                    )
 
+                val result = kafkaTemplate.send(record)
                 if (result.get() != null) {
                     logger.debug("Sent deletion request via KafkaMtbFileSender")
                     MtbFileSender.Response(RequestStatus.UNKNOWN)
