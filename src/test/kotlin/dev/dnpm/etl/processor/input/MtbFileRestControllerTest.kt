@@ -72,7 +72,7 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any())
+            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
         }
 
         @Test
@@ -128,7 +128,7 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any())
+            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
         }
 
         @Test
@@ -186,7 +186,7 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(0)).processMtbFile(any())
+            verify(requestProcessor, times(0)).processMtbFile(any<MtbFile>())
         }
 
     }

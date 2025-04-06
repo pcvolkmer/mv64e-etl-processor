@@ -74,7 +74,7 @@ class KafkaInputListenerTest {
             )
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -121,7 +121,7 @@ class KafkaInputListenerTest {
             )
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any(), anyValueClass())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>(), anyValueClass())
     }
 
     @Test
