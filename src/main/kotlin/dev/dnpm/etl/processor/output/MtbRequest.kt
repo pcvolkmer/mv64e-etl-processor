@@ -31,17 +31,27 @@ interface MtbRequest {
 sealed interface MtbFileRequest<out T> : MtbRequest {
     override val requestId: RequestId
     val content: T
+
+    fun patientPseudonym(): PatientPseudonym
 }
 
 data class BwhcV1MtbFileRequest(
     override val requestId: RequestId,
     override val content: MtbFile
-) : MtbFileRequest<MtbFile>
+) : MtbFileRequest<MtbFile> {
+    override fun patientPseudonym(): PatientPseudonym {
+        return PatientPseudonym(content.patient.id)
+    }
+}
 
 data class DnpmV2MtbFileRequest(
     override val requestId: RequestId,
     override val content: Mtb
-) : MtbFileRequest<Mtb>
+) : MtbFileRequest<Mtb> {
+    override fun patientPseudonym(): PatientPseudonym {
+        return PatientPseudonym(content.patient.id)
+    }
+}
 
 data class DeleteRequest(
     override val requestId: RequestId,
