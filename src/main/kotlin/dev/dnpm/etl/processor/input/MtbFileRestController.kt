@@ -24,7 +24,7 @@ import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.consent.ICheckConsent
-import dev.dnpm.etl.processor.consent.ConsentStatus
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.slf4j.LoggerFactory
@@ -47,20 +47,26 @@ class MtbFileRestController(
 
     @PostMapping( consumes = [ MediaType.APPLICATION_JSON_VALUE ] )
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
-        var consentStatus = constService.isConsented(mtbFile.patient.id)
+        var ttpConsentStatus = constService.isConsented(mtbFile.patient.id)
 
-        if (mtbFile.consent.status == Consent.Status.ACTIVE && (consentStatus.equals(ConsentStatus.CONSENTED) || consentStatus.equals(
-                ConsentStatus.IGNORED
-            ))
-        ) {
+        // received status REJECTED overrides TTP value. Also in case of disabled consent service,
+        // we need to override IGNORED status
+        if (mtbFile.consent.status == Consent.Status.REJECTED) ttpConsentStatus =
+            TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
+
+        val isConsentOK = mtbFile.consent.status == Consent.Status.ACTIVE && (ttpConsentStatus.equals(
+            TtpConsentStatus.CONSENTED
+        ) || ttpConsentStatus.equals(
+            TtpConsentStatus.IGNORED
+        ))
+        if (isConsentOK) {
             logger.debug("Accepted MTB File (bwHC V1) for processing")
             requestProcessor.processMtbFile(mtbFile)
         } else {
+
             logger.debug("Accepted MTB File (bwHC V1) and process deletion")
-            if (mtbFile.consent.status == Consent.Status.REJECTED) consentStatus =
-                ConsentStatus.CONSENT_REJECTED
             val patientId = PatientId(mtbFile.patient.id)
-            requestProcessor.processDeletion(patientId, consentStatus)
+            requestProcessor.processDeletion(patientId, ttpConsentStatus)
         }
         return ResponseEntity.accepted().build()
     }
@@ -75,7 +81,7 @@ class MtbFileRestController(
     @DeleteMapping(path = ["{patientId}"])
     fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
         logger.debug("Accepted patient ID to process deletion")
-        requestProcessor.processDeletion(PatientId(patientId), ConsentStatus.IGNORED)
+        requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.IGNORED)
         return ResponseEntity.accepted().build()
     }
 

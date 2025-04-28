@@ -84,8 +84,8 @@ class AppConfiguration {
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
-    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig): Generator {
+        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate, appFhirConfig)
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)

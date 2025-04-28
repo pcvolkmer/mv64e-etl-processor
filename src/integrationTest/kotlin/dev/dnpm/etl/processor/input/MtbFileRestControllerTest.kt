@@ -22,10 +22,9 @@ package dev.dnpm.etl.processor.input
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.anyValueClass
-import dev.dnpm.etl.processor.config.AppFhirConfig
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.consent.ConsentCheckedIgnored
-import dev.dnpm.etl.processor.consent.ConsentStatus
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.consent.ICheckConsent
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -145,7 +143,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass(),  eq(ConsentStatus.IGNORED))
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(),  eq(TtpConsentStatus.IGNORED))
     }
 
     @Test

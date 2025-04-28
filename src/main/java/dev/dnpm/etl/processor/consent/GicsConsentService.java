@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
@@ -88,6 +89,18 @@ public class GicsConsentService implements ICheckConsent {
                 .setSystem(configProperties.getPolicySystem())));
         result.addParameter(new ParametersParameterComponent().setName("version")
             .setValue(new StringType().setValue(configProperties.getParameterVersion())));
+
+        /* add config parameter with:
+         * ignoreVersionNumber -> true
+         * unknownStateIsConsideredAsDecline -> true
+         */
+        var config = new ParametersParameterComponent().setName("config").addPart(
+            new ParametersParameterComponent().setName("ignoreVersionNumber")
+                .setValue(new BooleanType().setValue(true))).addPart(
+            new ParametersParameterComponent().setName("unknownStateIsConsideredAsDecline")
+                .setValue(new BooleanType().setValue(true)));
+        result.addParameter(config);
+
         return result;
     }
 
@@ -127,7 +140,7 @@ public class GicsConsentService implements ICheckConsent {
     }
 
     @Override
-    public ConsentStatus isConsented(String personIdentifierValue) {
+    public TtpConsentStatus isConsented(String personIdentifierValue) {
         var parameter = GicsConsentService.getIsConsentedParam(gIcsConfigProperties,
             personIdentifierValue);
 
@@ -136,9 +149,9 @@ public class GicsConsentService implements ICheckConsent {
 
     }
 
-    private ConsentStatus evaluateConsentResponse(String consentStatusResponse) {
+    private TtpConsentStatus evaluateConsentResponse(String consentStatusResponse) {
         if (consentStatusResponse == null) {
-            return ConsentStatus.FAILED_TO_ASK;
+            return TtpConsentStatus.FAILED_TO_ASK;
         }
         var responseParameters = fhirContext.newJsonParser()
             .parseResource(Parameters.class, consentStatusResponse);
@@ -146,12 +159,12 @@ public class GicsConsentService implements ICheckConsent {
         var responseValue = responseParameters.getParameter("consented").getValue();
         var isConsented = responseValue.castToBoolean(responseValue);
         if (!isConsented.hasValue()) {
-            return ConsentStatus.FAILED_TO_ASK;
+            return TtpConsentStatus.FAILED_TO_ASK;
         }
         if (isConsented.booleanValue()) {
-            return ConsentStatus.CONSENTED;
+            return TtpConsentStatus.CONSENTED;
         } else {
-            return ConsentStatus.CONSENT_MISSING;
+            return TtpConsentStatus.CONSENT_MISSING_OR_REJECTED;
         }
     }
 }

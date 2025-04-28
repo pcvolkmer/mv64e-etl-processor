@@ -25,5 +25,5 @@ enum class RequestStatus(val value: String) {
     ERROR("error"),
     UNKNOWN("unknown"),
     DUPLICATION("duplication"),
-    CONSENTMISSING("no-consent")
+    NO_CONSENT("no-consent")
 }

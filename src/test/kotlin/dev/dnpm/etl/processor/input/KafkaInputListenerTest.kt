@@ -23,8 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
-import dev.dnpm.etl.processor.anyValueClass
-import dev.dnpm.etl.processor.consent.ConsentStatus
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -36,10 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.*
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -98,7 +94,7 @@ class KafkaInputListenerTest {
 
         verify(requestProcessor, times(1)).processDeletion(
             anyValueClass(),
-            eq(ConsentStatus.IGNORED)
+            eq(TtpConsentStatus.IGNORED)
         )
     }
 
@@ -152,7 +148,8 @@ class KafkaInputListenerTest {
                 Optional.empty()
             )
         )
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass(), eq(ConsentStatus.IGNORED)
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass(), eq(
+            TtpConsentStatus.IGNORED))
     }
 
     @Test
@@ -183,7 +180,8 @@ class KafkaInputListenerTest {
                 Optional.empty()
             )
         )
-        verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass(), eq(ConsentStatus.IGNORED)
+        verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass(), eq(
+            TtpConsentStatus.IGNORED))
     }
 
 }

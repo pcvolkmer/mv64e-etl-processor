@@ -21,9 +21,8 @@ package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
-import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.consent.ConsentCheckedIgnored
-import dev.dnpm.etl.processor.consent.ConsentStatus
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.Mtb
@@ -81,7 +80,8 @@ class MtbFileRestControllerTest {
         @Test
         fun shouldProcessPostRequestWithRejectedConsent() {
             mockMvc.post("/mtbfile") {
-                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.REJECTED))
+                content =
+                    objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.REJECTED))
                 contentType = MediaType.APPLICATION_JSON
             }.andExpect {
                 status {
@@ -89,7 +89,10 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+            verify(requestProcessor, times(1)).processDeletion(
+                anyValueClass(),
+                org.mockito.kotlin.eq(TtpConsentStatus.CONSENT_MISSING_OR_REJECTED)
+            )
         }
 
         @Test
@@ -100,7 +103,10 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+            verify(requestProcessor, times(1)).processDeletion(
+                anyValueClass(),
+                org.mockito.kotlin.eq(TtpConsentStatus.IGNORED)
+            )
         }
     }
 
@@ -116,7 +122,7 @@ class MtbFileRestControllerTest {
             @Mock requestProcessor: RequestProcessor
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor)
+            val controller = MtbFileRestController(requestProcessor, ConsentCheckedIgnored())
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }
 
@@ -137,7 +143,8 @@ class MtbFileRestControllerTest {
         @Test
         fun shouldProcessPostRequestWithRejectedConsent() {
             mockMvc.post("/mtb") {
-                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.REJECTED))
+                content =
+                    objectMapper.writeValueAsString(bwhcMtbFileContent(Consent.Status.REJECTED))
                 contentType = MediaType.APPLICATION_JSON
             }.andExpect {
                 status {
@@ -145,7 +152,11 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+            verify(requestProcessor, times(1)).processDeletion(
+                anyValueClass(), org.mockito.kotlin.eq(
+                    TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
+                )
+            )
         }
 
         @Test
@@ -156,7 +167,11 @@ class MtbFileRestControllerTest {
                 }
             }
 
-            verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+            verify(requestProcessor, times(1)).processDeletion(
+                anyValueClass(), org.mockito.kotlin.eq(
+                    TtpConsentStatus.IGNORED
+                )
+            )
         }
     }
 
@@ -172,13 +187,15 @@ class MtbFileRestControllerTest {
             @Mock requestProcessor: RequestProcessor
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor)
+            val controller = MtbFileRestController(requestProcessor, ConsentCheckedIgnored())
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }
 
         @Test
         fun shouldRespondPostRequest() {
-            val mtbFileContent = ClassPathResource("mv64e-mtb-fake-patient.json").inputStream.readAllBytes().toString(Charsets.UTF_8)
+            val mtbFileContent =
+                ClassPathResource("mv64e-mtb-fake-patient.json").inputStream.readAllBytes()
+                    .toString(Charsets.UTF_8)
 
             mockMvc.post("/mtb") {
                 content = mtbFileContent

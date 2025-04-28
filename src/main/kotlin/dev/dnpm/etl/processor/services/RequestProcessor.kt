@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
-import dev.dnpm.etl.processor.consent.ConsentStatus
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -129,19 +129,18 @@ class RequestProcessor(
                 && lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFileRequest)
     }
 
-    fun processDeletion(patientId: PatientId, isConsented: ConsentStatus) {
+    fun processDeletion(patientId: PatientId, isConsented: TtpConsentStatus) {
         processDeletion(patientId, randomRequestId(), isConsented)
     }
 
-    fun processDeletion(patientId: PatientId, requestId: RequestId, isConsented: ConsentStatus) {
+    fun processDeletion(patientId: PatientId, requestId: RequestId, isConsented: TtpConsentStatus) {
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
             val requestStatus: RequestStatus = when (isConsented) {
-                ConsentStatus.CONSENT_MISSING -> RequestStatus.CONSENTMISSING
-                ConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
-                ConsentStatus.CONSENTED, ConsentStatus.IGNORED,
-                ConsentStatus.CONSENT_REJECTED -> RequestStatus.UNKNOWN
+                TtpConsentStatus.CONSENT_MISSING_OR_REJECTED -> RequestStatus.NO_CONSENT
+                TtpConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
+                TtpConsentStatus.CONSENTED, TtpConsentStatus.IGNORED -> RequestStatus.UNKNOWN
             }
 
             requestService.save(
