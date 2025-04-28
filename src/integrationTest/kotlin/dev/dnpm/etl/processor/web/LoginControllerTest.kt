@@ -19,21 +19,21 @@
 
 package dev.dnpm.etl.processor.web
 
-import com.gargoylesoftware.htmlunit.WebClient
-import com.gargoylesoftware.htmlunit.html.HtmlPage
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.security.TokenService
 import org.assertj.core.api.Assertions.assertThat
+import org.htmlunit.WebClient
+import org.htmlunit.html.HtmlPage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -56,8 +56,8 @@ import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
         "app.security.enable-tokens=true"
     ]
 )
-@MockBean(
-    TokenService::class,
+@MockitoBean(
+    types = [TokenService::class]
 )
 class LoginControllerTest {
 

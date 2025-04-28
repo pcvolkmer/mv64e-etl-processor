@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -21,16 +21,10 @@ package dev.dnpm.etl.processor.config
 
 import dev.dnpm.etl.processor.security.Role
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.DeprecatedConfigurationProperty
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
     var bwhcUri: String?,
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated in favor of 'app.pseudonymize.generator'",
-        replacement = "app.pseudonymize.generator"
-    )
-    var pseudonymizer: PseudonymGenerator = PseudonymGenerator.BUILDIN,
     var transformations: List<TransformationProperties> = listOf(),
     var maxRetryAttempts: Int = 3,
     var duplicationDetection: Boolean = true
@@ -56,10 +50,6 @@ data class GPasConfigProperties(
     val target: String = "etl-processor",
     val username: String?,
     val password: String?,
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated in favor of including Root CA"
-    )
-    val sslCaLocation: String?
 ) {
     companion object {
         const val NAME = "app.pseudonymize.gpas"
@@ -113,6 +103,9 @@ data class GIcsConfigProperties(
 @ConfigurationProperties(RestTargetProperties.NAME)
 data class RestTargetProperties(
     val uri: String?,
+    val username: String?,
+    val password: String?,
+    val isBwhc: Boolean = false,
 ) {
     companion object {
         const val NAME = "app.rest"
@@ -123,18 +116,8 @@ data class RestTargetProperties(
 data class KafkaProperties(
     val inputTopic: String?,
     val outputTopic: String = "etl-processor",
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated",
-        replacement = "outputTopic"
-    )
-    val topic: String = outputTopic,
     val outputResponseTopic: String = "${outputTopic}_response",
-    @get:DeprecatedConfigurationProperty(
-        reason = "Deprecated",
-        replacement = "outputResponseTopic"
-    )
-    val responseTopic: String = outputResponseTopic,
-    val groupId: String = "${topic}_group",
+    val groupId: String = "${outputTopic}_group",
     val servers: String = ""
 ) {
     companion object {

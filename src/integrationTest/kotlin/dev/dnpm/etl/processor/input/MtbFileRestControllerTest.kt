@@ -39,13 +39,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
@@ -60,7 +60,7 @@ import org.springframework.test.web.servlet.post
         ConsentCheckedIgnored::class, ICheckConsent::class
     ]
 )
-@MockBean(TokenRepository::class, RequestProcessor::class)
+@MockitoBean(types = [TokenRepository::class, RequestProcessor::class])
 @TestPropertySource(
     properties = [
         "app.pseudonymize.generator=BUILDIN",
@@ -95,7 +95,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processMtbFile(any())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -108,7 +108,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processMtbFile(any())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -121,7 +121,7 @@ class MtbFileRestControllerTest {
             status { isUnauthorized() }
         }
 
-        verify(requestProcessor, never()).processMtbFile(any())
+        verify(requestProcessor, never()).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -134,7 +134,7 @@ class MtbFileRestControllerTest {
             status { isForbidden() }
         }
 
-        verify(requestProcessor, never()).processMtbFile(any())
+        verify(requestProcessor, never()).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -160,7 +160,7 @@ class MtbFileRestControllerTest {
     }
 
     @Nested
-    @MockBean(UserRoleRepository::class, ClientRegistrationRepository::class)
+    @MockitoBean(types = [UserRoleRepository::class, ClientRegistrationRepository::class])
     @TestPropertySource(
         properties = [
             "app.pseudonymize.generator=BUILDIN",
@@ -182,7 +182,7 @@ class MtbFileRestControllerTest {
                 status { isAccepted() }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any())
+            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
         }
 
         @Test
@@ -195,7 +195,7 @@ class MtbFileRestControllerTest {
                 status { isAccepted() }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any())
+            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
         }
     }
 

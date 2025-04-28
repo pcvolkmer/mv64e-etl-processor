@@ -1,6 +1,6 @@
-# ETL-Processor for bwHC data [![Run Tests](https://github.com/CCC-MF/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/CCC-MF/etl-processor/actions/workflows/test.yml)
+# ETL-Processor for DNPM:DIP [![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
 
-Diese Anwendung versendet ein bwHC-MTB-File an das bwHC-Backend und pseudonymisiert die Patienten-ID.
+Diese Anwendung versendet ein bwHC-MTB-File im bwHC-Datenmodell 1.0 an DNPM:DIP und pseudonymisiert die Patienten-ID.
 
 ## Einordnung innerhalb einer DNPM-ETL-Strecke
 
@@ -9,7 +9,7 @@ Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkost
 Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
 
-Löschanfragen werden immer als Löschanfrage an das bwHC-backend weitergeleitet.
+Löschanfragen werden immer als Löschanfrage an DNPM:DIP weitergeleitet.
 
 Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand der Anwendung gewährt.
 
@@ -22,7 +22,17 @@ Die Erkennung von Duplikaten ist normalerweise immer aktiv, kann jedoch über de
 
 ### Datenübermittlung über HTTP/REST
 
-Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an das bwHC-Backend gesendet.
+Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an DNPM:DIP gesendet.
+
+Ein HTTP Request kann, angenommen die Installation erfolgte auf dem Host `dnpm.example.com` an nachfolgende URLs gesendet werden:
+
+| HTTP-Request | URL                                     | Consent-Status im Datensatz | Bemerkung                                                                       |
+|--------------|-----------------------------------------|-----------------------------|---------------------------------------------------------------------------------|
+| `POST`       | `https://dnpm.example.com/mtb`          | `ACTIVE`                    | Die Anwendung verarbeitet den eingehenden Datensatz                             |
+| `POST`       | `https://dnpm.example.com/mtb`          | `REJECT`                    | Die Anwendung sendet einen Lösch-Request für die im Datensatz angegebene Pat-ID |
+| `DELETE`     | `https://dnpm.example.com/mtb/12345678` | -                           | Die Anwendung sendet einen Lösch-Request für Pat-ID `12345678`                  |
+
+Anstelle des Pfads `/mtb` kann auch, wie in Version 0.9 und älter üblich, `/mtbfile` verwendet werden.
 
 ### Datenübermittlung mit Apache Kafka
 
@@ -33,14 +43,20 @@ Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
 ## Konfiguration
 
-### Breaking Changes nach Version 0.10
+### 🔥 Wichtige Änderungen in Version 0.10
+
+Ab Version 0.10 wird [DNPM:DIP](https://github.com/dnpm-dip) unterstützt und als Standardendpunkt verwendet.
+Soll noch das alte bwHC-Backend verwendet werden, so ist die Umgebungsvariable  `APP_REST_IS_BWHC` auf `true` zu setzen.
+
+### 🔥 Breaking Changes nach Version 0.10
 
 In Versionen des ETL-Processors **nach Version 0.10** werden die folgenden Konfigurationsoptionen entfernt:
 
-* `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`: Nutzen Sie hier, wie unter [_Integration eines eigenen Root CA
-  Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben, das Einbinden eigener Zertifikate.
 * `APP_KAFKA_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_TOPIC`
 * `APP_KAFKA_RESPONSE_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`
+
+Der Pfad zum Versenden von MTB-Daten ist nun offiziell `/mtb`.
+In Versionen **nach Version 0.10** wird die Unterstützung des Pfads `/mtbfile` entfernt.
 
 ### Pseudonymisierung der Patienten-ID
 
@@ -50,13 +66,11 @@ Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgen
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Präfix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
 
-**Hinweise**: 
+**Hinweis** 
 
-* Der alte Konfigurationsparameter `APP_PSEUDONYMIZER` mit den Werten `GPAS` oder `BUILDIN` sollte nicht mehr verwendet
-  werden.
-* Die Pseudonymisierung erfolgt im ETL-Prozessor nur für die Patienten-ID.
-  Andere IDs werden mithilfe des standortbezogenen Präfixes (erneut) anonymisiert, um für den aktuellen Kontext nicht
-  vergleichbare IDs bereitzustellen.
+Die Pseudonymisierung erfolgt im ETL-Prozessor nur für die Patienten-ID.
+Andere IDs werden mithilfe des standortbezogenen Präfixes (erneut) anonymisiert, um für den aktuellen Kontext nicht
+vergleichbare IDs bereitzustellen.
 
 #### Eingebaute Anonymisierung
 
@@ -72,13 +86,6 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* ~~`APP_PSEUDONYMIZE_GPAS_SSLCALOCATION`~~: **Veraltet** - Root Zertifikat für gPas, falls es dediziert hinzugefügt werden muss.
-  **Wird in nach Version 0.10 entfernt**
-
-Der Konfigurationsparameter `APP_PSEUDONYMIZE_GPAS_SSLCALOCATION` sollte nicht mehr verwendet werden und wird nach
-Version 0.10 entfernt.
-Stattdessen sollte das Root Zertifikat wie unter [_Integration eines eigenen Root CA
-Zertifikats_](#integration-eines-eigenen-root-ca-zertifikats) beschrieben eingebunden werden.
 
 ### Anmeldung mit einem Passwort
 
@@ -145,7 +152,7 @@ Sie bekommen dabei wieder die Standardrolle zugewiesen.
 #### Auswirkungen auf den dargestellten Inhalt
 
 Nur Administratoren haben Zugriff auf den Konfigurationsbereich, nur angemeldete Benutzer können die anonymisierte oder
-pseudonymisierte Patienten-ID sowie den Qualitätsbericht des bwHC-Backends einsehen.
+pseudonymisierte Patienten-ID sowie den Qualitätsbericht von DNPM:DIP einsehen.
 
 Wurde kein Administrator-Account konfiguriert, sind diese Inhalte generell nicht verfügbar.
 
@@ -161,7 +168,7 @@ zur Nutzung des MTB-File-Endpunkts eine HTTP-Basic-Authentifizierung voraussetze
 
 ![Tokenverwaltung](docs/tokens.png)
 
-In diesem Fall können den Endpunkt für das Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)** wie folgt konfigurieren:
+In diesem Fall kann der Endpunkt für das Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)** wie folgt konfiguriert werden:
 
 ```
 https://testonkostar:MTg1NTL...NGU4@etl.example.com/mtbfile
@@ -174,7 +181,7 @@ Alternativ kann eine Authentifizierung über Benutzername/Passwort oder OIDC erf
 ### Transformation von Werten
 
 In Onkostar kann es vorkommen, dass ein Wert eines Merkmalskatalogs an einem Standort angepasst wurde und dadurch nicht dem Wert entspricht,
-der vom bwHC-Backend akzeptiert wird.
+der von DNPM:DIP akzeptiert wird.
 
 Diese Anwendung bietet daher die Möglichkeit, eine Transformation vorzunehmen. Hierzu muss der "Pfad" innerhalb des JSON-MTB-Files angegeben werden und
 welcher Wert wie ersetzt werden soll.
@@ -194,18 +201,21 @@ Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpu
 
 #### REST
 
-Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an das bwHC-Backend gesendet wird:
+Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an DNPM:DIP gesendet wird:
 
-* `APP_REST_URI`: URI der zu benutzenden API der bwHC-Backend-Instanz. z.B.: `http://localhost:9000/bwhc/etl/api`
+* `APP_REST_URI`: URI der zu benutzenden API der Backend-Instanz. Zum Beispiel:
+  * `http://localhost:9000/bwhc/etl/api` für **bwHC Backend**
+  * `http://localhost:9000/api` für **dnpm:dip**
+* `APP_REST_USERNAME`: Basic-Auth-Benutzername für den REST-Endpunkt
+* `APP_REST_PASSWORD`: Basic-Auth-Passwort für den REST-Endpunkt
+* `APP_REST_IS_BWHC`: `true` für **bwHC Backend**, weglassen oder `false` für **dnpm:dip**
 
 #### Kafka-Topics
 
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein Kafka-Topic übermittelt wird:
 
 * `APP_KAFKA_OUTPUT_TOPIC`: Zu verwendendes Topic zum Versenden von Anfragen. 
-  Ersetzt ~~`APP_KAFKA_TOPIC`~~, **welches nach Version 0.10 entfernt wird**. 
 * `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`: Topic mit Antworten über den Erfolg des Versendens. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_response".
-  Ersetzt ~~`APP_KAFKA_RESPONSE_TOPIC`~~, **welches nach Version 0.10 entfernt wird**.
 * `APP_KAFKA_GROUP_ID`: Kafka GroupID des Consumers. Standardwert: `APP_KAFKA_TOPIC` mit Anhang "_group".
 * `APP_KAFKA_SERVERS`: Zu verwendende Kafka-Bootstrap-Server als kommagetrennte Liste
 
@@ -213,7 +223,7 @@ Wird keine Rückantwort über Apache Kafka empfangen und es gibt keine weitere M
 
 Weitere Einstellungen können über die Parameter von Spring Kafka konfiguriert werden.
 
-Lässt sich keine Verbindung zu dem bwHC-Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
+Lässt sich keine Verbindung zu dem Backend aufbauen, wird eine Rückantwort mit Status-Code `900` erwartet, welchen es
 für HTTP nicht gibt.
 
 Wird die Umgebungsvariable `APP_KAFKA_INPUT_TOPIC` gesetzt, kann eine Nachricht auch über dieses Kafka-Topic an den ETL-Prozessor übermittelt werden.
@@ -250,7 +260,7 @@ kafka-configs.sh --bootstrap-server localhost:9092 --alter --topic test --add-co
 Da als Key eines Records die (pseudonymisierte) Patienten-ID verwendet wird, stehen mit obiger Konfiguration 
 der Kafka-Topics nach 10 Sekunden nur noch der jeweils letzte Eintrag für den entsprechenden Key zur Verfügung.
 
-Da der Key sowohl für die Records in Richtung bwHC-Backend für die Rückantwort identisch aufgebaut ist, lassen sich so
+Da der Key sowohl für die Records in Richtung DNPM:DIP, als auch für die Rückantwort identisch aufgebaut ist, lassen sich so
 auch im Falle eines Consent-Widerspruchs die enthaltenen Daten als auch die Offenlegung durch Verifikationsdaten in der
 Antwort effektiv verhindern, da diese nach 10 Sekunden gelöscht werden.
 
@@ -259,9 +269,30 @@ ein Consent-Widerspruch erfolgte.
 
 Dieses Vorgehen empfiehlt sich, wenn Sie gespeicherte Records nachgelagert für andere Auswertungen verwenden möchten.
 
+### Antworten und Statusauswertung
+
+Anfragen an das bwHC-Backend aus Versionen bis 0.9.x wurden wie folgt behandelt:
+
+| HTTP-Response  | Status    |
+|----------------|-----------|
+| `HTTP 200`     | `SUCCESS` |
+| `HTTP 201`     | `WARNING` |
+| `HTTP 400-...` | `ERROR`   |
+
+Dies konnte dazu führen, dass zwar mit einem `HTTP 201` geantwortet wurde, aber dennoch in der Issue-Liste die
+Severity `error` aufgetaucht ist.
+
+Ab Version 0.10 wird die Issue-Liste der Antwort verwendet und die darion enthaltene höchste Severity-Stufe als Ergebnis verwendet.
+
+| Höchste Severity | Status    |
+|------------------|-----------|
+| `info`           | `SUCCESS` |
+| `warning`        | `WARNING` |
+| `error`, `fatal` | `ERROR`   |
+
 ## Docker-Images
 
-Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/CCC-MF/etl-processor/pkgs/container/etl-processor
+Diese Anwendung ist auch als Docker-Image verfügbar: https://github.com/pcvolkmer/etl-processor/pkgs/container/etl-processor
 
 ### Images lokal bauen 
 
@@ -374,3 +405,5 @@ Die Datei `application-dev.yml` enthält hierzu die Konfiguration für das Profi
 
 Beim Ausführen der Integrationstests wird eine Testdatenbank in einem Docker-Container gestartet.
 Siehe hier auch die Klasse `AbstractTestcontainerTest` unter `src/integrationTest`.
+
+Ein einfaches Entwickler-Setup inklusive DNPM:DIP ist mit Hilfe von https://github.com/pcvolkmer/dnpmdip-devenv realisierbar.

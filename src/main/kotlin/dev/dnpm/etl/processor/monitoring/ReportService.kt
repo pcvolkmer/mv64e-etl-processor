@@ -25,6 +25,9 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.monitoring.ReportService.Issue
+import dev.dnpm.etl.processor.monitoring.ReportService.Severity
+import java.util.Optional
 
 class ReportService(
     private val objectMapper: ObjectMapper
@@ -55,12 +58,25 @@ class ReportService(
     private data class DataQualityReport(val issues: List<Issue>)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Issue(val severity: Severity, @JsonAlias("details") val message: String)
+    data class Issue(
+        val severity: Severity,
+        @JsonAlias("details") val message: String,
+        val path: Optional<String> = Optional.empty()
+    )
 
     enum class Severity(@JsonValue val value: String) {
         FATAL("fatal"),
         ERROR("error"),
         WARNING("warning"),
         INFO("info")
+    }
+}
+
+fun List<Issue>.asRequestStatus(): RequestStatus {
+    val severity = this.minOfOrNull { it.severity }
+    return when (severity) {
+        Severity.FATAL, Severity.ERROR -> RequestStatus.ERROR
+        Severity.WARNING -> RequestStatus.WARNING
+        else -> RequestStatus.SUCCESS
     }
 }

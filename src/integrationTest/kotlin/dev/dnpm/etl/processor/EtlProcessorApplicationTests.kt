@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.dnpm.etl.processor.output.BwhcV1MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -33,10 +34,10 @@ import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
@@ -45,7 +46,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-@MockBean(MtbFileSender::class)
+@MockitoBean(types = [MtbFileSender::class])
 @TestPropertySource(
     properties = [
         "app.rest.uri=http://example.com",
@@ -73,7 +74,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
     )
     inner class TransformationTest {
 
-        @MockBean
+        @MockitoBean
         private lateinit var mtbFileSender: MtbFileSender
 
         @Autowired
@@ -91,7 +92,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
         fun mtbFileIsTransformed() {
             doAnswer {
                 MtbFileSender.Response(RequestStatus.SUCCESS)
-            }.whenever(mtbFileSender).send(any<MtbFileSender.MtbFileRequest>())
+            }.whenever(mtbFileSender).send(any<BwhcV1MtbFileRequest>())
 
             val mtbFile = MtbFile.builder()
                 .withPatient(
@@ -134,9 +135,9 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
                 }
             }
 
-            val captor = argumentCaptor<MtbFileSender.MtbFileRequest>()
+            val captor = argumentCaptor<BwhcV1MtbFileRequest>()
             verify(mtbFileSender).send(captor.capture())
-            assertThat(captor.firstValue.mtbFile.diagnoses).hasSize(1).allMatch { diagnosis ->
+            assertThat(captor.firstValue.content.diagnoses).hasSize(1).allMatch { diagnosis ->
                 diagnosis.icd10.version == "2014"
             }
         }

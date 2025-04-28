@@ -2,34 +2,35 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
-import java.text.SimpleDateFormat
-import java.util.*
 
 plugins {
     war
-    id("org.springframework.boot") version "3.3.1"
-    id("io.spring.dependency-management") version "1.1.5"
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.spring") version "1.9.24"
+    id("org.springframework.boot") version "3.4.5"
+    id("io.spring.dependency-management") version "1.1.7"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
     jacoco
 }
 
-group = "de.ukw.ccc"
-version = "0.10.0-SNAPSHOT"
+group = "dev.dnpm"
+version = "0.11.0-SNAPSHOT"
 
 var versions = mapOf(
-    "bwhc-dto-java" to "0.3.0",
-    "hapi-fhir" to "6.10.5",
-    "commons-compress" to "1.26.2",
-    "mockito-kotlin" to "5.3.1",
+    "bwhc-dto-java" to "0.4.0",
+    "mtb-dto" to "0.1.0-SNAPSHOT",
+    "hapi-fhir" to "7.6.0",
+    "mockito-kotlin" to "5.4.0",
     "archunit" to "1.3.0",
     // Webjars
+    "webjars-locator" to "0.52",
     "echarts" to "5.4.3",
     "htmx.org" to "1.9.12"
 )
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 sourceSets {
@@ -48,9 +49,18 @@ configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
     }
+
+    all {
+        resolutionStrategy {
+            cacheChangingModulesFor(5, "minutes")
+        }
+    }
 }
 
 repositories {
+    maven {
+        url = uri("https://git.dnpm.dev/api/packages/public-snapshots/maven")
+    }
     maven {
         url = uri("https://git.dnpm.dev/api/packages/public/maven")
     }
@@ -72,30 +82,35 @@ dependencies {
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("de.ukw.ccc:bwhc-dto-java:${versions["bwhc-dto-java"]}")
+    implementation("dev.pcvolkmer.mv64e:mtb-dto:${versions["mtb-dto"]}") { isChanging = true }
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("com.jayway.jsonpath:json-path")
-    implementation("org.webjars:webjars-locator:0.52")
+    implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
+
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
+
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
+
     integrationTestImplementation("org.testcontainers:junit-jupiter")
     integrationTestImplementation("org.testcontainers:postgresql")
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
-    integrationTestImplementation("net.sourceforge.htmlunit:htmlunit")
+    integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
-    // Override dependency version from org.testcontainers:junit-jupiter - CVE-2024-26308, CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:${versions["commons-compress"]}")
 }
 
 tasks.withType<KotlinCompile> {
@@ -112,8 +127,9 @@ tasks.withType<Test> {
     }
 }
 
-task<Test>("integrationTest") {
+tasks.register<Test>("integrationTest") {
     description = "Runs integration tests"
+    group = "verification"
 
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
     classpath = sourceSets["integrationTest"].runtimeClasspath
@@ -122,6 +138,8 @@ task<Test>("integrationTest") {
 }
 
 tasks.register("allTests") {
+    description = "Run all tests"
+    group = JavaBasePlugin.VERIFICATION_GROUP
     dependsOn(tasks.withType<Test>())
 }
 
@@ -135,9 +153,8 @@ tasks.jacocoTestReport {
     }
 }
 
-
 tasks.named<BootBuildImage>("bootBuildImage") {
-    imageName.set("ghcr.io/ccc-mf/etl-processor")
+    imageName.set("ghcr.io/pcvolkmer/etl-processor")
 
     // Binding for CA Certs
     bindings.set(listOf(
@@ -146,9 +163,8 @@ tasks.named<BootBuildImage>("bootBuildImage") {
 
     environment.set(environment.get() + mapOf(
         // Enable this line to embed CA Certs into image on build time
-        "BP_EMBED_CERTS" to "true",
-        "BP_OCI_CREATED" to SimpleDateFormat("MM-dd-yyyy_hh-mm").format(Date()),
-        "BP_OCI_SOURCE" to "https://github.com/CCC-MF/etl-processor",
+        //"BP_EMBED_CERTS" to "true",
+        "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/etl-processor",
         "BP_OCI_LICENSES" to "AGPLv3",
         "BP_OCI_DESCRIPTION" to "ETL Processor for bwHC MTB files"
     ))

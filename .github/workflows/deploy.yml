@@ -30,6 +30,6 @@ jobs:
       - name: Execute image build and push
         run: |
           ./gradlew bootBuildImage
-          docker tag ghcr.io/ccc-mf/etl-processor ghcr.io/ccc-mf/etl-processor:${{ github.ref_name }}
-          docker push ghcr.io/ccc-mf/etl-processor
-          docker push ghcr.io/ccc-mf/etl-processor:${{ github.ref_name }}
+          docker tag ghcr.io/${{ github.repository }} ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          docker push ghcr.io/${{ github.repository }}
+          docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}

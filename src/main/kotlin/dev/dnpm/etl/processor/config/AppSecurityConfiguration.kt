@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -44,6 +44,8 @@ import org.springframework.security.web.SecurityFilterChain
 import java.util.*
 
 
+private const val LOGIN_PATH = "/login"
+
 @Configuration
 @EnableConfigurationProperties(
     value = [
@@ -85,9 +87,14 @@ class AppSecurityConfiguration(
 
     @Bean
     @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "true")
-    fun filterChainOidc(http: HttpSecurity, passwordEncoder: PasswordEncoder, userRoleRepository: UserRoleRepository, sessionRegistry: SessionRegistry): SecurityFilterChain {
+    fun filterChainOidc(
+        http: HttpSecurity,
+        passwordEncoder: PasswordEncoder,
+        userRoleRepository: UserRoleRepository,
+        sessionRegistry: SessionRegistry
+    ): SecurityFilterChain {
         http {
-            authorizeRequests {
+            authorizeHttpRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
                 authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
                 authorize("/report/**", hasAnyRole("ADMIN", "USER"))
@@ -104,15 +111,15 @@ class AppSecurityConfiguration(
                 realmName = "ETL-Processor"
             }
             formLogin {
-                loginPage = "/login"
+                loginPage = LOGIN_PATH
             }
             oauth2Login {
-                loginPage = "/login"
+                loginPage = LOGIN_PATH
             }
             sessionManagement {
                 sessionConcurrency {
                     maximumSessions = 1
-                    expiredUrl = "/login?expired"
+                    expiredUrl = "$LOGIN_PATH?expired"
                 }
                 sessionFixation {
                     newSession()
@@ -125,13 +132,22 @@ class AppSecurityConfiguration(
 
     @Bean
     @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "true")
-    fun grantedAuthoritiesMapper(userRoleRepository: UserRoleRepository, appSecurityConfigProperties: SecurityConfigProperties): GrantedAuthoritiesMapper {
+    fun grantedAuthoritiesMapper(
+        userRoleRepository: UserRoleRepository,
+        appSecurityConfigProperties: SecurityConfigProperties
+    ): GrantedAuthoritiesMapper {
         return GrantedAuthoritiesMapper { grantedAuthority ->
             grantedAuthority.filterIsInstance<OidcUserAuthority>()
                 .onEach {
                     val userRole = userRoleRepository.findByUsername(it.userInfo.preferredUsername)
                     if (userRole.isEmpty) {
-                        userRoleRepository.save(UserRole(null, it.userInfo.preferredUsername, appSecurityConfigProperties.defaultNewUserRole))
+                        userRoleRepository.save(
+                            UserRole(
+                                null,
+                                it.userInfo.preferredUsername,
+                                appSecurityConfigProperties.defaultNewUserRole
+                            )
+                        )
                     }
                 }
                 .map {
@@ -145,7 +161,7 @@ class AppSecurityConfiguration(
     @ConditionalOnProperty(value = ["app.security.enable-oidc"], havingValue = "false", matchIfMissing = true)
     fun filterChain(http: HttpSecurity, passwordEncoder: PasswordEncoder): SecurityFilterChain {
         http {
-            authorizeRequests {
+            authorizeHttpRequests {
                 authorize("/configs/**", hasRole("ADMIN"))
                 authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
                 authorize("/report/**", hasRole("ADMIN"))
@@ -155,7 +171,7 @@ class AppSecurityConfiguration(
                 realmName = "ETL-Processor"
             }
             formLogin {
-                loginPage = "/login"
+                loginPage = LOGIN_PATH
             }
             csrf { disable() }
         }

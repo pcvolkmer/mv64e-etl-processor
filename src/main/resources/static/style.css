@@ -650,11 +650,12 @@ input.inline:focus-visible {
 
 .tab:hover,
 .tab.active {
-    background: var(--table-border);
+    background: var(--bg-gray);
+    color: white;
 }
 
 .tabcontent {
-    border: 1px solid var(--table-border);
+    border: 2px solid var(--bg-gray);
     border-radius: 0 .5em .5em .5em;
     display: none;
     padding: 1em;
@@ -696,4 +697,14 @@ a.reload {
 .no-token {
     padding: 1em;
     background: var(--bg-red-op);
+}
+
+.issue-message {
+    font-family: monospace;
+    font-weight: bolder;
+}
+
+.issue-path {
+    font-family: monospace;
+    line-height: 1rem;
 }

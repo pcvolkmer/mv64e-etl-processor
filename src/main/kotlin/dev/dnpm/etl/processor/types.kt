@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor
 
+import org.springframework.http.MediaType
 import java.util.*
 
 class Fingerprint(val value: String) {
@@ -47,3 +48,16 @@ value class PatientId(val value: String)
 value class PatientPseudonym(val value: String)
 
 fun emptyPatientPseudonym() = PatientPseudonym("")
+
+/**
+ * Custom MediaTypes
+ *
+ * @since 0.11.0
+ */
+object CustomMediaType {
+    val APPLICATION_VND_DNPM_V2_MTB_JSON = MediaType("application", "vnd.dnpm.v2.mtb+json")
+    const val APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE = "application/vnd.dnpm.v2.mtb+json"
+
+    val APPLICATION_VND_DNPM_V2_RD_JSON = MediaType("application", "vnd.dnpm.v2.rd+json")
+    const val APPLICATION_VND_DNPM_V2_RD_JSON_VALUE = "application/vnd.dnpm.v2.rd+json"
+}

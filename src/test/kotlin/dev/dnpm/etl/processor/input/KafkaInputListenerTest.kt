@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -25,6 +25,7 @@ import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.consent.ConsentStatus
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -75,7 +76,7 @@ class KafkaInputListenerTest {
             )
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
     }
 
     @Test
@@ -108,14 +109,7 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.ACTIVE).build())
             .build()
 
-        val headers = RecordHeaders(
-            listOf(
-                RecordHeader(
-                    "requestId",
-                    UUID.randomUUID().toString().toByteArray()
-                )
-            )
-        )
+        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
         kafkaInputListener.onMessage(
             ConsumerRecord(
                 "testtopic",
@@ -132,7 +126,7 @@ class KafkaInputListenerTest {
             )
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any(), anyValueClass())
+        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>(), anyValueClass())
     }
 
     @Test
@@ -142,12 +136,36 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
             .build()
 
+        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                -1L,
+                TimestampType.NO_TIMESTAMP_TYPE,
+                -1,
+                -1,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile),
+                headers,
+                Optional.empty()
+            )
+        )
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass(), eq(ConsentStatus.IGNORED)
+    }
+
+    @Test
+    fun shouldNotProcessDnpmV2Request() {
+        val mtbFile = MtbFile.builder()
+            .withPatient(Patient.builder().withId("DUMMY_12345678").build())
+            .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
+            .build()
+
         val headers = RecordHeaders(
             listOf(
-                RecordHeader(
-                    "requestId",
-                    UUID.randomUUID().toString().toByteArray()
-                )
+                RecordHeader("requestId", UUID.randomUUID().toString().toByteArray()),
+                RecordHeader("contentType", CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
             )
         )
         kafkaInputListener.onMessage(
@@ -165,11 +183,7 @@ class KafkaInputListenerTest {
                 Optional.empty()
             )
         )
-        verify(requestProcessor, times(1)).processDeletion(
-            anyValueClass(),
-            anyValueClass(),
-            eq(ConsentStatus.IGNORED)
-        )
+        verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass(), eq(ConsentStatus.IGNORED)
     }
 
 }

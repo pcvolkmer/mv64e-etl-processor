@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -49,9 +49,8 @@ class GpasPseudonymGeneratorTest {
     fun setup() {
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
         val gPasConfigProperties = GPasConfigProperties(
-            "http://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate",
+            "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate",
             "test",
-            null,
             null,
             null
         )
@@ -66,7 +65,7 @@ class GpasPseudonymGeneratorTest {
     fun shouldReturnExpectedPseudonym() {
         this.mockRestServiceServer.expect {
             method(HttpMethod.POST)
-            requestTo("http://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
+            requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
             withStatus(HttpStatus.OK).body(
                 getDummyResponseBody(
@@ -85,7 +84,7 @@ class GpasPseudonymGeneratorTest {
     fun shouldThrowExceptionIfGpasNotAvailable() {
         this.mockRestServiceServer.expect {
             method(HttpMethod.POST)
-            requestTo("http://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
+            requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
             withException(IOException("Simulated IO error")).createResponse(it)
         }
@@ -97,7 +96,7 @@ class GpasPseudonymGeneratorTest {
     fun shouldThrowExceptionIfGpasDoesNotReturn2xxResponse() {
         this.mockRestServiceServer.expect {
             method(HttpMethod.POST)
-            requestTo("http://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
+            requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
             withStatus(HttpStatus.FOUND)
                 .header(

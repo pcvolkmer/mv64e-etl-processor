@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,54 +19,61 @@
 
 package dev.dnpm.etl.processor.output
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.RestTargetProperties
+import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers.method
-import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
 
-class RestMtbFileSenderTest {
+class RestBwhcMtbFileSenderTest {
 
     private lateinit var mockRestServiceServer: MockRestServiceServer
 
     private lateinit var restMtbFileSender: RestMtbFileSender
 
+    private var reportService = ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
+
     @BeforeEach
     fun setup() {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        this.restMtbFileSender =
+            RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
     }
 
     @ParameterizedTest
     @MethodSource("deleteRequestWithResponseSource")
     fun shouldReturnExpectedResponseForDelete(requestWithResponse: RequestWithResponse) {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.DELETE)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.DELETE))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/Patient/${TEST_PATIENT_PSEUDONYM.value}"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
+        val response = restMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -74,14 +81,15 @@ class RestMtbFileSenderTest {
     @ParameterizedTest
     @MethodSource("mtbFileRequestWithResponseSource")
     fun shouldReturnExpectedResponseForMtbFilePost(requestWithResponse: RequestWithResponse) {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.POST)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.POST))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
+            .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
+        val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -90,11 +98,12 @@ class RestMtbFileSenderTest {
     @MethodSource("mtbFileRequestWithResponseSource")
     fun shouldRetryOnMtbFileHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        this.restMtbFileSender =
+            RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
 
         val expectedCount = when (requestWithResponse.httpStatus) {
             // OK - No Retry
@@ -103,14 +112,14 @@ class RestMtbFileSenderTest {
             else -> ExpectedCount.max(3)
         }
 
-        this.mockRestServiceServer.expect(expectedCount) {
-            method(HttpMethod.POST)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(expectedCount, method(HttpMethod.POST))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/MTBFile"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
-        val response = restMtbFileSender.send(MtbFileSender.MtbFileRequest(TEST_REQUEST_ID, mtbFile))
+        val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, mtbFile))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -119,11 +128,12 @@ class RestMtbFileSenderTest {
     @MethodSource("deleteRequestWithResponseSource")
     fun shouldRetryOnDeleteHttpRequestError(requestWithResponse: RequestWithResponse) {
         val restTemplate = RestTemplate()
-        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile")
+        val restTargetProperties = RestTargetProperties("http://localhost:9000/mtbfile", null, null)
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-        this.restMtbFileSender = RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate)
+        this.restMtbFileSender =
+            RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
 
         val expectedCount = when (requestWithResponse.httpStatus) {
             // OK - No Retry
@@ -132,14 +142,14 @@ class RestMtbFileSenderTest {
             else -> ExpectedCount.max(3)
         }
 
-        this.mockRestServiceServer.expect(expectedCount) {
-            method(HttpMethod.DELETE)
-            requestTo("/mtbfile")
-        }.andRespond {
-            withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(expectedCount, method(HttpMethod.DELETE))
+            .andExpect(requestTo("http://localhost:9000/mtbfile/Patient/${TEST_PATIENT_PSEUDONYM.value}"))
+            .andRespond {
+                withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
+            }
 
-        val response = restMtbFileSender.send(MtbFileSender.DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
+        val response = restMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, TEST_PATIENT_PSEUDONYM))
         assertThat(response.status).isEqualTo(requestWithResponse.response.status)
         assertThat(response.body).isEqualTo(requestWithResponse.response.body)
     }
@@ -153,24 +163,6 @@ class RestMtbFileSenderTest {
 
         val TEST_REQUEST_ID = RequestId("TestId")
         val TEST_PATIENT_PSEUDONYM = PatientPseudonym("PID")
-
-        private val warningBody = """
-                {
-                    "patient_id": "PID",
-                    "issues": [
-                        { "severity": "warning", "message": "Something is not right" }
-                    ]
-                }
-            """.trimIndent()
-
-        private val errorBody = """
-                {
-                    "patient_id": "PID",
-                    "issues": [
-                        { "severity": "error", "message": "Something is very bad" }
-                    ]
-                }
-            """.trimIndent()
 
         val mtbFile: MtbFile = MtbFile.builder()
             .withPatient(
@@ -205,31 +197,44 @@ class RestMtbFileSenderTest {
         @JvmStatic
         fun mtbFileRequestWithResponseSource(): Set<RequestWithResponse> {
             return setOf(
-                RequestWithResponse(HttpStatus.OK, "{}", MtbFileSender.Response(RequestStatus.SUCCESS, "{}")),
+                RequestWithResponse(
+                    HttpStatus.OK,
+                    responseBodyWithMaxSeverity(ReportService.Severity.INFO),
+                    MtbFileSender.Response(
+                        RequestStatus.SUCCESS,
+                        responseBodyWithMaxSeverity(ReportService.Severity.INFO)
+                    )
+                ),
                 RequestWithResponse(
                     HttpStatus.CREATED,
-                    warningBody,
-                    MtbFileSender.Response(RequestStatus.WARNING, warningBody)
+                    responseBodyWithMaxSeverity(ReportService.Severity.WARNING),
+                    MtbFileSender.Response(
+                        RequestStatus.WARNING,
+                        responseBodyWithMaxSeverity(ReportService.Severity.WARNING)
+                    )
                 ),
                 RequestWithResponse(
                     HttpStatus.BAD_REQUEST,
-                    "??",
-                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
+                    responseBodyWithMaxSeverity(ReportService.Severity.ERROR),
+                    MtbFileSender.Response(RequestStatus.ERROR, responseBodyWithMaxSeverity(ReportService.Severity.ERROR))
                 ),
                 RequestWithResponse(
                     HttpStatus.UNPROCESSABLE_ENTITY,
-                    errorBody,
-                    MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
+                    responseBodyWithMaxSeverity(ReportService.Severity.FATAL),
+                    MtbFileSender.Response(
+                        RequestStatus.ERROR,
+                        responseBodyWithMaxSeverity(ReportService.Severity.FATAL)
+                    )
                 ),
                 // Some more errors not mentioned in documentation
                 RequestWithResponse(
                     HttpStatus.NOT_FOUND,
-                    "what????",
+                    ERROR_RESPONSE_BODY,
                     MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 ),
                 RequestWithResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "what????",
+                    ERROR_RESPONSE_BODY,
                     MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 )
             )
@@ -255,6 +260,52 @@ class RestMtbFileSenderTest {
                     MtbFileSender.Response(RequestStatus.ERROR, ERROR_RESPONSE_BODY)
                 )
             )
+        }
+
+        fun responseBodyWithMaxSeverity(severity: ReportService.Severity): String {
+            return when (severity) {
+                ReportService.Severity.INFO -> """
+                        {
+                            "patient": "PID",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" }
+                            ]
+                        }
+                    """
+
+                ReportService.Severity.WARNING -> """
+                        {
+                            "patient": "PID",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" },
+                                { "severity": "warning", "message": "Warning Message" }
+                            ]
+                        }
+                    """
+
+                ReportService.Severity.ERROR -> """
+                        {
+                            "patient": "PID",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" },
+                                { "severity": "warning", "message": "Warning Message" },
+                                { "severity": "error", "message": "Error Message" }
+                            ]
+                        }
+                    """
+
+                ReportService.Severity.FATAL -> """
+                        {
+                            "patient": "PID",
+                            "issues": [
+                                { "severity": "info", "message": "Info Message" },
+                                { "severity": "warning", "message": "Warning Message" },
+                                { "severity": "error", "message": "Error Message" },
+                                { "severity": "fatal", "message": "Fatal Message" }
+                            ]
+                        }
+                    """
+            }
         }
     }
 
