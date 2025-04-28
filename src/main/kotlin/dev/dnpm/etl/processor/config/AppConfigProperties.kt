@@ -66,6 +66,50 @@ data class GPasConfigProperties(
     }
 }
 
+@ConfigurationProperties(GIcsConfigProperties.NAME)
+data class GIcsConfigProperties(
+    /**
+     * Base URL to gICS System
+     *
+     */
+    val gIcsBaseUri: String?,
+    val username: String?,
+    val password: String?,
+
+    /**
+     * If value is 'true' valid consent at processing time is mandatory for transmission of DNPM
+     * files otherwise they will be flagged and skipped.
+     * If value 'false' or missing consent status is assumed to be valid.
+     */
+    val enabled: Boolean?,
+
+    /**
+     * gICS specific system
+     * **/
+    val personIdentifierSystem: String =
+        "https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID",
+
+    /**
+     * Domain of consent resources
+     * **/
+    val consentDomainName: String = "MII",
+
+    /**
+     * Value to expect in case of positiv consent
+     */
+    val policyCode: String = "2.16.840.1.113883.3.1937.777.24.5.3.6",
+
+    /**
+     * Consent Policy which should be used for consent check
+     */
+    val policySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+    val parameterVersion: String = "1.1"
+) {
+    companion object {
+        const val NAME = "app.consent.gics"
+    }
+}
+
 @ConfigurationProperties(RestTargetProperties.NAME)
 data class RestTargetProperties(
     val uri: String?,

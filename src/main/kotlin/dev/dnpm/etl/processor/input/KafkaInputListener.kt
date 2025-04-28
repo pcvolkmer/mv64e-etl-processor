@@ -24,6 +24,7 @@ import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.consent.ConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -44,7 +45,7 @@ class KafkaInputListener(
         } else {
             RequestId("")
         }
-
+// fixme: add consent check
         if (mtbFile.consent.status == Consent.Status.ACTIVE) {
             logger.debug("Accepted MTB File for processing")
             if (requestId.isBlank()) {
@@ -55,9 +56,13 @@ class KafkaInputListener(
         } else {
             logger.debug("Accepted MTB File and process deletion")
             if (requestId.isBlank()) {
-                requestProcessor.processDeletion(patientId)
+                requestProcessor.processDeletion(patientId, ConsentStatus.IGNORED)
             } else {
-                requestProcessor.processDeletion(patientId, requestId)
+                requestProcessor.processDeletion(
+                    patientId,
+                    requestId,
+                    ConsentStatus.IGNORED
+                )
             }
         }
     }

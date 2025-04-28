@@ -2,6 +2,8 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
+import java.text.SimpleDateFormat
+import java.util.*
 
 plugins {
     war
@@ -133,6 +135,7 @@ tasks.jacocoTestReport {
     }
 }
 
+
 tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("ghcr.io/ccc-mf/etl-processor")
 
@@ -143,7 +146,8 @@ tasks.named<BootBuildImage>("bootBuildImage") {
 
     environment.set(environment.get() + mapOf(
         // Enable this line to embed CA Certs into image on build time
-        //"BP_EMBED_CERTS" to "true",
+        "BP_EMBED_CERTS" to "true",
+        "BP_OCI_CREATED" to SimpleDateFormat("MM-dd-yyyy_hh-mm").format(Date()),
         "BP_OCI_SOURCE" to "https://github.com/CCC-MF/etl-processor",
         "BP_OCI_LICENSES" to "AGPLv3",
         "BP_OCI_DESCRIPTION" to "ETL Processor for bwHC MTB files"

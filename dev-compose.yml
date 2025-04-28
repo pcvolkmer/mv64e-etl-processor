@@ -16,6 +16,11 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ## Use AKHQ as Kafka web frontend
   akhq:
@@ -54,3 +59,40 @@ services:
 #      POSTGRES_DB: dev
 #      POSTGRES_USER: dev
 #      POSTGRES_PASSWORD: dev
+
+
+  mysql:
+    image: mysql:8
+    container_name: gics-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Europe/Berlin
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./sqls:/docker-entrypoint-initdb.d
+    command: --max_allowed_packet=20M --default-time-zone=Europe/Berlin
+
+  gics:
+    image: registry.diz.uni-marburg.de/ths/gics:2023.1.3
+    container_name: gics-wildfly
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+      - "127.0.0.1:9992:9990"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mysql
+
+  consent-data-loader:
+    image: confluentinc/cp-kafkacat:7.1.12
+    entrypoint: ["/bin/bash", "-c"]
+    command: >
+      "kafkacat -b kafka:19092 -K: -t consent-json -P -l /data/consent-data.ndjson"
+    volumes:
+      - ./consent-data.ndjson:/data/consent-data.ndjson:ro
+    depends_on:
+      kafka:
+        condition: service_healthy

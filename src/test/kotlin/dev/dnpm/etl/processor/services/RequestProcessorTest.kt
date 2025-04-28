@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.consent.ConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
@@ -337,7 +338,7 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.UNKNOWN)
         }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = ConsentStatus.IGNORED)
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
@@ -355,7 +356,7 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
         }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = ConsentStatus.IGNORED)
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -373,7 +374,7 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.ERROR)
         }.whenever(sender).send(any<MtbFileSender.DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = ConsentStatus.IGNORED)
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -385,7 +386,7 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
         doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = ConsentStatus.IGNORED)
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())

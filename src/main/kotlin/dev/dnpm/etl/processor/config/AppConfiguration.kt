@@ -20,6 +20,9 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.consent.ConsentCheckedIgnored
+import dev.dnpm.etl.processor.consent.ICheckConsent
+import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
@@ -73,7 +76,8 @@ import kotlin.time.toJavaDuration
     value = [
         AppConfigProperties::class,
         PseudonymizeConfigProperties::class,
-        GPasConfigProperties::class
+        GPasConfigProperties::class,
+        GIcsConfigProperties::class
     ]
 )
 @EnableScheduling
@@ -86,22 +90,27 @@ class AppConfiguration {
         return RestTemplate()
     }
 
+    @Bean
+    fun appFhirConfig(): AppFhirConfig{
+        return AppFhirConfig()
+    }
+
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
-    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
+    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig): Generator {
         try {
             if (!configProperties.sslCaLocation.isNullOrBlank()) {
                 return GpasPseudonymGenerator(
                     configProperties,
                     retryTemplate,
-                    createCustomGpasRestTemplate(configProperties)
+                    createCustomGpasRestTemplate(configProperties),appFhirConfig
                 )
             }
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
 
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate,appFhirConfig)
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
@@ -113,20 +122,20 @@ class AppConfiguration {
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
     @ConditionalOnMissingBean
     @Bean
-    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
+    fun gpasPseudonymGeneratorOnDeprecatedProperty(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig): Generator {
         try {
             if (!configProperties.sslCaLocation.isNullOrBlank()) {
                 return GpasPseudonymGenerator(
                     configProperties,
                     retryTemplate,
-                    createCustomGpasRestTemplate(configProperties)
+                    createCustomGpasRestTemplate(configProperties),appFhirConfig
                 )
             }
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
 
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate,appFhirConfig)
     }
 
     private fun createCustomGpasRestTemplate(configProperties: GPasConfigProperties): RestTemplate {
@@ -278,6 +287,24 @@ class AppConfiguration {
     @Bean
     fun jdbcConfiguration(): AbstractJdbcConfiguration {
         return AppJdbcConfiguration()
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun constService(): ICheckConsent {
+        return ConsentCheckedIgnored()
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
+    fun gicsAccessConsent( gIcsConfigProperties: GIcsConfigProperties,
+                           retryTemplate: RetryTemplate,  restTemplate: RestTemplate,  appFhirConfig: AppFhirConfig): ICheckConsent {
+        return GicsConsentService(
+            gIcsConfigProperties,
+            retryTemplate,
+            restTemplate,
+            appFhirConfig
+        )
     }
 }
 

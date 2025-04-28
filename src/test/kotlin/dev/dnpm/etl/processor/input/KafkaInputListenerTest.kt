@@ -24,6 +24,7 @@ import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.anyValueClass
+import dev.dnpm.etl.processor.consent.ConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import java.util.*
@@ -48,7 +50,7 @@ class KafkaInputListenerTest {
 
     @BeforeEach
     fun setup(
-        @Mock requestProcessor: RequestProcessor
+        @Mock requestProcessor: RequestProcessor,
     ) {
         this.requestProcessor = requestProcessor
         this.objectMapper = ObjectMapper()
@@ -63,7 +65,15 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.ACTIVE).build())
             .build()
 
-        kafkaInputListener.onMessage(ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile)))
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile)
+            )
+        )
 
         verify(requestProcessor, times(1)).processMtbFile(any())
     }
@@ -75,9 +85,20 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
             .build()
 
-        kafkaInputListener.onMessage(ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile)))
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile)
+            )
+        )
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(
+            anyValueClass(),
+            eq(ConsentStatus.IGNORED)
+        )
     }
 
     @Test
@@ -87,9 +108,28 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.ACTIVE).build())
             .build()
 
-        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
+        val headers = RecordHeaders(
+            listOf(
+                RecordHeader(
+                    "requestId",
+                    UUID.randomUUID().toString().toByteArray()
+                )
+            )
+        )
         kafkaInputListener.onMessage(
-            ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                -1L,
+                TimestampType.NO_TIMESTAMP_TYPE,
+                -1,
+                -1,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile),
+                headers,
+                Optional.empty()
+            )
         )
 
         verify(requestProcessor, times(1)).processMtbFile(any(), anyValueClass())
@@ -102,11 +142,34 @@ class KafkaInputListenerTest {
             .withConsent(Consent.builder().withStatus(Consent.Status.REJECTED).build())
             .build()
 
-        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
-        kafkaInputListener.onMessage(
-            ConsumerRecord("testtopic", 0, 0, -1L, TimestampType.NO_TIMESTAMP_TYPE, -1, -1, "", this.objectMapper.writeValueAsString(mtbFile), headers, Optional.empty())
+        val headers = RecordHeaders(
+            listOf(
+                RecordHeader(
+                    "requestId",
+                    UUID.randomUUID().toString().toByteArray()
+                )
+            )
         )
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass())
+        kafkaInputListener.onMessage(
+            ConsumerRecord(
+                "testtopic",
+                0,
+                0,
+                -1L,
+                TimestampType.NO_TIMESTAMP_TYPE,
+                -1,
+                -1,
+                "",
+                this.objectMapper.writeValueAsString(mtbFile),
+                headers,
+                Optional.empty()
+            )
+        )
+        verify(requestProcessor, times(1)).processDeletion(
+            anyValueClass(),
+            anyValueClass(),
+            eq(ConsentStatus.IGNORED)
+        )
     }
 
 }

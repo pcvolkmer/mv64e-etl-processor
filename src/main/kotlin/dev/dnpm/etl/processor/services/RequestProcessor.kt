@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.consent.ConsentStatus
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -59,7 +60,8 @@ class RequestProcessor(
         mtbFile pseudonymizeWith pseudonymizeService
         mtbFile anonymizeContentWith pseudonymizeService
 
-        val request = MtbFileSender.MtbFileRequest(requestId, transformationService.transform(mtbFile))
+        val request =
+            MtbFileSender.MtbFileRequest(requestId, transformationService.transform(mtbFile))
 
         val patientPseudonym = PatientPseudonym(request.mtbFile.patient.id)
 
@@ -105,20 +107,28 @@ class RequestProcessor(
 
         val lastMtbFileRequestForPatient =
             requestService.lastMtbFileRequestForPatientPseudonym(patientPseudonym)
-        val isLastRequestDeletion = requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
+        val isLastRequestDeletion =
+            requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
 
         return null != lastMtbFileRequestForPatient
                 && !isLastRequestDeletion
                 && lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFile)
     }
 
-    fun processDeletion(patientId: PatientId) {
-        processDeletion(patientId, randomRequestId())
+    fun processDeletion(patientId: PatientId, isConsented: ConsentStatus) {
+        processDeletion(patientId, randomRequestId(), isConsented)
     }
 
-    fun processDeletion(patientId: PatientId, requestId: RequestId) {
+    fun processDeletion(patientId: PatientId, requestId: RequestId, isConsented: ConsentStatus) {
         try {
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
+
+            val requestStatus: RequestStatus = when (isConsented) {
+                ConsentStatus.CONSENT_MISSING -> RequestStatus.CONSENTMISSING
+                ConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
+                ConsentStatus.CONSENTED, ConsentStatus.IGNORED,
+                ConsentStatus.CONSENT_REJECTED -> RequestStatus.UNKNOWN
+            }
 
             requestService.save(
                 Request(
@@ -127,11 +137,14 @@ class RequestProcessor(
                     patientId,
                     fingerprint(patientPseudonym.value),
                     RequestType.DELETE,
-                    RequestStatus.UNKNOWN
+                    requestStatus
                 )
             )
 
-            val responseStatus = sender.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+            val responseStatus =
+                sender.send(MtbFileSender.DeleteRequest(requestId, patientPseudonym))
+
+            //fixme: publish proper report if consent check failed
 
             applicationEventPublisher.publishEvent(
                 ResponseEvent(
@@ -171,5 +184,4 @@ class RequestProcessor(
                 .lowercase()
         )
     }
-
 }

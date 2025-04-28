@@ -22,13 +22,14 @@ package dev.dnpm.etl.processor.input
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.anyValueClass
+import dev.dnpm.etl.processor.consent.ConsentCheckedIgnored
+import dev.dnpm.etl.processor.consent.ConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.springframework.http.MediaType
@@ -51,7 +52,10 @@ class MtbFileRestControllerTest {
         @Mock requestProcessor: RequestProcessor
     ) {
         this.requestProcessor = requestProcessor
-        val controller = MtbFileRestController(requestProcessor)
+        val controller = MtbFileRestController(
+            requestProcessor, ConsentCheckedIgnored()
+        )
+
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
     }
 
@@ -128,7 +132,10 @@ class MtbFileRestControllerTest {
             }
         }
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(
+            anyValueClass(),
+            org.mockito.kotlin.eq(ConsentStatus.CONSENT_REJECTED)
+        )
     }
 
     @Test
@@ -139,7 +146,10 @@ class MtbFileRestControllerTest {
             }
         }
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(
+            anyValueClass(),
+            org.mockito.kotlin.eq(ConsentStatus.IGNORED)
+        )
     }
 
 }
