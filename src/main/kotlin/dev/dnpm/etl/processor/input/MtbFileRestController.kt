@@ -45,20 +45,11 @@ class MtbFileRestController(
         return ResponseEntity.ok("Test")
     }
 
-    @PostMapping( consumes = [ MediaType.APPLICATION_JSON_VALUE ] )
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
-        var ttpConsentStatus = constService.isConsented(mtbFile.patient.id)
-
-        // received status REJECTED overrides TTP value. Also in case of disabled consent service,
-        // we need to override IGNORED status
-        if (mtbFile.consent.status == Consent.Status.REJECTED) ttpConsentStatus =
-            TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
-
-        val isConsentOK = mtbFile.consent.status == Consent.Status.ACTIVE && (ttpConsentStatus.equals(
-            TtpConsentStatus.CONSENTED
-        ) || ttpConsentStatus.equals(
-            TtpConsentStatus.IGNORED
-        ))
+        val consentStatusBooleanPair = checkConsentStatus(mtbFile)
+        var ttpConsentStatus = consentStatusBooleanPair.first
+        val isConsentOK = consentStatusBooleanPair.second
         if (isConsentOK) {
             logger.debug("Accepted MTB File (bwHC V1) for processing")
             requestProcessor.processMtbFile(mtbFile)
@@ -71,7 +62,22 @@ class MtbFileRestController(
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping( consumes = [ CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE] )
+    private fun checkConsentStatus(mtbFile: MtbFile): Pair<TtpConsentStatus, Boolean> {
+        var ttpConsentStatus = constService.isConsented(mtbFile.patient.id)
+
+        val isConsentOK =
+            (ttpConsentStatus.equals(TtpConsentStatus.IGNORED) && mtbFile.consent.status == Consent.Status.ACTIVE) ||
+                    ttpConsentStatus.equals(
+                        TtpConsentStatus.CONSENTED
+                    )
+        if (ttpConsentStatus.equals(TtpConsentStatus.IGNORED) && mtbFile.consent.status == Consent.Status.REJECTED) {
+            // in case ttp check is disabled - we propagate rejected status anyway
+            ttpConsentStatus = TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
+        }
+        return Pair(ttpConsentStatus, isConsentOK)
+    }
+
+    @PostMapping(consumes = [CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
         logger.debug("Accepted MTB File (DNPM V2) for processing")
         requestProcessor.processMtbFile(mtbFile)

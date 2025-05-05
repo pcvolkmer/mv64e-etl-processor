@@ -92,8 +92,7 @@ data class GIcsConfigProperties(
     /**
      * Consent Policy which should be used for consent check
      */
-    val policySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-    val parameterVersion: String = "1.1"
+    val policySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3"
 ) {
     companion object {
         const val NAME = "app.consent.gics"

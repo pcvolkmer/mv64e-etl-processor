@@ -1,12 +1,14 @@
 package dev.dnpm.etl.processor.consent;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
@@ -31,7 +33,7 @@ public class GicsConsentService implements ICheckConsent {
 
     private final GIcsConfigProperties gIcsConfigProperties;
 
-    public final String IS_CONSENTED_PATH = "/ttp-fhir/fhir/gics/$isConsented";
+    public static final String IS_CONSENTED_ENDPOINT = "/$isConsented";
     private final RetryTemplate retryTemplate;
     private final RestTemplate restTemplate;
     private final FhirContext fhirContext;
@@ -56,8 +58,7 @@ public class GicsConsentService implements ICheckConsent {
                 throw new IllegalArgumentException(
                     "gICS base URL is empty - should call gICS with false configuration.");
             }
-            url = UriComponentsBuilder.fromHttpUrl(gIcsBaseUri)
-                .path(IS_CONSENTED_PATH)
+            url = UriComponentsBuilder.fromHttpUrl(gIcsBaseUri).path(IS_CONSENTED_ENDPOINT)
                 .toUriString();
         }
         return url;
@@ -84,14 +85,20 @@ public class GicsConsentService implements ICheckConsent {
                 .setSystem(configProperties.getPersonIdentifierSystem())));
         result.addParameter(new ParametersParameterComponent().setName("domain")
             .setValue(new StringType().setValue(configProperties.getConsentDomainName())));
-        result.addParameter(new ParametersParameterComponent().setName("policy")
-            .setValue(new Coding().setCode(configProperties.getPolicyCode())
+        result.addParameter(new ParametersParameterComponent().setName("policy").setValue(
+            new Coding().setCode(configProperties.getPolicyCode())
                 .setSystem(configProperties.getPolicySystem())));
+
+        /*
+         * is mandatory parameter, but we ignore it via additional configuration parameter
+         * 'ignoreVersionNumber'.
+         */
         result.addParameter(new ParametersParameterComponent().setName("version")
-            .setValue(new StringType().setValue(configProperties.getParameterVersion())));
+            .setValue(new StringType().setValue("1.1")));
 
         /* add config parameter with:
-         * ignoreVersionNumber -> true
+         * ignoreVersionNumber -> true ->> Reason is we cannot know which policy version each patient
+         * has possibly signed or not, therefore we are happy with any version found.
          * unknownStateIsConsideredAsDecline -> true
          */
         var config = new ParametersParameterComponent().setName("config").addPart(
@@ -110,9 +117,10 @@ public class GicsConsentService implements ICheckConsent {
         HttpEntity<String> requestEntity = new HttpEntity<>(parameterAsXml, this.httpHeader);
         ResponseEntity<String> responseEntity;
         try {
+            var url = getGicsUri();
+
             responseEntity = retryTemplate.execute(
-                ctx -> restTemplate.exchange(getGicsUri(), HttpMethod.POST, requestEntity,
-                    String.class));
+                ctx -> restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class));
         } catch (RestClientException e) {
             var msg = String.format("Get consents status request failed reason: '%s",
                 e.getMessage());
@@ -123,8 +131,7 @@ public class GicsConsentService implements ICheckConsent {
             var msg = String.format(
                 "Get consents status process has been terminated. termination reason: '%s",
                 terminatedRetryException.getMessage());
-            log.error(msg
-            );
+            log.error(msg);
             return null;
 
         }
@@ -153,18 +160,31 @@ public class GicsConsentService implements ICheckConsent {
         if (consentStatusResponse == null) {
             return TtpConsentStatus.FAILED_TO_ASK;
         }
-        var responseParameters = fhirContext.newJsonParser()
-            .parseResource(Parameters.class, consentStatusResponse);
+        try {
+            var response = fhirContext.newJsonParser().parseResource(consentStatusResponse);
 
-        var responseValue = responseParameters.getParameter("consented").getValue();
-        var isConsented = responseValue.castToBoolean(responseValue);
-        if (!isConsented.hasValue()) {
-            return TtpConsentStatus.FAILED_TO_ASK;
+            if (response instanceof Parameters responseParameters) {
+
+                var responseValue = responseParameters.getParameter("consented").getValue();
+                var isConsented = responseValue.castToBoolean(responseValue);
+                if (!isConsented.hasValue()) {
+                    return TtpConsentStatus.FAILED_TO_ASK;
+                }
+                if (isConsented.booleanValue()) {
+                    return TtpConsentStatus.CONSENTED;
+                } else {
+                    return TtpConsentStatus.CONSENT_MISSING_OR_REJECTED;
+                }
+            } else if (response instanceof OperationOutcome outcome) {
+
+                log.error(
+                    "failed to get consent status from ttp. probably configuration error. outcome: ",
+                    fhirContext.newJsonParser().encodeToString(outcome));
+
+            }
+        } catch (DataFormatException dfe) {
+            log.error("failed to parse response to FHIR R4 resource.", dfe);
         }
-        if (isConsented.booleanValue()) {
-            return TtpConsentStatus.CONSENTED;
-        } else {
-            return TtpConsentStatus.CONSENT_MISSING_OR_REJECTED;
-        }
+        return TtpConsentStatus.FAILED_TO_ASK;
     }
 }
