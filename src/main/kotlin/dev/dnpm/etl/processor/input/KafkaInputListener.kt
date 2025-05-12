@@ -77,12 +77,12 @@ class KafkaInputListener(
         } else {
             logger.debug("Accepted MTB File and process deletion")
             if (requestId.isBlank()) {
-                requestProcessor.processDeletion(patientId, TtpConsentStatus.IGNORED)
+                requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
             } else {
                 requestProcessor.processDeletion(
                     patientId,
                     requestId,
-                    TtpConsentStatus.IGNORED
+                    TtpConsentStatus.UNKNOWN_CHECK_FILE
                 )
             }
         }

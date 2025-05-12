@@ -7,12 +7,14 @@ public enum TtpConsentStatus {
     CONSENTED,
 
     CONSENT_MISSING_OR_REJECTED,
+
     /**
      * Due technical problems consent status is unknown
      */
     FAILED_TO_ASK,
+
     /**
-     * We assume received files are consented
+     * Consent status is validate via file property 'consent.status'
      */
-    IGNORED
+    UNKNOWN_CHECK_FILE
 }

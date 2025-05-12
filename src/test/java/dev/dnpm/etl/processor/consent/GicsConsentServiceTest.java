@@ -48,7 +48,7 @@ public class GicsConsentServiceTest {
     }
 
     @Test
-    void isConsented() {
+    void getTtpConsentStatus() {
         final Parameters responseConsented = new Parameters().addParameter(
             new ParametersParameterComponent().setName("consented")
                 .setValue(new BooleanType().setValue(true)));
@@ -59,7 +59,7 @@ public class GicsConsentServiceTest {
                     .encodeResourceToString(responseConsented),
                 MediaType.APPLICATION_JSON));
 
-        var consentStatus = gicsConsentService.isConsented("123456");
+        var consentStatus = gicsConsentService.getTtpConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.CONSENTED);
     }
 
@@ -76,7 +76,7 @@ public class GicsConsentServiceTest {
                     .encodeResourceToString(responseRevoced),
                 MediaType.APPLICATION_JSON));
 
-        var consentStatus = gicsConsentService.isConsented("123456");
+        var consentStatus = gicsConsentService.getTtpConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.CONSENT_MISSING_OR_REJECTED);
     }
 
@@ -94,7 +94,7 @@ public class GicsConsentServiceTest {
                     .encodeResourceToString(responseErrorOutcome),
                 MediaType.APPLICATION_JSON));
 
-        var consentStatus = gicsConsentService.isConsented("123456");
+        var consentStatus = gicsConsentService.getTtpConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.FAILED_TO_ASK);
     }
 

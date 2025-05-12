@@ -20,7 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.ConsentCheckedIgnored
+import dev.dnpm.etl.processor.consent.ConsentCheckFileBased
 import dev.dnpm.etl.processor.consent.ICheckConsent
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
@@ -183,7 +183,7 @@ class AppConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun constService(): ICheckConsent {
-        return ConsentCheckedIgnored()
+        return ConsentCheckFileBased()
     }
 
     @Bean

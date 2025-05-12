@@ -91,7 +91,7 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 Ab gIcs Version 2.13.0 kann per [REST-Schnittstelle](https://simplifier.net/guide/ttp-fhir-gateway-ig/ImplementationGuide-markdown-Einwilligungsmanagement-Operations-isConsented?version=current) der Einwilligungsstatus abgefragt werden. 
 Vor der MTB-Übertragung kann der zum Sendezeitpunkt verfügbarer Einwilligungsstatus über Endpunkt *isConsented* abgefragt werden.
 
-Falls diese Prüfung aktiviert wurde, wird der Einwilligungsstatus dem in der MTB Datei vorgezogen und überschreibt diesen.
+Falls diese Prüfung aktiviert wurde, wird der Einwilligungsstatus dem in der MTB Datei vorgezogen und der Wert in der MTB-Datei wird dabei ignoriert.
 Falls in diesem Fall die Statusprüfung fehlschlägt, wird Status **abgelehnt** angenommen.
 Ist die Prüfung über gIcs deaktiviert, wird der eingetragene Einwilligungsstatus der übermittelten MTB Datei geprüft.
 

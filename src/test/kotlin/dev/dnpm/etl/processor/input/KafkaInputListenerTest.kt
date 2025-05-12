@@ -94,7 +94,7 @@ class KafkaInputListenerTest {
 
         verify(requestProcessor, times(1)).processDeletion(
             anyValueClass(),
-            eq(TtpConsentStatus.IGNORED)
+            eq(TtpConsentStatus.UNKNOWN_CHECK_FILE)
         )
     }
 
@@ -149,7 +149,7 @@ class KafkaInputListenerTest {
             )
         )
         verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass(), eq(
-            TtpConsentStatus.IGNORED))
+            TtpConsentStatus.UNKNOWN_CHECK_FILE))
     }
 
     @Test
@@ -181,7 +181,7 @@ class KafkaInputListenerTest {
             )
         )
         verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass(), eq(
-            TtpConsentStatus.IGNORED))
+            TtpConsentStatus.UNKNOWN_CHECK_FILE))
     }
 
 }

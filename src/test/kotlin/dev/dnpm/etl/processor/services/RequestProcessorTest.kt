@@ -344,7 +344,7 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.UNKNOWN)
         }.whenever(sender).send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.IGNORED)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
@@ -362,7 +362,7 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
         }.whenever(sender).send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.IGNORED)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -380,7 +380,7 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.ERROR)
         }.whenever(sender).send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.IGNORED)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -392,7 +392,7 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
         doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.IGNORED)
+        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())

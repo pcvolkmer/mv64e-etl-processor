@@ -58,7 +58,7 @@ public class GicsConsentService implements ICheckConsent {
                 throw new IllegalArgumentException(
                     "gICS base URL is empty - should call gICS with false configuration.");
             }
-            url = UriComponentsBuilder.fromHttpUrl(gIcsBaseUri).path(IS_CONSENTED_ENDPOINT)
+            url = UriComponentsBuilder.fromUriString(gIcsBaseUri).path(IS_CONSENTED_ENDPOINT)
                 .toUriString();
         }
         return url;
@@ -147,7 +147,7 @@ public class GicsConsentService implements ICheckConsent {
     }
 
     @Override
-    public TtpConsentStatus isConsented(String personIdentifierValue) {
+    public TtpConsentStatus getTtpConsentStatus(String personIdentifierValue) {
         var parameter = GicsConsentService.getIsConsentedParam(gIcsConfigProperties,
             personIdentifierValue);
 
@@ -176,10 +176,8 @@ public class GicsConsentService implements ICheckConsent {
                     return TtpConsentStatus.CONSENT_MISSING_OR_REJECTED;
                 }
             } else if (response instanceof OperationOutcome outcome) {
-
-                log.error(
-                    "failed to get consent status from ttp. probably configuration error. outcome: ",
-                    fhirContext.newJsonParser().encodeToString(outcome));
+                log.error("failed to get consent status from ttp. probably configuration error. "
+                    + "outcome: '{}'", fhirContext.newJsonParser().encodeToString(outcome));
 
             }
         } catch (DataFormatException dfe) {

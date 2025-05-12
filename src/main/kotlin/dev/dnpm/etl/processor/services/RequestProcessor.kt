@@ -140,7 +140,7 @@ class RequestProcessor(
             val requestStatus: RequestStatus = when (isConsented) {
                 TtpConsentStatus.CONSENT_MISSING_OR_REJECTED -> RequestStatus.NO_CONSENT
                 TtpConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
-                TtpConsentStatus.CONSENTED, TtpConsentStatus.IGNORED -> RequestStatus.UNKNOWN
+                TtpConsentStatus.CONSENTED, TtpConsentStatus.UNKNOWN_CHECK_FILE -> RequestStatus.UNKNOWN
             }
 
             requestService.save(

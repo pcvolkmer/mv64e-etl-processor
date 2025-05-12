@@ -48,7 +48,7 @@ class MtbFileRestController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
         val consentStatusBooleanPair = checkConsentStatus(mtbFile)
-        var ttpConsentStatus = consentStatusBooleanPair.first
+        val ttpConsentStatus = consentStatusBooleanPair.first
         val isConsentOK = consentStatusBooleanPair.second
         if (isConsentOK) {
             logger.debug("Accepted MTB File (bwHC V1) for processing")
@@ -63,14 +63,14 @@ class MtbFileRestController(
     }
 
     private fun checkConsentStatus(mtbFile: MtbFile): Pair<TtpConsentStatus, Boolean> {
-        var ttpConsentStatus = constService.isConsented(mtbFile.patient.id)
+        var ttpConsentStatus = constService.getTtpConsentStatus(mtbFile.patient.id)
 
         val isConsentOK =
-            (ttpConsentStatus.equals(TtpConsentStatus.IGNORED) && mtbFile.consent.status == Consent.Status.ACTIVE) ||
+            (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.ACTIVE) ||
                     ttpConsentStatus.equals(
                         TtpConsentStatus.CONSENTED
                     )
-        if (ttpConsentStatus.equals(TtpConsentStatus.IGNORED) && mtbFile.consent.status == Consent.Status.REJECTED) {
+        if (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.REJECTED) {
             // in case ttp check is disabled - we propagate rejected status anyway
             ttpConsentStatus = TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
         }
@@ -87,7 +87,7 @@ class MtbFileRestController(
     @DeleteMapping(path = ["{patientId}"])
     fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
         logger.debug("Accepted patient ID to process deletion")
-        requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.IGNORED)
+        requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
         return ResponseEntity.accepted().build()
     }
 

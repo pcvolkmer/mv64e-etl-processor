@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
-import dev.dnpm.etl.processor.consent.ConsentCheckedIgnored
+import dev.dnpm.etl.processor.consent.ConsentCheckFileBased
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.consent.ICheckConsent
 import dev.dnpm.etl.processor.security.TokenRepository
@@ -55,7 +55,7 @@ import org.springframework.test.web.servlet.post
     classes = [
         MtbFileRestController::class,
         AppSecurityConfiguration::class,
-        ConsentCheckedIgnored::class, ICheckConsent::class
+        ConsentCheckFileBased::class, ICheckConsent::class
     ]
 )
 @MockitoBean(types = [TokenRepository::class, RequestProcessor::class])
@@ -143,7 +143,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass(),  eq(TtpConsentStatus.IGNORED))
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(),  eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
     }
 
     @Test
