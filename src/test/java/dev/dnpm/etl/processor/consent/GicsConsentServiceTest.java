@@ -3,6 +3,7 @@ package dev.dnpm.etl.processor.consent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.AppConfiguration;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
@@ -23,19 +24,19 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 
 
-
-@ContextConfiguration(classes = {GicsConsentService.class,
-    AppConfiguration.class, ObjectMapper.class})
+@ContextConfiguration(classes = {AppConfiguration.class, ObjectMapper.class})
 @TestPropertySource(properties = {"app.consent.gics.enabled=true",
-    "app.consent.gics.gIcsBaseUri=http://localhost:8090/ttp-fhir/fhir/gics"})
+    "app.consent.gics.uri=http://localhost:8090/ttp-fhir/fhir/gics"})
 @RestClientTest
 public class GicsConsentServiceTest {
 
     public static final String GICS_BASE_URI = "http://localhost:8090/ttp-fhir/fhir/gics";
     @Autowired
     MockRestServiceServer mockRestServiceServer;
+
     @Autowired
     GicsConsentService gicsConsentService;
+
     @Autowired
     AppConfiguration appConfiguration;
 
@@ -45,6 +46,7 @@ public class GicsConsentServiceTest {
     @BeforeEach
     public void setUp() {
         mockRestServiceServer = MockRestServiceServer.createServer(appConfiguration.restTemplate());
+
     }
 
     @Test
@@ -54,7 +56,8 @@ public class GicsConsentServiceTest {
                 .setValue(new BooleanType().setValue(true)));
 
         mockRestServiceServer.expect(
-            requestTo("http://localhost:8090/ttp-fhir/fhir/gics" + GicsConsentService.IS_CONSENTED_ENDPOINT)).andRespond(
+            requestTo("http://localhost:8090/ttp-fhir/fhir/gics"
+                + GicsConsentService.IS_CONSENTED_ENDPOINT)).andRespond(
             withSuccess(appFhirConfig.fhirContext().newJsonParser()
                     .encodeResourceToString(responseConsented),
                 MediaType.APPLICATION_JSON));
@@ -63,7 +66,6 @@ public class GicsConsentServiceTest {
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.CONSENTED);
     }
 
-
     @Test
     void consentRevoced() {
         final Parameters responseRevoced = new Parameters().addParameter(
@@ -71,7 +73,8 @@ public class GicsConsentServiceTest {
                 .setValue(new BooleanType().setValue(false)));
 
         mockRestServiceServer.expect(
-            requestTo("http://localhost:8090/ttp-fhir/fhir/gics" + GicsConsentService.IS_CONSENTED_ENDPOINT)).andRespond(
+            requestTo("http://localhost:8090/ttp-fhir/fhir/gics"
+                + GicsConsentService.IS_CONSENTED_ENDPOINT)).andRespond(
             withSuccess(appFhirConfig.fhirContext().newJsonParser()
                     .encodeResourceToString(responseRevoced),
                 MediaType.APPLICATION_JSON));

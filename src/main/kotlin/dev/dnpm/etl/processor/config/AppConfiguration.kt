@@ -23,10 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.ConsentCheckFileBased
 import dev.dnpm.etl.processor.consent.ICheckConsent
 import dev.dnpm.etl.processor.consent.GicsConsentService
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
-import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
-import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
@@ -181,14 +178,8 @@ class AppConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    fun constService(): ICheckConsent {
-        return ConsentCheckFileBased()
-    }
-
-    @Bean
     @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
-    fun gicsAccessConsent( gIcsConfigProperties: GIcsConfigProperties,
+    fun gicsConsentService( gIcsConfigProperties: GIcsConfigProperties,
                            retryTemplate: RetryTemplate,  restTemplate: RestTemplate,  appFhirConfig: AppFhirConfig): ICheckConsent {
         return GicsConsentService(
             gIcsConfigProperties,
@@ -196,6 +187,22 @@ class AppConfiguration {
             restTemplate,
             appFhirConfig
         )
+    }
+
+    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
+    @Bean
+    fun gIcsConnectionCheckService(
+        restTemplate: RestTemplate,
+        gIcsConfigProperties:  GIcsConfigProperties,
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+    ): ConnectionCheckService {
+        return GIcsConnectionCheckService(restTemplate, gIcsConfigProperties, connectionCheckUpdateProducer)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun constService(): ICheckConsent {
+        return ConsentCheckFileBased()
     }
 }
 

@@ -96,7 +96,7 @@ Falls in diesem Fall die Statusprüfung fehlschlägt, wird Status **abgelehnt** 
 Ist die Prüfung über gIcs deaktiviert, wird der eingetragene Einwilligungsstatus der übermittelten MTB Datei geprüft.
 
 * `APP_CONSENT_GICS_ENABLED`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn nicht gesetzt.
-* `APP_CONSENT_GICS_GICSBASEURI`: URI der gICS-Instanz (z.B. `http://localhost:8090/ttp-fhir/fhir/gics`)
+* `APP_CONSENT_GICS_URI`: URI der gICS-Instanz (z.B. `http://localhost:8090/ttp-fhir/fhir/gics`)
 * `APP_CONSENT_GICS_USERNAME`: gIcs Basic-Auth Benutzername
 * `APP_CONSENT_GICS_PASSWORD`: gIcs Basic-Auth Passwort
 * `APP_CONSENT_GICS_PERSONIDENTIFIERSYSTEM`: Derzeit wird nur die PID unterstützt. wenn leer wird `https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID` angenommen

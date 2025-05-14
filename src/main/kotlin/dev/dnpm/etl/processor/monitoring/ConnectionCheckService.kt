@@ -20,6 +20,7 @@
 
 package dev.dnpm.etl.processor.monitoring
 
+import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.GPasConfigProperties
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import jakarta.annotation.PostConstruct
@@ -64,6 +65,12 @@ sealed class ConnectionCheckResult {
     ) : ConnectionCheckResult()
 
     data class GPasConnectionCheckResult(
+        override val available: Boolean,
+        override val timestamp: Instant,
+        override val lastChange: Instant
+    ) : ConnectionCheckResult()
+
+    data class GIcsConnectionCheckResult(
         override val available: Boolean,
         override val timestamp: Instant,
         override val lastChange: Instant
@@ -205,6 +212,59 @@ class GPasConnectionCheckService(
     }
 
     override fun connectionAvailable(): ConnectionCheckResult.GPasConnectionCheckResult {
+        return this.result
+    }
+}
+
+class GIcsConnectionCheckService(
+    private val restTemplate: RestTemplate,
+    private val gIcsConfigProperties: GIcsConfigProperties,
+    @Qualifier("connectionCheckUpdateProducer")
+    private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+) : ConnectionCheckService {
+
+    private var result = ConnectionCheckResult.GIcsConnectionCheckResult(false, Instant.now(), Instant.now())
+
+    @PostConstruct
+    @Scheduled(cron = "0 * * * * *")
+    fun check() {
+        result = try {
+
+            val uri = UriComponentsBuilder.fromUriString(
+                gIcsConfigProperties.uri.toString()).path("/metadata").build().toUri()
+
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+            if (!gIcsConfigProperties.username.isNullOrBlank() && !gIcsConfigProperties.password.isNullOrBlank()) {
+                headers.setBasicAuth(gIcsConfigProperties.username, gIcsConfigProperties.password)
+            }
+
+            val available = restTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                HttpEntity<Void>(headers),
+                Void::class.java
+            ).statusCode == HttpStatus.OK
+
+            ConnectionCheckResult.GIcsConnectionCheckResult(
+                available,
+                Instant.now(),
+                if (result.available == available) { result.lastChange } else { Instant.now() }
+            )
+        } catch (_: Exception) {
+            ConnectionCheckResult.GIcsConnectionCheckResult(
+                false,
+                Instant.now(),
+                if (!result.available) { result.lastChange } else { Instant.now() }
+            )
+        }
+        connectionCheckUpdateProducer.emitNext(
+            result,
+            Sinks.EmitFailureHandler.FAIL_FAST
+        )
+    }
+
+    override fun connectionAvailable(): ConnectionCheckResult.GIcsConnectionCheckResult {
         return this.result
     }
 }

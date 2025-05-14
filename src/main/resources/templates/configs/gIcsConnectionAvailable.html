@@ -1,0 +1,24 @@
+<th:block th:if="${gIcsConnectionAvailable == null}">
+    <h2><span>🟦</span> gICS nicht konfiguriert - Einwilligung wird über Dateiinhalt geprüft</h2>
+</th:block>
+<th:block th:if="${gIcsConnectionAvailable != null}">
+    <h2><span th:if="${gIcsConnectionAvailable.available}">✅</span><span th:if="${not(gIcsConnectionAvailable.available)}">⚡</span> Verbindung zu gICS</h2>
+    <div>
+        Stand: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(gIcsConnectionAvailable.timestamp)}" th:text="${#temporals.formatISO(gIcsConnectionAvailable.timestamp)}"></time>
+        &nbsp;|&nbsp;
+        Letzte Änderung: <time style="font-weight: bold" th:datetime="${#temporals.formatISO(gIcsConnectionAvailable.lastChange)}" th:text="${#temporals.formatISO(gIcsConnectionAvailable.lastChange)}"></time>
+    </div>
+    <div>
+        <span>Die Verbindung ist aktuell</span>
+        <strong th:if="${gIcsConnectionAvailable.available}" style="color: green">verfügbar.</strong>
+        <strong th:if="${not(gIcsConnectionAvailable.available)}" style="color: red">nicht verfügbar.</strong>
+    </div>
+    <div class="connection-display border">
+        <img th:src="@{/server.png}" alt="ETL-Processor" />
+        <span class="connection" th:classappend="${gIcsConnectionAvailable.available ? 'available' : ''}"></span>
+        <img th:src="@{/server.png}" alt="gICS" />
+        <span>ETL-Processor</span>
+        <span></span>
+        <span>gICS</span>
+    </div>
+</th:block>

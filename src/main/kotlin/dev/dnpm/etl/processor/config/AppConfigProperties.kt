@@ -62,7 +62,7 @@ data class GIcsConfigProperties(
      * Base URL to gICS System
      *
      */
-    val gIcsBaseUri: String?,
+    val uri: String?,
     val username: String?,
     val password: String?,
 

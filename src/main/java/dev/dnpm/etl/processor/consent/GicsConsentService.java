@@ -49,11 +49,12 @@ public class GicsConsentService implements ICheckConsent {
         this.fhirContext = appFhirConfig.fhirContext();
         httpHeader = buildHeader(gIcsConfigProperties.getUsername(),
             gIcsConfigProperties.getPassword());
+        log.info("GicsConsentService initialized...");
     }
 
     public String getGicsUri() {
         if (url == null) {
-            final String gIcsBaseUri = gIcsConfigProperties.getGIcsBaseUri();
+            final String gIcsBaseUri = gIcsConfigProperties.getUri();
             if (StringUtils.isBlank(gIcsBaseUri)) {
                 throw new IllegalArgumentException(
                     "gICS base URL is empty - should call gICS with false configuration.");
