@@ -21,10 +21,8 @@ package dev.dnpm.etl.processor.pseudonym
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
-import dev.pcvolkmer.mv64e.mtb.MTBEpisodeOfCare
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.PeriodDate
-import dev.pcvolkmer.mv64e.mtb.Reference
+import de.ukw.ccc.bwhc.dto.Patient
+import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,6 +34,8 @@ import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource
+import java.time.Instant
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class ExtensionsTest {
@@ -207,7 +207,7 @@ class ExtensionsTest {
     inner class UsingDnpmV2Datamodel {
 
         val FAKE_MTB_FILE_PATH = "mv64e-mtb-fake-patient.json"
-        val CLEAN_PATIENT_ID = "63f8fd7b-8127-4f3c-8843-aa9199e21c29"
+        val CLEAN_PATIENT_ID = "e14bf9b6-7982-4933-a648-cfdea6484f1c"
 
         private fun fakeMtbFile(): Mtb {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
@@ -244,32 +244,26 @@ class ExtensionsTest {
                 "TESTDOMAIN"
             }.whenever(pseudonymizeService).prefix()
 
-            val mtbFile = Mtb.builder()
-                .withPatient(
-                    dev.pcvolkmer.mv64e.mtb.Patient.builder()
-                        .withId("1")
-                        .withBirthDate("2000-08-08")
-                        .withGender(null)
-                        .build()
+            val mtbFile = Mtb().apply {
+                this.patient = dev.pcvolkmer.mv64e.mtb.Patient().apply {
+                    this.id = "PID"
+                    this.birthDate = Date.from(Instant.now())
+                    this.gender = GenderCoding().apply {
+                        this.code = GenderCodingCode.MALE
+                    }
+                }
+                this.episodesOfCare = listOf(
+                    MtbEpisodeOfCare().apply {
+                        this.id = "1"
+                        this.patient = Reference().apply {
+                            this.id = "PID"
+                        }
+                        this.period = PeriodDate().apply {
+                            this.start = Date.from(Instant.now())
+                        }
+                    }
                 )
-                .withEpisodesOfCare(
-                    listOf(
-                        MTBEpisodeOfCare.builder()
-                            .withId("1")
-                            .withPatient(Reference("1"))
-                            .withPeriod(PeriodDate.builder().withStart("2023-08-08").build())
-                            .build()
-                    )
-                )
-                .withClaims(null)
-                .withDiagnoses(null)
-                .withCarePlans(null)
-                .withClaimResponses(null)
-                .withHistologyReports(null)
-                .withNgsReports(null)
-                .withResponses(null)
-                .withSpecimens(null)
-                .build()
+            }
 
             mtbFile.pseudonymizeWith(pseudonymizeService)
             mtbFile.anonymizeContentWith(pseudonymizeService)
