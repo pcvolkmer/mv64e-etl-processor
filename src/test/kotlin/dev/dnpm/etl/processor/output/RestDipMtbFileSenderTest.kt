@@ -49,6 +49,8 @@ import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
+import java.time.Instant
+import java.util.*
 
 class RestDipMtbFileSenderTest {
 
@@ -155,7 +157,7 @@ class RestDipMtbFileSenderTest {
                     withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
                 }
 
-            val response = restMtbFileSender.send(DnpmV2MtbFileRequest(TEST_REQUEST_ID, dnpmV2MtbFile))
+            val response = restMtbFileSender.send(DnpmV2MtbFileRequest(TEST_REQUEST_ID, dnpmV2MtbFile()))
             assertThat(response.status).isEqualTo(requestWithResponse.response.status)
             assertThat(response.body).isEqualTo(requestWithResponse.response.body)
         }
@@ -267,24 +269,28 @@ class RestDipMtbFileSenderTest {
             )
             .build()
 
-        val dnpmV2MtbFile: Mtb = Mtb.builder()
-            .withPatient(
-                dev.pcvolkmer.mv64e.mtb.Patient.builder()
-                    .withId("PID")
-                    .withBirthDate("2000-08-08")
-                    .withGender(CodingGender.builder().withCode(CodingGender.Code.MALE).build())
-                    .build()
-            )
-            .withEpisodesOfCare(
-                listOf(
-                    MTBEpisodeOfCare.builder()
-                        .withId("1")
-                        .withPatient(Reference("PID"))
-                        .withPeriod(PeriodDate.builder().withStart("2023-08-08").build())
-                        .build()
+        fun dnpmV2MtbFile(): Mtb {
+            return Mtb().apply {
+                this.patient = dev.pcvolkmer.mv64e.mtb.Patient().apply {
+                    this.id = "PID"
+                    this.birthDate = Date.from(Instant.now())
+                    this.gender = GenderCoding().apply {
+                        this.code = GenderCodingCode.MALE
+                    }
+                }
+                this.episodesOfCare = listOf(
+                    MtbEpisodeOfCare().apply {
+                        this.id = "1"
+                        this.patient = Reference().apply {
+                            this.id = "PID"
+                        }
+                        this.period = PeriodDate().apply {
+                            this.start = Date.from(Instant.now())
+                        }
+                    }
                 )
-            )
-            .build()
+            }
+        }
 
         private const val ERROR_RESPONSE_BODY = "Sonstiger Fehler bei der Übertragung"
 

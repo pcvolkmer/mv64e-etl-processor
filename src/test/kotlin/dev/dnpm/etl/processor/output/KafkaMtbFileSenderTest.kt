@@ -44,6 +44,8 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplateBuilder
+import java.time.Instant
+import java.util.*
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.ExecutionException
 
@@ -309,24 +311,28 @@ class KafkaMtbFileSenderTest {
             }.build()
         }
 
-        fun dnpmV2MtbFile(): Mtb = Mtb.builder()
-            .withPatient(
-                dev.pcvolkmer.mv64e.mtb.Patient.builder()
-                    .withId("PID")
-                    .withBirthDate("2000-08-08")
-                    .withGender(CodingGender.builder().withCode(CodingGender.Code.MALE).build())
-                    .build()
-            )
-            .withEpisodesOfCare(
-                listOf(
-                    MTBEpisodeOfCare.builder()
-                        .withId("1")
-                        .withPatient(Reference("PID"))
-                        .withPeriod(PeriodDate.builder().withStart("2023-08-08").build())
-                        .build()
+        fun dnpmV2MtbFile(): Mtb {
+            return Mtb().apply {
+                this.patient = dev.pcvolkmer.mv64e.mtb.Patient().apply {
+                    this.id = "PID"
+                    this.birthDate = Date.from(Instant.now())
+                    this.gender = GenderCoding().apply {
+                        this.code = GenderCodingCode.MALE
+                    }
+                }
+                this.episodesOfCare = listOf(
+                    MtbEpisodeOfCare().apply {
+                        this.id = "1"
+                        this.patient = Reference().apply {
+                            this.id = "PID"
+                        }
+                        this.period = PeriodDate().apply {
+                            this.start = Date.from(Instant.now())
+                        }
+                    }
                 )
-            )
-            .build()
+            }
+        }
 
         fun bwhcV1kafkaRecordData(requestId: RequestId, consentStatus: Consent.Status): MtbRequest {
             return BwhcV1MtbFileRequest(requestId, bwhcV1MtbFile(consentStatus))
