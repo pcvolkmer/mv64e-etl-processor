@@ -279,11 +279,14 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     this.responses?.forEach { it.patient.id = patientPseudonym }
     this.specimens?.forEach { it.patient.id = patientPseudonym }
     this.priorDiagnosticReports?.forEach { it.patient.id = patientPseudonym }
-    this.performanceStatus.forEach { it.patient.id = patientPseudonym }
-    this.systemicTherapies.forEach {
+    this.performanceStatus?.forEach { it.patient.id = patientPseudonym }
+    this.systemicTherapies?.forEach {
         it.history?.forEach {
             it.patient.id = patientPseudonym
         }
+    }
+    this.followUps?.forEach {
+        it.patient.id = patientPseudonym
     }
 }
 
