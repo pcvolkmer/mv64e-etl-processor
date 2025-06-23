@@ -80,9 +80,14 @@ data class GIcsConfigProperties(
         "https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID",
 
     /**
-     * Domain of consent resources
-     * **/
-    val consentDomainName: String = "MII",
+     * Domain of broad consent resources
+     **/
+    val broadConsentDomainName: String = "MII",
+
+    /**
+     * Domain of Modelvorhaben 64e consent resources
+     **/
+    val gnomDeConsentDomainName: String = "GenomeDE_MV",
 
     /**
      * Value to expect in case of positiv consent

@@ -91,16 +91,29 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 Ab gIcs Version 2.13.0 kann per [REST-Schnittstelle](https://simplifier.net/guide/ttp-fhir-gateway-ig/ImplementationGuide-markdown-Einwilligungsmanagement-Operations-isConsented?version=current) der Einwilligungsstatus abgefragt werden. 
 Vor der MTB-Übertragung kann der zum Sendezeitpunkt verfügbarer Einwilligungsstatus über Endpunkt *isConsented* abgefragt werden.
 
-Falls diese Prüfung aktiviert wurde, wird der Einwilligungsstatus dem in der MTB Datei vorgezogen und der Wert in der MTB-Datei wird dabei ignoriert.
-Falls in diesem Fall die Statusprüfung fehlschlägt, wird Status **abgelehnt** angenommen.
-Ist die Prüfung über gIcs deaktiviert, wird der eingetragene Einwilligungsstatus der übermittelten MTB Datei geprüft.
+Falls Anbindung an gICS aktiviert wurde, wird der Einwilligungsstatus der MTB Datei ignoriert. 
+Stattdessen werden vorhandene Einwilligungen abgefragt und in die MTB Datei eingebettet.
 
+Es werden zwei Einwilligungsdomänen unterstützt, eine für Broad Consent und als zweites GenomDE Modelvorhaben §64e.
+ 
+#### Hinweise
+1. Die aktuelle Impl. nimmt an, dass die hinterlegten Domänen der Einwilligungen ausschließlich für die genannten Art von Einwilligungen genutzt werden. Es finde keine weitere Filterung statt. Wir fragen pro Domäne die Schnittstelle `CurrentPolicyStatesForPerson` - siehe auch [IG TTP-FHIR Gateway
+](https://www.ths-greifswald.de/wp-content/uploads/tools/fhirgw/ig/2024-3-0/ImplementationGuide-markdown-Einwilligungsmanagement-Operations-currentPolicyStatesForPerson.html) ab.     
+2. Die Einwilligung wird für den Patienten-Identifier der MTB abgerufen und anschließend durch das DNPM Pseudonym ersetzt.
+3. Abfragen von Einwilligungen über gesonderte Pseudonyme anstatt des MTB-Identifiers fehlt in der ersten Implementierung.  
+4. Bei Verarbeitung von MTB Version 1.x Inhalten ist eine positive Einwilligung für die 
+Weiterverarbeitung notwendig. Das Fehlen einer Einwilligung löst die Löschung des Patienten im Brückenkopf aus.  
+
+#### Konfiguration
 * `APP_CONSENT_GICS_ENABLED`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn nicht gesetzt.
+* `APP_CONSENT_GICS_CHECKGNOMEDE`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn nicht gesetzt. Versuche Einwilligungsdaten zu GENOM DE Modelvorhaben über gIcs abzurufen. 
+* `APP_CONSENT_GICS_CHECKBROADCONSENT`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn nicht gesetzt. Versuche Einwilligungsdaten zu Broad Consent über gIcs abzurufen.
 * `APP_CONSENT_GICS_URI`: URI der gICS-Instanz (z.B. `http://localhost:8090/ttp-fhir/fhir/gics`)
 * `APP_CONSENT_GICS_USERNAME`: gIcs Basic-Auth Benutzername
 * `APP_CONSENT_GICS_PASSWORD`: gIcs Basic-Auth Passwort
 * `APP_CONSENT_GICS_PERSONIDENTIFIERSYSTEM`: Derzeit wird nur die PID unterstützt. wenn leer wird `https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID` angenommen
-* `APP_CONSENT_GICS_CONSENTDOMAINNAME`: Domäne in der gIcs Einwilligungen verwaltet. Falls Wert leer, wird `MII` angenommen.
+* `APP_CONSENT_GICS_BROADCONSENTDOMAINNAME`: Domäne in der gIcs Broad Consent Einwilligungen verwaltet. Falls Wert leer, wird `MII` angenommen.
+* `APP_CONSENT_GICS_GNOMDECONSENTDOMAINNAME`: Domäne in der gIcs GenomDE Modelvorhaben §64e Einwilligungen verwaltet. Falls Wert leer, wird `GenomDE_MV` angenommen.
 * `APP_CONSENT_GICS_POLICYCODE`: Die entscheidende Objekt-ID der zu prüfenden Einwilligung-Regel. Falls leer wird `2.16.840.1.113883.3.1937.777.24.5.3.6` angenommen. 
 * `APP_CONSENT_GICS_POLICYSYSTEM`: Das System der Einwilligung-Regel der Objekt-IDs. Falls leer wird `urn:oid:2.16.840.1.113883.3.1937.777.24.5.3` angenommen.
 

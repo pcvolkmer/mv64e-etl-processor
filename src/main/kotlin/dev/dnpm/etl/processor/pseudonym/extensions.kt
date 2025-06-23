@@ -23,6 +23,7 @@ import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.PatientId
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.commons.codec.digest.DigestUtils
+import org.hl7.fhir.r4.model.Consent
 
 /** Replaces patient ID with generated patient pseudonym
  *
@@ -287,6 +288,14 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     }
     this.followUps?.forEach {
         it.patient.id = patientPseudonym
+    }
+
+    // FIXME: MUST CREATE TESTCASE  - NEEDS TESTING!!
+    this.metadata?.researchConsents?.forEach {  it  -> {
+        val consent = it as? Consent
+        consent?.patient?.reference = "Patient/$patientPseudonym"
+        consent?.patient?.display = null
+        }
     }
 }
 

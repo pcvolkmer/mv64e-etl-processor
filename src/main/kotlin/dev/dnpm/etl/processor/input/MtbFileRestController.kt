@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(path = ["mtbfile", "mtb"])
 class MtbFileRestController(
-    private val requestProcessor: RequestProcessor, private val constService: ICheckConsent
+    private val requestProcessor: RequestProcessor, private val iCheckConsent: ICheckConsent
 ) {
 
     private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
@@ -63,7 +63,7 @@ class MtbFileRestController(
     }
 
     private fun checkConsentStatus(mtbFile: MtbFile): Pair<TtpConsentStatus, Boolean> {
-        var ttpConsentStatus = constService.getTtpConsentStatus(mtbFile.patient.id)
+        var ttpConsentStatus = iCheckConsent.getTtpConsentStatus(mtbFile.patient.id)
 
         val isConsentOK =
             (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.ACTIVE) ||
