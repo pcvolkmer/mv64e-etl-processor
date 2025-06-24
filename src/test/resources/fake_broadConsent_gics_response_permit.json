@@ -1,0 +1,1631 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61782bc-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d61782bc-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.2",
+              "display": "IDAT_erheben"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.2",
+                      "display": "IDAT_erheben"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618b6e4-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d618b6e4-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.31",
+              "display": "Rekontaktierung_Zusatzbefund"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.31",
+                      "display": "Rekontaktierung_Zusatzbefund"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6180058-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d6180058-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.6",
+              "display": "MDAT_erheben"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2030-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2030-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.6",
+                      "display": "MDAT_erheben"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d617e5c3-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d617e5c3-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
+              "display": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
+                      "display": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6186042-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d6186042-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.27",
+              "display": "Rekontaktierung_Verknuepfung_Datenbanken"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.27",
+                      "display": "Rekontaktierung_Verknuepfung_Datenbanken"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618abf6-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d618abf6-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.29",
+              "display": "Rekontaktierung_weitere_Studien"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.29",
+                      "display": "Rekontaktierung_weitere_Studien"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618341d-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d618341d-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.5",
+              "display": "IDAT_bereitstellen_EU_DSGVO_NIVEAU"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.5",
+                      "display": "IDAT_bereitstellen_EU_DSGVO_NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61817be-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d61817be-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
+              "display": "MDAT_speichern_verarbeiten"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
+                      "display": "MDAT_speichern_verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6183b46-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d6183b46-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.3",
+              "display": "IDAT_speichern_verarbeiten"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.3",
+                      "display": "IDAT_speichern_verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61848d9-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d61848d9-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.37",
+              "display": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.37",
+                      "display": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61886e7-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d61886e7-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.28",
+              "display": "Rekontaktierung_weitere_Erhebung"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.28",
+                      "display": "Rekontaktierung_weitere_Erhebung"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6182af5-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d6182af5-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
+              "display": "MDAT_zusammenfuehren_Dritte"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
+                      "display": "MDAT_zusammenfuehren_Dritte"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618422d-5003-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "d618422d-5003-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "profile": [
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 12345678"
+        },
+        "dateTime": "2025-06-23T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+        },
+        "policy": [
+          {
+            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
+          },
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
+          }
+        ],
+        "policyRule": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.4",
+              "display": "IDAT_zusammenfuehren_Dritte"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-23T00:00:00+02:00",
+            "end": "2055-06-23T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-06-23T00:00:00+02:00",
+                "end": "2055-06-23T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.4",
+                      "display": "IDAT_zusammenfuehren_Dritte"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
