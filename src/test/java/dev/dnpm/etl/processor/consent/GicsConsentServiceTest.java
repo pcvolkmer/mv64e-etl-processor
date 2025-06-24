@@ -100,6 +100,4 @@ public class GicsConsentServiceTest {
         var consentStatus = gicsConsentService.getTtpConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.FAILED_TO_ASK);
     }
-
-
 }

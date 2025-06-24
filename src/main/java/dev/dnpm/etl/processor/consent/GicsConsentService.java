@@ -81,7 +81,7 @@ public class GicsConsentService implements ICheckConsent {
         return headers;
     }
 
-    public static Parameters getIsConsentedParam(GIcsConfigProperties configProperties,
+    public static Parameters getIsConsentedRequestParam(GIcsConfigProperties configProperties,
         String personIdentifierValue) {
         var result = new Parameters();
         result.addParameter(new ParametersParameterComponent().setName("personIdentifier").setValue(
@@ -152,7 +152,7 @@ public class GicsConsentService implements ICheckConsent {
 
     @Override
     public TtpConsentStatus getTtpConsentStatus(String personIdentifierValue) {
-        var parameter = GicsConsentService.getIsConsentedParam(gIcsConfigProperties,
+        var parameter = GicsConsentService.getIsConsentedRequestParam(gIcsConfigProperties,
             personIdentifierValue);
 
         var consentStatusResponse = callGicsApi(parameter);
