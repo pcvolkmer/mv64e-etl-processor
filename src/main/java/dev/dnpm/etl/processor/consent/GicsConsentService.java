@@ -214,13 +214,11 @@ public class GicsConsentService implements ICheckConsent {
     }
 
     public Bundle getBroadConsent(String personIdentifierValue, Date requestDate) {
-        String consentDomainName = gIcsConfigProperties.getBroadConsentDomainName();
         return currentConsentForPersonAndTemplate(personIdentifierValue, ConsentDomain.BroadConsent,
             requestDate);
     }
 
-    public Bundle getGnomDeConsent(String personIdentifierValue, Date requestDate) {
-
+    public Bundle getGenomDeConsent(String personIdentifierValue, Date requestDate) {
         return currentConsentForPersonAndTemplate(personIdentifierValue,
             ConsentDomain.Modelvorhaben64e, requestDate);
     }

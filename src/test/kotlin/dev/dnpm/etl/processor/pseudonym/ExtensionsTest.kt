@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.pseudonym
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -39,6 +40,9 @@ import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class ExtensionsTest {
+    fun getObjectMapper() : ObjectMapper {
+        return JacksonConfig().objectMapper()
+    }
 
     @Nested
     inner class UsingBwhcDatamodel {
@@ -46,13 +50,14 @@ class ExtensionsTest {
         val FAKE_MTB_FILE_PATH = "fake_MTBFile.json"
         val CLEAN_PATIENT_ID = "5dad2f0b-49c6-47d8-a952-7b9e9e0f7549"
 
+
         private fun fakeMtbFile(): MtbFile {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
-            return ObjectMapper().readValue(mtbFile, MtbFile::class.java)
+            return getObjectMapper().readValue(mtbFile, MtbFile::class.java)
         }
 
         private fun MtbFile.serialized(): String {
-            return ObjectMapper().writeValueAsString(this)
+            return getObjectMapper().writeValueAsString(this)
         }
 
         @Test
@@ -211,11 +216,11 @@ class ExtensionsTest {
 
         private fun fakeMtbFile(): Mtb {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
-            return ObjectMapper().readValue(mtbFile, Mtb::class.java)
+            return getObjectMapper().readValue(mtbFile, Mtb::class.java)
         }
 
         private fun Mtb.serialized(): String {
-            return ObjectMapper().writeValueAsString(this)
+            return getObjectMapper().writeValueAsString(this)
         }
 
         @Test

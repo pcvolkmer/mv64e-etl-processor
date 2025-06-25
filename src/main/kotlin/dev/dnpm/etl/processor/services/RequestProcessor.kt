@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
@@ -32,9 +33,17 @@ import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
+import dev.pcvolkmer.mv64e.mtb.ConsentProvision
+import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
+import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhMetadata
+import dev.pcvolkmer.mv64e.mtb.Provision
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.r4.model.Bundle
+import org.hl7.fhir.r4.model.Consent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -48,7 +57,8 @@ class RequestProcessor(
     private val requestService: RequestService,
     private val objectMapper: ObjectMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val appConfigProperties: AppConfigProperties
+    private val appConfigProperties: AppConfigProperties,
+    private val gicsConsentService: GicsConsentService?
 ) {
 
     fun processMtbFile(mtbFile: MtbFile) {
@@ -69,10 +79,82 @@ class RequestProcessor(
 
     fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
         val pid = PatientId(mtbFile.patient.id)
+
+        addConsentToMtb(mtbFile)
         mtbFile pseudonymizeWith pseudonymizeService
         mtbFile anonymizeContentWith pseudonymizeService
         val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
         saveAndSend(request, pid)
+    }
+
+    fun addConsentToMtb(mtbFile: Mtb) {
+        if (gicsConsentService == null) return
+        // init metadata if necessary
+        if (mtbFile.metadata == null) {
+            val mvhMetadata = MvhMetadata.builder().build();
+            mtbFile.metadata = mvhMetadata
+            if (mtbFile.metadata.researchConsents == null) {
+                mtbFile.metadata.researchConsents = mutableListOf()
+            }
+            if (mtbFile.metadata.modelProjectConsent == null) {
+                mtbFile.metadata.modelProjectConsent = ModelProjectConsent()
+                mtbFile.metadata.modelProjectConsent.provisions = mutableListOf()
+            }
+        }
+
+        // fixme Date should be extracted from mtbFile
+        val consentGnomeDe =
+            gicsConsentService.getGenomDeConsent(mtbFile.patient.id, Date.from(Instant.now()))
+        addGenomeDbProvisions(mtbFile, consentGnomeDe)
+
+        // fixme Date should be extracted from mtbFile
+        val broadConsent =
+            gicsConsentService.getBroadConsent(mtbFile.patient.id, Date.from(Instant.now()))
+        embedBroadConsentResources(mtbFile, broadConsent)
+    }
+
+    fun embedBroadConsentResources(
+        mtbFile: Mtb,
+        broadConsent: Bundle
+    ) {
+        broadConsent.entry.forEach { it ->
+            mtbFile.metadata.researchConsents.add(mapOf(it.resource.id to it as IBaseResource))
+        }
+    }
+
+    fun addGenomeDbProvisions(
+        mtbFile: Mtb,
+        consentGnomeDe: Bundle
+    ) {
+        consentGnomeDe.entry.forEach { it ->
+            {
+                val consent = it.resource as Consent
+                val provisionComponent = consent.provision.provision.firstOrNull()
+                val provisionCode =
+                    provisionComponent?.code?.firstOrNull()?.coding?.firstOrNull()?.code
+                var isValidCode = true
+                if (provisionCode != null) {
+                    var modelProjectConsentPurpose: ModelProjectConsentPurpose =
+                        ModelProjectConsentPurpose.SEQUENCING
+                    if (provisionCode == "Teilnahme") {
+                        modelProjectConsentPurpose = ModelProjectConsentPurpose.SEQUENCING
+                    } else if (provisionCode == "Fallidentifizierung") {
+                        modelProjectConsentPurpose = ModelProjectConsentPurpose.CASE_IDENTIFICATION
+                    } else if (provisionCode == "Rekontaktierung") {
+                        modelProjectConsentPurpose = ModelProjectConsentPurpose.REIDENTIFICATION
+                    } else {
+                        isValidCode = false
+                    }
+                    if (isValidCode) mtbFile.metadata.modelProjectConsent.provisions.add(
+                        Provision.builder().type(
+                            ConsentProvision.forValue(provisionComponent.type.name)
+                        ).date(provisionComponent.period.start).purpose(
+                            modelProjectConsentPurpose
+                        ).build()
+                    )
+                }
+            }
+        }
     }
 
     private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
@@ -126,7 +208,9 @@ class RequestProcessor(
 
         return null != lastMtbFileRequestForPatient
                 && !isLastRequestDeletion
-                && lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFileRequest)
+                && lastMtbFileRequestForPatient.fingerprint == fingerprint(
+            pseudonymizedMtbFileRequest
+        )
     }
 
     fun processDeletion(patientId: PatientId, isConsented: TtpConsentStatus) {

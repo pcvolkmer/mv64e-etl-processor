@@ -25,6 +25,7 @@ import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -59,7 +60,7 @@ class RequestProcessorTest {
     private lateinit var requestService: RequestService
     private lateinit var applicationEventPublisher: ApplicationEventPublisher
     private lateinit var appConfigProperties: AppConfigProperties
-
+    private lateinit var gicsConsentService : GicsConsentService
     private lateinit var requestProcessor: RequestProcessor
 
     @BeforeEach
@@ -68,7 +69,8 @@ class RequestProcessorTest {
         @Mock transformationService: TransformationService,
         @Mock sender: RestMtbFileSender,
         @Mock requestService: RequestService,
-        @Mock applicationEventPublisher: ApplicationEventPublisher
+        @Mock applicationEventPublisher: ApplicationEventPublisher,
+        @Mock gicsConsentService: GicsConsentService
     ) {
         this.pseudonymizeService = pseudonymizeService
         this.transformationService = transformationService
@@ -76,6 +78,7 @@ class RequestProcessorTest {
         this.requestService = requestService
         this.applicationEventPublisher = applicationEventPublisher
         this.appConfigProperties = AppConfigProperties(null)
+        this.gicsConsentService = gicsConsentService
 
         val objectMapper = ObjectMapper()
 
@@ -86,7 +89,8 @@ class RequestProcessorTest {
             requestService,
             objectMapper,
             applicationEventPublisher,
-            appConfigProperties
+            appConfigProperties,
+            gicsConsentService
         )
     }
 
