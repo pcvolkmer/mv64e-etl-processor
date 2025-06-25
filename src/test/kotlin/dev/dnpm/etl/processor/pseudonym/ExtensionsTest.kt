@@ -207,7 +207,7 @@ class ExtensionsTest {
     inner class UsingDnpmV2Datamodel {
 
         val FAKE_MTB_FILE_PATH = "mv64e-mtb-fake-patient.json"
-        val CLEAN_PATIENT_ID = "e14bf9b6-7982-4933-a648-cfdea6484f1c"
+        val CLEAN_PATIENT_ID = "aca5a971-28be-4089-8128-0036a4fe6f1a"
 
         private fun fakeMtbFile(): Mtb {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
