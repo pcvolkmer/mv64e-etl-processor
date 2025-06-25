@@ -87,7 +87,7 @@ data class GIcsConfigProperties(
     /**
      * Domain of Modelvorhaben 64e consent resources
      **/
-    val gnomDeConsentDomainName: String = "GenomeDE_MV",
+    val gnomDeConsentDomainName: String = "GenomDE_MV",
 
     /**
      * Value to expect in case of positiv consent

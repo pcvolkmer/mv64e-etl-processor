@@ -100,17 +100,21 @@ class AppConfiguration {
     }
 
     @Bean
-    fun reportService(objectMapper: ObjectMapper): ReportService {
-        return ReportService(objectMapper)
+    fun reportService(): ReportService {
+        return ReportService(getObjectMapper())
+    }
+
+    @Bean
+    fun getObjectMapper () : ObjectMapper{
+        return JacksonConfig().objectMapper()
     }
 
     @Bean
     fun transformationService(
-        objectMapper: ObjectMapper,
         configProperties: AppConfigProperties
     ): TransformationService {
         logger.info("Apply ${configProperties.transformations.size} transformation rules")
-        return TransformationService(objectMapper, configProperties.transformations.map {
+        return TransformationService(getObjectMapper(), configProperties.transformations.map {
             Transformation.of(it.path) from it.from to it.to
         })
     }

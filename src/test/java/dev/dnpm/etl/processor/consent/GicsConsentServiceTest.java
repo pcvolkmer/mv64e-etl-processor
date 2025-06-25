@@ -7,13 +7,18 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.AppConfiguration;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
+import dev.dnpm.etl.processor.config.GIcsConfigProperties;
+import java.time.Instant;
+import java.util.Date;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,9 @@ public class GicsConsentServiceTest {
 
     @Autowired
     AppFhirConfig appFhirConfig;
+
+    @Autowired
+    GIcsConfigProperties gIcsConfigProperties;
 
     @BeforeEach
     public void setUp() {
@@ -99,5 +107,18 @@ public class GicsConsentServiceTest {
 
         var consentStatus = gicsConsentService.getTtpConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.FAILED_TO_ASK);
+    }
+
+    @Test
+    void buildRequestParameterCurrentPolicyStatesForPersonTest() {
+
+        String pid = "12345678";
+        var result = GicsConsentService.buildRequestParameterCurrentPolicyStatesForPerson(gIcsConfigProperties,
+            pid, Date.from(Instant.now()),gIcsConfigProperties.getGnomDeConsentDomainName());
+
+        assertThat(result.getParameter().size()).as("should contain 3 parameter resources").isEqualTo(3);
+
+        assertThat(((StringType)result.getParameter("domain").getValue()).getValue()).isEqualTo(gIcsConfigProperties.getGnomDeConsentDomainName());
+        assertThat(((Identifier)result.getParameter("personIdentifier").getValue()).getValue()).isEqualTo(pid);
     }
 }

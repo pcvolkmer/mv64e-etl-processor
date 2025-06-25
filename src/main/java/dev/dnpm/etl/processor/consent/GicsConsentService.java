@@ -38,6 +38,7 @@ public class GicsConsentService implements ICheckConsent {
     private final GIcsConfigProperties gIcsConfigProperties;
 
     public static final String IS_CONSENTED_ENDPOINT = "/$isConsented";
+    public static final String IS_POLICY_STATES_FOR_PERSON_ENDPOINT = "/$currentPolicyStatesForPerson";
     private final RetryTemplate retryTemplate;
     private final RestTemplate restTemplate;
     private final FhirContext fhirContext;
@@ -55,7 +56,7 @@ public class GicsConsentService implements ICheckConsent {
         log.info("GicsConsentService initialized...");
     }
 
-    public String getGicsUri() {
+    public String getGicsUri(String endpoint) {
         if (url == null) {
             final String gIcsBaseUri = gIcsConfigProperties.getUri();
             if (StringUtils.isBlank(gIcsBaseUri)) {
@@ -81,7 +82,7 @@ public class GicsConsentService implements ICheckConsent {
         return headers;
     }
 
-    public static Parameters getIsConsentedRequestParam(GIcsConfigProperties configProperties,
+    protected static Parameters getIsConsentedRequestParam(GIcsConfigProperties configProperties,
         String personIdentifierValue) {
         var result = new Parameters();
         result.addParameter(new ParametersParameterComponent().setName("personIdentifier").setValue(
@@ -115,13 +116,13 @@ public class GicsConsentService implements ICheckConsent {
         return result;
     }
 
-    protected String callGicsApi(Parameters parameter) {
+    protected String callGicsApi(Parameters parameter, String endpoint) {
         var parameterAsXml = fhirContext.newXmlParser().encodeResourceToString(parameter);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(parameterAsXml, this.httpHeader);
         ResponseEntity<String> responseEntity;
         try {
-            var url = getGicsUri();
+            var url = getGicsUri(endpoint);
 
             responseEntity = retryTemplate.execute(
                 ctx -> restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class));
@@ -155,7 +156,8 @@ public class GicsConsentService implements ICheckConsent {
         var parameter = GicsConsentService.getIsConsentedRequestParam(gIcsConfigProperties,
             personIdentifierValue);
 
-        var consentStatusResponse = callGicsApi(parameter);
+        var consentStatusResponse = callGicsApi(parameter,
+            GicsConsentService.IS_CONSENTED_ENDPOINT);
         return evaluateConsentResponse(consentStatusResponse);
     }
 
@@ -167,7 +169,8 @@ public class GicsConsentService implements ICheckConsent {
         var requestParameter = GicsConsentService.buildRequestParameterCurrentPolicyStatesForPerson(
             gIcsConfigProperties, personIdentifierValue, requestDate, consentDomain);
 
-        var consentDataSerialized = callGicsApi(requestParameter);
+        var consentDataSerialized = callGicsApi(requestParameter,
+            GicsConsentService.IS_POLICY_STATES_FOR_PERSON_ENDPOINT);
 
         if (consentDataSerialized == null) {
             // error occurred - should not process further!
@@ -222,7 +225,7 @@ public class GicsConsentService implements ICheckConsent {
             ConsentDomain.Modelvorhaben64e, requestDate);
     }
 
-    private static Parameters buildRequestParameterCurrentPolicyStatesForPerson(
+    protected static Parameters buildRequestParameterCurrentPolicyStatesForPerson(
         GIcsConfigProperties gIcsConfigProperties, String personIdentifierValue, Date requestDate,
         String targetDomain) {
         var requestParameter = new Parameters();
