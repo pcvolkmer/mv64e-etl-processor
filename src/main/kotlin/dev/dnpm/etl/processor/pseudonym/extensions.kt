@@ -256,6 +256,7 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     this.claims?.forEach { it.patient.id = patientPseudonym }
     this.claimResponses?.forEach { it.patient.id = patientPseudonym }
     this.diagnoses?.forEach { it.patient.id = patientPseudonym }
+    this.familyMemberHistories?.forEach { it.patient.id = patientPseudonym }
     this.histologyReports?.forEach {
         it.patient.id = patientPseudonym
         it.results.tumorMorphology?.patient?.id = patientPseudonym
