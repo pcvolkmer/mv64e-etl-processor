@@ -110,7 +110,7 @@ public class GicsConsentService implements ICheckConsent {
             new ParametersParameterComponent().setName("ignoreVersionNumber")
                 .setValue(new BooleanType().setValue(true))).addPart(
             new ParametersParameterComponent().setName("unknownStateIsConsideredAsDecline")
-                .setValue(new BooleanType().setValue(true)));
+                .setValue(new BooleanType().setValue(false)));
         result.addParameter(config);
 
         return result;
