@@ -101,7 +101,7 @@ class MtbFileRestControllerTest {
 
             verify(requestProcessor, times(1)).processDeletion(
                 anyValueClass(),
-                org.mockito.kotlin.eq(TtpConsentStatus.CONSENT_MISSING_OR_REJECTED)
+                org.mockito.kotlin.eq(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED)
             )
         }
 
@@ -149,7 +149,7 @@ class MtbFileRestControllerTest {
         @ValueSource(strings = ["ACTIVE", "REJECTED"])
         fun shouldProcessPostRequest(status: String) {
 
-            whenever(gicsConsentService.getTtpConsentStatus(any())).thenReturn(TtpConsentStatus.CONSENTED)
+            whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(TtpConsentStatus.BROAD_CONSENT_GIVEN)
 
             mockMvc.post("/mtbfile") {
                 content =
@@ -169,7 +169,7 @@ class MtbFileRestControllerTest {
         @ValueSource(strings = ["ACTIVE", "REJECTED"])
         fun shouldProcessPostRequestWithRejectedConsent(status: String) {
 
-            whenever(gicsConsentService.getTtpConsentStatus(any())).thenReturn(TtpConsentStatus.CONSENT_MISSING_OR_REJECTED)
+            whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED)
 
             mockMvc.post("/mtbfile") {
                 content =
@@ -184,7 +184,7 @@ class MtbFileRestControllerTest {
             // consent status from ttp should override file consent value
             verify(requestProcessor, times(1)).processDeletion(
                 anyValueClass(),
-                org.mockito.kotlin.eq(TtpConsentStatus.CONSENT_MISSING_OR_REJECTED)
+                org.mockito.kotlin.eq(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED)
             )
         }
 
@@ -201,7 +201,7 @@ class MtbFileRestControllerTest {
                 anyValueClass(),
                 org.mockito.kotlin.eq(TtpConsentStatus.UNKNOWN_CHECK_FILE)
             )
-            verify(gicsConsentService, times(0)).getTtpConsentStatus(any())
+            verify(gicsConsentService, times(0)).getTtpBroadConsentStatus(any())
 
         }
     }
@@ -253,7 +253,7 @@ class MtbFileRestControllerTest {
 
             verify(requestProcessor, times(1)).processDeletion(
                 anyValueClass(), org.mockito.kotlin.eq(
-                    TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
+                    TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED
                 )
             )
         }
@@ -283,11 +283,12 @@ class MtbFileRestControllerTest {
 
         @BeforeEach
         fun setup(
-            @Mock requestProcessor: RequestProcessor
+            @Mock requestProcessor: RequestProcessor,
+            @Mock gicsConsentService: GicsConsentService
         ) {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(requestProcessor,
-                ConsentCheckFileBased()
+                gicsConsentService
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }

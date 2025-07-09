@@ -63,16 +63,16 @@ class MtbFileRestController(
     }
 
     private fun checkConsentStatus(mtbFile: MtbFile): Pair<TtpConsentStatus, Boolean> {
-        var ttpConsentStatus = iCheckConsent.getTtpConsentStatus(mtbFile.patient.id)
+        var ttpConsentStatus = iCheckConsent.getTtpBroadConsentStatus(mtbFile.patient.id)
 
         val isConsentOK =
             (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.ACTIVE) ||
                     ttpConsentStatus.equals(
-                        TtpConsentStatus.CONSENTED
+                        TtpConsentStatus.BROAD_CONSENT_GIVEN
                     )
         if (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.REJECTED) {
             // in case ttp check is disabled - we propagate rejected status anyway
-            ttpConsentStatus = TtpConsentStatus.CONSENT_MISSING_OR_REJECTED
+            ttpConsentStatus = TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED
         }
         return Pair(ttpConsentStatus, isConsentOK)
     }

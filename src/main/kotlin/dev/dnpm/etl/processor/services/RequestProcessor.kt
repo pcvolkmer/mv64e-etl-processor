@@ -23,7 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
-import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.ConsentDomain
+import dev.dnpm.etl.processor.consent.ICheckConsent
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
@@ -44,9 +45,15 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Consent
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import java.io.IOException
+import java.lang.RuntimeException
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 
 @Service
@@ -58,9 +65,10 @@ class RequestProcessor(
     private val objectMapper: ObjectMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val appConfigProperties: AppConfigProperties,
-    private val gicsConsentService: GicsConsentService?
+    private val consentService: ICheckConsent?
 ) {
 
+    private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
     fun processMtbFile(mtbFile: MtbFile) {
         processMtbFile(mtbFile, randomRequestId())
     }
@@ -77,21 +85,79 @@ class RequestProcessor(
         processMtbFile(mtbFile, randomRequestId())
     }
 
-    fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
-        val pid = PatientId(mtbFile.patient.id)
+    /**
+     * In case an instance of {@link  ICheckConsent} is active, consent will be embedded and checked.
+     *
+     * Logik:
+     *  * <c>true</c> IF consent check is disabled.
+     *  * <c>true</c> IF broad consent (BC) has been given.
+     *  * <c>true</c> BC has been asked AND declined but genomDe consent has been consented.
+     *  * ELSE <c>false</c> is returned.
+     *
+     * @param mtbFile File v2 (will be enriched with consent data)
+     * @return true if consent is given
+     *
+     */
+    fun consentGatedCheck(mtbFile: Mtb): Boolean {
+        if (consentService == null) {
+            // consent check seems to be disabled
+            return true
+        }
 
-        addConsentToMtb(mtbFile)
-        mtbFile pseudonymizeWith pseudonymizeService
-        mtbFile anonymizeContentWith pseudonymizeService
-        val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
-        saveAndSend(request, pid)
+        initMetaDataAtMtbFile(mtbFile)
+
+        val personIdentifierValue = extractPatientIdentifier(mtbFile)
+        val requestDate = Date.from(Instant.now(Clock.system(ZoneId.of("ECT"))))
+
+        // 1. Broad consent Entry exists?
+        // 1.1. -> yes and research consent is given -> send mtb file
+        // 1.2. -> no -> return status error - consent has not been asked
+        // 2. ->  Broad consent found but rejected -> is GenomDe consent provision 'sequencing' given?
+        // 2.1 -> yes -> send mtb file
+        // 2.2 -> no ->  warn/info no consent given
+
+        /*
+         * broad consent
+         */
+        val broadConsent = consentService.getBroadConsent(personIdentifierValue, requestDate)
+        val broadConsentHasBeenAsked = !broadConsent.entry.isEmpty()
+
+        // fast exit - if patient has not been asked, we can skip and exit
+        if (!broadConsentHasBeenAsked) return false
+
+        val genomeDeConsent = consentService.getGenomDeConsent(
+            personIdentifierValue, requestDate
+        )
+
+        addGenomeDbProvisions(mtbFile, genomeDeConsent)
+        embedBroadConsentResources(mtbFile, broadConsent)
+
+        val broadConsentStatus = consentService.getProvisionTypeByPolicyCode(
+            broadConsent,
+            requestDate,
+            ConsentDomain.BroadConsent
+        )
+
+        val genomDeSequencingStatus = consentService.getProvisionTypeByPolicyCode(
+            genomeDeConsent, requestDate,
+            ConsentDomain.Modelvorhaben64e
+        )
+
+        if (Consent.ConsentProvisionType.PERMIT == broadConsentStatus) return true
+        if (Consent.ConsentProvisionType.DENY == broadConsentStatus && Consent.ConsentProvisionType.PERMIT == genomDeSequencingStatus) return true
+        if (Consent.ConsentProvisionType.NULL == broadConsentStatus) {
+            // bc not asked
+            return false
+        }
+
+        return false
     }
 
-    fun addConsentToMtb(mtbFile: Mtb) {
-        if (gicsConsentService == null) return
+
+    private fun initMetaDataAtMtbFile(mtbFile: Mtb) {
         // init metadata if necessary
         if (mtbFile.metadata == null) {
-            val mvhMetadata = MvhMetadata.builder().build();
+            val mvhMetadata = MvhMetadata.builder().build()
             mtbFile.metadata = mvhMetadata
             if (mtbFile.metadata.researchConsents == null) {
                 mtbFile.metadata.researchConsents = mutableListOf()
@@ -101,21 +167,29 @@ class RequestProcessor(
                 mtbFile.metadata.modelProjectConsent.provisions = mutableListOf()
             }
         }
-
-        // fixme Date should be extracted from mtbFile
-        val consentGnomeDe =
-            gicsConsentService.getGenomDeConsent(mtbFile.patient.id, Date.from(Instant.now()))
-        addGenomeDbProvisions(mtbFile, consentGnomeDe)
-
-        // fixme Date should be extracted from mtbFile
-        val broadConsent =
-            gicsConsentService.getBroadConsent(mtbFile.patient.id, Date.from(Instant.now()))
-        embedBroadConsentResources(mtbFile, broadConsent)
     }
 
+    fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
+        val pid = PatientId(extractPatientIdentifier(mtbFile))
+
+        if (consentGatedCheck(mtbFile)) {
+            mtbFile pseudonymizeWith pseudonymizeService
+            mtbFile anonymizeContentWith pseudonymizeService
+            val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
+            saveAndSend(request, pid)
+        } else {
+            logger.warn("consent check failed file will not be processed further!")
+            applicationEventPublisher.publishEvent(
+                ResponseEvent(
+                    requestId, Instant.now(), RequestStatus.NO_CONSENT
+                )
+            )
+        }
+    }
+
+
     fun embedBroadConsentResources(
-        mtbFile: Mtb,
-        broadConsent: Bundle
+        mtbFile: Mtb, broadConsent: Bundle
     ) {
         broadConsent.entry.forEach { it ->
             mtbFile.metadata.researchConsents.add(mapOf(it.resource.id to it as IBaseResource))
@@ -123,36 +197,36 @@ class RequestProcessor(
     }
 
     fun addGenomeDbProvisions(
-        mtbFile: Mtb,
-        consentGnomeDe: Bundle
+        mtbFile: Mtb, consentGnomeDe: Bundle
     ) {
         consentGnomeDe.entry.forEach { it ->
             {
-                val consent = it.resource as Consent
-                val provisionComponent = consent.provision.provision.firstOrNull()
+                val consentFhirResource = it.resource as Consent
+
+                // we expect only one provision in collection, therefore get first or none
+                val provisionComponent = consentFhirResource.provision.provision.firstOrNull()
                 val provisionCode =
                     provisionComponent?.code?.firstOrNull()?.coding?.firstOrNull()?.code
-                var isValidCode = true
+
                 if (provisionCode != null) {
-                    var modelProjectConsentPurpose: ModelProjectConsentPurpose =
-                        ModelProjectConsentPurpose.SEQUENCING
-                    if (provisionCode == "Teilnahme") {
-                        modelProjectConsentPurpose = ModelProjectConsentPurpose.SEQUENCING
-                    } else if (provisionCode == "Fallidentifizierung") {
-                        modelProjectConsentPurpose = ModelProjectConsentPurpose.CASE_IDENTIFICATION
-                    } else if (provisionCode == "Rekontaktierung") {
-                        modelProjectConsentPurpose = ModelProjectConsentPurpose.REIDENTIFICATION
-                    } else {
-                        isValidCode = false
+                    try {
+                        val modelProjectConsentPurpose: ModelProjectConsentPurpose =
+                            ModelProjectConsentPurpose.valueOf(provisionCode)
+                        mtbFile.metadata.modelProjectConsent.provisions.add(
+                            Provision.builder().type(
+                                ConsentProvision.forValue(provisionComponent.type.name)
+                            ).date(provisionComponent.period.start).purpose(
+                                modelProjectConsentPurpose
+                            ).build()
+                        )
+                    } catch (ioe: IOException) {
+                        logger.error(
+                            "provision code '$provisionCode' is unknown and cannot be mapped.",
+                            ioe.toString()
+                        )
                     }
-                    if (isValidCode) mtbFile.metadata.modelProjectConsent.provisions.add(
-                        Provision.builder().type(
-                            ConsentProvision.forValue(provisionComponent.type.name)
-                        ).date(provisionComponent.period.start).purpose(
-                            modelProjectConsentPurpose
-                        ).build()
-                    )
                 }
+
             }
         }
     }
@@ -172,9 +246,7 @@ class RequestProcessor(
         if (appConfigProperties.duplicationDetection && isDuplication(request)) {
             applicationEventPublisher.publishEvent(
                 ResponseEvent(
-                    request.requestId,
-                    Instant.now(),
-                    RequestStatus.DUPLICATION
+                    request.requestId, Instant.now(), RequestStatus.DUPLICATION
                 )
             )
             return
@@ -206,9 +278,7 @@ class RequestProcessor(
         val isLastRequestDeletion =
             requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
 
-        return null != lastMtbFileRequestForPatient
-                && !isLastRequestDeletion
-                && lastMtbFileRequestForPatient.fingerprint == fingerprint(
+        return null != lastMtbFileRequestForPatient && !isLastRequestDeletion && lastMtbFileRequestForPatient.fingerprint == fingerprint(
             pseudonymizedMtbFileRequest
         )
     }
@@ -222,9 +292,12 @@ class RequestProcessor(
             val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
             val requestStatus: RequestStatus = when (isConsented) {
-                TtpConsentStatus.CONSENT_MISSING_OR_REJECTED -> RequestStatus.NO_CONSENT
+                TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED, TtpConsentStatus.BROAD_CONSENT_MISSING, TtpConsentStatus.BROAD_CONSENT_REJECTED -> RequestStatus.NO_CONSENT
                 TtpConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
-                TtpConsentStatus.CONSENTED, TtpConsentStatus.UNKNOWN_CHECK_FILE -> RequestStatus.UNKNOWN
+                TtpConsentStatus.BROAD_CONSENT_GIVEN, TtpConsentStatus.UNKNOWN_CHECK_FILE -> RequestStatus.UNKNOWN
+                TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT, TtpConsentStatus.GENOM_DE_CONSENT_MISSING, TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED -> {
+                    throw RuntimeException("processDelete should never deal with '" + isConsented.name + "' consent status. This is a bug and need to be fixed!")
+                }
             }
 
             requestService.save(
@@ -242,10 +315,7 @@ class RequestProcessor(
 
             applicationEventPublisher.publishEvent(
                 ResponseEvent(
-                    requestId,
-                    Instant.now(),
-                    responseStatus.status,
-                    when (responseStatus.status) {
+                    requestId, Instant.now(), responseStatus.status, when (responseStatus.status) {
                         RequestStatus.WARNING, RequestStatus.ERROR -> Optional.of(responseStatus.body)
                         else -> Optional.empty()
                     }
@@ -276,10 +346,10 @@ class RequestProcessor(
 
     private fun fingerprint(s: String): Fingerprint {
         return Fingerprint(
-            Base32().encodeAsString(DigestUtils.sha256(s))
-                .replace("=", "")
-                .lowercase()
+            Base32().encodeAsString(DigestUtils.sha256(s)).replace("=", "").lowercase()
         )
     }
 
 }
+
+private fun extractPatientIdentifier(mtbFile: Mtb): String = mtbFile.patient.id

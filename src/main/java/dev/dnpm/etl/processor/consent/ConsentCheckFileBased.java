@@ -1,5 +1,8 @@
 package dev.dnpm.etl.processor.consent;
 
+import java.util.Date;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Consent.ConsentProvisionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +15,29 @@ public class ConsentCheckFileBased implements ICheckConsent{
     }
 
     @Override
-    public TtpConsentStatus getTtpConsentStatus(String personIdentifierValue) {
+    public TtpConsentStatus getTtpBroadConsentStatus(String personIdentifierValue) {
         return TtpConsentStatus.UNKNOWN_CHECK_FILE;
+    }
+
+    @Override
+    public Bundle getBroadConsent(String personIdentifierValue, Date requestDate) {
+        return ICheckConsent.super.getBroadConsent(personIdentifierValue, requestDate);
+    }
+
+    @Override
+    public Bundle getGenomDeConsent(String personIdentifierValue, Date requestDate) {
+        return ICheckConsent.super.getGenomDeConsent(personIdentifierValue, requestDate);
+    }
+
+    @Override
+    public Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
+        ConsentDomain targetConsentDomain, Date requestDate) {
+        return new Bundle();
+    }
+
+    @Override
+    public ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle,
+        Date requestDate, ConsentDomain consentDomain) {
+        return ConsentProvisionType.NULL;
     }
 }

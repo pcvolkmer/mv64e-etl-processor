@@ -87,17 +87,27 @@ data class GIcsConfigProperties(
     /**
      * Domain of Modelvorhaben 64e consent resources
      **/
-    val gnomDeConsentDomainName: String = "GenomDE_MV",
+    val genomDeConsentDomainName: String = "GenomDE_MV",
 
     /**
      * Value to expect in case of positiv consent
      */
-    val policyCode: String = "2.16.840.1.113883.3.1937.777.24.5.3.6",
+    val broadConsentPolicyCode: String = "2.16.840.1.113883.3.1937.777.24.5.3.6",
 
     /**
      * Consent Policy which should be used for consent check
      */
-    val policySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3"
+    val broadConsentPolicySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+
+    /**
+     * Value to expect in case of positiv consent
+     */
+    val genomeDePolicyCode: String = "sequencing",
+
+    /**
+     * Consent Policy which should be used for consent check
+     */
+    val genomeDePolicySystem: String = "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV"
 ) {
     companion object {
         const val NAME = "app.consent.gics"
