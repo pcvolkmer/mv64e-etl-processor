@@ -42,7 +42,6 @@ import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import dev.pcvolkmer.mv64e.mtb.Provision
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
-import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Consent
 import org.slf4j.Logger
@@ -53,7 +52,6 @@ import java.io.IOException
 import java.lang.RuntimeException
 import java.time.Clock
 import java.time.Instant
-import java.time.ZoneId
 import java.util.*
 
 @Service
@@ -107,7 +105,7 @@ class RequestProcessor(
         initMetaDataAtMtbFile(mtbFile)
 
         val personIdentifierValue = extractPatientIdentifier(mtbFile)
-        val requestDate = Date.from(Instant.now(Clock.system(ZoneId.of("ECT"))))
+        val requestDate = Date.from(Instant.now(Clock.systemUTC()))
 
         // 1. Broad consent Entry exists?
         // 1.1. -> yes and research consent is given -> send mtb file
@@ -192,7 +190,7 @@ class RequestProcessor(
         mtbFile: Mtb, broadConsent: Bundle
     ) {
         broadConsent.entry.forEach { it ->
-            mtbFile.metadata.researchConsents.add(mapOf(it.resource.id to it as IBaseResource))
+            mtbFile.metadata.researchConsents.add(mapOf(it.resource.id to it.resource as Consent))
         }
     }
 

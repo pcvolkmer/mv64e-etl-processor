@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.Optional;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -185,7 +184,7 @@ public class GicsConsentService implements ICheckConsent {
             throw new IllegalStateException(
                 "consent data request failed - stopping processing! - try again or fix other problems first.");
         }
-        IBaseResource iBaseResource = fhirContext.newXmlParser()
+        var iBaseResource = fhirContext.newJsonParser()
             .parseResource(consentDataSerialized);
         if (iBaseResource instanceof OperationOutcome) {
             // log error  - very likely a configuration error
