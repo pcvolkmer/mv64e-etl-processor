@@ -22,9 +22,15 @@ package dev.dnpm.etl.processor.pseudonym
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
+import dev.dnpm.etl.processor.consent.BaseConsentService
+import dev.dnpm.etl.processor.consent.ConsentDomain
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
+import dev.dnpm.etl.processor.services.TransformationServiceTest
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
+import org.hl7.fhir.r4.model.Bundle
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -231,11 +237,46 @@ class ExtensionsTest {
             }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
             val mtbFile = fakeMtbFile()
+            mtbFile.ensureMetaDataIsInitialized()
+            addConsentData(CLEAN_PATIENT_ID,mtbFile)
 
             mtbFile.pseudonymizeWith(pseudonymizeService)
 
             assertThat(mtbFile.patient.id).isEqualTo("PSEUDO-ID")
             assertThat(mtbFile.serialized()).doesNotContain(CLEAN_PATIENT_ID)
+        }
+
+        private fun addConsentData(cleanPatientId: String, mtbFile: Mtb) {
+            val gIcsConfigProperties = GIcsConfigProperties("","","", true)
+
+            val baseConsentService =  object: BaseConsentService(gIcsConfigProperties){
+                override fun getTtpBroadConsentStatus(personIdentifierValue: String?): TtpConsentStatus? {
+                   throw NotImplementedError("dummy")
+                }
+
+                override fun currentConsentForPersonAndTemplate(
+                    personIdentifierValue: String?,
+                    targetConsentDomain: ConsentDomain?,
+                    requestDate: Date?
+                ): Bundle? {
+                    throw NotImplementedError("dummy")
+                }
+
+                override fun getProvisionTypeByPolicyCode(
+                    consentBundle: Bundle?,
+                    requestDate: Date?,
+                    consentDomain: ConsentDomain?
+                ): org.hl7.fhir.r4.model.Consent.ConsentProvisionType? {
+                    throw NotImplementedError("dummy")
+                }
+            }
+
+            val bundle = Bundle()
+            val dummyConsent = TransformationServiceTest.getDummyConsent()
+            dummyConsent.patient.reference = "Patient/$cleanPatientId"
+            bundle.addEntry().resource= dummyConsent
+
+            baseConsentService.embedBroadConsentResources(mtbFile,bundle)
         }
 
         @Test

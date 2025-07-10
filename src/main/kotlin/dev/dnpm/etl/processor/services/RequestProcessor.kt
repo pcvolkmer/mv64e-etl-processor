@@ -33,10 +33,9 @@ import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
+import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
 import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.hl7.fhir.r4.model.Consent
@@ -97,7 +96,7 @@ class RequestProcessor(
             return true
         }
 
-        initMetaDataAtMtbFile(mtbFile)
+        mtbFile.ensureMetaDataIsInitialized()
 
         val personIdentifierValue = extractPatientIdentifier(mtbFile)
         val requestDate = Date.from(Instant.now(Clock.systemUTC()))
@@ -144,27 +143,6 @@ class RequestProcessor(
         }
 
         return false
-    }
-
-
-    private fun initMetaDataAtMtbFile(mtbFile: Mtb) {
-        // init metadata if necessary
-        if (mtbFile.metadata == null) {
-            val mvhMetadata = MvhMetadata.builder().build()
-            mtbFile.metadata = mvhMetadata
-        }
-        if (mtbFile.metadata.researchConsents == null) {
-            mtbFile.metadata.researchConsents = mutableListOf()
-        }
-        if (mtbFile.metadata.modelProjectConsent == null) {
-            mtbFile.metadata.modelProjectConsent = ModelProjectConsent()
-            mtbFile.metadata.modelProjectConsent.provisions = mutableListOf()
-        } else
-            if (mtbFile.metadata.modelProjectConsent.provisions != null) {
-                // make sure list can be changed
-                mtbFile.metadata.modelProjectConsent.provisions =
-                    mtbFile.metadata.modelProjectConsent.provisions.toMutableList()
-            }
     }
 
     fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {

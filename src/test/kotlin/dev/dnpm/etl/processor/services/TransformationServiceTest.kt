@@ -133,18 +133,18 @@ class TransformationServiceTest {
         mvhMetadata.modelProjectConsent =
             ModelProjectConsent.builder().date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z")))
                 .version("1").provisions(
-                listOf(
-                    Provision.builder().type(ConsentProvision.PERMIT)
-                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
-                        .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build(),
-                    Provision.builder().type(ConsentProvision.PERMIT)
-                        .purpose(ModelProjectConsentPurpose.REIDENTIFICATION)
-                        .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build(),
-                    Provision.builder().type(ConsentProvision.DENY)
-                        .purpose(ModelProjectConsentPurpose.CASE_IDENTIFICATION)
-                        .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build()
-                )
-            ).build()
+                    listOf(
+                        Provision.builder().type(ConsentProvision.PERMIT)
+                            .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                            .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build(),
+                        Provision.builder().type(ConsentProvision.PERMIT)
+                            .purpose(ModelProjectConsentPurpose.REIDENTIFICATION)
+                            .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build(),
+                        Provision.builder().type(ConsentProvision.DENY)
+                            .purpose(ModelProjectConsentPurpose.CASE_IDENTIFICATION)
+                            .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build()
+                    )
+                ).build()
         val consent = getDummyConsent()
 
         mvhMetadata.researchConsents = mutableListOf()
@@ -156,49 +156,52 @@ class TransformationServiceTest {
         assertThat(transformed.metadata.modelProjectConsent.date).isNotNull
 
     }
-}
 
-fun getDummyConsent(): org.hl7.fhir.r4.model.Consent {
-    val modelVorhabenConsent = org.hl7.fhir.r4.model.Consent()
-    modelVorhabenConsent.id = "consent 1 id"
-    modelVorhabenConsent.patient.reference = "Patient/1234-pat1"
+    companion object {
+        fun getDummyConsent(): org.hl7.fhir.r4.model.Consent {
+            val modelVorhabenConsent = org.hl7.fhir.r4.model.Consent()
+            modelVorhabenConsent.id = "consent 1 id"
+            modelVorhabenConsent.patient.reference = "Patient/1234-pat1"
 
-    modelVorhabenConsent.provision.setType(
-        org.hl7.fhir.r4.model.Consent.ConsentProvisionType.fromCode(
-            "deny"
-        )
-    )
-    modelVorhabenConsent.provision.period.start =
-        Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
-    modelVorhabenConsent.provision.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
-
-
-    val addProvision1 = modelVorhabenConsent.provision.addProvision()
-    addProvision1.setType(org.hl7.fhir.r4.model.Consent.ConsentProvisionType.fromCode("permit"))
-    addProvision1.period.start = Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
-    addProvision1.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
-    addProvision1.code.addLast(
-        CodeableConcept(
-            Coding(
-                "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
-                "Teilnahme",
-                "Teilnahme am Modellvorhaben und Einwilligung zur Genomsequenzierung"
+            modelVorhabenConsent.provision.setType(
+                org.hl7.fhir.r4.model.Consent.ConsentProvisionType.fromCode(
+                    "deny"
+                )
             )
-        )
-    )
+            modelVorhabenConsent.provision.period.start =
+                Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
+            modelVorhabenConsent.provision.period.end =
+                Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
 
-    val addProvision2 = modelVorhabenConsent.provision.addProvision()
-    addProvision2.setType(org.hl7.fhir.r4.model.Consent.ConsentProvisionType.fromCode("deny"))
-    addProvision2.period.start = Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
-    addProvision2.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
-    addProvision2.code.addLast(
-        CodeableConcept(
-            Coding(
-                "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
-                "Rekontaktierung",
-                "Re-Identifizierung meiner Daten über die Vertrauensstelle beim Robert Koch-Institut und in die erneute Kontaktaufnahme durch meine behandelnde Ärztin oder meinen behandelnden Arzt"
+
+            val addProvision1 = modelVorhabenConsent.provision.addProvision()
+            addProvision1.setType(org.hl7.fhir.r4.model.Consent.ConsentProvisionType.fromCode("permit"))
+            addProvision1.period.start = Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
+            addProvision1.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
+            addProvision1.code.addLast(
+                CodeableConcept(
+                    Coding(
+                        "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                        "Teilnahme",
+                        "Teilnahme am Modellvorhaben und Einwilligung zur Genomsequenzierung"
+                    )
+                )
             )
-        )
-    )
-    return modelVorhabenConsent
+
+            val addProvision2 = modelVorhabenConsent.provision.addProvision()
+            addProvision2.setType(org.hl7.fhir.r4.model.Consent.ConsentProvisionType.fromCode("deny"))
+            addProvision2.period.start = Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
+            addProvision2.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
+            addProvision2.code.addLast(
+                CodeableConcept(
+                    Coding(
+                        "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                        "Rekontaktierung",
+                        "Re-Identifizierung meiner Daten über die Vertrauensstelle beim Robert Koch-Institut und in die erneute Kontaktaufnahme durch meine behandelnde Ärztin oder meinen behandelnden Arzt"
+                    )
+                )
+            )
+            return modelVorhabenConsent
+        }
+    }
 }
