@@ -107,7 +107,13 @@ data class GIcsConfigProperties(
     /**
      * Consent Policy which should be used for consent check
      */
-    val genomeDePolicySystem: String = "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV"
+    val genomeDePolicySystem: String = "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+
+    /**
+     * Consent version (fixed version)
+     *
+     */
+    val genomeDeConsentVersion:  String = "2.0"
 ) {
     companion object {
         const val NAME = "app.consent.gics"

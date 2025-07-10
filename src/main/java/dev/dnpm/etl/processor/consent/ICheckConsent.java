@@ -1,6 +1,6 @@
 package dev.dnpm.etl.processor.consent;
 
-
+import dev.pcvolkmer.mv64e.mtb.Mtb;
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Consent.ConsentProvisionType;
@@ -36,8 +36,8 @@ public interface ICheckConsent {
      * @return consent policies as bundle; <p>if empty patient has not been asked, yet.</p>
      */
     default Bundle getGenomDeConsent(String personIdentifierValue, Date requestDate) {
-        return currentConsentForPersonAndTemplate(personIdentifierValue, ConsentDomain.Modelvorhaben64e,
-            requestDate);
+        return currentConsentForPersonAndTemplate(personIdentifierValue,
+            ConsentDomain.Modelvorhaben64e, requestDate);
     }
 
     /**
@@ -50,12 +50,17 @@ public interface ICheckConsent {
      */
     Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
         ConsentDomain targetConsentDomain, Date requestDate);
+
     /**
-     *
      * @param consentBundle consent resource
-     * @param requestDate date which must be within validation period of provision
+     * @param requestDate   date which must be within validation period of provision
      * @return type of provision, will be {@link ConsentProvisionType#NULL} if none is found.
      */
-    ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle,
-        Date requestDate, ConsentDomain consentDomain);
+    ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle, Date requestDate,
+        ConsentDomain consentDomain);
+
+
+    void embedBroadConsentResources(Mtb mtbFile, Bundle broadConsent);
+
+    void addGenomeDbProvisions(Mtb mtbFile, Bundle consentGnomeDe);
 }

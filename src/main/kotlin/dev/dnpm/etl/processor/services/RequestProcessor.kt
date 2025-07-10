@@ -34,21 +34,16 @@ import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
-import dev.pcvolkmer.mv64e.mtb.ConsentProvision
 import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import dev.pcvolkmer.mv64e.mtb.MvhMetadata
-import dev.pcvolkmer.mv64e.mtb.Provision
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
-import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Consent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
-import java.io.IOException
 import java.lang.RuntimeException
 import java.time.Clock
 import java.time.Instant
@@ -96,7 +91,7 @@ class RequestProcessor(
      * @return true if consent is given
      *
      */
-    fun consentGatedCheck(mtbFile: Mtb): Boolean {
+    fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
         if (consentService == null) {
             // consent check seems to be disabled
             return true
@@ -127,8 +122,8 @@ class RequestProcessor(
             personIdentifierValue, requestDate
         )
 
-        addGenomeDbProvisions(mtbFile, genomeDeConsent)
-        embedBroadConsentResources(mtbFile, broadConsent)
+        consentService.addGenomeDbProvisions(mtbFile, genomeDeConsent)
+        consentService.embedBroadConsentResources(mtbFile, broadConsent)
 
         val broadConsentStatus = consentService.getProvisionTypeByPolicyCode(
             broadConsent,
@@ -157,20 +152,25 @@ class RequestProcessor(
         if (mtbFile.metadata == null) {
             val mvhMetadata = MvhMetadata.builder().build()
             mtbFile.metadata = mvhMetadata
-            if (mtbFile.metadata.researchConsents == null) {
-                mtbFile.metadata.researchConsents = mutableListOf()
-            }
-            if (mtbFile.metadata.modelProjectConsent == null) {
-                mtbFile.metadata.modelProjectConsent = ModelProjectConsent()
-                mtbFile.metadata.modelProjectConsent.provisions = mutableListOf()
-            }
         }
+        if (mtbFile.metadata.researchConsents == null) {
+            mtbFile.metadata.researchConsents = mutableListOf()
+        }
+        if (mtbFile.metadata.modelProjectConsent == null) {
+            mtbFile.metadata.modelProjectConsent = ModelProjectConsent()
+            mtbFile.metadata.modelProjectConsent.provisions = mutableListOf()
+        } else
+            if (mtbFile.metadata.modelProjectConsent.provisions != null) {
+                // make sure list can be changed
+                mtbFile.metadata.modelProjectConsent.provisions =
+                    mtbFile.metadata.modelProjectConsent.provisions.toMutableList()
+            }
     }
 
     fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
         val pid = PatientId(extractPatientIdentifier(mtbFile))
 
-        if (consentGatedCheck(mtbFile)) {
+        if (consentGatedCheckAndTryEmbedding(mtbFile)) {
             mtbFile pseudonymizeWith pseudonymizeService
             mtbFile anonymizeContentWith pseudonymizeService
             val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
@@ -185,49 +185,6 @@ class RequestProcessor(
         }
     }
 
-
-    fun embedBroadConsentResources(
-        mtbFile: Mtb, broadConsent: Bundle
-    ) {
-        broadConsent.entry.forEach { it ->
-            mtbFile.metadata.researchConsents.add(mapOf(it.resource.id to it.resource as Consent))
-        }
-    }
-
-    fun addGenomeDbProvisions(
-        mtbFile: Mtb, consentGnomeDe: Bundle
-    ) {
-        consentGnomeDe.entry.forEach { it ->
-            {
-                val consentFhirResource = it.resource as Consent
-
-                // we expect only one provision in collection, therefore get first or none
-                val provisionComponent = consentFhirResource.provision.provision.firstOrNull()
-                val provisionCode =
-                    provisionComponent?.code?.firstOrNull()?.coding?.firstOrNull()?.code
-
-                if (provisionCode != null) {
-                    try {
-                        val modelProjectConsentPurpose: ModelProjectConsentPurpose =
-                            ModelProjectConsentPurpose.valueOf(provisionCode)
-                        mtbFile.metadata.modelProjectConsent.provisions.add(
-                            Provision.builder().type(
-                                ConsentProvision.forValue(provisionComponent.type.name)
-                            ).date(provisionComponent.period.start).purpose(
-                                modelProjectConsentPurpose
-                            ).build()
-                        )
-                    } catch (ioe: IOException) {
-                        logger.error(
-                            "provision code '$provisionCode' is unknown and cannot be mapped.",
-                            ioe.toString()
-                        )
-                    }
-                }
-
-            }
-        }
-    }
 
     private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
         requestService.save(

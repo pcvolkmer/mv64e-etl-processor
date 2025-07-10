@@ -1,12 +1,14 @@
 package dev.dnpm.etl.processor.consent;
 
+import dev.pcvolkmer.mv64e.mtb.Mtb;
 import java.util.Date;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Consent.ConsentProvisionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConsentCheckFileBased implements ICheckConsent{
+public class ConsentCheckFileBased implements ICheckConsent {
 
     private static final Logger log = LoggerFactory.getLogger(ConsentCheckFileBased.class);
 
@@ -39,5 +41,15 @@ public class ConsentCheckFileBased implements ICheckConsent{
     public ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle,
         Date requestDate, ConsentDomain consentDomain) {
         return ConsentProvisionType.NULL;
+    }
+
+    @Override
+    public void embedBroadConsentResources(Mtb mtbFile, Bundle broadConsent) {
+        throw new NotImplementedException("not intended to be implemented here!");
+    }
+
+    @Override
+    public void addGenomeDbProvisions(Mtb mtbFile, Bundle consentGnomeDe) {
+        throw new NotImplementedException("not intended to be implemented here!");
     }
 }

@@ -38,11 +38,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
-public class GicsConsentService implements ICheckConsent {
+public class GicsConsentService extends BaseConsentService   {
 
     private final Logger log = LoggerFactory.getLogger(GicsConsentService.class);
-
-    private final GIcsConfigProperties gIcsConfigProperties;
 
     public static final String IS_CONSENTED_ENDPOINT = "/$isConsented";
     public static final String IS_POLICY_STATES_FOR_PERSON_ENDPOINT = "/$currentPolicyStatesForPerson";
@@ -54,7 +52,8 @@ public class GicsConsentService implements ICheckConsent {
 
     public GicsConsentService(GIcsConfigProperties gIcsConfigProperties,
         RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
-        this.gIcsConfigProperties = gIcsConfigProperties;
+        super(gIcsConfigProperties);
+
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;
         this.fhirContext = appFhirConfig.fhirContext();
