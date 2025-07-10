@@ -36,7 +36,7 @@ public interface ICheckConsent {
      * @return consent policies as bundle; <p>if empty patient has not been asked, yet.</p>
      */
     default Bundle getGenomDeConsent(String personIdentifierValue, Date requestDate) {
-        return currentConsentForPersonAndTemplate(personIdentifierValue, ConsentDomain.BroadConsent,
+        return currentConsentForPersonAndTemplate(personIdentifierValue, ConsentDomain.Modelvorhaben64e,
             requestDate);
     }
 
