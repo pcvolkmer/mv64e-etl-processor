@@ -97,7 +97,9 @@ class ExtensionsTest {
             mtbFile.pseudonymizeWith(pseudonymizeService)
             mtbFile.anonymizeContentWith(pseudonymizeService)
 
-            val pattern = "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex().toPattern()
+            val pattern =
+                "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
+                    .toPattern()
             val matcher = pattern.matcher(mtbFile.serialized())
 
             assertThrows<IllegalStateException> {
@@ -238,7 +240,7 @@ class ExtensionsTest {
 
             val mtbFile = fakeMtbFile()
             mtbFile.ensureMetaDataIsInitialized()
-            addConsentData(CLEAN_PATIENT_ID,mtbFile)
+            addConsentData(mtbFile)
 
             mtbFile.pseudonymizeWith(pseudonymizeService)
 
@@ -246,12 +248,12 @@ class ExtensionsTest {
             assertThat(mtbFile.serialized()).doesNotContain(CLEAN_PATIENT_ID)
         }
 
-        private fun addConsentData(cleanPatientId: String, mtbFile: Mtb) {
-            val gIcsConfigProperties = GIcsConfigProperties("","","", true)
+        private fun addConsentData(mtbFile: Mtb) {
+            val gIcsConfigProperties = GIcsConfigProperties("", "", "", true)
 
-            val baseConsentService =  object: BaseConsentService(gIcsConfigProperties){
+            val baseConsentService = object : BaseConsentService(gIcsConfigProperties) {
                 override fun getTtpBroadConsentStatus(personIdentifierValue: String?): TtpConsentStatus? {
-                   throw NotImplementedError("dummy")
+                    throw NotImplementedError("dummy")
                 }
 
                 override fun currentConsentForPersonAndTemplate(
@@ -273,10 +275,10 @@ class ExtensionsTest {
 
             val bundle = Bundle()
             val dummyConsent = TransformationServiceTest.getDummyConsent()
-            dummyConsent.patient.reference = "Patient/$cleanPatientId"
-            bundle.addEntry().resource= dummyConsent
+            dummyConsent.patient.reference = "Patient/$CLEAN_PATIENT_ID"
+            bundle.addEntry().resource = dummyConsent
 
-            baseConsentService.embedBroadConsentResources(mtbFile,bundle)
+            baseConsentService.embedBroadConsentResources(mtbFile, bundle)
         }
 
         @Test

@@ -125,22 +125,20 @@ class RequestProcessor(
         consentService.embedBroadConsentResources(mtbFile, broadConsent)
 
         val broadConsentStatus = consentService.getProvisionTypeByPolicyCode(
-            broadConsent,
-            requestDate,
-            ConsentDomain.BroadConsent
+            broadConsent, requestDate, ConsentDomain.BroadConsent
         )
 
         val genomDeSequencingStatus = consentService.getProvisionTypeByPolicyCode(
-            genomeDeConsent, requestDate,
-            ConsentDomain.Modelvorhaben64e
+            genomeDeConsent, requestDate, ConsentDomain.Modelvorhaben64e
         )
 
-        if (Consent.ConsentProvisionType.PERMIT == broadConsentStatus) return true
-        if (Consent.ConsentProvisionType.DENY == broadConsentStatus && Consent.ConsentProvisionType.PERMIT == genomDeSequencingStatus) return true
         if (Consent.ConsentProvisionType.NULL == broadConsentStatus) {
             // bc not asked
             return false
         }
+        if (Consent.ConsentProvisionType.PERMIT == broadConsentStatus ||
+            Consent.ConsentProvisionType.PERMIT == genomDeSequencingStatus
+        ) return true
 
         return false
     }
@@ -162,7 +160,6 @@ class RequestProcessor(
             )
         }
     }
-
 
     private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
         requestService.save(
