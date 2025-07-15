@@ -25,7 +25,6 @@ import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import org.apache.commons.codec.digest.DigestUtils
-import org.hl7.fhir.r4.model.Consent
 
 /** Replaces patient ID with generated patient pseudonym
  *
@@ -295,11 +294,12 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
 
     this.metadata?.researchConsents?.forEach { it ->
         val entry = it ?: return@forEach
-        val key = entry.keys.first()
-        val consent = entry[key] as? Consent ?: return@forEach
-            val patRef= "Patient/$patientPseudonym"
-            consent.patient?.setReference(patRef)
-            consent.patient?.display = null
+        if (entry.contains("patient")) {
+            // here we expect only a patient reference any other data like display
+            // need to be removed, since may contain unsecure data
+            entry.remove("patient")
+            entry["patient"] = mapOf("reference" to "Patient/$patientPseudonym")
+        }
     }
 }
 

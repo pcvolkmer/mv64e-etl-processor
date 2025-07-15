@@ -2,6 +2,7 @@ package dev.dnpm.etl.processor.consent;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import java.util.Date;
@@ -51,8 +52,8 @@ public class GicsConsentService extends BaseConsentService   {
     private String url;
 
     public GicsConsentService(GIcsConfigProperties gIcsConfigProperties,
-        RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
-        super(gIcsConfigProperties);
+        RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig, ObjectMapper objectMapper) {
+        super(gIcsConfigProperties,objectMapper);
 
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;

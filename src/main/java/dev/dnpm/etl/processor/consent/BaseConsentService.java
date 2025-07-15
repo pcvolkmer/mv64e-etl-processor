@@ -1,5 +1,9 @@
 package dev.dnpm.etl.processor.consent;
 
+import ca.uhn.fhir.context.FhirContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import dev.pcvolkmer.mv64e.mtb.ConsentProvision;
 import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose;
@@ -8,7 +12,6 @@ import dev.pcvolkmer.mv64e.mtb.Provision;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Consent;
@@ -20,24 +23,38 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseConsentService implements ICheckConsent {
 
     protected final GIcsConfigProperties gIcsConfigProperties;
-    protected Logger logger = LoggerFactory.getLogger(BaseConsentService.class);
 
-    public BaseConsentService(GIcsConfigProperties gIcsConfigProperties) {
+    private final ObjectMapper objectMapper;
+    protected Logger logger = LoggerFactory.getLogger(BaseConsentService.class);
+    static FhirContext fhirCtx = FhirContext.forR4();
+
+    public BaseConsentService(GIcsConfigProperties gIcsConfigProperties,
+        ObjectMapper objectMapper) {
         this.gIcsConfigProperties = gIcsConfigProperties;
+        this.objectMapper = objectMapper;
     }
 
     public void embedBroadConsentResources(Mtb mtbFile, Bundle broadConsent) {
+
         for (Bundle.BundleEntryComponent entry : broadConsent.getEntry()) {
             Resource resource = entry.getResource();
             if (resource instanceof Consent) {
-                Map<String, Object> consentMap = new HashMap<>();
-                consentMap.put(resource.getIdElement().getIdPart(), resource);
-                mtbFile.getMetadata().getResearchConsents().add(consentMap);
+                // since jackson convertValue does not work here,
+                // we need another step to back to string, before we convert to object map
+                var asJsonString = fhirCtx.newJsonParser().encodeResourceToString(resource);
+                try {
+                    var mapOfJson = objectMapper.readValue(asJsonString,
+                        new TypeReference<HashMap<String, Object>>() {
+                        });
+                    mtbFile.getMetadata().getResearchConsents().add(mapOfJson);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
 
-     public void addGenomeDbProvisions(Mtb mtbFile, Bundle consentGnomeDe) {
+    public void addGenomeDbProvisions(Mtb mtbFile, Bundle consentGnomeDe) {
         for (Bundle.BundleEntryComponent entry : consentGnomeDe.getEntry()) {
             Resource resource = entry.getResource();
             if (!(resource instanceof Consent consentFhirResource)) {
@@ -67,7 +84,8 @@ public abstract class BaseConsentService implements ICheckConsent {
 
                     if (ModelProjectConsentPurpose.SEQUENCING.equals(modelProjectConsentPurpose)) {
                         // CONVENTION: wrapping date is date of SEQUENCING consent
-                        mtbFile.getMetadata().getModelProjectConsent().setDate(consentFhirResource.getDateTime());
+                        mtbFile.getMetadata().getModelProjectConsent()
+                            .setDate(consentFhirResource.getDateTime());
                     }
 
                     Provision provision = Provision.builder()
@@ -79,12 +97,15 @@ public abstract class BaseConsentService implements ICheckConsent {
                     mtbFile.getMetadata().getModelProjectConsent().getProvisions().add(provision);
 
                 } catch (IOException ioe) {
-                    logger.error("Provision code '" + provisionCode + "' is unknown and cannot be mapped.", ioe.toString());
+                    logger.error(
+                        "Provision code '" + provisionCode + "' is unknown and cannot be mapped.",
+                        ioe.toString());
                 }
             }
 
             if (!mtbFile.getMetadata().getModelProjectConsent().getProvisions().isEmpty()) {
-                mtbFile.getMetadata().getModelProjectConsent().setVersion(gIcsConfigProperties.getGenomeDeConsentVersion());
+                mtbFile.getMetadata().getModelProjectConsent()
+                    .setVersion(gIcsConfigProperties.getGenomeDeConsentVersion());
             }
         }
     }

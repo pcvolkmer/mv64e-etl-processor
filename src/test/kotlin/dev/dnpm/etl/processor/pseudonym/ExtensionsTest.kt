@@ -251,7 +251,8 @@ class ExtensionsTest {
         private fun addConsentData(mtbFile: Mtb) {
             val gIcsConfigProperties = GIcsConfigProperties("", "", "", true)
 
-            val baseConsentService = object : BaseConsentService(gIcsConfigProperties) {
+            val baseConsentService = object : BaseConsentService(gIcsConfigProperties,
+                JacksonConfig().objectMapper()) {
                 override fun getTtpBroadConsentStatus(personIdentifierValue: String?): TtpConsentStatus? {
                     throw NotImplementedError("dummy")
                 }

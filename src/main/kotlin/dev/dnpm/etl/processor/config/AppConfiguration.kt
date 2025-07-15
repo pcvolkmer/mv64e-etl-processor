@@ -184,12 +184,13 @@ class AppConfiguration {
     @Bean
     @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
     fun gicsConsentService( gIcsConfigProperties: GIcsConfigProperties,
-                           retryTemplate: RetryTemplate,  restTemplate: RestTemplate,  appFhirConfig: AppFhirConfig): ICheckConsent {
+                           retryTemplate: RetryTemplate,  restTemplate: RestTemplate,  appFhirConfig: AppFhirConfig, getObjectMapper: ObjectMapper): ICheckConsent {
         return GicsConsentService(
             gIcsConfigProperties,
             retryTemplate,
             restTemplate,
-            appFhirConfig
+            appFhirConfig,
+            getObjectMapper
         )
     }
 

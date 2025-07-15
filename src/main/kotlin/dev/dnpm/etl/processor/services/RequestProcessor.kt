@@ -36,6 +36,7 @@ import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.hl7.fhir.r4.model.Consent
@@ -122,6 +123,10 @@ class RequestProcessor(
         )
 
         consentService.addGenomeDbProvisions(mtbFile, genomeDeConsent)
+
+        // fixme: currently we do not have information about submission type
+        if (!genomeDeConsent.entry.isEmpty()) mtbFile.metadata.type = MvhSubmissionType.INITIAL
+
         consentService.embedBroadConsentResources(mtbFile, broadConsent)
 
         val broadConsentStatus = consentService.getProvisionTypeByPolicyCode(
