@@ -1,6 +1,5 @@
 package dev.dnpm.etl.processor.consent;
 
-import dev.pcvolkmer.mv64e.mtb.Mtb;
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Consent.ConsentProvisionType;
@@ -59,8 +58,4 @@ public interface ICheckConsent {
     ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle, Date requestDate,
         ConsentDomain consentDomain);
 
-
-    void embedBroadConsentResources(Mtb mtbFile, Bundle broadConsent);
-
-    void addGenomeDbProvisions(Mtb mtbFile, Bundle consentGnomeDe);
 }

@@ -58,7 +58,7 @@ class RequestProcessor(
     private val objectMapper: ObjectMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val appConfigProperties: AppConfigProperties,
-    private val consentService: ICheckConsent?
+    private val consentProcessor: ConsentProcessor?
 ) {
 
     private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
@@ -78,80 +78,13 @@ class RequestProcessor(
         processMtbFile(mtbFile, randomRequestId())
     }
 
-    /**
-     * In case an instance of {@link  ICheckConsent} is active, consent will be embedded and checked.
-     *
-     * Logik:
-     *  * <c>true</c> IF consent check is disabled.
-     *  * <c>true</c> IF broad consent (BC) has been given.
-     *  * <c>true</c> BC has been asked AND declined but genomDe consent has been consented.
-     *  * ELSE <c>false</c> is returned.
-     *
-     * @param mtbFile File v2 (will be enriched with consent data)
-     * @return true if consent is given
-     *
-     */
-    fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
-        if (consentService == null) {
-            // consent check seems to be disabled
-            return true
-        }
-
-        mtbFile.ensureMetaDataIsInitialized()
-
-        val personIdentifierValue = extractPatientIdentifier(mtbFile)
-        val requestDate = Date.from(Instant.now(Clock.systemUTC()))
-
-        // 1. Broad consent Entry exists?
-        // 1.1. -> yes and research consent is given -> send mtb file
-        // 1.2. -> no -> return status error - consent has not been asked
-        // 2. ->  Broad consent found but rejected -> is GenomDe consent provision 'sequencing' given?
-        // 2.1 -> yes -> send mtb file
-        // 2.2 -> no ->  warn/info no consent given
-
-        /*
-         * broad consent
-         */
-        val broadConsent = consentService.getBroadConsent(personIdentifierValue, requestDate)
-        val broadConsentHasBeenAsked = !broadConsent.entry.isEmpty()
-
-        // fast exit - if patient has not been asked, we can skip and exit
-        if (!broadConsentHasBeenAsked) return false
-
-        val genomeDeConsent = consentService.getGenomDeConsent(
-            personIdentifierValue, requestDate
-        )
-
-        consentService.addGenomeDbProvisions(mtbFile, genomeDeConsent)
-
-        // fixme: currently we do not have information about submission type
-        if (!genomeDeConsent.entry.isEmpty()) mtbFile.metadata.type = MvhSubmissionType.INITIAL
-
-        consentService.embedBroadConsentResources(mtbFile, broadConsent)
-
-        val broadConsentStatus = consentService.getProvisionTypeByPolicyCode(
-            broadConsent, requestDate, ConsentDomain.BroadConsent
-        )
-
-        val genomDeSequencingStatus = consentService.getProvisionTypeByPolicyCode(
-            genomeDeConsent, requestDate, ConsentDomain.Modelvorhaben64e
-        )
-
-        if (Consent.ConsentProvisionType.NULL == broadConsentStatus) {
-            // bc not asked
-            return false
-        }
-        if (Consent.ConsentProvisionType.PERMIT == broadConsentStatus ||
-            Consent.ConsentProvisionType.PERMIT == genomDeSequencingStatus
-        ) return true
-
-        return false
-    }
 
     fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
         val pid = PatientId(extractPatientIdentifier(mtbFile))
 
-        if (consentGatedCheckAndTryEmbedding(mtbFile)) {
+        val isConsentOk = consentProcessor != null &&
+                consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null;
+        if (isConsentOk) {
             mtbFile pseudonymizeWith pseudonymizeService
             mtbFile anonymizeContentWith pseudonymizeService
             val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))

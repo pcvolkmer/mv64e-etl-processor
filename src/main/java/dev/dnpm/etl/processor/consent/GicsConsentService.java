@@ -39,7 +39,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
-public class GicsConsentService extends BaseConsentService   {
+public class GicsConsentService implements ICheckConsent {
 
     private final Logger log = LoggerFactory.getLogger(GicsConsentService.class);
 
@@ -49,17 +49,18 @@ public class GicsConsentService extends BaseConsentService   {
     private final RestTemplate restTemplate;
     private final FhirContext fhirContext;
     private final HttpHeaders httpHeader;
+    private final GIcsConfigProperties gIcsConfigProperties;
     private String url;
 
     public GicsConsentService(GIcsConfigProperties gIcsConfigProperties,
-        RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig, ObjectMapper objectMapper) {
-        super(gIcsConfigProperties,objectMapper);
+        RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
 
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;
         this.fhirContext = appFhirConfig.fhirContext();
         httpHeader = buildHeader(gIcsConfigProperties.getUsername(),
             gIcsConfigProperties.getPassword());
+        this.gIcsConfigProperties = gIcsConfigProperties;
         log.info("GicsConsentService initialized...");
     }
 
@@ -207,7 +208,8 @@ public class GicsConsentService extends BaseConsentService   {
         String consentDomain;
         switch (targetConsentDomain) {
             case BroadConsent -> consentDomain = gIcsConfigProperties.getBroadConsentDomainName();
-            case Modelvorhaben64e -> consentDomain = gIcsConfigProperties.getGenomDeConsentDomainName();
+            case Modelvorhaben64e ->
+                consentDomain = gIcsConfigProperties.getGenomDeConsentDomainName();
             default -> throw new IllegalArgumentException(
                 "target ConsentDomain is missing but must be provided!");
         }

@@ -42,14 +42,4 @@ public class ConsentCheckFileBased implements ICheckConsent {
         Date requestDate, ConsentDomain consentDomain) {
         return ConsentProvisionType.NULL;
     }
-
-    @Override
-    public void embedBroadConsentResources(Mtb mtbFile, Bundle broadConsent) {
-        throw new NotImplementedException("not intended to be implemented here!");
-    }
-
-    @Override
-    public void addGenomeDbProvisions(Mtb mtbFile, Bundle consentGnomeDe) {
-        throw new NotImplementedException("not intended to be implemented here!");
-    }
 }

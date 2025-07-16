@@ -113,7 +113,7 @@ data class GIcsConfigProperties(
      * Consent version (fixed version)
      *
      */
-    val genomeDeConsentVersion:  String = "2.0"
+    val genomeDeConsentVersion: String = "2.0"
 ) {
     companion object {
         const val NAME = "app.consent.gics"

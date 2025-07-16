@@ -60,7 +60,7 @@ class RequestProcessorTest {
     private lateinit var requestService: RequestService
     private lateinit var applicationEventPublisher: ApplicationEventPublisher
     private lateinit var appConfigProperties: AppConfigProperties
-    private lateinit var gicsConsentService : GicsConsentService
+    private lateinit var consentProcessor: ConsentProcessor
     private lateinit var requestProcessor: RequestProcessor
 
     @BeforeEach
@@ -70,7 +70,7 @@ class RequestProcessorTest {
         @Mock sender: RestMtbFileSender,
         @Mock requestService: RequestService,
         @Mock applicationEventPublisher: ApplicationEventPublisher,
-        @Mock gicsConsentService: GicsConsentService
+        @Mock consentProcessor: ConsentProcessor
     ) {
         this.pseudonymizeService = pseudonymizeService
         this.transformationService = transformationService
@@ -78,7 +78,7 @@ class RequestProcessorTest {
         this.requestService = requestService
         this.applicationEventPublisher = applicationEventPublisher
         this.appConfigProperties = AppConfigProperties(null)
-        this.gicsConsentService = gicsConsentService
+        this.consentProcessor = consentProcessor
 
         val objectMapper = ObjectMapper()
 
@@ -90,7 +90,7 @@ class RequestProcessorTest {
             objectMapper,
             applicationEventPublisher,
             appConfigProperties,
-            gicsConsentService
+            consentProcessor
         )
     }
 
@@ -348,7 +348,10 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.UNKNOWN)
         }.whenever(sender).send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
+        this.requestProcessor.processDeletion(
+            TEST_PATIENT_ID,
+            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
+        )
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())
@@ -366,7 +369,10 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
         }.whenever(sender).send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
+        this.requestProcessor.processDeletion(
+            TEST_PATIENT_ID,
+            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
+        )
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -384,7 +390,10 @@ class RequestProcessorTest {
             MtbFileSender.Response(status = RequestStatus.ERROR)
         }.whenever(sender).send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
+        this.requestProcessor.processDeletion(
+            TEST_PATIENT_ID,
+            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
+        )
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -396,7 +405,10 @@ class RequestProcessorTest {
     fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
         doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        this.requestProcessor.processDeletion(TEST_PATIENT_ID, isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE)
+        this.requestProcessor.processDeletion(
+            TEST_PATIENT_ID,
+            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
+        )
 
         val requestCaptor = argumentCaptor<Request>()
         verify(requestService, times(1)).save(requestCaptor.capture())

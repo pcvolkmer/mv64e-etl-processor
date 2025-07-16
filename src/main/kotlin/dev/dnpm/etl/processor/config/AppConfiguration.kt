@@ -30,6 +30,7 @@ import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
+import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.slf4j.LoggerFactory
@@ -75,17 +76,26 @@ class AppConfiguration {
     }
 
     @Bean
-    fun appFhirConfig(): AppFhirConfig{
+    fun appFhirConfig(): AppFhirConfig {
         return AppFhirConfig()
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
-    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig): Generator {
+    fun gpasPseudonymGenerator(
+        configProperties: GPasConfigProperties,
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+        appFhirConfig: AppFhirConfig
+    ): Generator {
         return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate, appFhirConfig)
     }
 
-    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
+    @ConditionalOnProperty(
+        value = ["app.pseudonymize.generator"],
+        havingValue = "BUILDIN",
+        matchIfMissing = true
+    )
     @Bean
     fun buildinPseudonymGenerator(): Generator {
         return AnonymizingGenerator()
@@ -105,7 +115,7 @@ class AppConfiguration {
     }
 
     @Bean
-    fun getObjectMapper () : ObjectMapper{
+    fun getObjectMapper(): ObjectMapper {
         return JacksonConfig().objectMapper()
     }
 
@@ -133,7 +143,11 @@ class AppConfiguration {
                     callback: RetryCallback<T, E>,
                     throwable: Throwable
                 ) {
-                    logger.warn("Error occured: {}. Retrying {}", throwable.message, context.retryCount)
+                    logger.warn(
+                        "Error occured: {}. Retrying {}",
+                        throwable.message,
+                        context.retryCount
+                    )
                 }
             })
             .build()
@@ -141,7 +155,11 @@ class AppConfiguration {
 
     @ConditionalOnProperty(value = ["app.security.enable-tokens"], havingValue = "true")
     @Bean
-    fun tokenService(userDetailsManager: InMemoryUserDetailsManager, passwordEncoder: PasswordEncoder, tokenRepository: TokenRepository): TokenService {
+    fun tokenService(
+        userDetailsManager: InMemoryUserDetailsManager,
+        passwordEncoder: PasswordEncoder,
+        tokenRepository: TokenRepository
+    ): TokenService {
         return TokenService(userDetailsManager, passwordEncoder, tokenRepository)
     }
 
@@ -162,7 +180,11 @@ class AppConfiguration {
         gPasConfigProperties: GPasConfigProperties,
         connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ): ConnectionCheckService {
-        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
+        return GPasConnectionCheckService(
+            restTemplate,
+            gPasConfigProperties,
+            connectionCheckUpdateProducer
+        )
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
@@ -173,7 +195,11 @@ class AppConfiguration {
         gPasConfigProperties: GPasConfigProperties,
         connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ): ConnectionCheckService {
-        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
+        return GPasConnectionCheckService(
+            restTemplate,
+            gPasConfigProperties,
+            connectionCheckUpdateProducer
+        )
     }
 
     @Bean
@@ -183,14 +209,31 @@ class AppConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
-    fun gicsConsentService( gIcsConfigProperties: GIcsConfigProperties,
-                           retryTemplate: RetryTemplate,  restTemplate: RestTemplate,  appFhirConfig: AppFhirConfig, getObjectMapper: ObjectMapper): ICheckConsent {
+    fun gicsConsentService(
+        gIcsConfigProperties: GIcsConfigProperties,
+        retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig
+    ): ICheckConsent {
         return GicsConsentService(
             gIcsConfigProperties,
             retryTemplate,
             restTemplate,
-            appFhirConfig,
-            getObjectMapper
+            appFhirConfig
+        )
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
+    fun gicsConsentProcessor(
+        gIcsConfigProperties: GIcsConfigProperties,
+        getObjectMapper: ObjectMapper,
+        appFhirConfig: AppFhirConfig,
+        gicsConsentService: ICheckConsent
+    ): ConsentProcessor {
+        return ConsentProcessor(
+            gIcsConfigProperties,
+            getObjectMapper,
+            appFhirConfig.fhirContext(),
+            gicsConsentService
         )
     }
 
@@ -198,10 +241,14 @@ class AppConfiguration {
     @Bean
     fun gIcsConnectionCheckService(
         restTemplate: RestTemplate,
-        gIcsConfigProperties:  GIcsConfigProperties,
+        gIcsConfigProperties: GIcsConfigProperties,
         connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ): ConnectionCheckService {
-        return GIcsConnectionCheckService(restTemplate, gIcsConfigProperties, connectionCheckUpdateProducer)
+        return GIcsConnectionCheckService(
+            restTemplate,
+            gIcsConfigProperties,
+            connectionCheckUpdateProducer
+        )
     }
 
     @Bean
