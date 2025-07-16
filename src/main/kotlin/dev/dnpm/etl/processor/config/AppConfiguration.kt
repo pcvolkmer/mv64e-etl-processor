@@ -20,8 +20,8 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.ConsentCheckFileBased
-import dev.dnpm.etl.processor.consent.ICheckConsent
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
@@ -212,7 +212,7 @@ class AppConfiguration {
     fun gicsConsentService(
         gIcsConfigProperties: GIcsConfigProperties,
         retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig
-    ): ICheckConsent {
+    ): IGetConsent {
         return GicsConsentService(
             gIcsConfigProperties,
             retryTemplate,
@@ -227,7 +227,7 @@ class AppConfiguration {
         gIcsConfigProperties: GIcsConfigProperties,
         getObjectMapper: ObjectMapper,
         appFhirConfig: AppFhirConfig,
-        gicsConsentService: ICheckConsent
+        gicsConsentService: IGetConsent
     ): ConsentProcessor {
         return ConsentProcessor(
             gIcsConfigProperties,
@@ -253,8 +253,8 @@ class AppConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun constService(): ICheckConsent {
-        return ConsentCheckFileBased()
+    fun iGetConsentService(): IGetConsent {
+        return ConsentByMtbFile()
     }
 }
 

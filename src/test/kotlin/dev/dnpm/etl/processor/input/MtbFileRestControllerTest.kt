@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Consent.Status
 import dev.dnpm.etl.processor.CustomMediaType
-import dev.dnpm.etl.processor.consent.ConsentCheckFileBased
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -68,7 +68,7 @@ class MtbFileRestControllerTest {
         ) {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(requestProcessor,
-                ConsentCheckFileBased()
+                ConsentByMtbFile()
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }
@@ -220,7 +220,7 @@ class MtbFileRestControllerTest {
         ) {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(requestProcessor,
-                ConsentCheckFileBased()
+                ConsentByMtbFile()
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }

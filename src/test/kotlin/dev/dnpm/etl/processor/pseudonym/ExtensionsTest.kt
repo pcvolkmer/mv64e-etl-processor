@@ -26,7 +26,7 @@ import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.services.ConsentProcessor
-import dev.dnpm.etl.processor.services.TransformationServiceTest
+import dev.dnpm.etl.processor.services.ConsentProcessorTest
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
@@ -252,7 +252,7 @@ class ExtensionsTest {
 
 
             val bundle = Bundle()
-            val dummyConsent = TransformationServiceTest.getDummyConsent()
+            val dummyConsent = ConsentProcessorTest.getDummyGenomDeConsent()
             dummyConsent.patient.reference = "Patient/$CLEAN_PATIENT_ID"
             bundle.addEntry().resource = dummyConsent
 

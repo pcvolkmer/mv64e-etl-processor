@@ -6,12 +6,14 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.consent.ConsentDomain
-import dev.dnpm.etl.processor.consent.ICheckConsent
+import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.mtb.*
-import org.hl7.fhir.r4.model.Bundle
-import org.hl7.fhir.r4.model.CodeableConcept
-import org.hl7.fhir.r4.model.Consent
+import org.apache.commons.lang3.NotImplementedException
+import org.hl7.fhir.r4.model.*
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
+import org.hl7.fhir.r4.model.Coding
+import org.hl7.fhir.r4.model.Consent.ConsentState
 import org.hl7.fhir.r4.model.Consent.ProvisionComponent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,9 +25,10 @@ import java.util.*
 
 @Service
 class ConsentProcessor(
-    private val gIcsConfigProperties: GIcsConfigProperties, private val objectMapper: ObjectMapper,
+    private val gIcsConfigProperties: GIcsConfigProperties,
+    private val objectMapper: ObjectMapper,
     private val fhirContext: FhirContext,
-    private val consentService: ICheckConsent?
+    private val consentService: IGetConsent?
 ) {
     private var logger: Logger = LoggerFactory.getLogger("ConsentProcessor")
 
@@ -80,11 +83,11 @@ class ConsentProcessor(
 
         embedBroadConsentResources(mtbFile, broadConsent)
 
-        val broadConsentStatus = consentService.getProvisionTypeByPolicyCode(
+        val broadConsentStatus = getProvisionTypeByPolicyCode(
             broadConsent, requestDate, ConsentDomain.BroadConsent
         )
 
-        val genomDeSequencingStatus = consentService.getProvisionTypeByPolicyCode(
+        val genomDeSequencingStatus = getProvisionTypeByPolicyCode(
             genomeDeConsent, requestDate, ConsentDomain.Modelvorhaben64e
         )
 
@@ -92,27 +95,22 @@ class ConsentProcessor(
             // bc not asked
             return false
         }
-        if (Consent.ConsentProvisionType.PERMIT == broadConsentStatus ||
-            Consent.ConsentProvisionType.PERMIT == genomDeSequencingStatus
-        ) return true
+        if (Consent.ConsentProvisionType.PERMIT == broadConsentStatus || Consent.ConsentProvisionType.PERMIT == genomDeSequencingStatus) return true
 
         return false
     }
 
-    public fun embedBroadConsentResources(mtbFile: Mtb, broadConsent: Bundle) {
+    fun embedBroadConsentResources(mtbFile: Mtb, broadConsent: Bundle) {
         for (entry in broadConsent.getEntry()) {
             val resource = entry.getResource()
             if (resource is Consent) {
                 // since jackson convertValue does not work here,
                 // we need another step to back to string, before we convert to object map
-                val asJsonString =
-                    fhirContext.newJsonParser().encodeResourceToString(resource)
+                val asJsonString = fhirContext.newJsonParser().encodeResourceToString(resource)
                 try {
                     val mapOfJson: HashMap<String?, Any?>? =
                         objectMapper.readValue<HashMap<String?, Any?>?>(
-                            asJsonString,
-                            object : TypeReference<HashMap<String?, Any?>?>() {
-                            })
+                            asJsonString, object : TypeReference<HashMap<String?, Any?>?>() {})
                     mtbFile.metadata.researchConsents.add(mapOfJson)
                 } catch (e: JsonProcessingException) {
                     throw RuntimeException(e)
@@ -121,7 +119,7 @@ class ConsentProcessor(
         }
     }
 
-    public fun addGenomeDbProvisions(mtbFile: Mtb, consentGnomeDe: Bundle) {
+    fun addGenomeDbProvisions(mtbFile: Mtb, consentGnomeDe: Bundle) {
         for (entry in consentGnomeDe.getEntry()) {
             val resource = entry.getResource()
             if (resource !is Consent) {
@@ -157,8 +155,7 @@ class ConsentProcessor(
                     val provision = Provision.builder()
                         .type(ConsentProvision.valueOf(provisionComponent.getType().name))
                         .date(provisionComponent.getPeriod().getStart())
-                        .purpose(modelProjectConsentPurpose)
-                        .build()
+                        .purpose(modelProjectConsentPurpose).build()
 
                     mtbFile.metadata.modelProjectConsent.provisions.add(provision)
                 } catch (ioe: IOException) {
@@ -181,6 +178,91 @@ class ConsentProcessor(
      */
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
         mtbFile.metadata.type = MvhSubmissionType.INITIAL
+    }
+
+    /**
+     * @param consentBundle consent resource
+     * @param requestDate   date which must be within validation period of provision
+     * @return type of provision, will be [org.hl7.fhir.r4.model.Consent.ConsentProvisionType.NULL] if none is found.
+     */
+    fun getProvisionTypeByPolicyCode(
+        consentBundle: Bundle, requestDate: Date?, consentDomain: ConsentDomain
+    ): Consent.ConsentProvisionType {
+        val code: String?
+        val system: String?
+        if (ConsentDomain.BroadConsent == consentDomain) {
+            code = gIcsConfigProperties.broadConsentPolicyCode
+            system = gIcsConfigProperties.broadConsentPolicySystem
+        } else if (ConsentDomain.Modelvorhaben64e == consentDomain) {
+            code = gIcsConfigProperties.genomeDePolicyCode
+            system = gIcsConfigProperties.genomeDePolicySystem
+        } else {
+            throw NotImplementedException("unknown consent domain " + consentDomain.name)
+        }
+
+        val provisionTypeByPolicyCode = getProvisionTypeByPolicyCode(
+            consentBundle, code, system, requestDate
+        )
+        return provisionTypeByPolicyCode
+    }
+
+    /**
+     * @param consentBundle            consent resource
+     * @param policyAndProvisionCode   policyRule and provision code value
+     * @param policyAndProvisionSystem policyRule and provision system value
+     * @param requestDate              date which must be within validation period of provision
+     * @return type of provision, will be [org.hl7.fhir.r4.model.Consent.ConsentProvisionType.NULL] if none is found.
+     */
+    fun getProvisionTypeByPolicyCode(
+        consentBundle: Bundle,
+        policyAndProvisionCode: String?,
+        policyAndProvisionSystem: String?,
+        requestDate: Date?
+    ): Consent.ConsentProvisionType {
+        val entriesOfInterest = consentBundle.entry.filter { entry ->
+            entry.resource.isResource && entry.resource.resourceType == ResourceType.Consent && (entry.resource as Consent).status == ConsentState.ACTIVE && checkCoding(
+                policyAndProvisionCode,
+                policyAndProvisionSystem,
+                (entry.resource as Consent).policyRule.codingFirstRep
+            ) && isIsRequestDateInRange(
+                requestDate, (entry.resource as Consent).provision.period
+            )
+        }.map { consentWithTargetPolicy: BundleEntryComponent ->
+            val provision = (consentWithTargetPolicy.getResource() as Consent).getProvision()
+            val provisionComponentByCode =
+                provision.getProvision().stream().filter { prov: ProvisionComponent? ->
+                    checkCoding(
+                        policyAndProvisionCode,
+                        policyAndProvisionSystem,
+                        prov!!.getCodeFirstRep().getCodingFirstRep()
+                    ) && isIsRequestDateInRange(
+                        requestDate, prov.getPeriod()
+                    )
+                }.findFirst()
+            if (provisionComponentByCode.isPresent) {
+                // actual provision we search for
+                return@map provisionComponentByCode.get().getType()
+            } else {
+                if (provision.type != null) return provision.type
+
+            }
+            return Consent.ConsentProvisionType.NULL
+        }.firstOrNull()
+
+        if (entriesOfInterest == null) return Consent.ConsentProvisionType.NULL
+        return entriesOfInterest
+    }
+
+    fun checkCoding(
+        researchAllowedPolicyOid: String?, researchAllowedPolicySystem: String?, coding: Coding
+    ): Boolean {
+        return coding.getSystem() == researchAllowedPolicySystem && (coding.getCode() == researchAllowedPolicyOid)
+    }
+
+    fun isIsRequestDateInRange(requestdate: Date?, provPeriod: Period): Boolean {
+        val isRequestDateAfterOrEqualStart = provPeriod.getStart().compareTo(requestdate)
+        val isRequestDateBeforeOrEqualEnd = provPeriod.getEnd().compareTo(requestdate)
+        return isRequestDateAfterOrEqualStart <= 0 && isRequestDateBeforeOrEqualEnd >= 0
     }
 
 }

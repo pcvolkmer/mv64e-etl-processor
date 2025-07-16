@@ -2,9 +2,8 @@ package dev.dnpm.etl.processor.consent;
 
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Consent.ConsentProvisionType;
 
-public interface ICheckConsent {
+public interface IGetConsent {
 
     /**
      * Get broad consent status for a patient identifier
@@ -49,13 +48,5 @@ public interface ICheckConsent {
      */
     Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
         ConsentDomain targetConsentDomain, Date requestDate);
-
-    /**
-     * @param consentBundle consent resource
-     * @param requestDate   date which must be within validation period of provision
-     * @return type of provision, will be {@link ConsentProvisionType#NULL} if none is found.
-     */
-    ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle, Date requestDate,
-        ConsentDomain consentDomain);
 
 }

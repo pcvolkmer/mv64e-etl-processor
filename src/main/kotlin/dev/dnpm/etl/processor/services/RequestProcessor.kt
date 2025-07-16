@@ -23,8 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
-import dev.dnpm.etl.processor.consent.ConsentDomain
-import dev.dnpm.etl.processor.consent.ICheckConsent
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
@@ -33,19 +31,15 @@ import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
-import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
-import org.hl7.fhir.r4.model.Consent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
-import java.time.Clock
 import java.time.Instant
 import java.util.*
 
@@ -83,7 +77,7 @@ class RequestProcessor(
         val pid = PatientId(extractPatientIdentifier(mtbFile))
 
         val isConsentOk = consentProcessor != null &&
-                consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null;
+                consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
         if (isConsentOk) {
             mtbFile pseudonymizeWith pseudonymizeService
             mtbFile anonymizeContentWith pseudonymizeService
@@ -190,7 +184,7 @@ class RequestProcessor(
                 )
             )
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             requestService.save(
                 Request(
                     uuid = requestId,

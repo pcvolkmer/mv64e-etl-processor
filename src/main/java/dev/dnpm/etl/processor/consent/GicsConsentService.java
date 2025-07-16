@@ -2,27 +2,18 @@ package dev.dnpm.etl.processor.consent;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import java.util.Date;
-import java.util.Optional;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.Consent.ConsentProvisionType;
-import org.hl7.fhir.r4.model.Consent.ConsentState;
-import org.hl7.fhir.r4.model.Consent.ProvisionComponent;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -39,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
-public class GicsConsentService implements ICheckConsent {
+public class GicsConsentService implements IGetConsent {
 
     private final Logger log = LoggerFactory.getLogger(GicsConsentService.class);
 
@@ -272,83 +263,4 @@ public class GicsConsentService implements ICheckConsent {
         return TtpConsentStatus.FAILED_TO_ASK;
     }
 
-    /**
-     * @param consentBundle consent resource
-     * @param requestDate   date which must be within validation period of provision
-     * @return type of provision, will be {@link ConsentProvisionType#NULL} if none is found.
-     */
-    public ConsentProvisionType getProvisionTypeByPolicyCode(Bundle consentBundle,
-        Date requestDate, ConsentDomain consentDomain) {
-        String code;
-        String system;
-        if (ConsentDomain.BroadConsent == consentDomain) {
-            code = gIcsConfigProperties.getBroadConsentPolicyCode();
-            system = gIcsConfigProperties.getBroadConsentPolicySystem();
-        } else if (ConsentDomain.Modelvorhaben64e == consentDomain) {
-            code = gIcsConfigProperties.getGenomeDePolicyCode();
-            system = gIcsConfigProperties.getGenomeDePolicySystem();
-        } else {
-            throw new NotImplementedException("unknown consent domain " + consentDomain.name());
-        }
-
-        Optional<ConsentProvisionType> provisionTypeByPolicyCode = getProvisionTypeByPolicyCode(
-            consentBundle, code,
-            system, requestDate);
-        return provisionTypeByPolicyCode.orElse(ConsentProvisionType.NULL);
-    }
-
-    /**
-     * @param consentBundle            consent resource
-     * @param policyAndProvisionCode   policyRule and provision code value
-     * @param policyAndProvisionSystem policyRule and provision system value
-     * @param requestDate              date which must be within validation period of provision
-     * @return type of provision, will be {@link ConsentProvisionType#NULL} if none is found.
-     */
-    public Optional<ConsentProvisionType> getProvisionTypeByPolicyCode(Bundle consentBundle,
-        String policyAndProvisionCode, String policyAndProvisionSystem, Date requestDate) {
-        return consentBundle.getEntry().stream().filter(entry -> {
-            if (entry.getResource().getResourceType() != ResourceType.Consent) {
-                // no consent in bundle
-                return false;
-            }
-
-            Consent consent = (Consent) entry.getResource();
-
-            // consent ist active and its policy rule must fits search criteria
-            return consent.getStatus() == ConsentState.ACTIVE && checkCoding(
-                policyAndProvisionCode, policyAndProvisionSystem,
-                consent.getPolicyRule().getCodingFirstRep()) && isIsRequestDateInRange(requestDate,
-                consent.getProvision().getPeriod());
-
-        }).map(consentWithTargetPolicy -> {
-            ProvisionComponent provision = ((Consent) consentWithTargetPolicy.getResource()).getProvision();
-            var provisionComponentByCode = provision.getProvision().stream().filter(prov ->
-
-                checkCoding(policyAndProvisionCode, policyAndProvisionSystem,
-                    prov.getCodeFirstRep().getCodingFirstRep()) && isIsRequestDateInRange(
-                    requestDate, prov.getPeriod())
-
-            ).findFirst();
-
-            if (provisionComponentByCode.isPresent()) {
-                // actual provision we search for
-                return provisionComponentByCode.get().getType();
-            }
-            // no fitting nested provision found - fall back to wrapping provision with default value
-            return provision.getType();
-        }).findFirst().or(() -> Optional.of(ConsentProvisionType.NULL));
-    }
-
-    protected static boolean checkCoding(String researchAllowedPolicyOid,
-        String researchAllowedPolicySystem, Coding coding) {
-
-        return coding.getSystem().equals(researchAllowedPolicySystem) && coding.getCode()
-            .equals(researchAllowedPolicyOid);
-    }
-
-    protected static boolean isIsRequestDateInRange(Date requestdate, Period provPeriod) {
-        var isRequestDateAfterOrEqualStart = provPeriod.getStart().compareTo(requestdate);
-        var isRequestDateBeforeOrEqualEnd = provPeriod.getEnd().compareTo(requestdate);
-        return isRequestDateAfterOrEqualStart <= 0 && isRequestDateBeforeOrEqualEnd >= 0;
-    }
 }
