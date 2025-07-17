@@ -107,16 +107,15 @@ public class GpasPseudonymGenerator implements Generator {
     protected ResponseEntity<String> getGpasPseudonym(String gPasRequestBody) {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(gPasRequestBody, this.httpHeader);
-        ResponseEntity<String> responseEntity = null;
 
         try {
-            responseEntity = retryTemplate.execute(
+            ResponseEntity<String> responseEntity = retryTemplate.execute(
                 ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
                     String.class));
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
             }
-
+            return responseEntity;
         } catch (RestClientException rce) {
             if (rce instanceof BadRequest) {
                 String msg = "gPas or request configuration is incorrect. Please check both."
