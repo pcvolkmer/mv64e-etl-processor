@@ -114,21 +114,21 @@ public class GpasPseudonymGenerator implements Generator {
                     String.class));
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
+                return responseEntity;
             }
-            return responseEntity;
         } catch (RestClientException rce) {
             if (rce instanceof BadRequest) {
                 String msg = "gPas or request configuration is incorrect. Please check both."
                     + rce.getMessage();
                 log.debug(
                     msg);
-                throw new PseudonymRequestFailed(msg);
+                throw new PseudonymRequestFailed(msg, rce);
             }
             if (rce instanceof Unauthorized) {
                 var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s".formatted(
                     rce.getMessage());
                 log.error(msg);
-                throw new PseudonymRequestFailed(msg);
+                throw new PseudonymRequestFailed(msg, rce);
             }
         } catch (Exception unexpected) {
             throw new PseudonymRequestFailed(
