@@ -317,3 +317,8 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
 
     // TODO all other properties
 }
+
+infix fun Mtb.addGenomDeTan(pseudonymizeService: PseudonymizeService)
+{
+    this.metadata.transferTan = pseudonymizeService.genomDeTan(PatientId(this.patient.id))
+}

@@ -23,4 +23,6 @@ public interface Generator {
 
     String generate(String id);
 
+    String generateGenomDeTan(String id);
+
 }

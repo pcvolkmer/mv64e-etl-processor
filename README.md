@@ -28,8 +28,13 @@ Konfigurationsparameter
 
 Zusätzlich zur Patienten Identifier Pseudonymisierung müssen Vorgangsummern generiert werden, die
 jede Übertragung eindeutig identifizieren aber gleichzeitig dem Patienten zugeordnet werden können.
-Dies lässt sich durch weitere Pseudonyme abbilden, allerdings werden pro Originalwert mehrere Pseudonyme benötigt. 
-Zu diesem Zweck muss in gPas eine **Multi-Pseudonym-Domäne** konfiguriert werden (siehe auch *APP_PSEUDONYMIZE_GPAS_CCDN*).
+Dies lässt sich durch weitere Pseudonyme abbilden, allerdings werden pro Originalwert mehrere
+Pseudonyme benötigt.
+Zu diesem Zweck muss in gPas eine **Multi-Pseudonym-Domäne** konfiguriert werden (siehe auch
+*APP_PSEUDONYMIZE_GPAS_CCDN*).
+
+**WICHTIG:** Deaktivierte Pseudonymisierung ist nur für Tests nutzbar. Vorgangsummern sind zufällig
+und werden anschließend verworfen.
 
 ### Datenübermittlung über HTTP/REST
 
@@ -110,7 +115,8 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname für Patienten ID
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* `APP_PSEUDONYMIZE_GPAS_CCDN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (Clinical data node)
+* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_DOMAIN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
+  Clinical data node)
 
 ### Anmeldung mit einem Passwort
 

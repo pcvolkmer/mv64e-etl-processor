@@ -48,7 +48,7 @@ class GpasPseudonymGeneratorTest {
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
         val gPasConfigProperties = GPasConfigProperties(
             "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate",
-            "test",
+            "test", "test2",
             null,
             null
         )
@@ -64,7 +64,13 @@ class GpasPseudonymGeneratorTest {
             method(HttpMethod.POST)
             requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
-            withStatus(HttpStatus.OK).body(getDummyResponseBody("1234", "test", "test1234ABCDEF567890"))
+            withStatus(HttpStatus.OK).body(
+                getDummyResponseBody(
+                    "1234",
+                    "test",
+                    "test1234ABCDEF567890"
+                )
+            )
                 .createResponse(it)
         }
 
@@ -90,7 +96,10 @@ class GpasPseudonymGeneratorTest {
             requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
             withStatus(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
+                .header(
+                    HttpHeaders.LOCATION,
+                    "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate"
+                )
                 .createResponse(it)
         }
 

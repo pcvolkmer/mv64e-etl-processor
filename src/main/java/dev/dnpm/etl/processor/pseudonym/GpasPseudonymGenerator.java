@@ -38,30 +38,41 @@ public class GpasPseudonymGenerator implements Generator {
 
     private final static FhirContext r4Context = FhirContext.forR4();
     private final String gPasUrl;
-    private final String psnTargetDomain;
     private final HttpHeaders httpHeader;
     private final RetryTemplate retryTemplate;
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
-
     private final RestTemplate restTemplate;
+    private final @NotNull String genomDeDomain;
+    private final @NotNull String psnTargetDomain;
 
-    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate, RestTemplate restTemplate) {
+    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate,
+        RestTemplate restTemplate) {
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
+        this.genomDeDomain = gpasCfg.getGenomDeDomain();
         httpHeader = getHttpHeaders(gpasCfg.getUsername(), gpasCfg.getPassword());
 
-        log.debug(String.format("%s has been initialized", this.getClass().getName()));
+        log.debug("{} has been initialized", this.getClass().getName());
 
     }
 
     @Override
     public String generate(String id) {
-        var gPasRequestBody = getGpasRequestBody(id);
+        return generate(id, psnTargetDomain);
+    }
+
+    @Override
+    public String generateGenomDeTan(String id) {
+        return generate(id, genomDeDomain);
+    }
+
+    protected String generate(String id, String targetDomain) {
+        var gPasRequestBody = getGpasRequestBody(id, targetDomain);
         var responseEntity = getGpasPseudonym(gPasRequestBody);
         var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
-                .parseResource(responseEntity.getBody());
+            .parseResource(responseEntity.getBody());
 
         return unwrapPseudonym(gPasPseudonymResult);
     }
@@ -75,9 +86,9 @@ public class GpasPseudonymGenerator implements Generator {
         }
 
         final var identifier = (Identifier) parameters.get().getPart().stream()
-                .filter(a -> a.getName().equals("pseudonym"))
-                .findFirst()
-                .orElseGet(ParametersParameterComponent::new).getValue();
+            .filter(a -> a.getName().equals("pseudonym"))
+            .findFirst()
+            .orElseGet(ParametersParameterComponent::new).getValue();
 
         // pseudonym
         return sanitizeValue(identifier.getValue());
@@ -106,8 +117,8 @@ public class GpasPseudonymGenerator implements Generator {
 
         try {
             responseEntity = retryTemplate.execute(
-                    ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
-                            String.class));
+                ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
+                    String.class));
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
@@ -119,16 +130,16 @@ public class GpasPseudonymGenerator implements Generator {
             return responseEntity;
         } catch (Exception unexpected) {
             throw new PseudonymRequestFailed(
-                    "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
+                "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
         }
     }
 
-    protected String getGpasRequestBody(String id) {
+    protected String getGpasRequestBody(String id, String targetDomain) {
         var requestParameters = new Parameters();
         requestParameters.addParameter().setName("target")
-                .setValue(new StringType().setValue(psnTargetDomain));
+            .setValue(new StringType().setValue(targetDomain));
         requestParameters.addParameter().setName("original")
-                .setValue(new StringType().setValue(id));
+            .setValue(new StringType().setValue(id));
         final IParser iParser = r4Context.newJsonParser();
         return iParser.encodeResourceToString(requestParameters);
     }
