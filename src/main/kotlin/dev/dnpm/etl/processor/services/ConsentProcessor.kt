@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IGetConsent
@@ -25,6 +26,7 @@ import java.util.*
 
 @Service
 class ConsentProcessor(
+    private val appConfigProperties: AppConfigProperties,
     private val gIcsConfigProperties: GIcsConfigProperties,
     private val objectMapper: ObjectMapper,
     private val fhirContext: FhirContext,
@@ -177,7 +179,13 @@ class ConsentProcessor(
      *  fixme: currently we do not have information about submission type
      */
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
-        mtbFile.metadata.type = MvhSubmissionType.INITIAL
+        if (appConfigProperties.genomDeTestSubmission) {
+            // fixme: uncomment when data model is updated
+            // mtbFile.metadata.type = MvhSubmissionType.Test
+            logger.info("genomeDe submission mit TEST")
+        } else {
+            mtbFile.metadata.type = MvhSubmissionType.INITIAL
+        }
     }
 
     /**

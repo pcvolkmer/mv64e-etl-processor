@@ -224,12 +224,14 @@ class AppConfiguration {
     @Bean
     @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
     fun gicsConsentProcessor(
+        configProperties: AppConfigProperties,
         gIcsConfigProperties: GIcsConfigProperties,
         getObjectMapper: ObjectMapper,
         appFhirConfig: AppFhirConfig,
         gicsConsentService: IGetConsent
     ): ConsentProcessor {
         return ConsentProcessor(
+            configProperties,
             gIcsConfigProperties,
             getObjectMapper,
             appFhirConfig.fhirContext(),

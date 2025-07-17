@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.services.ConsentProcessor
@@ -249,7 +250,7 @@ class ExtensionsTest {
 
         private fun addConsentData(mtbFile: Mtb) {
             val gIcsConfigProperties = GIcsConfigProperties("", "", "", true)
-
+            val appConfigProperties = AppConfigProperties(null, emptyList())
 
             val bundle = Bundle()
             val dummyConsent = ConsentProcessorTest.getDummyGenomDeConsent()
@@ -257,6 +258,7 @@ class ExtensionsTest {
             bundle.addEntry().resource = dummyConsent
 
             ConsentProcessor(
+                appConfigProperties,
                 gIcsConfigProperties,
                 JacksonConfig().objectMapper(),
                 FhirContext.forR4(),

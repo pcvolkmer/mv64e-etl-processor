@@ -2,6 +2,7 @@ package dev.dnpm.etl.processor.services
 
 import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.GicsConsentService
@@ -31,6 +32,7 @@ import java.util.*
 @ExtendWith(MockitoExtension::class)
 class ConsentProcessorTest {
 
+    private lateinit var appConfigProperties: AppConfigProperties
     private lateinit var gicsConsentService: GicsConsentService
     private lateinit var objectMapper: ObjectMapper
     private lateinit var gIcsConfigProperties: GIcsConfigProperties
@@ -47,9 +49,15 @@ class ConsentProcessorTest {
         this.objectMapper = jacksonConfig.objectMapper()
         this.fhirContext = JacksonConfig.fhirContext()
         this.gicsConsentService = gicsConsentService
-
+        this.appConfigProperties = AppConfigProperties(null, emptyList())
         this.consentProcessor =
-            ConsentProcessor(gIcsConfigProperties, objectMapper, fhirContext, gicsConsentService)
+            ConsentProcessor(
+                appConfigProperties,
+                gIcsConfigProperties,
+                objectMapper,
+                fhirContext,
+                gicsConsentService
+            )
     }
 
     @Test
