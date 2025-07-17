@@ -33,6 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 public class GpasPseudonymGenerator implements Generator {
@@ -104,25 +107,37 @@ public class GpasPseudonymGenerator implements Generator {
     protected ResponseEntity<String> getGpasPseudonym(String gPasRequestBody) {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(gPasRequestBody, this.httpHeader);
-        ResponseEntity<String> responseEntity;
+        ResponseEntity<String> responseEntity = null;
 
         try {
             responseEntity = retryTemplate.execute(
                 ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
                     String.class));
-
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
-            } else {
-                log.warn("API request unsuccessful. Response: {}", requestEntity.getBody());
-                throw new PseudonymRequestFailed("API request unsuccessful gPas unsuccessful.");
             }
 
-            return responseEntity;
+        } catch (RestClientException rce) {
+            if (rce instanceof BadRequest) {
+                String msg = "gPas or request configuration is incorrect. Please check both."
+                    + rce.getMessage();
+                log.debug(
+                    msg);
+                throw new PseudonymRequestFailed(msg);
+            }
+            if (rce instanceof Unauthorized) {
+                var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s".formatted(
+                    rce.getMessage());
+                log.error(msg);
+                throw new PseudonymRequestFailed(msg);
+            }
         } catch (Exception unexpected) {
             throw new PseudonymRequestFailed(
                 "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
         }
+        throw new PseudonymRequestFailed(
+            "API request due unexpected error unsuccessful gPas unsuccessful.");
+
     }
 
     protected String getGpasRequestBody(String id) {
