@@ -90,6 +90,7 @@ dependencies {
     implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
+    implementation ("org.apache.commons:commons-math3:3.6.1")
 
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")

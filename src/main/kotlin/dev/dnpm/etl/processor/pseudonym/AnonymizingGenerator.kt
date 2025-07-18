@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.pseudonym
 
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.math3.random.RandomDataGenerator
 
 
 class AnonymizingGenerator : Generator {
@@ -29,6 +30,11 @@ class AnonymizingGenerator : Generator {
         return Base32().encodeAsString(DigestUtils.sha256(id))
             .substring(0..41)
             .lowercase()
+    }
+
+    override fun generateGenomDeTan(id: String?): String? {
+        val randomDataGenerator = RandomDataGenerator()
+        return randomDataGenerator.nextSecureHexString(64).lowercase()
     }
 
 }

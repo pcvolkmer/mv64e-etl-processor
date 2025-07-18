@@ -42,12 +42,12 @@ public class GpasPseudonymGenerator implements Generator {
 
     private final FhirContext r4Context;
     private final String gPasUrl;
-    private final String psnTargetDomain;
     private final HttpHeaders httpHeader;
     private final RetryTemplate retryTemplate;
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
-
     private final RestTemplate restTemplate;
+    private final @NotNull String genomDeDomain;
+    private final @NotNull String psnTargetDomain;
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate,
         RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
@@ -55,16 +55,26 @@ public class GpasPseudonymGenerator implements Generator {
         this.restTemplate = restTemplate;
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
+        this.genomDeDomain = gpasCfg.getGenomDeDomain();
         this.r4Context = appFhirConfig.fhirContext();
         httpHeader = getHttpHeaders(gpasCfg.getUsername(), gpasCfg.getPassword());
 
-        log.debug(String.format("%s has been initialized", this.getClass().getName()));
+        log.debug("{} has been initialized", this.getClass().getName());
 
     }
 
     @Override
     public String generate(String id) {
-        var gPasRequestBody = getGpasRequestBody(id);
+        return generate(id, psnTargetDomain);
+    }
+
+    @Override
+    public String generateGenomDeTan(String id) {
+        return generate(id, genomDeDomain);
+    }
+
+    protected String generate(String id, String targetDomain) {
+        var gPasRequestBody = getGpasRequestBody(id, targetDomain);
         var responseEntity = getGpasPseudonym(gPasRequestBody);
         var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
             .parseResource(responseEntity.getBody());
@@ -139,7 +149,7 @@ public class GpasPseudonymGenerator implements Generator {
 
     }
 
-    protected String getGpasRequestBody(String id) {
+    protected String getGpasRequestBody(String id, String targetDomain) {
         var requestParameters = new Parameters();
         requestParameters.addParameter().setName("target")
             .setValue(new StringType().setValue(psnTargetDomain));

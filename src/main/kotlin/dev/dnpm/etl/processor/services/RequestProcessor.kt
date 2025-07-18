@@ -30,8 +30,11 @@ import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
+import dev.pcvolkmer.mv64e.mtb.ConsentProvision
+import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
@@ -79,6 +82,13 @@ class RequestProcessor(
         val isConsentOk = consentProcessor != null &&
                 consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
         if (isConsentOk) {
+            val isModelProjectConsented = mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
+                p.purpose == ModelProjectConsentPurpose.SEQUENCING
+                        && p.type == ConsentProvision.PERMIT
+            } == true
+            if (isModelProjectConsented) {
+                mtbFile addGenomDeTan pseudonymizeService
+            }
             mtbFile pseudonymizeWith pseudonymizeService
             mtbFile anonymizeContentWith pseudonymizeService
             val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
@@ -108,7 +118,9 @@ class RequestProcessor(
         if (appConfigProperties.duplicationDetection && isDuplication(request)) {
             applicationEventPublisher.publishEvent(
                 ResponseEvent(
-                    request.requestId, Instant.now(), RequestStatus.DUPLICATION
+                    request.requestId,
+                    Instant.now(),
+                    RequestStatus.DUPLICATION
                 )
             )
             return
@@ -140,7 +152,9 @@ class RequestProcessor(
         val isLastRequestDeletion =
             requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
 
-        return null != lastMtbFileRequestForPatient && !isLastRequestDeletion && lastMtbFileRequestForPatient.fingerprint == fingerprint(
+        return null != lastMtbFileRequestForPatient
+                && !isLastRequestDeletion
+                && lastMtbFileRequestForPatient.fingerprint == fingerprint(
             pseudonymizedMtbFileRequest
         )
     }
