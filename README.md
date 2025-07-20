@@ -113,7 +113,15 @@ Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfiguri
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
 
-### Einwilligung gICS
+### (Externe) Consent-Services
+
+Consent-Services können konfiguriert werden.
+
+* `APP_CONSENT_SERVICE`: Zu verwendender (externer) Consent-Service:
+  * `BUILDIN`: Verwende Consent-Angaben im MTB-File und ändere diese nicht.
+  * `GICS`: Verwende gICS der Greiswalder Tools (siehe unten).
+
+#### Einwilligung gICS
 
 Ab gIcs Version 2.13.0 kann
 per [REST-Schnittstelle](https://simplifier.net/guide/ttp-fhir-gateway-ig/ImplementationGuide-markdown-Einwilligungsmanagement-Operations-isConsented?version=current)
@@ -127,7 +135,7 @@ Stattdessen werden vorhandene Einwilligungen abgefragt und in die MTB Datei eing
 Es werden zwei Einwilligungsdomänen unterstützt, eine für Broad Consent und als zweites GenomDE
 Modelvorhaben §64e.
 
-#### Hinweise
+##### Hinweise
 
 1. Die aktuelle Impl. nimmt an, dass die hinterlegten Domänen der Einwilligungen ausschließlich für
    die genannten Art von Einwilligungen genutzt werden. Es finde keine weitere Filterung statt. Wir
@@ -143,10 +151,10 @@ Modelvorhaben §64e.
    Weiterverarbeitung notwendig. Das Fehlen einer Einwilligung löst die Löschung des Patienten im
    Brückenkopf aus.
 
-#### Konfiguration
+##### Konfiguration
 
 * `APP_CONSENT_GICS_ENABLED`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn nicht
-  gesetzt.
+  gesetzt. Gleiche Funktionalität wie Angabe `APP_CONSENT_SERVICE=GICS`
 * `APP_CONSENT_GICS_CHECKGNOMEDE`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn
   nicht gesetzt. Versuche Einwilligungsdaten zu GENOM DE Modelvorhaben über gIcs abzurufen.
 * `APP_CONSENT_GICS_CHECKBROADCONSENT`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn

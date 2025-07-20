@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
@@ -272,6 +274,46 @@ class AppConfigurationTest {
                     throw RuntimeException()
                 }
             }
+        }
+
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties = [
+            "app.consent.service=GICS"
+        ]
+    )
+    inner class AppConfigurationConsentGicsTest(private val context: ApplicationContext) {
+
+        @Test
+        fun shouldUseConfiguredGenerator() {
+            assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
+        }
+
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties = [
+            "app.consent.gics.enabled=true"
+        ]
+    )
+    inner class AppConfigurationConsentGicsEnabledTest(private val context: ApplicationContext) {
+
+        @Test
+        fun shouldUseConfiguredGenerator() {
+            assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
+        }
+
+    }
+
+    @Nested
+    inner class AppConfigurationConsentBuildinTest(private val context: ApplicationContext) {
+
+        @Test
+        fun shouldUseConfiguredGenerator() {
+            assertThat(context.getBean(ConsentByMtbFile::class.java)).isNotNull
         }
 
     }
