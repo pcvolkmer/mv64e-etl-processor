@@ -180,9 +180,13 @@ class ConsentProcessor(
      */
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
         if (appConfigProperties.genomDeTestSubmission) {
-            // fixme: uncomment when data model is updated
+
+            // fixme: remove INITIAL and uncomment when data model is updated
+            mtbFile.metadata.type = MvhSubmissionType.INITIAL
             // mtbFile.metadata.type = MvhSubmissionType.Test
+
             logger.info("genomeDe submission mit TEST")
+
         } else {
             mtbFile.metadata.type = MvhSubmissionType.INITIAL
         }
