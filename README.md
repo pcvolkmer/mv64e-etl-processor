@@ -115,14 +115,15 @@ als Patienten-Pseudonym verwendet.
 
 #### Pseudonymisierung mit gPAS
 
-Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren.
+Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren. 
 
-* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (z.B.
-  `http://localhost:8080/ttp-fhir/fhir/gpas/$$pseudonymizeAllowCreate`)
-* `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname für Patienten ID
+Ab Version 2025.1 (Multi-Pseudonym Support)
+
+* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz REST API (e.g. http://127.0.0.1:9990/ttp-fhir/fhir/gpas)
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_DOMAIN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
+* `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`: gPas Domänenname für Patienten ID
+* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
   Clinical data node)
 
 ### Einwilligung gICS
