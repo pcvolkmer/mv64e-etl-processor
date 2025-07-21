@@ -21,10 +21,12 @@ package dev.dnpm.etl.processor.pseudonym
 
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.math3.random.RandomDataGenerator
-
+import java.security.SecureRandom
 
 class AnonymizingGenerator : Generator {
+    companion object fun getSecureRandom() : SecureRandom {
+        return  SecureRandom()
+    }
 
     override fun generate(id: String): String {
         return Base32().encodeAsString(DigestUtils.sha256(id))
@@ -32,9 +34,14 @@ class AnonymizingGenerator : Generator {
             .lowercase()
     }
 
-    override fun generateGenomDeTan(id: String?): String? {
-        val randomDataGenerator = RandomDataGenerator()
-        return randomDataGenerator.nextSecureHexString(64).lowercase()
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun generateGenomDeTan(id: String?): String {
+
+        val bytes = ByteArray(64 / 2)
+        getSecureRandom().nextBytes(bytes)
+
+        return bytes.joinToString("") { "%02x".format(it) }
+
     }
 
 }
