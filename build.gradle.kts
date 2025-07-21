@@ -18,7 +18,7 @@ version = "0.11.0-SNAPSHOT"
 var versions = mapOf(
     "bwhc-dto-java" to "0.4.0",
     "mtb-dto" to "0.1.0-SNAPSHOT",
-    "hapi-fhir" to "7.6.0",
+    "hapi-fhir" to "7.6.1",
     "mockito-kotlin" to "5.4.0",
     "archunit" to "1.3.0",
     // Webjars
@@ -90,7 +90,8 @@ dependencies {
     implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
-    implementation ("org.apache.commons:commons-math3:3.6.1")
+    // Fix for CVE-2025-48924
+    implementation("org.apache.commons:commons-lang3:3.18.0")
 
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")

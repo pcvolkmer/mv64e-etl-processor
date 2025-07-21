@@ -58,6 +58,15 @@ data class GPasConfigProperties(
     }
 }
 
+@ConfigurationProperties(ConsentConfigProperties.NAME)
+data class ConsentConfigProperties(
+    var service: ConsentService = ConsentService.BUILDIN
+) {
+    companion object {
+        const val NAME = "app.consent"
+    }
+}
+
 @ConfigurationProperties(GIcsConfigProperties.NAME)
 data class GIcsConfigProperties(
     /**
@@ -163,6 +172,11 @@ data class SecurityConfigProperties(
 enum class PseudonymGenerator {
     BUILDIN,
     GPAS
+}
+
+enum class ConsentService {
+    BUILDIN,
+    GICS
 }
 
 data class TransformationProperties(

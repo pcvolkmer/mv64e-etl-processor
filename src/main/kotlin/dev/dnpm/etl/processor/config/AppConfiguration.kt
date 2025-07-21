@@ -21,8 +21,8 @@ package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.ConsentByMtbFile
-import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
@@ -34,11 +34,14 @@ import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.ConfigurationCondition
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
@@ -62,6 +65,7 @@ import kotlin.time.toJavaDuration
         AppConfigProperties::class,
         PseudonymizeConfigProperties::class,
         GPasConfigProperties::class,
+        ConsentConfigProperties::class,
         GIcsConfigProperties::class
     ]
 )
@@ -207,11 +211,13 @@ class AppConfiguration {
         return AppJdbcConfiguration()
     }
 
+    @Conditional(GicsEnabledCondition::class)
     @Bean
-    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
     fun gicsConsentService(
         gIcsConfigProperties: GIcsConfigProperties,
-        retryTemplate: RetryTemplate, restTemplate: RestTemplate, appFhirConfig: AppFhirConfig
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+        appFhirConfig: AppFhirConfig
     ): IGetConsent {
         return GicsConsentService(
             gIcsConfigProperties,
@@ -221,8 +227,8 @@ class AppConfiguration {
         )
     }
 
+    @Conditional(GicsEnabledCondition::class)
     @Bean
-    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
     fun gicsConsentProcessor(
         configProperties: AppConfigProperties,
         gIcsConfigProperties: GIcsConfigProperties,
@@ -239,7 +245,7 @@ class AppConfiguration {
         )
     }
 
-    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
+    @Conditional(GicsEnabledCondition::class)
     @Bean
     fun gIcsConnectionCheckService(
         restTemplate: RestTemplate,
@@ -258,5 +264,19 @@ class AppConfiguration {
     fun iGetConsentService(): IGetConsent {
         return ConsentByMtbFile()
     }
+
 }
 
+class GicsEnabledCondition : AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
+
+    @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "GICS" )
+    class OnGicsServiceSelected {
+        // Just for Condition
+    }
+
+    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
+    class OnGicsEnabled {
+        // Just for Condition
+    }
+
+}
