@@ -160,7 +160,7 @@ public class GicsConsentService implements IGetConsent {
         return evaluateConsentResponse(consentStatusResponse);
     }
 
-    public Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
+    protected Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
         ConsentDomain targetConsentDomain, Date requestDate) {
 
         String consentDomain = getConsentDomain(targetConsentDomain);
@@ -263,4 +263,19 @@ public class GicsConsentService implements IGetConsent {
         return TtpConsentStatus.FAILED_TO_ASK;
     }
 
+    @Override
+    public Bundle getConsent(String patientId, Date requestDate, ConsentDomain consentDomain) {
+        switch (consentDomain) {
+            case BroadConsent -> {
+                return currentConsentForPersonAndTemplate(patientId, ConsentDomain.BroadConsent,
+                    requestDate);
+            }
+            case Modelvorhaben64e -> {
+                return currentConsentForPersonAndTemplate(patientId,
+                    ConsentDomain.Modelvorhaben64e, requestDate);
+            }
+        }
+
+        return new Bundle();
+    }
 }

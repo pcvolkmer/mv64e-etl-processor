@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
+import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
@@ -21,6 +22,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource
 import java.io.IOException
@@ -65,9 +67,10 @@ class ConsentProcessorTest {
         assertThat(consentProcessor.toString()).isNotNull
         // prep gICS response
         doAnswer { getDummyBroadConsentBundle() }.whenever(gicsConsentService)
-            .getBroadConsent(any(), any())
+            .getConsent(any(), any(), eq(ConsentDomain.BroadConsent))
+
         doAnswer { Bundle() }.whenever(gicsConsentService)
-            .getGenomDeConsent(any(), any())
+            .getConsent(any(), any(), eq(ConsentDomain.Modelvorhaben64e))
 
         val inputMtb = Mtb.builder()
             .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build()).build()

@@ -68,14 +68,16 @@ class ConsentProcessor(
         /*
          * broad consent
          */
-        val broadConsent = consentService.getBroadConsent(personIdentifierValue, requestDate)
+        val broadConsent = consentService.getConsent(
+            personIdentifierValue, requestDate, ConsentDomain.BroadConsent
+        )
         val broadConsentHasBeenAsked = !broadConsent.entry.isEmpty()
 
         // fast exit - if patient has not been asked, we can skip and exit
         if (!broadConsentHasBeenAsked) return false
 
-        val genomeDeConsent = consentService.getGenomDeConsent(
-            personIdentifierValue, requestDate
+        val genomeDeConsent = consentService.getConsent(
+            personIdentifierValue, requestDate, ConsentDomain.Modelvorhaben64e
         )
 
         addGenomeDbProvisions(mtbFile, genomeDeConsent)
