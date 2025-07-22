@@ -51,7 +51,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
     properties = [
         "app.rest.uri=http://example.com",
         "app.pseudonymize.generator=buildin",
-        "app.consent.service=buildin"
+        "app.consent.service=none"
     ]
 )
 class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
@@ -68,7 +68,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
     @TestPropertySource(
         properties = [
             "app.pseudonymize.generator=buildin",
-            "app.consent.service=buildin",
+            "app.consent.service=none",
             "app.transformations[0].path=diagnoses[*].icd10.version",
             "app.transformations[0].from=2013",
             "app.transformations[0].to=2014",

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
@@ -30,7 +31,7 @@ class ConsentProcessor(
     private val gIcsConfigProperties: GIcsConfigProperties,
     private val objectMapper: ObjectMapper,
     private val fhirContext: FhirContext,
-    private val consentService: IGetConsent?
+    private val consentService: IGetConsent
 ) {
     private var logger: Logger = LoggerFactory.getLogger("ConsentProcessor")
 
@@ -48,8 +49,8 @@ class ConsentProcessor(
      *
      */
     fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
-        if (consentService == null) {
-            // consent check seems to be disabled
+        if (consentService is ConsentByMtbFile) {
+            // consent check is disabled
             return true
         }
 
@@ -68,18 +69,19 @@ class ConsentProcessor(
         /*
          * broad consent
          */
-        val broadConsent = consentService.getBroadConsent(personIdentifierValue, requestDate)
+        val broadConsent = consentService.getConsent(
+            personIdentifierValue, requestDate, ConsentDomain.BroadConsent
+        )
         val broadConsentHasBeenAsked = !broadConsent.entry.isEmpty()
 
         // fast exit - if patient has not been asked, we can skip and exit
         if (!broadConsentHasBeenAsked) return false
 
-        val genomeDeConsent = consentService.getGenomDeConsent(
-            personIdentifierValue, requestDate
+        val genomeDeConsent = consentService.getConsent(
+            personIdentifierValue, requestDate, ConsentDomain.Modelvorhaben64e
         )
 
         addGenomeDbProvisions(mtbFile, genomeDeConsent)
-
 
         if (!genomeDeConsent.entry.isEmpty()) setGenomDeSubmissionType(mtbFile)
 
@@ -180,9 +182,13 @@ class ConsentProcessor(
      */
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
         if (appConfigProperties.genomDeTestSubmission) {
-            // fixme: uncomment when data model is updated
+
+            // fixme: remove INITIAL and uncomment when data model is updated
+            mtbFile.metadata.type = MvhSubmissionType.INITIAL
             // mtbFile.metadata.type = MvhSubmissionType.Test
+
             logger.info("genomeDe submission mit TEST")
+
         } else {
             mtbFile.metadata.type = MvhSubmissionType.INITIAL
         }

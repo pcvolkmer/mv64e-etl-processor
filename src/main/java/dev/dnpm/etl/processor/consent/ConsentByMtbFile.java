@@ -18,19 +18,14 @@ public class ConsentByMtbFile implements IGetConsent {
         return TtpConsentStatus.UNKNOWN_CHECK_FILE;
     }
 
+    /**
+     * EMPTY METHOD: NOT IMPLEMENTED
+     *
+     * @return empty bundle
+     */
     @Override
-    public Bundle getBroadConsent(String personIdentifierValue, Date requestDate) {
-        return IGetConsent.super.getBroadConsent(personIdentifierValue, requestDate);
-    }
-
-    @Override
-    public Bundle getGenomDeConsent(String personIdentifierValue, Date requestDate) {
-        return IGetConsent.super.getGenomDeConsent(personIdentifierValue, requestDate);
-    }
-
-    @Override
-    public Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
-        ConsentDomain targetConsentDomain, Date requestDate) {
+    public Bundle getConsent(String personIdentifierValue, Date requestDate,
+        ConsentDomain consentDomain) {
         return new Bundle();
     }
 }

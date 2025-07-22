@@ -131,16 +131,17 @@ Ab Version 2025.1 (Multi-Pseudonym Support)
 Consent-Services können konfiguriert werden.
 
 * `APP_CONSENT_SERVICE`: Zu verwendender (externer) Consent-Service:
-  * `BUILDIN`: Verwende Consent-Angaben im MTB-File und ändere diese nicht.
-  * `GICS`: Verwende gICS der Greiswalder Tools (siehe unten).
+    * `NONE`: Verwende Consent-Angaben im MTB-File v1 und ändere diese nicht. Für MTB-File v2 wird
+      die Prüfung übersprungen.
+    * `GICS`: Verwende gICS der Greiswalder Tools (siehe unten).
 
 #### Einwilligung gICS
 
-Ab gIcs Version 2.13.0 kann
+Ab gIcs Version 2.13.0 kann im ETL-Processor
 per [REST-Schnittstelle](https://simplifier.net/guide/ttp-fhir-gateway-ig/ImplementationGuide-markdown-Einwilligungsmanagement-Operations-isConsented?version=current)
 der Einwilligungsstatus abgefragt werden.
 Vor der MTB-Übertragung kann der zum Sendezeitpunkt verfügbarer Einwilligungsstatus über Endpunkt
-*isConsented* abgefragt werden.
+*isConsented* (MTB-File v1) und *currentPolicyStatesForPerson* (MTB-File v2) abgefragt werden.
 
 Falls Anbindung an gICS aktiviert wurde, wird der Einwilligungsstatus der MTB Datei ignoriert.
 Stattdessen werden vorhandene Einwilligungen abgefragt und in die MTB Datei eingebettet.
@@ -166,12 +167,8 @@ Modelvorhaben §64e.
 
 ##### Konfiguration
 
-* `APP_CONSENT_GICS_ENABLED`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn nicht
-  gesetzt. Gleiche Funktionalität wie Angabe `APP_CONSENT_SERVICE=GICS`
-* `APP_CONSENT_GICS_CHECKGNOMEDE`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn
-  nicht gesetzt. Versuche Einwilligungsdaten zu GENOM DE Modelvorhaben über gIcs abzurufen.
-* `APP_CONSENT_GICS_CHECKBROADCONSENT`: Aktiviert oder deaktiviert `true` oder `false`, `false` wenn
-  nicht gesetzt. Versuche Einwilligungsdaten zu Broad Consent über gIcs abzurufen.
+* `APP_CONSRENT_SERVICE`: Muss Wert `GICS` gesetzt sein um die Abfragen zu aktivieren. Der Wert
+  `NONE` deaktiviert die Abfrage in gICS.
 * `APP_CONSENT_GICS_URI`: URI der gICS-Instanz (z.B. `http://localhost:8090/ttp-fhir/fhir/gics`)
 * `APP_CONSENT_GICS_USERNAME`: gIcs Basic-Auth Benutzername
 * `APP_CONSENT_GICS_PASSWORD`: gIcs Basic-Auth Passwort
