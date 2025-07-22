@@ -44,13 +44,20 @@ class KafkaMtbFileSender(
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val record =
-                    ProducerRecord(kafkaProperties.outputTopic, key(request), objectMapper.writeValueAsString(request))
+                    ProducerRecord(
+                        kafkaProperties.outputTopic,
+                        key(request),
+                        objectMapper.writeValueAsString(request)
+                    )
                 when (request) {
                     is BwhcV1MtbFileRequest -> record.headers()
                         .add("contentType", MediaType.APPLICATION_JSON_VALUE.toByteArray())
 
                     is DnpmV2MtbFileRequest -> record.headers()
-                        .add("contentType", CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+                        .add(
+                            "contentType",
+                            CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray()
+                        )
                 }
 
                 val result = kafkaTemplate.send(record)
@@ -84,7 +91,12 @@ class KafkaMtbFileSender(
                         kafkaProperties.outputTopic,
                         key(request),
                         // Always use old BwhcV1FileRequest with Consent REJECT
-                        objectMapper.writeValueAsString(BwhcV1MtbFileRequest(request.requestId, dummyMtbFile))
+                        objectMapper.writeValueAsString(
+                            BwhcV1MtbFileRequest(
+                                request.requestId,
+                                dummyMtbFile
+                            )
+                        )
                     )
 
                 val result = kafkaTemplate.send(record)
