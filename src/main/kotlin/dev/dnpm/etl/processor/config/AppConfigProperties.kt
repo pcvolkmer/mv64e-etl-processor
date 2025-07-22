@@ -59,7 +59,7 @@ data class GPasConfigProperties(
 
 @ConfigurationProperties(ConsentConfigProperties.NAME)
 data class ConsentConfigProperties(
-    var service: ConsentService = ConsentService.BUILDIN
+    var service: ConsentService = ConsentService.NONE
 ) {
     companion object {
         const val NAME = "app.consent"
@@ -75,13 +75,6 @@ data class GIcsConfigProperties(
     val uri: String?,
     val username: String?,
     val password: String?,
-
-    /**
-     * If value is 'true' valid consent at processing time is mandatory for transmission of DNPM
-     * files otherwise they will be flagged and skipped.
-     * If value 'false' or missing consent status is assumed to be valid.
-     */
-    val enabled: Boolean?,
 
     /**
      * gICS specific system
@@ -174,7 +167,7 @@ enum class PseudonymGenerator {
 }
 
 enum class ConsentService {
-    BUILDIN,
+    NONE,
     GICS
 }
 

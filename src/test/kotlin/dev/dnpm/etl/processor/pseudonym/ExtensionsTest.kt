@@ -26,6 +26,7 @@ import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.ConsentProcessorTest
 import dev.pcvolkmer.mv64e.mtb.*
@@ -249,7 +250,7 @@ class ExtensionsTest {
         }
 
         private fun addConsentData(mtbFile: Mtb) {
-            val gIcsConfigProperties = GIcsConfigProperties("", "", "", true)
+            val gIcsConfigProperties = GIcsConfigProperties("", "", "")
             val appConfigProperties = AppConfigProperties(null, emptyList())
 
             val bundle = Bundle()
@@ -262,7 +263,7 @@ class ExtensionsTest {
                 gIcsConfigProperties,
                 JacksonConfig().objectMapper(),
                 FhirContext.forR4(),
-                null
+                ConsentByMtbFile()
             ).embedBroadConsentResources(mtbFile, bundle)
 
         }

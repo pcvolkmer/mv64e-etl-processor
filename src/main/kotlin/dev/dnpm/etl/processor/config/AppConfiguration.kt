@@ -229,7 +229,7 @@ class AppConfiguration {
 
     @Conditional(GicsEnabledCondition::class)
     @Bean
-    fun gicsConsentProcessor(
+    fun consentProcessor(
         configProperties: AppConfigProperties,
         gIcsConfigProperties: GIcsConfigProperties,
         getObjectMapper: ObjectMapper,
@@ -267,9 +267,10 @@ class AppConfiguration {
 
 }
 
-class GicsEnabledCondition : AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
+class GicsEnabledCondition :
+    AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
 
-    @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "GICS" )
+    @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics")
     class OnGicsServiceSelected {
         // Just for Condition
     }

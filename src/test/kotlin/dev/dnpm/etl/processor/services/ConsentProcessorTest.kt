@@ -46,7 +46,7 @@ class ConsentProcessorTest {
         @Mock gicsConsentService: GicsConsentService,
     ) {
 
-        this.gIcsConfigProperties = GIcsConfigProperties(null, null, null, true)
+        this.gIcsConfigProperties = GIcsConfigProperties(null, null, null)
         val jacksonConfig = JacksonConfig()
         this.objectMapper = jacksonConfig.objectMapper()
         this.fhirContext = JacksonConfig.fhirContext()

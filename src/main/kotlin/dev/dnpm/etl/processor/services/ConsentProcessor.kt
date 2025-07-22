@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
@@ -30,7 +31,7 @@ class ConsentProcessor(
     private val gIcsConfigProperties: GIcsConfigProperties,
     private val objectMapper: ObjectMapper,
     private val fhirContext: FhirContext,
-    private val consentService: IGetConsent?
+    private val consentService: IGetConsent
 ) {
     private var logger: Logger = LoggerFactory.getLogger("ConsentProcessor")
 
@@ -48,8 +49,8 @@ class ConsentProcessor(
      *
      */
     fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
-        if (consentService == null) {
-            // consent check seems to be disabled
+        if (consentService is ConsentByMtbFile) {
+            // consent check is disabled
             return true
         }
 
@@ -81,7 +82,6 @@ class ConsentProcessor(
         )
 
         addGenomeDbProvisions(mtbFile, genomeDeConsent)
-
 
         if (!genomeDeConsent.entry.isEmpty()) setGenomDeSubmissionType(mtbFile)
 
