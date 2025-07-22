@@ -39,3 +39,5 @@ out/
 .vscode/
 /dev/gpas*
 /deploy/.env
+/dev/gICS*
+/dev/gPAS*

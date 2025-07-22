@@ -19,6 +19,7 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
+import dev.dnpm.etl.processor.config.AppFhirConfig
 import dev.dnpm.etl.processor.config.GPasConfigProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -42,6 +43,7 @@ class GpasPseudonymGeneratorTest {
     private lateinit var mockRestServiceServer: MockRestServiceServer
     private lateinit var generator: GpasPseudonymGenerator
     private lateinit var restTemplate: RestTemplate
+    private  var appFhirConfig: AppFhirConfig = AppFhirConfig()
 
     @BeforeEach
     fun setup() {
@@ -55,7 +57,8 @@ class GpasPseudonymGeneratorTest {
 
         this.restTemplate = RestTemplate()
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-        this.generator = GpasPseudonymGenerator(gPasConfigProperties, retryTemplate, restTemplate)
+        this.generator =
+            GpasPseudonymGenerator(gPasConfigProperties, retryTemplate, restTemplate, appFhirConfig)
     }
 
     @Test
@@ -64,7 +67,13 @@ class GpasPseudonymGeneratorTest {
             method(HttpMethod.POST)
             requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
-            withStatus(HttpStatus.OK).body(getDummyResponseBody("1234", "test", "test1234ABCDEF567890"))
+            withStatus(HttpStatus.OK).body(
+                getDummyResponseBody(
+                    "1234",
+                    "test",
+                    "test1234ABCDEF567890"
+                )
+            )
                 .createResponse(it)
         }
 
@@ -90,7 +99,10 @@ class GpasPseudonymGeneratorTest {
             requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
         }.andRespond {
             withStatus(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
+                .header(
+                    HttpHeaders.LOCATION,
+                    "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate"
+                )
                 .createResponse(it)
         }
 

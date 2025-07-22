@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.pseudonym;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GPasConfigProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Identifier;
@@ -32,11 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 public class GpasPseudonymGenerator implements Generator {
 
-    private final static FhirContext r4Context = FhirContext.forR4();
+    private final FhirContext r4Context;
     private final String gPasUrl;
     private final String psnTargetDomain;
     private final HttpHeaders httpHeader;
@@ -45,11 +49,13 @@ public class GpasPseudonymGenerator implements Generator {
 
     private final RestTemplate restTemplate;
 
-    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate, RestTemplate restTemplate) {
+    public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate,
+        RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;
         this.gPasUrl = gpasCfg.getUri();
         this.psnTargetDomain = gpasCfg.getTarget();
+        this.r4Context = appFhirConfig.fhirContext();
         httpHeader = getHttpHeaders(gpasCfg.getUsername(), gpasCfg.getPassword());
 
         log.debug(String.format("%s has been initialized", this.getClass().getName()));
@@ -61,7 +67,7 @@ public class GpasPseudonymGenerator implements Generator {
         var gPasRequestBody = getGpasRequestBody(id);
         var responseEntity = getGpasPseudonym(gPasRequestBody);
         var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
-                .parseResource(responseEntity.getBody());
+            .parseResource(responseEntity.getBody());
 
         return unwrapPseudonym(gPasPseudonymResult);
     }
@@ -75,9 +81,9 @@ public class GpasPseudonymGenerator implements Generator {
         }
 
         final var identifier = (Identifier) parameters.get().getPart().stream()
-                .filter(a -> a.getName().equals("pseudonym"))
-                .findFirst()
-                .orElseGet(ParametersParameterComponent::new).getValue();
+            .filter(a -> a.getName().equals("pseudonym"))
+            .findFirst()
+            .orElseGet(ParametersParameterComponent::new).getValue();
 
         // pseudonym
         return sanitizeValue(identifier.getValue());
@@ -97,38 +103,48 @@ public class GpasPseudonymGenerator implements Generator {
         return psnValue.replaceAll(forbiddenCharsRegex, "_");
     }
 
-
     @NotNull
     protected ResponseEntity<String> getGpasPseudonym(String gPasRequestBody) {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(gPasRequestBody, this.httpHeader);
-        ResponseEntity<String> responseEntity;
 
         try {
-            responseEntity = retryTemplate.execute(
-                    ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
-                            String.class));
-
+            ResponseEntity<String> responseEntity = retryTemplate.execute(
+                ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
+                    String.class));
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
-            } else {
-                log.warn("API request unsuccessful. Response: {}", requestEntity.getBody());
-                throw new PseudonymRequestFailed("API request unsuccessful gPas unsuccessful.");
+                return responseEntity;
             }
-
-            return responseEntity;
+        } catch (RestClientException rce) {
+            if (rce instanceof BadRequest) {
+                String msg = "gPas or request configuration is incorrect. Please check both."
+                    + rce.getMessage();
+                log.debug(
+                    msg);
+                throw new PseudonymRequestFailed(msg, rce);
+            }
+            if (rce instanceof Unauthorized) {
+                var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s".formatted(
+                    rce.getMessage());
+                log.error(msg);
+                throw new PseudonymRequestFailed(msg, rce);
+            }
         } catch (Exception unexpected) {
             throw new PseudonymRequestFailed(
-                    "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
+                "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
         }
+        throw new PseudonymRequestFailed(
+            "API request due unexpected error unsuccessful gPas unsuccessful.");
+
     }
 
     protected String getGpasRequestBody(String id) {
         var requestParameters = new Parameters();
         requestParameters.addParameter().setName("target")
-                .setValue(new StringType().setValue(psnTargetDomain));
+            .setValue(new StringType().setValue(psnTargetDomain));
         requestParameters.addParameter().setName("original")
-                .setValue(new StringType().setValue(id));
+            .setValue(new StringType().setValue(id));
         final IParser iParser = r4Context.newJsonParser();
         return iParser.encodeResourceToString(requestParameters);
     }

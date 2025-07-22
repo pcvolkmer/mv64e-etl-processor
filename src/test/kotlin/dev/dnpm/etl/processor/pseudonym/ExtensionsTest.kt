@@ -19,11 +19,19 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
+import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.config.GIcsConfigProperties
+import dev.dnpm.etl.processor.config.JacksonConfig
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.services.ConsentProcessor
+import dev.dnpm.etl.processor.services.ConsentProcessorTest
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
+import org.hl7.fhir.r4.model.Bundle
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -39,6 +47,9 @@ import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class ExtensionsTest {
+    fun getObjectMapper(): ObjectMapper {
+        return JacksonConfig().objectMapper()
+    }
 
     @Nested
     inner class UsingBwhcDatamodel {
@@ -46,13 +57,14 @@ class ExtensionsTest {
         val FAKE_MTB_FILE_PATH = "fake_MTBFile.json"
         val CLEAN_PATIENT_ID = "5dad2f0b-49c6-47d8-a952-7b9e9e0f7549"
 
+
         private fun fakeMtbFile(): MtbFile {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
-            return ObjectMapper().readValue(mtbFile, MtbFile::class.java)
+            return getObjectMapper().readValue(mtbFile, MtbFile::class.java)
         }
 
         private fun MtbFile.serialized(): String {
-            return ObjectMapper().writeValueAsString(this)
+            return getObjectMapper().writeValueAsString(this)
         }
 
         @Test
@@ -86,7 +98,9 @@ class ExtensionsTest {
             mtbFile.pseudonymizeWith(pseudonymizeService)
             mtbFile.anonymizeContentWith(pseudonymizeService)
 
-            val pattern = "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex().toPattern()
+            val pattern =
+                "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
+                    .toPattern()
             val matcher = pattern.matcher(mtbFile.serialized())
 
             assertThrows<IllegalStateException> {
@@ -207,15 +221,15 @@ class ExtensionsTest {
     inner class UsingDnpmV2Datamodel {
 
         val FAKE_MTB_FILE_PATH = "mv64e-mtb-fake-patient.json"
-        val CLEAN_PATIENT_ID = "aca5a971-28be-4089-8128-0036a4fe6f1a"
+        val CLEAN_PATIENT_ID = "644bae7a-56f6-4ee8-b02f-c532e65af5b1"
 
         private fun fakeMtbFile(): Mtb {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
-            return ObjectMapper().readValue(mtbFile, Mtb::class.java)
+            return getObjectMapper().readValue(mtbFile, Mtb::class.java)
         }
 
         private fun Mtb.serialized(): String {
-            return ObjectMapper().writeValueAsString(this)
+            return getObjectMapper().writeValueAsString(this)
         }
 
         @Test
@@ -226,11 +240,32 @@ class ExtensionsTest {
             }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
             val mtbFile = fakeMtbFile()
+            mtbFile.ensureMetaDataIsInitialized()
+            addConsentData(mtbFile)
 
             mtbFile.pseudonymizeWith(pseudonymizeService)
 
             assertThat(mtbFile.patient.id).isEqualTo("PSEUDO-ID")
             assertThat(mtbFile.serialized()).doesNotContain(CLEAN_PATIENT_ID)
+        }
+
+        private fun addConsentData(mtbFile: Mtb) {
+            val gIcsConfigProperties = GIcsConfigProperties("", "", "")
+            val appConfigProperties = AppConfigProperties(null, emptyList())
+
+            val bundle = Bundle()
+            val dummyConsent = ConsentProcessorTest.getDummyGenomDeConsent()
+            dummyConsent.patient.reference = "Patient/$CLEAN_PATIENT_ID"
+            bundle.addEntry().resource = dummyConsent
+
+            ConsentProcessor(
+                appConfigProperties,
+                gIcsConfigProperties,
+                JacksonConfig().objectMapper(),
+                FhirContext.forR4(),
+                ConsentByMtbFile()
+            ).embedBroadConsentResources(mtbFile, bundle)
+
         }
 
         @Test

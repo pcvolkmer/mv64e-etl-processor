@@ -70,6 +70,12 @@ class ResponseProcessor(
                     )
                 }
 
+                RequestStatus.NO_CONSENT -> {
+                    it.report = Report(
+                        "Einwilligung Status fehlt, widerrufen oder ungeklärt."
+                    )
+                }
+
                 else -> {
                     logger.error("Cannot process response: Unknown response!")
                     return@ifPresentOrElse

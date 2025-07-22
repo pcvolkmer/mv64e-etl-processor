@@ -19,10 +19,7 @@
 
 package dev.dnpm.etl.processor.web
 
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
-import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
-import dev.dnpm.etl.processor.monitoring.OutputConnectionCheckService
+import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.security.Role
@@ -61,11 +58,15 @@ class ConfigController(
         val gPasConnectionAvailable =
             connectionCheckServices.filterIsInstance<GPasConnectionCheckService>().firstOrNull()?.connectionAvailable()
 
+        val gIcsConnectionAvailable =
+            connectionCheckServices.filterIsInstance<GIcsConnectionCheckService>().firstOrNull()?.connectionAvailable()
+
         model.addAttribute("pseudonymGenerator", pseudonymGenerator.javaClass.simpleName)
         model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
         model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
         model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
         model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
+        model.addAttribute("gIcsConnectionAvailable", gIcsConnectionAvailable)
         model.addAttribute("tokensEnabled", tokenService != null)
         if (tokenService != null) {
             model.addAttribute("tokens", tokenService.findAll())
@@ -117,6 +118,24 @@ class ConfigController(
         }
 
         return "configs/gPasConnectionAvailable"
+    }
+
+    @GetMapping(params = ["gIcsConnectionAvailable"])
+    fun gIcsConnectionAvailable(model: Model): String {
+        val gIcsConnectionAvailable =
+            connectionCheckServices.filterIsInstance<GIcsConnectionCheckService>().firstOrNull()?.connectionAvailable()
+
+        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+        model.addAttribute("gIcsConnectionAvailable", gIcsConnectionAvailable)
+        if (tokenService != null) {
+            model.addAttribute("tokensEnabled", true)
+            model.addAttribute("tokens", tokenService.findAll())
+        } else {
+            model.addAttribute("tokens", listOf<Token>())
+        }
+
+        return "configs/gIcsConnectionAvailable"
     }
 
     @PostMapping(path = ["tokens"])
@@ -190,6 +209,7 @@ class ConfigController(
                 is ConnectionCheckResult.KafkaConnectionCheckResult -> "output-connection-check"
                 is ConnectionCheckResult.RestConnectionCheckResult -> "output-connection-check"
                 is ConnectionCheckResult.GPasConnectionCheckResult -> "gpas-connection-check"
+                is ConnectionCheckResult.GIcsConnectionCheckResult -> "gics-connection-check"
             }
 
             ServerSentEvent.builder<Any>()

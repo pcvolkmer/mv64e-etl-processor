@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
+import dev.dnpm.etl.processor.monitoring.GIcsConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
@@ -89,7 +90,8 @@ abstract class MockSink : Sinks.Many<Boolean>
         RequestProcessor::class,
         TransformationService::class,
         GPasConnectionCheckService::class,
-        RestConnectionCheckService::class
+        RestConnectionCheckService::class,
+        GIcsConnectionCheckService::class
     ]
 )
 class ConfigControllerTest {
@@ -182,7 +184,13 @@ class ConfigControllerTest {
 
         @Test
         fun testShouldNotSaveTokenWithExstingName() {
-            whenever(tokenService.addToken(anyString())).thenReturn(Result.failure(RuntimeException("Testfailure")))
+            whenever(tokenService.addToken(anyString())).thenReturn(
+                Result.failure(
+                    RuntimeException(
+                        "Testfailure"
+                    )
+                )
+            )
 
             mockMvc.post("/configs/tokens") {
                 with(user("admin").roles("ADMIN"))
@@ -303,7 +311,10 @@ class ConfigControllerTest {
 
             val idCaptor = argumentCaptor<Long>()
             val roleCaptor = argumentCaptor<Role>()
-            verify(userRoleService, times(1)).updateUserRole(idCaptor.capture(), roleCaptor.capture())
+            verify(userRoleService, times(1)).updateUserRole(
+                idCaptor.capture(),
+                roleCaptor.capture()
+            )
 
             assertThat(idCaptor.firstValue).isEqualTo(42)
             assertThat(roleCaptor.firstValue).isEqualTo(Role.ADMIN)
@@ -341,23 +352,26 @@ class ConfigControllerTest {
 
         @BeforeEach
         fun setup(
-            applicationContext: WebApplicationContext,
+            applicationContext: WebApplicationContext
         ) {
             this.webClient = MockMvcWebTestClient
                 .bindToApplicationContext(applicationContext).build()
         }
 
         @Test
-        fun testShouldRequestSSE() {
-            val expectedEvent = ConnectionCheckResult.GPasConnectionCheckResult(true, Instant.now(), Instant.now())
+        fun testShouldRequestGPasSSE() {
+            val expectedEvent =
+                ConnectionCheckResult.GPasConnectionCheckResult(true, Instant.now(), Instant.now())
 
             connectionCheckUpdateProducer.tryEmitNext(expectedEvent)
             connectionCheckUpdateProducer.emitComplete { _, _ -> true }
 
-            val result = webClient.get().uri("http://localhost/configs/events").accept(TEXT_EVENT_STREAM).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(TEXT_EVENT_STREAM)
-                .returnResult(ConnectionCheckResult.GPasConnectionCheckResult::class.java)
+            val result =
+                webClient.get().uri("http://localhost/configs/events").accept(TEXT_EVENT_STREAM)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(TEXT_EVENT_STREAM)
+                    .returnResult(ConnectionCheckResult.GPasConnectionCheckResult::class.java)
 
             StepVerifier.create(result.responseBody)
                 .expectNext(expectedEvent)

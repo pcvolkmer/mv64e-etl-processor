@@ -16,6 +16,7 @@ spring:
           content:
             enabled: true
             paths: /**/*.js,/**/*.css,/**/*.svg,/**/*.jpeg
-
+app:
+  isGenomDeTestSubmission: true
 server:
   forward-headers-strategy: framework

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -34,10 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyValueClass
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.*
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -49,7 +47,7 @@ class KafkaInputListenerTest {
 
     @BeforeEach
     fun setup(
-        @Mock requestProcessor: RequestProcessor
+        @Mock requestProcessor: RequestProcessor,
     ) {
         this.requestProcessor = requestProcessor
         this.objectMapper = ObjectMapper()
@@ -94,7 +92,10 @@ class KafkaInputListenerTest {
             )
         )
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(
+            anyValueClass(),
+            eq(TtpConsentStatus.UNKNOWN_CHECK_FILE)
+        )
     }
 
     @Test
@@ -147,7 +148,8 @@ class KafkaInputListenerTest {
                 Optional.empty()
             )
         )
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(), anyValueClass(), eq(
+            TtpConsentStatus.UNKNOWN_CHECK_FILE))
     }
 
     @Test
@@ -178,7 +180,8 @@ class KafkaInputListenerTest {
                 Optional.empty()
             )
         )
-        verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass())
+        verify(requestProcessor, times(0)).processDeletion(anyValueClass(), anyValueClass(), eq(
+            TtpConsentStatus.UNKNOWN_CHECK_FILE))
     }
 
 }

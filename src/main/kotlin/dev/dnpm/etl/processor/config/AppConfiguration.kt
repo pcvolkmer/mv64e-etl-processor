@@ -20,24 +20,28 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
-import dev.dnpm.etl.processor.monitoring.GPasConnectionCheckService
-import dev.dnpm.etl.processor.monitoring.ReportService
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.IGetConsent
+import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
+import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.ConfigurationCondition
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
@@ -60,7 +64,9 @@ import kotlin.time.toJavaDuration
     value = [
         AppConfigProperties::class,
         PseudonymizeConfigProperties::class,
-        GPasConfigProperties::class
+        GPasConfigProperties::class,
+        ConsentConfigProperties::class,
+        GIcsConfigProperties::class
     ]
 )
 @EnableScheduling
@@ -73,13 +79,27 @@ class AppConfiguration {
         return RestTemplate()
     }
 
-    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
     @Bean
-    fun gpasPseudonymGenerator(configProperties: GPasConfigProperties, retryTemplate: RetryTemplate, restTemplate: RestTemplate): Generator {
-        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+    fun appFhirConfig(): AppFhirConfig {
+        return AppFhirConfig()
     }
 
-    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "BUILDIN", matchIfMissing = true)
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
+    @Bean
+    fun gpasPseudonymGenerator(
+        configProperties: GPasConfigProperties,
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+        appFhirConfig: AppFhirConfig
+    ): Generator {
+        return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate, appFhirConfig)
+    }
+
+    @ConditionalOnProperty(
+        value = ["app.pseudonymize.generator"],
+        havingValue = "BUILDIN",
+        matchIfMissing = true
+    )
     @Bean
     fun buildinPseudonymGenerator(): Generator {
         return AnonymizingGenerator()
@@ -94,17 +114,21 @@ class AppConfiguration {
     }
 
     @Bean
-    fun reportService(objectMapper: ObjectMapper): ReportService {
-        return ReportService(objectMapper)
+    fun reportService(): ReportService {
+        return ReportService(getObjectMapper())
+    }
+
+    @Bean
+    fun getObjectMapper(): ObjectMapper {
+        return JacksonConfig().objectMapper()
     }
 
     @Bean
     fun transformationService(
-        objectMapper: ObjectMapper,
         configProperties: AppConfigProperties
     ): TransformationService {
         logger.info("Apply ${configProperties.transformations.size} transformation rules")
-        return TransformationService(objectMapper, configProperties.transformations.map {
+        return TransformationService(getObjectMapper(), configProperties.transformations.map {
             Transformation.of(it.path) from it.from to it.to
         })
     }
@@ -123,7 +147,11 @@ class AppConfiguration {
                     callback: RetryCallback<T, E>,
                     throwable: Throwable
                 ) {
-                    logger.warn("Error occured: {}. Retrying {}", throwable.message, context.retryCount)
+                    logger.warn(
+                        "Error occured: {}. Retrying {}",
+                        throwable.message,
+                        context.retryCount
+                    )
                 }
             })
             .build()
@@ -131,7 +159,11 @@ class AppConfiguration {
 
     @ConditionalOnProperty(value = ["app.security.enable-tokens"], havingValue = "true")
     @Bean
-    fun tokenService(userDetailsManager: InMemoryUserDetailsManager, passwordEncoder: PasswordEncoder, tokenRepository: TokenRepository): TokenService {
+    fun tokenService(
+        userDetailsManager: InMemoryUserDetailsManager,
+        passwordEncoder: PasswordEncoder,
+        tokenRepository: TokenRepository
+    ): TokenService {
         return TokenService(userDetailsManager, passwordEncoder, tokenRepository)
     }
 
@@ -152,7 +184,11 @@ class AppConfiguration {
         gPasConfigProperties: GPasConfigProperties,
         connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ): ConnectionCheckService {
-        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
+        return GPasConnectionCheckService(
+            restTemplate,
+            gPasConfigProperties,
+            connectionCheckUpdateProducer
+        )
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymizer"], havingValue = "GPAS")
@@ -163,12 +199,85 @@ class AppConfiguration {
         gPasConfigProperties: GPasConfigProperties,
         connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
     ): ConnectionCheckService {
-        return GPasConnectionCheckService(restTemplate, gPasConfigProperties, connectionCheckUpdateProducer)
+        return GPasConnectionCheckService(
+            restTemplate,
+            gPasConfigProperties,
+            connectionCheckUpdateProducer
+        )
     }
 
     @Bean
     fun jdbcConfiguration(): AbstractJdbcConfiguration {
         return AppJdbcConfiguration()
     }
+
+    @Conditional(GicsEnabledCondition::class)
+    @Bean
+    fun gicsConsentService(
+        gIcsConfigProperties: GIcsConfigProperties,
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+        appFhirConfig: AppFhirConfig
+    ): IGetConsent {
+        return GicsConsentService(
+            gIcsConfigProperties,
+            retryTemplate,
+            restTemplate,
+            appFhirConfig
+        )
+    }
+
+    @Conditional(GicsEnabledCondition::class)
+    @Bean
+    fun consentProcessor(
+        configProperties: AppConfigProperties,
+        gIcsConfigProperties: GIcsConfigProperties,
+        getObjectMapper: ObjectMapper,
+        appFhirConfig: AppFhirConfig,
+        gicsConsentService: IGetConsent
+    ): ConsentProcessor {
+        return ConsentProcessor(
+            configProperties,
+            gIcsConfigProperties,
+            getObjectMapper,
+            appFhirConfig.fhirContext(),
+            gicsConsentService
+        )
+    }
+
+    @Conditional(GicsEnabledCondition::class)
+    @Bean
+    fun gIcsConnectionCheckService(
+        restTemplate: RestTemplate,
+        gIcsConfigProperties: GIcsConfigProperties,
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+    ): ConnectionCheckService {
+        return GIcsConnectionCheckService(
+            restTemplate,
+            gIcsConfigProperties,
+            connectionCheckUpdateProducer
+        )
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    fun iGetConsentService(): IGetConsent {
+        return ConsentByMtbFile()
+    }
+
 }
 
+class GicsEnabledCondition :
+    AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
+
+    @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics")
+    class OnGicsServiceSelected {
+        // Just for Condition
+    }
+
+    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
+    class OnGicsEnabled {
+        // Just for Condition
+    }
+
+}

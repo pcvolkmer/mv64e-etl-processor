@@ -21,7 +21,9 @@ package dev.dnpm.etl.processor.pseudonym
 
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.PatientId
+import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import org.apache.commons.codec.digest.DigestUtils
 
 /** Replaces patient ID with generated patient pseudonym
@@ -289,6 +291,16 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     this.followUps?.forEach {
         it.patient.id = patientPseudonym
     }
+
+    this.metadata?.researchConsents?.forEach { it ->
+        val entry = it ?: return@forEach
+        if (entry.contains("patient")) {
+            // here we expect only a patient reference any other data like display
+            // need to be removed, since may contain unsecure data
+            entry.remove("patient")
+            entry["patient"] = mapOf("reference" to "Patient/$patientPseudonym")
+        }
+    }
 }
 
 /**
@@ -316,4 +328,24 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
     }
 
     // TODO all other properties
+}
+
+fun Mtb.ensureMetaDataIsInitialized() {
+    // init metadata if necessary
+    if (this.metadata == null) {
+        val mvhMetadata = MvhMetadata.builder().build()
+        this.metadata = mvhMetadata
+    }
+    if (this.metadata.researchConsents == null) {
+        this.metadata.researchConsents = mutableListOf()
+    }
+    if (this.metadata.modelProjectConsent == null) {
+        this.metadata.modelProjectConsent = ModelProjectConsent()
+        this.metadata.modelProjectConsent.provisions = mutableListOf()
+    } else
+        if (this.metadata.modelProjectConsent.provisions != null) {
+            // make sure list can be changed
+            this.metadata.modelProjectConsent.provisions =
+                this.metadata.modelProjectConsent.provisions.toMutableList()
+        }
 }
