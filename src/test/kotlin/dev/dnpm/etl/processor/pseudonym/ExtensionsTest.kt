@@ -313,7 +313,8 @@ class ExtensionsTest {
             val pattern =
                 "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
                     .toPattern()
-            val matcher = pattern.matcher(mtbFile.serialized())
+            val input = mtbFile.serialized()
+            val matcher = pattern.matcher(input)
 
             assertThrows<IllegalStateException> {
                 matcher.find()

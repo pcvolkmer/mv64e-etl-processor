@@ -313,14 +313,37 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
         carePlan?.apply {
             id = id?.let { anonymize(it) }
 
-            diagnoses?.apply { diagnoses.apply { id = id?.let(::anonymize) } }
-            geneticCounselingRecommendation?.apply { id = geneticCounselingRecommendation.id?.let(::anonymize) }
-            rebiopsyRequests?.forEach { it -> it.id = it.id?.let(::anonymize) }
-            histologyReevaluationRequests?.forEach { it -> it.id = it?.id?.let(::anonymize) }
-            medicationRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
-            procedureRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
-            studyEnrollmentRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
-            responses?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+            diagnoses?.forEach { it -> it?.id = it.id?.let(::anonymize) }
+            geneticCounselingRecommendation?.apply {
+                id = geneticCounselingRecommendation.id?.let(::anonymize)
+            }
+            rebiopsyRequests?.forEach { it ->
+                it.id = it.id?.let(::anonymize)
+                it.tumorEntity?.id = it.tumorEntity?.id?.let(::anonymize)
+            }
+            histologyReevaluationRequests?.forEach { it ->
+                it.id = it?.id?.let(::anonymize)
+                it.specimen?.id = it.specimen?.id?.let(::anonymize)
+            }
+
+            medicationRecommendations?.forEach { it ->
+                it.id = it?.id?.let(::anonymize)
+                it.supportingVariants?.forEach { it ->
+                    it.variant?.id = it.variant?.id?.let(::anonymize)
+                }
+                it.reason?.id = it.reason?.id?.let(::anonymize)
+            }
+            procedureRecommendations?.forEach { it ->
+
+                it.id = it?.id?.let(::anonymize)
+                it.supportingVariants?.forEach { it ->
+                    it.variant?.id = it.variant?.id?.let(::anonymize)
+
+                }
+                it.reason?.id = it.reason?.id?.let(::anonymize)
+                studyEnrollmentRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+                responses?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+            }
         }
     }
 
@@ -347,6 +370,7 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
         }
         it.results?.tmb?.id = it.results?.tmb?.id?.let(::anonymize)
         it.results?.tmb?.specimen?.id = it.results?.tmb?.specimen?.id?.let(::anonymize)
+
         it.results?.brcaness?.id = it.results?.brcaness?.id?.let(::anonymize)
         it.results?.copyNumberVariants?.forEach { it -> it?.id = it.id?.let(::anonymize) }
         it.results?.hrdScore?.id = it.results?.hrdScore?.id?.let(::anonymize)
@@ -356,7 +380,12 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
     this.histologyReports.forEach { it ->
         it.id = it?.id?.let(::anonymize)
         it.results?.tumorCellContent?.id = it.results?.tumorCellContent?.id?.let(::anonymize)
+        it.results?.tumorCellContent?.specimen?.id =
+            it.results?.tumorCellContent?.specimen?.id?.let(::anonymize)
+
         it.results?.tumorMorphology?.id = it.results?.tumorMorphology?.id?.let(::anonymize)
+        it.results?.tumorMorphology?.specimen?.id =
+            it.results?.tumorMorphology?.specimen?.id?.let(::anonymize)
 
     }
     this.claimResponses.forEach { it -> it.id = it?.id?.let(::anonymize) }
@@ -412,6 +441,7 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
 
             it.id = it?.id?.let(::anonymize)
             it.reason?.id = it.reason?.id?.let(::anonymize)
+            it.basedOn?.id = it.basedOn?.id?.let(::anonymize)
         }
 
     }
