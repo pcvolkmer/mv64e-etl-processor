@@ -86,7 +86,9 @@ class ExtensionsTest {
             mtbFile.pseudonymizeWith(pseudonymizeService)
             mtbFile.anonymizeContentWith(pseudonymizeService)
 
-            val pattern = "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex().toPattern()
+            val pattern =
+                "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
+                    .toPattern()
             val matcher = pattern.matcher(mtbFile.serialized())
 
             assertThrows<IllegalStateException> {
@@ -270,6 +272,55 @@ class ExtensionsTest {
 
             assertThat(mtbFile.episodesOfCare).hasSize(1)
             assertThat(mtbFile.episodesOfCare.map { it.id }).isNotNull
+        }
+
+        @Test
+        fun shouldNotContainAnyUuidAfterRehashingOfIds(@Mock pseudonymizeService: PseudonymizeService) {
+            doAnswer {
+                it.arguments[0]
+                "PSEUDO-ID"
+            }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+
+            doAnswer {
+                "TESTDOMAIN"
+            }.whenever(pseudonymizeService).prefix()
+
+            val mtbFile = fakeMtbFile()
+
+            /**
+             * replace hex values with random long, so our test does not match false positives
+              */
+            mtbFile.ngsReports.forEach { report ->
+                report.results.simpleVariants.forEach { simpleVariant ->
+                    simpleVariant.externalIds.forEach { extIdValue ->
+                        extIdValue.value =
+                            Math.random().toLong().toString()
+                    }
+                }
+            }
+            mtbFile.ngsReports.forEach { report ->
+                report.results.rnaFusions.forEach { simpleVariant ->
+                    simpleVariant.externalIds.forEach { extIdValue ->
+                        extIdValue.value =
+                            Math.random().toLong().toString()
+                    }
+                }
+            }
+
+            mtbFile.pseudonymizeWith(pseudonymizeService)
+            mtbFile.anonymizeContentWith(pseudonymizeService)
+
+            val pattern =
+                "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
+                    .toPattern()
+            val matcher = pattern.matcher(mtbFile.serialized())
+
+            assertThrows<IllegalStateException> {
+                matcher.find()
+                matcher.group()
+            }.also {
+                assertThat(it.message).isEqualTo("No match found")
+            }
         }
     }
 }

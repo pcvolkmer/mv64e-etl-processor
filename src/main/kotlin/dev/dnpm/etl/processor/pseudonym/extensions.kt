@@ -307,13 +307,112 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
         return "$prefix$hash"
     }
 
-    this.episodesOfCare?.forEach {
-        it?.apply {
-            id = id?.let {
-                anonymize(it)
-            }
+    this.episodesOfCare?.forEach { it?.apply { id = id?.let(::anonymize) } }
+
+    this.carePlans?.onEach { carePlan ->
+        carePlan?.apply {
+            id = id?.let { anonymize(it) }
+
+            diagnoses?.apply { diagnoses.apply { id = id?.let(::anonymize) } }
+            geneticCounselingRecommendation?.apply { id = geneticCounselingRecommendation.id?.let(::anonymize) }
+            rebiopsyRequests?.forEach { it -> it.id = it.id?.let(::anonymize) }
+            histologyReevaluationRequests?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+            medicationRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+            procedureRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+            studyEnrollmentRecommendations?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+            responses?.forEach { it -> it.id = it?.id?.let(::anonymize) }
         }
     }
 
-    // TODO all other properties
+    this.responses.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.therapy?.id = it.therapy?.id?.let(::anonymize)
+
+    }
+
+    this.diagnoses.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.histology?.forEach { it -> it.id = it?.id?.let(::anonymize) }
+
+    }
+
+    this.ngsReports.forEach { it ->
+        it.id = it?.id?.let(::anonymize)
+        it.results?.tumorCellContent?.id = it.results.tumorCellContent?.id?.let(::anonymize)
+        it.results?.rnaFusions?.forEach { it -> it?.id = it.id?.let(::anonymize) }
+        it.results?.simpleVariants?.forEach { it ->
+            it?.id = it.id?.let(::anonymize)
+        }
+        it.results?.tmb?.id = it.results?.tmb?.id?.let(::anonymize)
+        it.results?.tmb?.specimen?.id = it.results?.tmb?.specimen?.id?.let(::anonymize)
+        it.results?.brcaness?.id = it.results?.brcaness?.id?.let(::anonymize)
+        it.results?.copyNumberVariants?.forEach { it -> it?.id = it.id?.let(::anonymize) }
+        it.results?.hrdScore?.id = it.results?.hrdScore?.id?.let(::anonymize)
+        it.results?.rnaSeqs?.forEach { it -> it?.id = it.id?.let(::anonymize) }
+    }
+
+    this.histologyReports.forEach { it ->
+        it.id = it?.id?.let(::anonymize)
+        it.results?.tumorCellContent?.id = it.results?.tumorCellContent?.id?.let(::anonymize)
+        it.results?.tumorMorphology?.id = it.results?.tumorMorphology?.id?.let(::anonymize)
+
+    }
+    this.claimResponses.forEach { it -> it.id = it?.id?.let(::anonymize) }
+    this.claims?.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.recommendation?.id = it.recommendation?.id?.let(::anonymize)
+
+    }
+    this.familyMemberHistories.forEach { it -> it.id = it?.id?.let(::anonymize) }
+    this.guidelineProcedures.forEach { it ->
+        it.id = it?.id?.let(::anonymize)
+        it.reason?.id = it.reason?.id?.let(::anonymize)
+        it.basedOn?.id = it.basedOn?.id?.let(::anonymize)
+
+    }
+
+    this.guidelineTherapies.forEach { it ->
+        it.id = it?.id?.let(::anonymize)
+        it.reason?.id = it.reason?.id?.let(::anonymize)
+        it.basedOn?.id = it.basedOn?.id?.let(::anonymize)
+    }
+    this.ihcReports.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.specimen?.id = it.specimen?.id?.let(::anonymize)
+    }
+
+    this.msiFindings.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.specimen?.id = it.specimen?.id?.let(::anonymize)
+    }
+
+    this.performanceStatus.forEach { it -> it.id = it?.id?.let(::anonymize) }
+
+    this.priorDiagnosticReports.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.specimen?.id = it.specimen?.id?.let(::anonymize)
+    }
+
+    this.specimens.forEach { it ->
+
+        it.id = it?.id?.let(::anonymize)
+        it.diagnosis?.id = it.diagnosis?.id?.let(::anonymize)
+
+    }
+
+    this.systemicTherapies.forEach { it ->
+
+        it.history?.forEach { it ->
+
+            it.id = it?.id?.let(::anonymize)
+            it.reason?.id = it.reason?.id?.let(::anonymize)
+        }
+
+    }
 }
