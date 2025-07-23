@@ -152,9 +152,7 @@ class RequestProcessor(
         val isLastRequestDeletion =
             requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
 
-        return null != lastMtbFileRequestForPatient
-                && !isLastRequestDeletion
-                && lastMtbFileRequestForPatient.fingerprint == fingerprint(
+        return null != lastMtbFileRequestForPatient && !isLastRequestDeletion && lastMtbFileRequestForPatient.fingerprint == fingerprint(
             pseudonymizedMtbFileRequest
         )
     }

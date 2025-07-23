@@ -5,7 +5,8 @@ die Patienten-ID.
 
 ## Einordnung innerhalb einer DNPM-ETL-Strecke
 
-Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin **[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
+Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin *
+*[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
 
 Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
@@ -108,10 +109,8 @@ vergleichbare IDs bereitzustellen.
 #### Eingebaute Anonymisierung
 
 Wurde keine oder die Verwendung der eingebauten Anonymisierung konfiguriert, so wird für die
-Patienten-ID der
-entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende "=" - zuzüglich des
-konfigurierten Präfixes
-als Patienten-Pseudonym verwendet.
+Patienten-ID der entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende 
+"=" - zuzüglich des konfigurierten Präfixes als Patienten-Pseudonym verwendet.
 
 #### Pseudonymisierung mit gPAS
 
@@ -186,8 +185,7 @@ Modelvorhaben §64e.
 ### Anmeldung mit einem Passwort
 
 Ein initialer Administrator-Account kann optional konfiguriert werden und sorgt dafür, dass
-bestimmte Bereiche nur nach
-einem erfolgreichen Login erreichbar sind.
+bestimmte Bereiche nur nach einem erfolgreichen Login erreichbar sind.
 
 * `APP_SECURITY_ADMIN_USER`: Muss angegeben werden zur Aktivierung der Zugriffsbeschränkung.
 * `APP_SECURITY_ADMIN_PASSWORD`: Das Passwort für den Administrator (Empfohlen).
