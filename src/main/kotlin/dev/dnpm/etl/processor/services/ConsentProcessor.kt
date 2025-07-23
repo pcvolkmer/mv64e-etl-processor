@@ -38,7 +38,7 @@ class ConsentProcessor(
     /**
      * In case an instance of {@link  ICheckConsent} is active, consent will be embedded and checked.
      *
-     * Logik:
+     * Logic:
      *  * <c>true</c> IF consent check is disabled.
      *  * <c>true</c> IF broad consent (BC) has been given.
      *  * <c>true</c> BC has been asked AND declined but genomDe consent has been consented.

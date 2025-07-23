@@ -13,8 +13,7 @@ Duplikate werden verworfen, Änderungen werden weitergeleitet.
 
 Löschanfragen werden immer als Löschanfrage an DNPM:DIP weitergeleitet.
 
-Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand
-der Anwendung gewährt.
+Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand der Anwendung gewährt.
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
@@ -26,6 +25,18 @@ Konfigurationsparameter
 
 ### Modelvorhaben genomDE §64e
 
+#### Vorgangsummern
+Zusätzlich zur Patienten Identifier Pseudonymisierung müssen Vorgangsummern generiert werden, die
+jede Übertragung eindeutig identifizieren aber gleichzeitig dem Patienten zugeordnet werden können.
+Dies lässt sich durch weitere Pseudonyme abbilden, allerdings werden pro Originalwert mehrere
+Pseudonyme benötigt.
+Zu diesem Zweck muss in gPas eine **Multi-Pseudonym-Domäne** konfiguriert werden (siehe auch
+*APP_PSEUDONYMIZE_GPAS_CCDN*).
+
+**WICHTIG:** Deaktivierte Pseudonymisierung ist nur für Tests nutzbar. Vorgangsummern sind zufällig
+und werden anschließend verworfen.
+
+#### Test Betriebsbereitschaft
 Um die voll Betriebsbereitschaft herzustellen, muss eine erfolgreiche Übertragung mit dem
 Submission-Typ *Test* erfolgt sein. Über die Umgebungsvariable wird dieser Übertragungsmodus
 aktiviert. Alle Datensätze mit erteilter Teilnahme am Modelvorhaben werden mit der Test-Kennung
@@ -98,20 +109,21 @@ vergleichbare IDs bereitzustellen.
 #### Eingebaute Anonymisierung
 
 Wurde keine oder die Verwendung der eingebauten Anonymisierung konfiguriert, so wird für die
-Patienten-ID der
-entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende "=" - zuzüglich des
-konfigurierten Präfixes
-als Patienten-Pseudonym verwendet.
+Patienten-ID der entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende 
+"=" - zuzüglich des konfigurierten Präfixes als Patienten-Pseudonym verwendet.
 
 #### Pseudonymisierung mit gPAS
 
-Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren.
+Wurde die Verwendung von gPAS konfiguriert, so sind weitere Angaben zu konfigurieren. 
 
-* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz inklusive Endpoint (z.B.
-  `http://localhost:8080/ttp-fhir/fhir/gpas/$$pseudonymizeAllowCreate`)
-* `APP_PSEUDONYMIZE_GPAS_TARGET`: gPas Domänenname
+Ab Version 2025.1 (Multi-Pseudonym Support)
+
+* `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz REST API (e.g. http://127.0.0.1:9990/ttp-fhir/fhir/gpas)
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
+* `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`: gPas Domänenname für Patienten ID
+* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
+  Clinical data node)
 
 ### (Externe) Consent-Services
 
@@ -173,8 +185,7 @@ Modelvorhaben §64e.
 ### Anmeldung mit einem Passwort
 
 Ein initialer Administrator-Account kann optional konfiguriert werden und sorgt dafür, dass
-bestimmte Bereiche nur nach
-einem erfolgreichen Login erreichbar sind.
+bestimmte Bereiche nur nach einem erfolgreichen Login erreichbar sind.
 
 * `APP_SECURITY_ADMIN_USER`: Muss angegeben werden zur Aktivierung der Zugriffsbeschränkung.
 * `APP_SECURITY_ADMIN_PASSWORD`: Das Passwort für den Administrator (Empfohlen).

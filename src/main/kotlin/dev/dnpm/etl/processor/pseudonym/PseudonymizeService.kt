@@ -35,6 +35,10 @@ class PseudonymizeService(
         }
     }
 
+    fun genomDeTan(patientId: PatientId): String {
+        return generator.generateGenomDeTan(patientId.value)
+    }
+
     fun prefix(): String {
         return configProperties.prefix
     }
