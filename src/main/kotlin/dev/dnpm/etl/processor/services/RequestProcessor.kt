@@ -79,14 +79,10 @@ class RequestProcessor(
     fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
         val pid = PatientId(extractPatientIdentifier(mtbFile))
 
-        val isConsentOk = consentProcessor != null &&
-                consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
+        val isConsentOk =
+            consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
         if (isConsentOk) {
-            val isModelProjectConsented = mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
-                p.purpose == ModelProjectConsentPurpose.SEQUENCING
-                        && p.type == ConsentProvision.PERMIT
-            } == true
-            if (isModelProjectConsented) {
+            if (isGenomDeConsented(mtbFile)) {
                 mtbFile addGenomDeTan pseudonymizeService
             }
             mtbFile pseudonymizeWith pseudonymizeService
@@ -101,6 +97,13 @@ class RequestProcessor(
                 )
             )
         }
+    }
+
+    private fun isGenomDeConsented(mtbFile: Mtb): Boolean {
+        val isModelProjectConsented = mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
+            p.purpose == ModelProjectConsentPurpose.SEQUENCING && p.type == ConsentProvision.PERMIT
+        } == true
+        return isModelProjectConsented
     }
 
     private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
@@ -118,9 +121,7 @@ class RequestProcessor(
         if (appConfigProperties.duplicationDetection && isDuplication(request)) {
             applicationEventPublisher.publishEvent(
                 ResponseEvent(
-                    request.requestId,
-                    Instant.now(),
-                    RequestStatus.DUPLICATION
+                    request.requestId, Instant.now(), RequestStatus.DUPLICATION
                 )
             )
             return
