@@ -23,7 +23,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GPasConfigProperties;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -42,38 +46,67 @@ public class GpasPseudonymGenerator implements Generator {
 
     private final FhirContext r4Context;
     private final String gPasUrl;
-    private final String psnTargetDomain;
     private final HttpHeaders httpHeader;
     private final RetryTemplate retryTemplate;
     private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
-
     private final RestTemplate restTemplate;
+    private final @NotNull String genomDeTanDomain;
+    private final @NotNull String pidPsnDomain;
+    protected final static String createOrGetPsn = "$pseudonymizeAllowCreate";
+    protected final static String createMultiDomainPsn = "$pseudonymize-secondary";
+    private final static String SINGLE_PSN_PART_NAME = "pseudonym";
+    private final static String MULTI_PSN_PART_NAME = "value";
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate,
         RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;
         this.gPasUrl = gpasCfg.getUri();
-        this.psnTargetDomain = gpasCfg.getTarget();
+        this.pidPsnDomain = gpasCfg.getPatientDomain();
+        this.genomDeTanDomain = gpasCfg.getGenomDeTanDomain();
         this.r4Context = appFhirConfig.fhirContext();
         httpHeader = getHttpHeaders(gpasCfg.getUsername(), gpasCfg.getPassword());
 
-        log.debug(String.format("%s has been initialized", this.getClass().getName()));
+        log.debug("{} has been initialized", this.getClass().getName());
 
     }
 
     @Override
     public String generate(String id) {
-        var gPasRequestBody = getGpasRequestBody(id);
-        var responseEntity = getGpasPseudonym(gPasRequestBody);
-        var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
-            .parseResource(responseEntity.getBody());
+        return generate(id, PsnDomainType.SINGLE_PSN_DOMAIN);
+    }
 
-        return unwrapPseudonym(gPasPseudonymResult);
+    @Override
+    public String generateGenomDeTan(String id) {
+        return generate(id, PsnDomainType.MULTI_PSN_DOMAIN);
+    }
+
+    protected String generate(String id, PsnDomainType domainType) {
+        switch (domainType) {
+            case SINGLE_PSN_DOMAIN -> {
+                final var requestBody = createSinglePsnRequestBody(id, pidPsnDomain);
+                final var responseEntity = getGpasPseudonym(requestBody, createOrGetPsn);
+                final var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
+                    .parseResource(responseEntity.getBody());
+
+                return unwrapPseudonym(gPasPseudonymResult, SINGLE_PSN_PART_NAME);
+            }
+            case MULTI_PSN_DOMAIN -> {
+                final var requestBody = createMultiPsnRequestBody(id, genomDeTanDomain);
+                final var responseEntity = getGpasPseudonym(requestBody, createMultiDomainPsn);
+                final var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
+                    .parseResource(responseEntity.getBody());
+
+                return unwrapPseudonym(gPasPseudonymResult, MULTI_PSN_PART_NAME);
+            }
+        }
+        throw new NotImplementedException(
+            "give domain type '%s' is unexpected and is currently not supported!".formatted(
+                domainType));
     }
 
     @NotNull
-    public static String unwrapPseudonym(Parameters gPasPseudonymResult) {
+    public static String unwrapPseudonym(Parameters gPasPseudonymResult, String targetPartName) {
         final var parameters = gPasPseudonymResult.getParameter().stream().findFirst();
 
         if (parameters.isEmpty()) {
@@ -81,7 +114,7 @@ public class GpasPseudonymGenerator implements Generator {
         }
 
         final var identifier = (Identifier) parameters.get().getPart().stream()
-            .filter(a -> a.getName().equals("pseudonym"))
+            .filter(a -> a.getName().equals(targetPartName))
             .findFirst()
             .orElseGet(ParametersParameterComponent::new).getValue();
 
@@ -104,13 +137,14 @@ public class GpasPseudonymGenerator implements Generator {
     }
 
     @NotNull
-    protected ResponseEntity<String> getGpasPseudonym(String gPasRequestBody) {
+    protected ResponseEntity<String> getGpasPseudonym(String gPasRequestBody, String apiEndpoint) {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(gPasRequestBody, this.httpHeader);
 
         try {
+            var targetUrl = buildRequestUrl(apiEndpoint);
             ResponseEntity<String> responseEntity = retryTemplate.execute(
-                ctx -> restTemplate.exchange(gPasUrl, HttpMethod.POST, requestEntity,
+                ctx -> restTemplate.exchange(targetUrl, HttpMethod.POST, requestEntity,
                     String.class));
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
@@ -139,15 +173,42 @@ public class GpasPseudonymGenerator implements Generator {
 
     }
 
-    protected String getGpasRequestBody(String id) {
-        var requestParameters = new Parameters();
+    protected URI buildRequestUrl(String apiEndpoint) throws URISyntaxException {
+        var gPasUrl1 = gPasUrl;
+        if (gPasUrl.lastIndexOf("/") == gPasUrl.length() - 1) {
+            gPasUrl1 = gPasUrl.substring(0, gPasUrl.length() - 1);
+        }
+        var urlBuilder = new URIBuilder(new URI(gPasUrl1)).appendPath(apiEndpoint);
+
+        return urlBuilder.build();
+    }
+
+    protected String createSinglePsnRequestBody(String id, String targetDomain) {
+        final var requestParameters = new Parameters();
         requestParameters.addParameter().setName("target")
-            .setValue(new StringType().setValue(psnTargetDomain));
+            .setValue(new StringType().setValue(targetDomain));
         requestParameters.addParameter().setName("original")
             .setValue(new StringType().setValue(id));
         final IParser iParser = r4Context.newJsonParser();
         return iParser.encodeResourceToString(requestParameters);
     }
+
+    protected String createMultiPsnRequestBody(String id, String targetDomain) {
+        final var param = new Parameters();
+        ParametersParameterComponent targetParam = param.addParameter().setName("original");
+        targetParam.addPart(
+            new ParametersParameterComponent().setName("target")
+                .setValue(new StringType(targetDomain)));
+        targetParam.addPart(
+            new ParametersParameterComponent().setName("value").setValue(new StringType(id)));
+        targetParam
+            .addPart(new ParametersParameterComponent().setName("count").setValue(
+                new StringType("1")));
+
+        final IParser iParser = r4Context.newJsonParser();
+        return iParser.encodeResourceToString(param);
+    }
+
 
     @NotNull
     protected HttpHeaders getHttpHeaders(String gPasUserName, String gPasPassword) {

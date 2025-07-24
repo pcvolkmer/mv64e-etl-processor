@@ -71,8 +71,8 @@ class PseudonymizeServiceTest {
     }
 
     @Test
-    fun sanitizeFileName(@Mock generator: GpasPseudonymGenerator) {
-        val result= GpasPseudonymGenerator.sanitizeValue("l://a\\bs;1*2?3>")
+    fun sanitizeFileName() {
+        val result = GpasPseudonymGenerator.sanitizeValue("l://a\\bs;1*2?3>")
 
         assertThat(result).isEqualTo("l___a_bs_1_2_3_")
     }
@@ -90,4 +90,16 @@ class PseudonymizeServiceTest {
         assertThat(mtbFile.patient.id).isEqualTo("UNKNOWN_123")
     }
 
+    @Test
+    fun shouldReturnDifferentValues() {
+        val ag = AnonymizingGenerator()
+
+        val tans = HashSet<String>()
+
+        (1..1000).forEach { i ->
+            val tan = ag.generateGenomDeTan("12345")
+            assertThat(tan).hasSize(64)
+            assertThat(tans.add(tan)).`as`("never the same result!").isTrue
+        }
+    }
 }

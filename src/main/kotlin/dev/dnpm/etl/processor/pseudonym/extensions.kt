@@ -478,3 +478,8 @@ fun Mtb.ensureMetaDataIsInitialized() {
                 this.metadata.modelProjectConsent.provisions.toMutableList()
         }
 }
+
+infix fun Mtb.addGenomDeTan(pseudonymizeService: PseudonymizeService)
+{
+    this.metadata.transferTan = pseudonymizeService.genomDeTan(PatientId(this.patient.id))
+}

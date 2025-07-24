@@ -43,7 +43,6 @@ import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
@@ -67,7 +66,8 @@ class MtbFileRestControllerTest {
             @Mock requestProcessor: RequestProcessor
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor,
+            val controller = MtbFileRestController(
+                requestProcessor,
                 ConsentByMtbFile()
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
@@ -90,8 +90,7 @@ class MtbFileRestControllerTest {
         @Test
         fun shouldProcessPostRequestWithRejectedConsent() {
             mockMvc.post("/mtbfile") {
-                content =
-                    objectMapper.writeValueAsString(bwhcMtbFileContent(Status.REJECTED))
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Status.REJECTED))
                 contentType = MediaType.APPLICATION_JSON
             }.andExpect {
                 status {
@@ -120,10 +119,6 @@ class MtbFileRestControllerTest {
         }
     }
 
-    @TestPropertySource(
-        properties = ["app.consent.gics.enabled=true",
-            "app.consent.gics.gIcsBaseUri=http://localhost:8090/ttp-fhir/fhir/gics"]
-    )
     @Nested
     inner class BwhcRequestsCheckConsentViaTtp {
 
@@ -142,7 +137,6 @@ class MtbFileRestControllerTest {
             val controller = MtbFileRestController(requestProcessor, gicsConsentService)
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
             this.gicsConsentService = gicsConsentService
-
         }
 
         @ParameterizedTest
@@ -152,8 +146,7 @@ class MtbFileRestControllerTest {
             whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(TtpConsentStatus.BROAD_CONSENT_GIVEN)
 
             mockMvc.post("/mtbfile") {
-                content =
-                    objectMapper.writeValueAsString(bwhcMtbFileContent(Status.valueOf(status)))
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Status.valueOf(status)))
                 contentType = MediaType.APPLICATION_JSON
             }.andExpect {
                 status {
@@ -172,8 +165,7 @@ class MtbFileRestControllerTest {
             whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED)
 
             mockMvc.post("/mtbfile") {
-                content =
-                    objectMapper.writeValueAsString(bwhcMtbFileContent(Status.valueOf(status)))
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Status.valueOf(status)))
                 contentType = MediaType.APPLICATION_JSON
             }.andExpect {
                 status {
@@ -219,7 +211,8 @@ class MtbFileRestControllerTest {
             @Mock requestProcessor: RequestProcessor
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor,
+            val controller = MtbFileRestController(
+                requestProcessor,
                 ConsentByMtbFile()
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
@@ -242,8 +235,7 @@ class MtbFileRestControllerTest {
         @Test
         fun shouldProcessPostRequestWithRejectedConsent() {
             mockMvc.post("/mtb") {
-                content =
-                    objectMapper.writeValueAsString(bwhcMtbFileContent(Status.REJECTED))
+                content = objectMapper.writeValueAsString(bwhcMtbFileContent(Status.REJECTED))
                 contentType = MediaType.APPLICATION_JSON
             }.andExpect {
                 status {
@@ -287,7 +279,8 @@ class MtbFileRestControllerTest {
             @Mock gicsConsentService: GicsConsentService
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor,
+            val controller = MtbFileRestController(
+                requestProcessor,
                 gicsConsentService
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
@@ -296,8 +289,7 @@ class MtbFileRestControllerTest {
         @Test
         fun shouldRespondPostRequest() {
             val mtbFileContent =
-                ClassPathResource("mv64e-mtb-fake-patient.json").inputStream.readAllBytes()
-                    .toString(Charsets.UTF_8)
+                ClassPathResource("mv64e-mtb-fake-patient.json").inputStream.readAllBytes().toString(Charsets.UTF_8)
 
             mockMvc.post("/mtb") {
                 content = mtbFileContent
@@ -314,28 +306,13 @@ class MtbFileRestControllerTest {
     }
 
     companion object {
-        fun bwhcMtbFileContent(consentStatus: Status) = MtbFile.builder()
-            .withPatient(
-                Patient.builder()
-                    .withId("TEST_12345678")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+        fun bwhcMtbFileContent(consentStatus: Status) = MtbFile.builder().withPatient(
+                Patient.builder().withId("TEST_12345678").withBirthDate("2000-08-08").withGender(Patient.Gender.MALE)
                     .build()
-            )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(consentStatus)
-                    .withPatient("TEST_12345678")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("TEST_12345678")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
-            )
-            .build()
+            ).withConsent(
+                Consent.builder().withId("1").withStatus(consentStatus).withPatient("TEST_12345678").build()
+            ).withEpisode(
+                Episode.builder().withId("1").withPatient("TEST_12345678").withPeriod(PeriodStart("2023-08-08")).build()
+            ).build()
     }
 }

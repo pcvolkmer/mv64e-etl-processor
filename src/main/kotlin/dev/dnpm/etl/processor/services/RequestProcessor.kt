@@ -30,8 +30,11 @@ import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
+import dev.pcvolkmer.mv64e.mtb.ConsentProvision
+import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
@@ -76,9 +79,12 @@ class RequestProcessor(
     fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
         val pid = PatientId(extractPatientIdentifier(mtbFile))
 
-        val isConsentOk = consentProcessor != null &&
-                consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
+        val isConsentOk =
+            consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
         if (isConsentOk) {
+            if (isGenomDeConsented(mtbFile)) {
+                mtbFile addGenomDeTan pseudonymizeService
+            }
             mtbFile pseudonymizeWith pseudonymizeService
             mtbFile anonymizeContentWith pseudonymizeService
             val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
@@ -91,6 +97,13 @@ class RequestProcessor(
                 )
             )
         }
+    }
+
+    private fun isGenomDeConsented(mtbFile: Mtb): Boolean {
+        val isModelProjectConsented = mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
+            p.purpose == ModelProjectConsentPurpose.SEQUENCING && p.type == ConsentProvision.PERMIT
+        } == true
+        return isModelProjectConsented
     }
 
     private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {

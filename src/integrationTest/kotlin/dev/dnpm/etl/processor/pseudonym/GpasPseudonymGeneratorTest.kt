@@ -43,14 +43,14 @@ class GpasPseudonymGeneratorTest {
     private lateinit var mockRestServiceServer: MockRestServiceServer
     private lateinit var generator: GpasPseudonymGenerator
     private lateinit var restTemplate: RestTemplate
-    private  var appFhirConfig: AppFhirConfig = AppFhirConfig()
+    private var appFhirConfig: AppFhirConfig = AppFhirConfig()
 
     @BeforeEach
     fun setup() {
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
         val gPasConfigProperties = GPasConfigProperties(
-            "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate",
-            "test",
+            "https://localhost:9990/ttp-fhir/fhir/gpas",
+            "test", "test2",
             null,
             null
         )
