@@ -27,7 +27,8 @@ data class AppConfigProperties(
     var bwhcUri: String?,
     var transformations: List<TransformationProperties> = listOf(),
     var maxRetryAttempts: Int = 3,
-    var duplicationDetection: Boolean = true
+    var duplicationDetection: Boolean = true,
+    var genomDeTestSubmission: Boolean = true
 ) {
     companion object {
         const val NAME = "app"
@@ -53,6 +54,72 @@ data class GPasConfigProperties(
 ) {
     companion object {
         const val NAME = "app.pseudonymize.gpas"
+    }
+}
+
+@ConfigurationProperties(ConsentConfigProperties.NAME)
+data class ConsentConfigProperties(
+    var service: ConsentService = ConsentService.NONE
+) {
+    companion object {
+        const val NAME = "app.consent"
+    }
+}
+
+@ConfigurationProperties(GIcsConfigProperties.NAME)
+data class GIcsConfigProperties(
+    /**
+     * Base URL to gICS System
+     *
+     */
+    val uri: String?,
+    val username: String?,
+    val password: String?,
+
+    /**
+     * gICS specific system
+     * **/
+    val personIdentifierSystem: String =
+        "https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID",
+
+    /**
+     * Domain of broad consent resources
+     **/
+    val broadConsentDomainName: String = "MII",
+
+    /**
+     * Domain of Modelvorhaben 64e consent resources
+     **/
+    val genomDeConsentDomainName: String = "GenomDE_MV",
+
+    /**
+     * Value to expect in case of positiv consent
+     */
+    val broadConsentPolicyCode: String = "2.16.840.1.113883.3.1937.777.24.5.3.6",
+
+    /**
+     * Consent Policy which should be used for consent check
+     */
+    val broadConsentPolicySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+
+    /**
+     * Value to expect in case of positiv consent
+     */
+    val genomeDePolicyCode: String = "sequencing",
+
+    /**
+     * Consent Policy which should be used for consent check
+     */
+    val genomeDePolicySystem: String = "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+
+    /**
+     * Consent version (fixed version)
+     *
+     */
+    val genomeDeConsentVersion: String = "2.0"
+) {
+    companion object {
+        const val NAME = "app.consent.gics"
     }
 }
 
@@ -97,6 +164,11 @@ data class SecurityConfigProperties(
 enum class PseudonymGenerator {
     BUILDIN,
     GPAS
+}
+
+enum class ConsentService {
+    NONE,
+    GICS
 }
 
 data class TransformationProperties(

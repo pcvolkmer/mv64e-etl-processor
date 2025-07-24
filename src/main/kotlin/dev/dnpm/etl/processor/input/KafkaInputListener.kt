@@ -25,6 +25,7 @@ import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -76,9 +77,13 @@ class KafkaInputListener(
         } else {
             logger.debug("Accepted MTB File and process deletion")
             if (requestId.isBlank()) {
-                requestProcessor.processDeletion(patientId)
+                requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
             } else {
-                requestProcessor.processDeletion(patientId, requestId)
+                requestProcessor.processDeletion(
+                    patientId,
+                    requestId,
+                    TtpConsentStatus.UNKNOWN_CHECK_FILE
+                )
             }
         }
     }

@@ -23,6 +23,8 @@ import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
+import dev.dnpm.etl.processor.consent.IGetConsent
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.slf4j.LoggerFactory
@@ -33,7 +35,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(path = ["mtbfile", "mtb"])
 class MtbFileRestController(
-    private val requestProcessor: RequestProcessor,
+    private val requestProcessor: RequestProcessor, private val iGetConsent: IGetConsent
 ) {
 
     private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
@@ -43,20 +45,39 @@ class MtbFileRestController(
         return ResponseEntity.ok("Test")
     }
 
-    @PostMapping( consumes = [ MediaType.APPLICATION_JSON_VALUE ] )
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
-        if (mtbFile.consent.status == Consent.Status.ACTIVE) {
+        val consentStatusBooleanPair = checkConsentStatus(mtbFile)
+        val ttpConsentStatus = consentStatusBooleanPair.first
+        val isConsentOK = consentStatusBooleanPair.second
+        if (isConsentOK) {
             logger.debug("Accepted MTB File (bwHC V1) for processing")
             requestProcessor.processMtbFile(mtbFile)
         } else {
+
             logger.debug("Accepted MTB File (bwHC V1) and process deletion")
             val patientId = PatientId(mtbFile.patient.id)
-            requestProcessor.processDeletion(patientId)
+            requestProcessor.processDeletion(patientId, ttpConsentStatus)
         }
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping( consumes = [ CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE] )
+    private fun checkConsentStatus(mtbFile: MtbFile): Pair<TtpConsentStatus, Boolean> {
+        var ttpConsentStatus = iGetConsent.getTtpBroadConsentStatus(mtbFile.patient.id)
+
+        val isConsentOK =
+            (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.ACTIVE) ||
+                    ttpConsentStatus.equals(
+                        TtpConsentStatus.BROAD_CONSENT_GIVEN
+                    )
+        if (ttpConsentStatus.equals(TtpConsentStatus.UNKNOWN_CHECK_FILE) && mtbFile.consent.status == Consent.Status.REJECTED) {
+            // in case ttp check is disabled - we propagate rejected status anyway
+            ttpConsentStatus = TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED
+        }
+        return Pair(ttpConsentStatus, isConsentOK)
+    }
+
+    @PostMapping(consumes = [CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
         logger.debug("Accepted MTB File (DNPM V2) for processing")
         requestProcessor.processMtbFile(mtbFile)
@@ -66,7 +87,7 @@ class MtbFileRestController(
     @DeleteMapping(path = ["{patientId}"])
     fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
         logger.debug("Accepted patient ID to process deletion")
-        requestProcessor.processDeletion(PatientId(patientId))
+        requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
         return ResponseEntity.accepted().build()
     }
 

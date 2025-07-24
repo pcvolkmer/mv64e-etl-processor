@@ -50,6 +50,11 @@
             </section>
 
             <section hx-ext="sse" th:sse-connect="@{/configs/events}">
+                <div th:insert="~{configs/gIcsConnectionAvailable.html}" th:hx-get="@{/configs?gIcsConnectionAvailable}" hx-trigger="sse:gics-connection-check">
+                </div>
+            </section>
+
+            <section hx-ext="sse" th:sse-connect="@{/configs/events}">
                 <div th:insert="~{configs/outputConnectionAvailable.html}" th:hx-get="@{/configs?outputConnectionAvailable}" hx-trigger="sse:output-connection-check">
                 </div>
             </section>

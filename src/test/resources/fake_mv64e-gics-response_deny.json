@@ -1,0 +1,333 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/24673204-50e1-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "24673204-50e1-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-24T11:58:27.178+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/ef86d80e-50e0-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "59284-0"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/2466d49b-50e1-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 999999"
+        },
+        "dateTime": "2025-06-24T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "GenomDE_MV"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/24670c77-50e1-11f0-a144-661e92ac9503"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+              "code": "Teilnahme",
+              "display": "Teilnahme am Modellvorhaben und Einwilligung zur Genomsequenzierung"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-24T00:00:00+02:00",
+            "end": "3000-01-01T00:00:00+01:00"
+          },
+          "provision": [
+            {
+              "type": "deny",
+              "period": {
+                "start": "2025-06-24T00:00:00+02:00",
+                "end": "3000-01-01T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                      "code": "Teilnahme",
+                      "display": "Teilnahme am Modellvorhaben und Einwilligung zur Genomsequenzierung"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/24673913-50e1-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "24673913-50e1-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-24T11:58:27.194+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/ef86d80e-50e0-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "59284-0"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/2466d49b-50e1-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 999999"
+        },
+        "dateTime": "2025-06-24T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "GenomDE_MV"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/24670c77-50e1-11f0-a144-661e92ac9503"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+              "code": "Fallidentifizierung",
+              "display": "Fallidentifizierung zum fachlichen Austausch unter Behandelnden"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-24T00:00:00+02:00",
+            "end": "3000-01-01T00:00:00+01:00"
+          },
+          "provision": [
+            {
+              "type": "deny",
+              "period": {
+                "start": "2025-06-24T00:00:00+02:00",
+                "end": "3000-01-01T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                      "code": "Fallidentifizierung",
+                      "display": "Fallidentifizierung zum fachlichen Austausch unter Behandelnden"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/24673da9-50e1-11f0-a144-661e92ac9503",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "24673da9-50e1-11f0-a144-661e92ac9503",
+        "meta": {
+          "lastUpdated": "2025-06-24T11:58:27.211+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/ef86d80e-50e0-11f0-a144-661e92ac9503"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "59284-0"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/2466d49b-50e1-11f0-a144-661e92ac9503",
+          "display": "Patienten-ID 999999"
+        },
+        "dateTime": "2025-06-24T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "GenomDE_MV"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/24670c77-50e1-11f0-a144-661e92ac9503"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+              "code": "Rekontaktierung",
+              "display": "Re-Identifizierung meiner Daten über die Vertrauensstelle beim Robert Koch-Institut und in die erneute Kontaktaufnahme durch meine behandelnde Ärztin oder meinen behandelnden Arzt"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-06-24T00:00:00+02:00",
+            "end": "3000-01-01T00:00:00+01:00"
+          },
+          "provision": [
+            {
+              "type": "deny",
+              "period": {
+                "start": "2025-06-24T00:00:00+02:00",
+                "end": "3000-01-01T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                      "code": "Rekontaktierung",
+                      "display": "Re-Identifizierung meiner Daten über die Vertrauensstelle beim Robert Koch-Institut und in die erneute Kontaktaufnahme durch meine behandelnde Ärztin oder meinen behandelnden Arzt"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

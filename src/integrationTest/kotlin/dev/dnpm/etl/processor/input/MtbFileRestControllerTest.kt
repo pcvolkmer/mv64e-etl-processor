@@ -23,6 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
+import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
+import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -31,10 +34,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
@@ -54,7 +54,8 @@ import org.springframework.test.web.servlet.post
 @ContextConfiguration(
     classes = [
         MtbFileRestController::class,
-        AppSecurityConfiguration::class
+        AppSecurityConfiguration::class,
+        ConsentByMtbFile::class, IGetConsent::class
     ]
 )
 @MockitoBean(types = [TokenRepository::class, RequestProcessor::class])
@@ -63,7 +64,8 @@ import org.springframework.test.web.servlet.post
         "app.pseudonymize.generator=BUILDIN",
         "app.security.admin-user=admin",
         "app.security.admin-password={noop}very-secret",
-        "app.security.enable-tokens=true"
+        "app.security.enable-tokens=true",
+        "app.consent.gics.enabled=false"
     ]
 )
 class MtbFileRestControllerTest {
@@ -141,7 +143,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processDeletion(anyValueClass())
+        verify(requestProcessor, times(1)).processDeletion(anyValueClass(),  eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
     }
 
     @Test
@@ -152,7 +154,7 @@ class MtbFileRestControllerTest {
             status { isUnauthorized() }
         }
 
-        verify(requestProcessor, never()).processDeletion(anyValueClass())
+        verify(requestProcessor, never()).processDeletion(anyValueClass(), any())
     }
 
     @Nested
@@ -163,7 +165,8 @@ class MtbFileRestControllerTest {
             "app.security.admin-user=admin",
             "app.security.admin-password={noop}very-secret",
             "app.security.enable-tokens=true",
-            "app.security.enable-oidc=true"
+            "app.security.enable-oidc=true",
+            "app.consent.gics.enabled=false"
         ]
     )
     inner class WithOidcEnabled {

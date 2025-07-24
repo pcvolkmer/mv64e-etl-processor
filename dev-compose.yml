@@ -16,6 +16,11 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   ## Use AKHQ as Kafka web frontend
   akhq:
