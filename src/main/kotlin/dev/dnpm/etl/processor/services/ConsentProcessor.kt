@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
@@ -49,7 +49,7 @@ class ConsentProcessor(
      *
      */
     fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
-        if (consentService is ConsentByMtbFile) {
+        if (consentService is MtbFileConsentService) {
             // consent check is disabled
             return true
         }

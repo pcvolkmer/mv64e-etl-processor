@@ -24,7 +24,7 @@ import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Consent.Status
 import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.CustomMediaType
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -75,7 +75,7 @@ class MtbFileRestControllerTest {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(
                 requestProcessor,
-                ConsentByMtbFile()
+                MtbFileConsentService()
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }
@@ -220,7 +220,7 @@ class MtbFileRestControllerTest {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(
                 requestProcessor,
-                ConsentByMtbFile()
+                MtbFileConsentService()
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }

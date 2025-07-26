@@ -20,7 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
@@ -313,7 +313,7 @@ class AppConfigurationTest {
 
         @Test
         fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(ConsentByMtbFile::class.java)).isNotNull
+            assertThat(context.getBean(MtbFileConsentService::class.java)).isNotNull
         }
 
     }

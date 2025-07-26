@@ -20,7 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.monitoring.*
@@ -262,7 +262,7 @@ class AppConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun iGetConsentService(): IConsentService {
-        return ConsentByMtbFile()
+        return MtbFileConsentService()
     }
 
 }

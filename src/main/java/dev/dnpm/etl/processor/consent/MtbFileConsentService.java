@@ -5,11 +5,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConsentByMtbFile implements IConsentService {
+public class MtbFileConsentService implements IConsentService {
 
-    private static final Logger log = LoggerFactory.getLogger(ConsentByMtbFile.class);
+    private static final Logger log = LoggerFactory.getLogger(MtbFileConsentService.class);
 
-    public ConsentByMtbFile() {
+    public MtbFileConsentService() {
         log.info("ConsentCheckFileBased initialized...");
     }
 
