@@ -3,7 +3,7 @@ package dev.dnpm.etl.processor.consent;
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
 
-public interface IGetConsent {
+public interface IConsentService {
 
     /**
      * Get broad consent status for a patient identifier

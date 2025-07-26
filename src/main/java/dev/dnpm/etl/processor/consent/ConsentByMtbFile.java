@@ -5,7 +5,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConsentByMtbFile implements IGetConsent {
+public class ConsentByMtbFile implements IConsentService {
 
     private static final Logger log = LoggerFactory.getLogger(ConsentByMtbFile.class);
 

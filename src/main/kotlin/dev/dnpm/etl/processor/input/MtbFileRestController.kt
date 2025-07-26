@@ -23,7 +23,7 @@ import de.ukw.ccc.bwhc.dto.Consent
 import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
-import dev.dnpm.etl.processor.consent.IGetConsent
+import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.ConsentProvision
@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(path = ["mtbfile", "mtb"])
 class MtbFileRestController(
     private val requestProcessor: RequestProcessor,
-    private val iGetConsent: IGetConsent
+    private val consentService: IConsentService
 ) {
 
     private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
@@ -87,7 +87,7 @@ class MtbFileRestController(
     }
 
     private fun checkConsentStatus(mtbFileV1: MtbFile): Pair<TtpConsentStatus, Boolean> {
-        var ttpConsentStatus = iGetConsent.getTtpBroadConsentStatus(mtbFileV1.patient.id)
+        var ttpConsentStatus = consentService.getTtpBroadConsentStatus(mtbFileV1.patient.id)
 
         val isConsentOK =
             (ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE && mtbFileV1.consent.status == Consent.Status.ACTIVE)
@@ -101,7 +101,7 @@ class MtbFileRestController(
     }
 
     private fun checkConsentStatus(mtbFileV2: Mtb): Pair<TtpConsentStatus, Boolean> {
-        var ttpConsentStatus = iGetConsent.getTtpBroadConsentStatus(mtbFileV2.patient.id)
+        var ttpConsentStatus = consentService.getTtpBroadConsentStatus(mtbFileV2.patient.id)
 
         val isConsentOK = ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN
                 || ttpConsentStatus == TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT

@@ -67,10 +67,10 @@ class ConsentProcessorTest {
         assertThat(consentProcessor.toString()).isNotNull
         // prep gICS response
         doAnswer { getDummyBroadConsentBundle() }.whenever(gicsConsentService)
-            .getConsent(any(), any(), eq(ConsentDomain.BroadConsent))
+            .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
 
         doAnswer { Bundle() }.whenever(gicsConsentService)
-            .getConsent(any(), any(), eq(ConsentDomain.Modelvorhaben64e))
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
 
         val inputMtb = Mtb.builder()
             .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build()).build()

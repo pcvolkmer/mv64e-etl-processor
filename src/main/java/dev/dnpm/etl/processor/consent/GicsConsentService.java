@@ -30,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 
-public class GicsConsentService implements IGetConsent {
+public class GicsConsentService implements IConsentService {
 
     private final Logger log = LoggerFactory.getLogger(GicsConsentService.class);
 
@@ -198,8 +198,8 @@ public class GicsConsentService implements IGetConsent {
     private String getConsentDomain(ConsentDomain targetConsentDomain) {
         String consentDomain;
         switch (targetConsentDomain) {
-            case BroadConsent -> consentDomain = gIcsConfigProperties.getBroadConsentDomainName();
-            case Modelvorhaben64e ->
+            case BROAD_CONSENT -> consentDomain = gIcsConfigProperties.getBroadConsentDomainName();
+            case MODELLVORHABEN_64E ->
                 consentDomain = gIcsConfigProperties.getGenomDeConsentDomainName();
             default -> throw new IllegalArgumentException(
                 "target ConsentDomain is missing but must be provided!");
@@ -266,13 +266,13 @@ public class GicsConsentService implements IGetConsent {
     @Override
     public Bundle getConsent(String patientId, Date requestDate, ConsentDomain consentDomain) {
         switch (consentDomain) {
-            case BroadConsent -> {
-                return currentConsentForPersonAndTemplate(patientId, ConsentDomain.BroadConsent,
+            case BROAD_CONSENT -> {
+                return currentConsentForPersonAndTemplate(patientId, ConsentDomain.BROAD_CONSENT,
                     requestDate);
             }
-            case Modelvorhaben64e -> {
+            case MODELLVORHABEN_64E -> {
                 return currentConsentForPersonAndTemplate(patientId,
-                    ConsentDomain.Modelvorhaben64e, requestDate);
+                                                          ConsentDomain.MODELLVORHABEN_64E, requestDate);
             }
         }
 

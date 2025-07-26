@@ -4,10 +4,10 @@ public enum ConsentDomain {
     /**
      * MII Broad consent
      */
-    BroadConsent,
+    BROAD_CONSENT,
 
     /**
-     * GenomDe Modelvohaben §64e
+     * GenomDe Modellvorhaben §64e
      */
-    Modelvorhaben64e
+    MODELLVORHABEN_64E
 }
