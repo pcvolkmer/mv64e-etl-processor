@@ -28,8 +28,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 
 @ContextConfiguration(classes = {AppConfiguration.class, ObjectMapper.class})
-@TestPropertySource(properties = {"app.consent.gics.enabled=true",
-    "app.consent.gics.uri=http://localhost:8090/ttp-fhir/fhir/gics"})
+@TestPropertySource(properties = {
+    "app.consent.service=gics",
+    "app.consent.gics.uri=http://localhost:8090/ttp-fhir/fhir/gics"
+})
 @RestClientTest
 public class GicsConsentServiceTest {
 
