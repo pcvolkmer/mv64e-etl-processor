@@ -271,12 +271,8 @@ class GicsEnabledCondition :
     AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
 
     @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics")
+    @ConditionalOnProperty(name = ["app.consent.gics.uri"])
     class OnGicsServiceSelected {
-        // Just for Condition
-    }
-
-    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
-    class OnGicsEnabled {
         // Just for Condition
     }
 

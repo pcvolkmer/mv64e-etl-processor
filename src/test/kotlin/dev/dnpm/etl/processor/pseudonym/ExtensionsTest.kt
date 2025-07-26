@@ -250,7 +250,7 @@ class ExtensionsTest {
         }
 
         private fun addConsentData(mtbFile: Mtb) {
-            val gIcsConfigProperties = GIcsConfigProperties("", "", "")
+            val gIcsConfigProperties = GIcsConfigProperties("https://gics.example.com")
             val appConfigProperties = AppConfigProperties(null, emptyList())
 
             val bundle = Bundle()

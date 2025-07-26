@@ -74,8 +74,8 @@ data class GIcsConfigProperties(
      *
      */
     val uri: String?,
-    val username: String?,
-    val password: String?,
+    val username: String? = null,
+    val password: String? = null,
 
     /**
      * gICS specific system

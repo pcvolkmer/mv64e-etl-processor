@@ -4,17 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
-import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +14,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.retry.TerminatedRetryException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.Date;
 
 
 public class GicsConsentService implements IConsentService {
@@ -36,12 +30,12 @@ public class GicsConsentService implements IConsentService {
 
     public static final String IS_CONSENTED_ENDPOINT = "/$isConsented";
     public static final String IS_POLICY_STATES_FOR_PERSON_ENDPOINT = "/$currentPolicyStatesForPerson";
+
     private final RetryTemplate retryTemplate;
     private final RestTemplate restTemplate;
     private final FhirContext fhirContext;
     private final HttpHeaders httpHeader;
     private final GIcsConfigProperties gIcsConfigProperties;
-    private String url;
 
     public GicsConsentService(GIcsConfigProperties gIcsConfigProperties,
         RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
@@ -53,19 +47,6 @@ public class GicsConsentService implements IConsentService {
             gIcsConfigProperties.getPassword());
         this.gIcsConfigProperties = gIcsConfigProperties;
         log.info("GicsConsentService initialized...");
-    }
-
-    public String getGicsUri(String endpoint) {
-        if (url == null) {
-            final String gIcsBaseUri = gIcsConfigProperties.getUri();
-            if (StringUtils.isBlank(gIcsBaseUri)) {
-                throw new IllegalArgumentException(
-                    "gICS base URL is empty - should call gICS with false configuration.");
-            }
-            url = UriComponentsBuilder.fromUriString(gIcsBaseUri).path(endpoint)
-                .toUriString();
-        }
-        return url;
     }
 
     @NotNull
@@ -115,16 +96,28 @@ public class GicsConsentService implements IConsentService {
         return result;
     }
 
+    private URI endpointUri(String endpoint) {
+        assert this.gIcsConfigProperties.getUri() != null;
+        return UriComponentsBuilder.fromUriString(this.gIcsConfigProperties.getUri()).path(endpoint).build().toUri();
+    }
+
     protected String callGicsApi(Parameters parameter, String endpoint) {
         var parameterAsXml = fhirContext.newXmlParser().encodeResourceToString(parameter);
-
         HttpEntity<String> requestEntity = new HttpEntity<>(parameterAsXml, this.httpHeader);
-        ResponseEntity<String> responseEntity;
         try {
-            var url = getGicsUri(endpoint);
+            var responseEntity = retryTemplate.execute(
+                ctx -> restTemplate.exchange(endpointUri(endpoint), HttpMethod.POST, requestEntity, String.class)
+            );
 
-            responseEntity = retryTemplate.execute(
-                ctx -> restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class));
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                return responseEntity.getBody();
+            } else {
+                var msg = String.format(
+                    "Trusted party system reached but request failed! code: '%s' response: '%s'",
+                    responseEntity.getStatusCode(), responseEntity.getBody());
+                log.error(msg);
+                return null;
+            }
         } catch (RestClientException e) {
             var msg = String.format("Get consents status request failed reason: '%s",
                 e.getMessage());
@@ -138,15 +131,6 @@ public class GicsConsentService implements IConsentService {
             log.error(msg);
             return null;
 
-        }
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            return responseEntity.getBody();
-        } else {
-            var msg = String.format(
-                "Trusted party system reached but request failed! code: '%s' response: '%s'",
-                responseEntity.getStatusCode(), responseEntity.getBody());
-            log.error(msg);
-            return null;
         }
     }
 
@@ -163,7 +147,7 @@ public class GicsConsentService implements IConsentService {
     protected Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
         ConsentDomain targetConsentDomain, Date requestDate) {
 
-        String consentDomain = getConsentDomain(targetConsentDomain);
+        String consentDomain = getConsentDomainName(targetConsentDomain);
 
         var requestParameter = GicsConsentService.buildRequestParameterCurrentPolicyStatesForPerson(
             gIcsConfigProperties, personIdentifierValue, requestDate, consentDomain);
@@ -184,8 +168,8 @@ public class GicsConsentService implements IConsentService {
                 "Consent request failed! Check outcome:\n " + consentDataSerialized;
             log.error(errorMessage);
             throw new IllegalStateException(errorMessage);
-        } else if (iBaseResource instanceof Bundle) {
-            return (Bundle) iBaseResource;
+        } else if (iBaseResource instanceof Bundle bundle) {
+            return bundle;
         } else {
             String errorMessage = "Consent request failed! Unexpected response received! ->  "
                 + consentDataSerialized;
@@ -195,16 +179,11 @@ public class GicsConsentService implements IConsentService {
     }
 
     @NotNull
-    private String getConsentDomain(ConsentDomain targetConsentDomain) {
-        String consentDomain;
-        switch (targetConsentDomain) {
-            case BROAD_CONSENT -> consentDomain = gIcsConfigProperties.getBroadConsentDomainName();
-            case MODELLVORHABEN_64E ->
-                consentDomain = gIcsConfigProperties.getGenomDeConsentDomainName();
-            default -> throw new IllegalArgumentException(
-                "target ConsentDomain is missing but must be provided!");
-        }
-        return consentDomain;
+    private String getConsentDomainName(ConsentDomain targetConsentDomain) {
+        return switch (targetConsentDomain) {
+            case BROAD_CONSENT -> gIcsConfigProperties.getBroadConsentDomainName();
+            case MODELLVORHABEN_64E -> gIcsConfigProperties.getGenomDeConsentDomainName();
+        };
     }
 
     protected static Parameters buildRequestParameterCurrentPolicyStatesForPerson(
@@ -265,17 +244,6 @@ public class GicsConsentService implements IConsentService {
 
     @Override
     public Bundle getConsent(String patientId, Date requestDate, ConsentDomain consentDomain) {
-        switch (consentDomain) {
-            case BROAD_CONSENT -> {
-                return currentConsentForPersonAndTemplate(patientId, ConsentDomain.BROAD_CONSENT,
-                    requestDate);
-            }
-            case MODELLVORHABEN_64E -> {
-                return currentConsentForPersonAndTemplate(patientId,
-                                                          ConsentDomain.MODELLVORHABEN_64E, requestDate);
-            }
-        }
-
-        return new Bundle();
+        return currentConsentForPersonAndTemplate(patientId, consentDomain, requestDate);
     }
 }

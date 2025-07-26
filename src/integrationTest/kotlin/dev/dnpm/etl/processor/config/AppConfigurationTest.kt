@@ -281,25 +281,11 @@ class AppConfigurationTest {
     @Nested
     @TestPropertySource(
         properties = [
-            "app.consent.service=GICS"
+            "app.consent.service=GICS",
+            "app.consent.gics.uri=http://localhost:9000",
         ]
     )
     inner class AppConfigurationConsentGicsTest(private val context: ApplicationContext) {
-
-        @Test
-        fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
-        }
-
-    }
-
-    @Nested
-    @TestPropertySource(
-        properties = [
-            "app.consent.gics.enabled=true"
-        ]
-    )
-    inner class AppConfigurationConsentGicsEnabledTest(private val context: ApplicationContext) {
 
         @Test
         fun shouldUseConfiguredGenerator() {
