@@ -107,13 +107,13 @@ class Dnpm21BasedConsentEvaluatorTest {
             TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT,
             ConsentEvaluation(TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT, true)
         ),
-        // Has file ModelProjectConsent and MV consent rejected => consent given
+        // Has file ModelProjectConsent and MV consent rejected => no consent given
         Arguments.of(
             buildMtb(ConsentProvision.PERMIT),
             TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED,
             ConsentEvaluation(TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED, false)
         ),
-        // Has file ModelProjectConsent and MV consent missing => consent given
+        // Has file ModelProjectConsent and MV consent missing => no consent given
         Arguments.of(
             buildMtb(ConsentProvision.PERMIT),
             TtpConsentStatus.GENOM_DE_CONSENT_MISSING,
@@ -155,13 +155,13 @@ class Dnpm21BasedConsentEvaluatorTest {
             TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT,
             ConsentEvaluation(TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT, true)
         ),
-        // File ModelProjectConsent rejected and MV consent rejected => consent given
+        // File ModelProjectConsent rejected and MV consent rejected => no consent given
         Arguments.of(
             buildMtb(ConsentProvision.DENY),
             TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED,
             ConsentEvaluation(TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED, false)
         ),
-        // File ModelProjectConsent rejected and MV consent missing => consent given
+        // File ModelProjectConsent rejected and MV consent missing => no consent given
         Arguments.of(
             buildMtb(ConsentProvision.DENY),
             TtpConsentStatus.GENOM_DE_CONSENT_MISSING,
