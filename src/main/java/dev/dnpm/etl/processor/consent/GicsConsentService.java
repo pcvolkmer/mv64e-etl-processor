@@ -23,7 +23,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.Date;
 
-
+/**
+ * Service to request Consent from remote gICS installation
+ *
+ * @since 0.11
+ */
 public class GicsConsentService implements IConsentService {
 
     private final Logger log = LoggerFactory.getLogger(GicsConsentService.class);
@@ -34,63 +38,81 @@ public class GicsConsentService implements IConsentService {
     private final RetryTemplate retryTemplate;
     private final RestTemplate restTemplate;
     private final FhirContext fhirContext;
-    private final HttpHeaders httpHeader;
     private final GIcsConfigProperties gIcsConfigProperties;
 
-    public GicsConsentService(GIcsConfigProperties gIcsConfigProperties,
-        RetryTemplate retryTemplate, RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
-
+    public GicsConsentService(
+        GIcsConfigProperties gIcsConfigProperties,
+        RetryTemplate retryTemplate,
+        RestTemplate restTemplate,
+        AppFhirConfig appFhirConfig
+    ) {
         this.retryTemplate = retryTemplate;
         this.restTemplate = restTemplate;
         this.fhirContext = appFhirConfig.fhirContext();
-        httpHeader = buildHeader(gIcsConfigProperties.getUsername(),
-            gIcsConfigProperties.getPassword());
         this.gIcsConfigProperties = gIcsConfigProperties;
         log.info("GicsConsentService initialized...");
     }
 
-    @NotNull
-    private static HttpHeaders buildHeader(String gPasUserName, String gPasPassword) {
-        var headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
-
-        if (StringUtils.isBlank(gPasUserName) || StringUtils.isBlank(gPasPassword)) {
-            return headers;
-        }
-
-        headers.setBasicAuth(gPasUserName, gPasPassword);
-        return headers;
-    }
-
-    protected static Parameters getIsConsentedRequestParam(GIcsConfigProperties configProperties,
-        String personIdentifierValue) {
+    protected Parameters getFhirRequestParameters(
+        String personIdentifierValue
+    ) {
         var result = new Parameters();
-        result.addParameter(new ParametersParameterComponent().setName("personIdentifier").setValue(
-            new Identifier().setValue(personIdentifierValue)
-                .setSystem(configProperties.getPersonIdentifierSystem())));
-        result.addParameter(new ParametersParameterComponent().setName("domain")
-            .setValue(new StringType().setValue(configProperties.getBroadConsentDomainName())));
-        result.addParameter(new ParametersParameterComponent().setName("policy").setValue(
-            new Coding().setCode(configProperties.getBroadConsentPolicyCode())
-                .setSystem(configProperties.getBroadConsentPolicySystem())));
+        result.addParameter(
+            new ParametersParameterComponent()
+                .setName("personIdentifier")
+                .setValue(
+                    new Identifier()
+                        .setValue(personIdentifierValue)
+                        .setSystem(this.gIcsConfigProperties.getPersonIdentifierSystem())
+                )
+        );
+        result.addParameter(
+            new ParametersParameterComponent()
+                .setName("domain")
+                .setValue(
+                    new StringType()
+                        .setValue(this.gIcsConfigProperties.getBroadConsentDomainName())
+                )
+        );
+        result.addParameter(
+            new ParametersParameterComponent()
+                .setName("policy")
+                .setValue(
+                    new Coding()
+                        .setCode(this.gIcsConfigProperties.getBroadConsentPolicyCode())
+                        .setSystem(this.gIcsConfigProperties.getBroadConsentPolicySystem())
+                )
+        );
 
         /*
          * is mandatory parameter, but we ignore it via additional configuration parameter
          * 'ignoreVersionNumber'.
          */
-        result.addParameter(new ParametersParameterComponent().setName("version")
-            .setValue(new StringType().setValue("1.1")));
+        result.addParameter(
+            new ParametersParameterComponent()
+                .setName("version")
+                .setValue(new StringType().setValue("1.1")
+                )
+        );
 
         /* add config parameter with:
          * ignoreVersionNumber -> true ->> Reason is we cannot know which policy version each patient
          * has possibly signed or not, therefore we are happy with any version found.
          * unknownStateIsConsideredAsDecline -> true
          */
-        var config = new ParametersParameterComponent().setName("config").addPart(
-            new ParametersParameterComponent().setName("ignoreVersionNumber")
-                .setValue(new BooleanType().setValue(true))).addPart(
-            new ParametersParameterComponent().setName("unknownStateIsConsideredAsDecline")
-                .setValue(new BooleanType().setValue(false)));
+        var config = new ParametersParameterComponent()
+            .setName("config")
+            .addPart(
+                new ParametersParameterComponent()
+                    .setName("ignoreVersionNumber")
+                    .setValue(new BooleanType().setValue(true))
+            )
+            .addPart(
+                new ParametersParameterComponent()
+                    .setName("unknownStateIsConsideredAsDecline")
+                    .setValue(new BooleanType().setValue(false))
+            );
+
         result.addParameter(config);
 
         return result;
@@ -101,9 +123,26 @@ public class GicsConsentService implements IConsentService {
         return UriComponentsBuilder.fromUriString(this.gIcsConfigProperties.getUri()).path(endpoint).build().toUri();
     }
 
+    private HttpHeaders headersWithHttpBasicAuth() {
+        assert this.gIcsConfigProperties.getUri() != null;
+
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);
+
+        if (
+            StringUtils.isBlank(this.gIcsConfigProperties.getUsername())
+                || StringUtils.isBlank(this.gIcsConfigProperties.getPassword())
+        ) {
+            return headers;
+        }
+
+        headers.setBasicAuth(this.gIcsConfigProperties.getUsername(), this.gIcsConfigProperties.getPassword());
+        return headers;
+    }
+
     protected String callGicsApi(Parameters parameter, String endpoint) {
         var parameterAsXml = fhirContext.newXmlParser().encodeResourceToString(parameter);
-        HttpEntity<String> requestEntity = new HttpEntity<>(parameterAsXml, this.httpHeader);
+        HttpEntity<String> requestEntity = new HttpEntity<>(parameterAsXml, this.headersWithHttpBasicAuth());
         try {
             var responseEntity = retryTemplate.execute(
                 ctx -> restTemplate.exchange(endpointUri(endpoint), HttpMethod.POST, requestEntity, String.class)
@@ -120,7 +159,7 @@ public class GicsConsentService implements IConsentService {
             }
         } catch (RestClientException e) {
             var msg = String.format("Get consents status request failed reason: '%s",
-                e.getMessage());
+                                    e.getMessage());
             log.error(msg);
             return null;
 
@@ -136,16 +175,17 @@ public class GicsConsentService implements IConsentService {
 
     @Override
     public TtpConsentStatus getTtpBroadConsentStatus(String personIdentifierValue) {
-        var parameter = GicsConsentService.getIsConsentedRequestParam(gIcsConfigProperties,
-            personIdentifierValue);
-
-        var consentStatusResponse = callGicsApi(parameter,
-            GicsConsentService.IS_CONSENTED_ENDPOINT);
+        var consentStatusResponse = callGicsApi(
+            getFhirRequestParameters(personIdentifierValue),
+            GicsConsentService.IS_CONSENTED_ENDPOINT
+        );
         return evaluateConsentResponse(consentStatusResponse);
     }
 
-    protected Bundle currentConsentForPersonAndTemplate(String personIdentifierValue,
-        ConsentDomain targetConsentDomain, Date requestDate) {
+    protected Bundle currentConsentForPersonAndTemplate(
+        String personIdentifierValue,
+        ConsentDomain targetConsentDomain, Date requestDate
+    ) {
 
         String consentDomain = getConsentDomainName(targetConsentDomain);
 
@@ -153,7 +193,7 @@ public class GicsConsentService implements IConsentService {
             gIcsConfigProperties, personIdentifierValue, requestDate, consentDomain);
 
         var consentDataSerialized = callGicsApi(requestParameter,
-            GicsConsentService.IS_POLICY_STATES_FOR_PERSON_ENDPOINT);
+                                                GicsConsentService.IS_POLICY_STATES_FOR_PERSON_ENDPOINT);
 
         if (consentDataSerialized == null) {
             // error occurred - should not process further!
@@ -161,7 +201,7 @@ public class GicsConsentService implements IConsentService {
                 "consent data request failed - stopping processing! - try again or fix other problems first.");
         }
         var iBaseResource = fhirContext.newJsonParser()
-            .parseResource(consentDataSerialized);
+                                       .parseResource(consentDataSerialized);
         if (iBaseResource instanceof OperationOutcome) {
             // log error  - very likely a configuration error
             String errorMessage =
@@ -188,26 +228,28 @@ public class GicsConsentService implements IConsentService {
 
     protected static Parameters buildRequestParameterCurrentPolicyStatesForPerson(
         GIcsConfigProperties gIcsConfigProperties, String personIdentifierValue, Date requestDate,
-        String targetDomain) {
+        String targetDomain
+    ) {
         var requestParameter = new Parameters();
         requestParameter.addParameter(new ParametersParameterComponent().setName("personIdentifier")
-            .setValue(new Identifier().setValue(personIdentifierValue)
-                .setSystem(gIcsConfigProperties.getPersonIdentifierSystem())));
+                                                                        .setValue(new Identifier()
+                                                                                      .setValue(personIdentifierValue)
+                                                                                      .setSystem(gIcsConfigProperties.getPersonIdentifierSystem())));
 
         requestParameter.addParameter(new ParametersParameterComponent().setName("domain")
-            .setValue(new StringType().setValue(targetDomain)));
+                                                                        .setValue(new StringType().setValue(targetDomain)));
 
         Parameters nestedConfigParameters = new Parameters();
         nestedConfigParameters.addParameter(
-                new ParametersParameterComponent().setName("idMatchingType").setValue(
-                    new Coding().setSystem(
-                            "https://ths-greifswald.de/fhir/CodeSystem/gics/IdMatchingType")
-                        .setCode("AT_LEAST_ONE"))).addParameter("ignoreVersionNumber", false)
-            .addParameter("unknownStateIsConsideredAsDecline", false)
-            .addParameter("requestDate", new DateType().setValue(requestDate));
+                                  new ParametersParameterComponent().setName("idMatchingType").setValue(
+                                      new Coding().setSystem(
+                                                      "https://ths-greifswald.de/fhir/CodeSystem/gics/IdMatchingType")
+                                                  .setCode("AT_LEAST_ONE"))).addParameter("ignoreVersionNumber", false)
+                              .addParameter("unknownStateIsConsideredAsDecline", false)
+                              .addParameter("requestDate", new DateType().setValue(requestDate));
 
         requestParameter.addParameter(new ParametersParameterComponent().setName("config").addPart()
-            .setResource(nestedConfigParameters));
+                                                                        .setResource(nestedConfigParameters));
 
         return requestParameter;
     }
@@ -233,7 +275,7 @@ public class GicsConsentService implements IConsentService {
                 }
             } else if (response instanceof OperationOutcome outcome) {
                 log.error("failed to get consent status from ttp. probably configuration error. "
-                    + "outcome: '{}'", fhirContext.newJsonParser().encodeToString(outcome));
+                              + "outcome: '{}'", fhirContext.newJsonParser().encodeToString(outcome));
 
             }
         } catch (DataFormatException dfe) {
