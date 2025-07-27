@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
-import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -55,7 +55,8 @@ import org.springframework.test.web.servlet.post
     classes = [
         MtbFileRestController::class,
         AppSecurityConfiguration::class,
-        MtbFileConsentService::class, IConsentService::class
+        MtbFileConsentService::class,
+        ConsentEvaluator::class
     ]
 )
 @MockitoBean(types = [TokenRepository::class, RequestProcessor::class])

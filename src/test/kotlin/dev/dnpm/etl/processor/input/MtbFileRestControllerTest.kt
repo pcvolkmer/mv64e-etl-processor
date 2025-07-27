@@ -23,9 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.ukw.ccc.bwhc.dto.*
 import de.ukw.ccc.bwhc.dto.Consent.Status
 import de.ukw.ccc.bwhc.dto.Patient
+import dev.dnpm.etl.processor.ArgProvider
 import dev.dnpm.etl.processor.CustomMediaType
+import dev.dnpm.etl.processor.consent.ConsentEvaluation
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
-import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.*
@@ -75,7 +77,7 @@ class MtbFileRestControllerTest {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(
                 requestProcessor,
-                MtbFileConsentService()
+                ConsentEvaluator(MtbFileConsentService())
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }
@@ -130,27 +132,30 @@ class MtbFileRestControllerTest {
     inner class BwhcRequestsCheckConsentViaTtp {
 
         private lateinit var mockMvc: MockMvc
-
         private lateinit var requestProcessor: RequestProcessor
-
-        private lateinit var gicsConsentService: GicsConsentService
+        private lateinit var consentEvaluator: ConsentEvaluator
 
         @BeforeEach
         fun setup(
             @Mock requestProcessor: RequestProcessor,
-            @Mock gicsConsentService: GicsConsentService
+            @Mock consentEvaluator: ConsentEvaluator
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor, gicsConsentService)
+            val controller = MtbFileRestController(requestProcessor, consentEvaluator)
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
-            this.gicsConsentService = gicsConsentService
+            this.consentEvaluator = consentEvaluator
         }
 
         @ParameterizedTest
         @ValueSource(strings = ["ACTIVE", "REJECTED"])
         fun shouldProcessPostRequest(status: String) {
 
-            whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(TtpConsentStatus.BROAD_CONSENT_GIVEN)
+            whenever(consentEvaluator.check(any<MtbFile>())).thenReturn(
+                ConsentEvaluation(
+                    TtpConsentStatus.BROAD_CONSENT_GIVEN,
+                    true
+                )
+            )
 
             mockMvc.post("/mtbfile") {
                 content = objectMapper.writeValueAsString(bwhcMtbFileContent(Status.valueOf(status)))
@@ -169,7 +174,12 @@ class MtbFileRestControllerTest {
         @ValueSource(strings = ["ACTIVE", "REJECTED"])
         fun shouldProcessPostRequestWithRejectedConsent(status: String) {
 
-            whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED)
+            whenever(consentEvaluator.check(any<MtbFile>())).thenReturn(
+                ConsentEvaluation(
+                    TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED,
+                    false
+                )
+            )
 
             mockMvc.post("/mtbfile") {
                 content = objectMapper.writeValueAsString(bwhcMtbFileContent(Status.valueOf(status)))
@@ -200,7 +210,7 @@ class MtbFileRestControllerTest {
                 anyValueClass(),
                 org.mockito.kotlin.eq(TtpConsentStatus.UNKNOWN_CHECK_FILE)
             )
-            verify(gicsConsentService, times(0)).getTtpBroadConsentStatus(any())
+            verify(consentEvaluator, times(0)).check(any<MtbFile>())
 
         }
     }
@@ -220,7 +230,7 @@ class MtbFileRestControllerTest {
             this.requestProcessor = requestProcessor
             val controller = MtbFileRestController(
                 requestProcessor,
-                MtbFileConsentService()
+                ConsentEvaluator(MtbFileConsentService())
             )
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
         }
@@ -277,27 +287,30 @@ class MtbFileRestControllerTest {
     inner class Dnpm21RequestsCheckConsentViaTtp {
 
         private lateinit var mockMvc: MockMvc
-
         private lateinit var requestProcessor: RequestProcessor
-
-        private lateinit var gicsConsentService: GicsConsentService
+        private lateinit var consentEvaluator: ConsentEvaluator
 
         @BeforeEach
         fun setup(
             @Mock requestProcessor: RequestProcessor,
-            @Mock gicsConsentService: GicsConsentService
+            @Mock consentEvaluator: ConsentEvaluator
         ) {
             this.requestProcessor = requestProcessor
-            val controller = MtbFileRestController(requestProcessor, gicsConsentService)
+            val controller = MtbFileRestController(requestProcessor, consentEvaluator)
             this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
-            this.gicsConsentService = gicsConsentService
+            this.consentEvaluator = consentEvaluator
         }
 
         @ParameterizedTest
         @ArgumentsSource(Dnpm21MtbFile::class)
         fun shouldProcessPostRequest(mtb: Mtb, broadConsent: TtpConsentStatus, shouldProcess: String) {
 
-            whenever(gicsConsentService.getTtpBroadConsentStatus(any())).thenReturn(broadConsent)
+            whenever(consentEvaluator.check(any<Mtb>())).thenReturn(
+                ConsentEvaluation(
+                    broadConsent,
+                    shouldProcess == "process"
+                )
+            )
 
             mockMvc.post("/mtbfile") {
                 content = objectMapper.writeValueAsString(mtb)
@@ -332,7 +345,7 @@ class MtbFileRestControllerTest {
                 anyValueClass(),
                 org.mockito.kotlin.eq(TtpConsentStatus.UNKNOWN_CHECK_FILE)
             )
-            verify(gicsConsentService, times(0)).getTtpBroadConsentStatus(any())
+            verify(consentEvaluator, times(0)).check(any<Mtb>())
 
         }
     }
@@ -347,12 +360,6 @@ class MtbFileRestControllerTest {
             Episode.builder().withId("1").withPatient("TEST_12345678").withPeriod(PeriodStart("2023-08-08")).build()
         ).build()
     }
-}
-
-open class ArgProvider(vararg val data: Arguments) : ArgumentsProvider {
-    override fun provideArguments(
-        context: ExtensionContext?
-    ): Stream<out Arguments> = Stream.of(*data)
 }
 
 class Dnpm21MtbFile : ArgProvider(
