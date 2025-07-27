@@ -18,12 +18,14 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @ContextConfiguration(classes = {AppConfiguration.class, ObjectMapper.class})
@@ -37,7 +39,6 @@ class GicsConsentServiceTest {
     static final String GICS_BASE_URI = "http://localhost:8090/ttp-fhir/fhir/gics";
 
     MockRestServiceServer mockRestServiceServer;
-    AppConfiguration appConfiguration;
     AppFhirConfig appFhirConfig;
     GIcsConfigProperties gIcsConfigProperties;
 
@@ -45,19 +46,19 @@ class GicsConsentServiceTest {
 
     @BeforeEach
     void setUp(
-        @Autowired AppConfiguration appConfiguration,
         @Autowired AppFhirConfig appFhirConfig,
         @Autowired GIcsConfigProperties gIcsConfigProperties
     ) {
-        this.appConfiguration = appConfiguration;
         this.appFhirConfig = appFhirConfig;
         this.gIcsConfigProperties = gIcsConfigProperties;
 
-        this.mockRestServiceServer = MockRestServiceServer.createServer(appConfiguration.restTemplate());
+        var restTemplate = new RestTemplate();
+
+        this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
         this.gicsConsentService = new GicsConsentService(
             this.gIcsConfigProperties,
-            RetryTemplate.builder().build(),
-            appConfiguration.restTemplate(),
+            RetryTemplate.builder().maxAttempts(1).build(),
+            restTemplate,
             this.appFhirConfig
         );
     }
@@ -138,11 +139,24 @@ class GicsConsentServiceTest {
     }
 
     @Test
+    void shouldReturnRequestError() {
+        mockRestServiceServer
+            .expect(
+                requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT)
+            )
+            .andRespond(
+                withServerError()
+            );
+
+        var consentStatus = gicsConsentService.getTtpBroadConsentStatus("123456");
+        assertThat(consentStatus).isEqualTo(TtpConsentStatus.FAILED_TO_ASK);
+    }
+
+    @Test
     void buildRequestParameterCurrentPolicyStatesForPersonTest() {
         String pid = "12345678";
-        var result = GicsConsentService
+        var result = gicsConsentService
             .buildRequestParameterCurrentPolicyStatesForPerson(
-                gIcsConfigProperties,
                 pid,
                 Date.from(Instant.now()),
                 gIcsConfigProperties.getGenomDeConsentDomainName()

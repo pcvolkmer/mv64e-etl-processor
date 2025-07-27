@@ -169,7 +169,6 @@ public class GicsConsentService implements IConsentService {
                 terminatedRetryException.getMessage());
             log.error(msg);
             return null;
-
         }
     }
 
@@ -189,8 +188,11 @@ public class GicsConsentService implements IConsentService {
 
         String consentDomain = getConsentDomainName(targetConsentDomain);
 
-        var requestParameter = GicsConsentService.buildRequestParameterCurrentPolicyStatesForPerson(
-            gIcsConfigProperties, personIdentifierValue, requestDate, consentDomain);
+        var requestParameter = buildRequestParameterCurrentPolicyStatesForPerson(
+            personIdentifierValue,
+            requestDate,
+            consentDomain
+        );
 
         var consentDataSerialized = callGicsApi(requestParameter,
                                                 GicsConsentService.IS_POLICY_STATES_FOR_PERSON_ENDPOINT);
@@ -226,30 +228,45 @@ public class GicsConsentService implements IConsentService {
         };
     }
 
-    protected static Parameters buildRequestParameterCurrentPolicyStatesForPerson(
-        GIcsConfigProperties gIcsConfigProperties, String personIdentifierValue, Date requestDate,
+    protected Parameters buildRequestParameterCurrentPolicyStatesForPerson(
+        String personIdentifierValue,
+        Date requestDate,
         String targetDomain
     ) {
         var requestParameter = new Parameters();
-        requestParameter.addParameter(new ParametersParameterComponent().setName("personIdentifier")
-                                                                        .setValue(new Identifier()
-                                                                                      .setValue(personIdentifierValue)
-                                                                                      .setSystem(gIcsConfigProperties.getPersonIdentifierSystem())));
+        requestParameter.addParameter(
+            new ParametersParameterComponent()
+                .setName("personIdentifier")
+                .setValue(
+                    new Identifier()
+                        .setValue(personIdentifierValue)
+                        .setSystem(this.gIcsConfigProperties.getPersonIdentifierSystem())
+                )
+        );
 
-        requestParameter.addParameter(new ParametersParameterComponent().setName("domain")
-                                                                        .setValue(new StringType().setValue(targetDomain)));
+        requestParameter.addParameter(
+            new ParametersParameterComponent()
+                .setName("domain")
+                .setValue(new StringType().setValue(targetDomain))
+        );
 
         Parameters nestedConfigParameters = new Parameters();
-        nestedConfigParameters.addParameter(
-                                  new ParametersParameterComponent().setName("idMatchingType").setValue(
-                                      new Coding().setSystem(
-                                                      "https://ths-greifswald.de/fhir/CodeSystem/gics/IdMatchingType")
-                                                  .setCode("AT_LEAST_ONE"))).addParameter("ignoreVersionNumber", false)
-                              .addParameter("unknownStateIsConsideredAsDecline", false)
-                              .addParameter("requestDate", new DateType().setValue(requestDate));
+        nestedConfigParameters
+            .addParameter(
+                new ParametersParameterComponent()
+                    .setName("idMatchingType")
+                    .setValue(new Coding()
+                                  .setSystem("https://ths-greifswald.de/fhir/CodeSystem/gics/IdMatchingType")
+                                  .setCode("AT_LEAST_ONE")
+                    )
+            )
+            .addParameter("ignoreVersionNumber", false)
+            .addParameter("unknownStateIsConsideredAsDecline", false)
+            .addParameter("requestDate", new DateType().setValue(requestDate));
 
-        requestParameter.addParameter(new ParametersParameterComponent().setName("config").addPart()
-                                                                        .setResource(nestedConfigParameters));
+        requestParameter.addParameter(
+            new ParametersParameterComponent().setName("config").addPart().setResource(nestedConfigParameters)
+        );
 
         return requestParameter;
     }
