@@ -53,7 +53,7 @@ class Dnpm21BasedConsentEvaluatorTest {
         }
 
         @ParameterizedTest
-        @ArgumentsSource(WithGicsBwhcMtbFileProvider::class)
+        @ArgumentsSource(WithGicsMtbFileProvider::class)
         fun test(mtbFile: Mtb, ttpConsentStatus: TtpConsentStatus, expectedConsentEvaluation: ConsentEvaluation) {
             whenever(consentService.getTtpBroadConsentStatus(anyString())).thenReturn(ttpConsentStatus)
             assertThat(consentEvaluator.check(mtbFile)).isEqualTo(expectedConsentEvaluation)
@@ -73,7 +73,7 @@ class Dnpm21BasedConsentEvaluatorTest {
         }
 
         @ParameterizedTest
-        @ArgumentsSource(BwhcMtbFileProvider::class)
+        @ArgumentsSource(MtbFileProvider::class)
         fun test(mtbFile: Mtb, expectedConsentEvaluation: ConsentEvaluation) {
             assertThat(consentEvaluator.check(mtbFile)).isEqualTo(expectedConsentEvaluation)
         }
@@ -82,7 +82,7 @@ class Dnpm21BasedConsentEvaluatorTest {
 
     // Util classes
 
-    class WithGicsBwhcMtbFileProvider : ArgProvider(
+    class WithGicsMtbFileProvider : ArgProvider(
         // Has file ModelProjectConsent and broad consent => consent given
         Arguments.of(
             buildMtb(ConsentProvision.PERMIT),
@@ -212,7 +212,7 @@ class Dnpm21BasedConsentEvaluatorTest {
         }
     }
 
-    class BwhcMtbFileProvider : ArgProvider(
+    class MtbFileProvider : ArgProvider(
         // Has file consent => consent given
         Arguments.of(
             buildMtb(ConsentProvision.PERMIT),
