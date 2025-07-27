@@ -159,12 +159,12 @@ class GicsConsentServiceTest {
             .buildRequestParameterCurrentPolicyStatesForPerson(
                 pid,
                 Date.from(Instant.now()),
-                gIcsConfigProperties.getGenomDeConsentDomainName()
+                ConsentDomain.MODELLVORHABEN_64E
             );
 
-        assertThat(result.getParameter().size())
+        assertThat(result.getParameter())
             .as("should contain 3 parameter resources")
-            .isEqualTo(3);
+            .hasSize(3);
 
         assertThat(((StringType) result.getParameter("domain").getValue()).getValue())
             .isEqualTo(

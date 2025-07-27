@@ -183,10 +183,9 @@ public class GicsConsentService implements IConsentService {
 
     protected Bundle currentConsentForPersonAndTemplate(
         String personIdentifierValue,
-        ConsentDomain targetConsentDomain, Date requestDate
+        ConsentDomain consentDomain,
+        Date requestDate
     ) {
-
-        String consentDomain = getConsentDomainName(targetConsentDomain);
 
         var requestParameter = buildRequestParameterCurrentPolicyStatesForPerson(
             personIdentifierValue,
@@ -231,7 +230,7 @@ public class GicsConsentService implements IConsentService {
     protected Parameters buildRequestParameterCurrentPolicyStatesForPerson(
         String personIdentifierValue,
         Date requestDate,
-        String targetDomain
+        ConsentDomain consentDomain
     ) {
         var requestParameter = new Parameters();
         requestParameter.addParameter(
@@ -247,7 +246,7 @@ public class GicsConsentService implements IConsentService {
         requestParameter.addParameter(
             new ParametersParameterComponent()
                 .setName("domain")
-                .setValue(new StringType().setValue(targetDomain))
+                .setValue(new StringType().setValue(getConsentDomainName(consentDomain)))
         );
 
         Parameters nestedConfigParameters = new Parameters();
