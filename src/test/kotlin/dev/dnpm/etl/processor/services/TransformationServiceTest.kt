@@ -36,7 +36,7 @@ class TransformationServiceTest {
     fun setup() {
         this.service = TransformationService(
             JacksonConfig().objectMapper(), listOf(
-                Transformation.of("diagnoses[*].icd10.version") from "2013" to "2014",
+                Transformation.of("diagnoses[*].code.version") from "2013" to "2014",
             )
         )
     }
