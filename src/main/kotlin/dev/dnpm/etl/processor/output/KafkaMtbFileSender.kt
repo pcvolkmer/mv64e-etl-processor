@@ -20,11 +20,11 @@
 package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.Consent
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -50,9 +50,6 @@ class KafkaMtbFileSender(
                         objectMapper.writeValueAsString(request)
                     )
                 when (request) {
-                    is BwhcV1MtbFileRequest -> record.headers()
-                        .add("contentType", MediaType.APPLICATION_JSON_VALUE.toByteArray())
-
                     is DnpmV2MtbFileRequest -> record.headers()
                         .add(
                             "contentType",
@@ -75,13 +72,8 @@ class KafkaMtbFileSender(
     }
 
     override fun send(request: DeleteRequest): MtbFileSender.Response {
-        val dummyMtbFile = MtbFile.builder()
-            .withConsent(
-                Consent.builder()
-                    .withPatient(request.patientId.value)
-                    .withStatus(Consent.Status.REJECTED)
-                    .build()
-            )
+        val dummyMtbFile = Mtb.builder()
+            .metadata(MvhMetadata())
             .build()
 
         return try {
@@ -92,7 +84,7 @@ class KafkaMtbFileSender(
                         key(request),
                         // Always use old BwhcV1FileRequest with Consent REJECT
                         objectMapper.writeValueAsString(
-                            BwhcV1MtbFileRequest(
+                            DnpmV2MtbFileRequest(
                                 request.requestId,
                                 dummyMtbFile
                             )
@@ -119,7 +111,6 @@ class KafkaMtbFileSender(
 
     private fun key(request: MtbRequest): String {
         return when (request) {
-            is BwhcV1MtbFileRequest -> "{\"pid\": \"${request.content.patient.id}\"}"
             is DnpmV2MtbFileRequest -> "{\"pid\": \"${request.content.patient.id}\"}"
             is DeleteRequest -> "{\"pid\": \"${request.patientId.value}\"}"
             else -> throw IllegalArgumentException("Unsupported request type: ${request::class.simpleName}")

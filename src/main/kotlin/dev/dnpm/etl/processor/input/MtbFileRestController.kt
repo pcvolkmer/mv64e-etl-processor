@@ -19,8 +19,6 @@
 
 package dev.dnpm.etl.processor.input
 
-import de.ukw.ccc.bwhc.dto.Consent
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.consent.IGetConsent
@@ -46,23 +44,7 @@ class MtbFileRestController(
         return ResponseEntity.ok("Test")
     }
 
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
-        val consentStatusBooleanPair = checkConsentStatus(mtbFile)
-        val ttpConsentStatus = consentStatusBooleanPair.first
-        val isConsentOK = consentStatusBooleanPair.second
-        if (isConsentOK) {
-            logger.debug("Accepted MTB File (bwHC V1) for processing")
-            requestProcessor.processMtbFile(mtbFile)
-        } else {
-            logger.debug("Accepted MTB File (bwHC V1) and process deletion")
-            val patientId = PatientId(mtbFile.patient.id)
-            requestProcessor.processDeletion(patientId, ttpConsentStatus)
-        }
-        return ResponseEntity.accepted().build()
-    }
-
-    @PostMapping(consumes = [CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE, CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
         logger.debug("Accepted MTB File (DNPM V2) for processing")
         requestProcessor.processMtbFile(mtbFile)
@@ -74,19 +56,6 @@ class MtbFileRestController(
         logger.debug("Accepted patient ID to process deletion")
         requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
         return ResponseEntity.accepted().build()
-    }
-
-    private fun checkConsentStatus(mtbFile: MtbFile): Pair<TtpConsentStatus, Boolean> {
-        var ttpConsentStatus = iGetConsent.getTtpBroadConsentStatus(mtbFile.patient.id)
-
-        val isConsentOK = (ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE && mtbFile.consent.status == Consent.Status.ACTIVE)
-                    || ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN
-
-        if (ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE && mtbFile.consent.status == Consent.Status.REJECTED) {
-            // in case ttp check is disabled - we propagate rejected status anyway
-            ttpConsentStatus = TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED
-        }
-        return Pair(ttpConsentStatus, isConsentOK)
     }
 
 }

@@ -20,7 +20,6 @@
 package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.consent.ConsentByMtbFile
@@ -29,6 +28,7 @@ import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.pcvolkmer.mv64e.mtb.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -48,6 +48,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
+import java.time.Instant
+import java.util.*
 
 @WebMvcTest(controllers = [MtbFileRestController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
@@ -93,7 +95,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
+        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
     }
 
     @Test
@@ -106,7 +108,7 @@ class MtbFileRestControllerTest {
             status { isAccepted() }
         }
 
-        verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
+        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
     }
 
     @Test
@@ -119,7 +121,7 @@ class MtbFileRestControllerTest {
             status { isUnauthorized() }
         }
 
-        verify(requestProcessor, never()).processMtbFile(any<MtbFile>())
+        verify(requestProcessor, never()).processMtbFile(any<Mtb>())
     }
 
     @Test
@@ -132,7 +134,7 @@ class MtbFileRestControllerTest {
             status { isForbidden() }
         }
 
-        verify(requestProcessor, never()).processMtbFile(any<MtbFile>())
+        verify(requestProcessor, never()).processMtbFile(any<Mtb>())
     }
 
     @Test
@@ -180,7 +182,7 @@ class MtbFileRestControllerTest {
                 status { isAccepted() }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
+            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
         }
 
         @Test
@@ -193,33 +195,26 @@ class MtbFileRestControllerTest {
                 status { isAccepted() }
             }
 
-            verify(requestProcessor, times(1)).processMtbFile(any<MtbFile>())
+            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
         }
     }
 
     companion object {
 
-        val mtbFile: MtbFile = MtbFile.builder()
-            .withPatient(
+        val mtbFile = Mtb.builder()
+            .patient(
                 Patient.builder()
-                    .withId("PID")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+                    .id("PID")
                     .build()
             )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("PID")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("PID")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("PID").build())
+                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2023-08-08T02:00:00.00Z"))).build())
+                        .build()
+                )
             )
             .build()
 

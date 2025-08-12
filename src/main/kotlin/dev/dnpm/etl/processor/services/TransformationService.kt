@@ -22,14 +22,9 @@ package dev.dnpm.etl.processor.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.pcvolkmer.mv64e.mtb.Mtb
 
 class TransformationService(private val objectMapper: ObjectMapper, private val transformations: List<Transformation>) {
-    fun transform(mtbFile: MtbFile): MtbFile {
-        val json = transform(objectMapper.writeValueAsString(mtbFile))
-        return objectMapper.readValue(json, MtbFile::class.java)
-    }
 
     fun transform(mtbFile: Mtb): Mtb {
         val json = transform(objectMapper.writeValueAsString(mtbFile))
