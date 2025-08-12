@@ -20,12 +20,7 @@
 package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.Consent
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
-import dev.dnpm.etl.processor.PatientId
-import dev.dnpm.etl.processor.RequestId
-import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -40,7 +35,7 @@ class KafkaInputListener(
 
     override fun onMessage(record: ConsumerRecord<String, String>) {
         when (guessMimeType(record)) {
-            MediaType.APPLICATION_JSON_VALUE -> handleBwhcMessage(record)
+            MediaType.APPLICATION_JSON_VALUE -> handleDnpmV2Message(record)
             CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE -> handleDnpmV2Message(record)
             else -> {
                 /* ignore other messages */
@@ -55,37 +50,6 @@ class KafkaInputListener(
         }
 
         return record.headers().headers("contentType")?.firstOrNull()?.value().contentToString()
-    }
-
-    private fun handleBwhcMessage(record: ConsumerRecord<String, String>) {
-        val mtbFile = objectMapper.readValue(record.value(), MtbFile::class.java)
-        val patientId = PatientId(mtbFile.patient.id)
-        val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
-        val requestId = if (null != firstRequestIdHeader) {
-            RequestId(String(firstRequestIdHeader.value()))
-        } else {
-            RequestId("")
-        }
-
-        if (mtbFile.consent.status == Consent.Status.ACTIVE) {
-            logger.debug("Accepted MTB File for processing")
-            if (requestId.isBlank()) {
-                requestProcessor.processMtbFile(mtbFile)
-            } else {
-                requestProcessor.processMtbFile(mtbFile, requestId)
-            }
-        } else {
-            logger.debug("Accepted MTB File and process deletion")
-            if (requestId.isBlank()) {
-                requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
-            } else {
-                requestProcessor.processDeletion(
-                    patientId,
-                    requestId,
-                    TtpConsentStatus.UNKNOWN_CHECK_FILE
-                )
-            }
-        }
     }
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {

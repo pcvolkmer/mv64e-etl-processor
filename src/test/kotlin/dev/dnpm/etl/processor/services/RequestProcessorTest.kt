@@ -20,22 +20,21 @@
 package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.AppConfigProperties
-import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
-import dev.dnpm.etl.processor.output.BwhcV1MtbFileRequest
 import dev.dnpm.etl.processor.output.DeleteRequest
+import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.randomRequestId
+import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,6 +48,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
+import java.util.*
 
 
 @ExtendWith(MockitoExtension::class)
@@ -77,7 +77,7 @@ class RequestProcessorTest {
         this.sender = sender
         this.requestService = requestService
         this.applicationEventPublisher = applicationEventPublisher
-        this.appConfigProperties = AppConfigProperties(null)
+        this.appConfigProperties = AppConfigProperties()
         this.consentProcessor = consentProcessor
 
         val objectMapper = ObjectMapper()
@@ -119,29 +119,22 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any<MtbFile>())
+        }.whenever(transformationService).transform(any<Mtb>())
 
-        val mtbFile = MtbFile.builder()
-            .withPatient(
+        val mtbFile = Mtb.builder()
+            .patient(
                 Patient.builder()
-                    .withId("1")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+                    .id("123")
                     .build()
             )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("123")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("1")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .build()
+                )
             )
             .build()
 
@@ -178,29 +171,22 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any<MtbFile>())
+        }.whenever(transformationService).transform(any<Mtb>())
 
-        val mtbFile = MtbFile.builder()
-            .withPatient(
+        val mtbFile = Mtb.builder()
+            .patient(
                 Patient.builder()
-                    .withId("1")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+                    .id("123")
                     .build()
             )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("123")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("1")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .build()
+                )
             )
             .build()
 
@@ -233,7 +219,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<BwhcV1MtbFileRequest>())
+        }.whenever(sender).send(any<DnpmV2MtbFileRequest>())
 
         doAnswer {
             it.arguments[0] as String
@@ -241,29 +227,22 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any<MtbFile>())
+        }.whenever(transformationService).transform(any<Mtb>())
 
-        val mtbFile = MtbFile.builder()
-            .withPatient(
+        val mtbFile = Mtb.builder()
+            .patient(
                 Patient.builder()
-                    .withId("1")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+                    .id("123")
                     .build()
             )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("123")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("1")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .build()
+                )
             )
             .build()
 
@@ -296,7 +275,7 @@ class RequestProcessorTest {
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.whenever(sender).send(any<BwhcV1MtbFileRequest>())
+        }.whenever(sender).send(any<DnpmV2MtbFileRequest>())
 
         doAnswer {
             it.arguments[0] as String
@@ -304,29 +283,22 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any<MtbFile>())
+        }.whenever(transformationService).transform(any<Mtb>())
 
-        val mtbFile = MtbFile.builder()
-            .withPatient(
+        val mtbFile = Mtb.builder()
+            .patient(
                 Patient.builder()
-                    .withId("1")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+                    .id("123")
                     .build()
             )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("123")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("1")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .build()
+                )
             )
             .build()
 
@@ -426,33 +398,26 @@ class RequestProcessorTest {
 
         doAnswer {
             it.arguments[0]
-        }.whenever(transformationService).transform(any<MtbFile>())
+        }.whenever(transformationService).transform(any<Mtb>())
 
         doAnswer {
             MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<BwhcV1MtbFileRequest>())
+        }.whenever(sender).send(any<DnpmV2MtbFileRequest>())
 
-        val mtbFile = MtbFile.builder()
-            .withPatient(
+        val mtbFile = Mtb.builder()
+            .patient(
                 Patient.builder()
-                    .withId("1")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
+                    .id("123")
                     .build()
             )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("123")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("1")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .build()
+                )
             )
             .build()
 

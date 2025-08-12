@@ -19,7 +19,6 @@
 
 package dev.dnpm.etl.processor.output
 
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.pcvolkmer.mv64e.mtb.Mtb
@@ -33,15 +32,6 @@ sealed interface MtbFileRequest<out T> : MtbRequest {
     val content: T
 
     fun patientPseudonym(): PatientPseudonym
-}
-
-data class BwhcV1MtbFileRequest(
-    override val requestId: RequestId,
-    override val content: MtbFile
-) : MtbFileRequest<MtbFile> {
-    override fun patientPseudonym(): PatientPseudonym {
-        return PatientPseudonym(content.patient.id)
-    }
 }
 
 data class DnpmV2MtbFileRequest(

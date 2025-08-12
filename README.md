@@ -1,6 +1,6 @@
 # ETL-Processor for DNPM:DIP [![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
 
-Diese Anwendung versendet ein bwHC-MTB-File im bwHC-Datenmodell 1.0 an DNPM:DIP und pseudonymisiert
+Diese Anwendung versendet ein MTB-File im DNPM-Datenmodell 2.1 an DNPM:DIP und pseudonymisiert
 die Patienten-ID.
 
 ## Einordnung innerhalb einer DNPM-ETL-Strecke
@@ -8,7 +8,7 @@ die Patienten-ID.
 Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin *
 *[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
 
-Der Inhalt einer Anfrage, wenn ein bwHC-MTBFile, wird pseudonymisiert und auf Duplikate geprüft.
+Der Inhalt einer Anfrage, wenn ein MTB-File, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
 
 Löschanfragen werden immer als Löschanfrage an DNPM:DIP weitergeleitet.
@@ -72,24 +72,9 @@ Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
 ## Konfiguration
 
-### 🔥 Wichtige Änderungen in Version 0.10
+### 🔥 Wichtige Änderungen in Version 0.11
 
-Ab Version 0.10 wird [DNPM:DIP](https://github.com/dnpm-dip) unterstützt und als Standardendpunkt
-verwendet.
-Soll noch das alte bwHC-Backend verwendet werden, so ist die Umgebungsvariable  `APP_REST_IS_BWHC`
-auf `true` zu setzen.
-
-### 🔥 Breaking Changes nach Version 0.10
-
-In Versionen des ETL-Processors **nach Version 0.10** werden die folgenden Konfigurationsoptionen
-entfernt:
-
-* `APP_KAFKA_TOPIC`: Nutzen Sie nun die Konfigurationsoption `APP_KAFKA_OUTPUT_TOPIC`
-* `APP_KAFKA_RESPONSE_TOPIC`: Nutzen Sie nun die Konfigurationsoption
-  `APP_KAFKA_OUTPUT_RESPONSE_TOPIC`
-
-Der Pfad zum Versenden von MTB-Daten ist nun offiziell `/mtb`.
-In Versionen **nach Version 0.10** wird die Unterstützung des Pfads `/mtbfile` entfernt.
+Ab Version 0.11 wird ausschließlich [DNPM:DIP](https://github.com/dnpm-dip) unterstützt.
 
 ### Pseudonymisierung der Patienten-ID
 
@@ -316,18 +301,15 @@ Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpu
 
 #### REST
 
-Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an DNPM:DIP gesendet wird:
+Folgende Umgebungsvariablen müssen gesetzt sein, damit ein MTB-File an DNPM:DIP gesendet wird:
 
-* `APP_REST_URI`: URI der zu benutzenden API der Backend-Instanz. Zum Beispiel:
-    * `http://localhost:9000/bwhc/etl/api` für **bwHC Backend**
-    * `http://localhost:9000/api` für **dnpm:dip**
+* `APP_REST_URI`: URI der zu benutzenden API der Backend-Instanz. Zum Beispiel `http://localhost:9000/api`
 * `APP_REST_USERNAME`: Basic-Auth-Benutzername für den REST-Endpunkt
 * `APP_REST_PASSWORD`: Basic-Auth-Passwort für den REST-Endpunkt
-* `APP_REST_IS_BWHC`: `true` für **bwHC Backend**, weglassen oder `false` für **dnpm:dip**
 
 #### Kafka-Topics
 
-Folgende Umgebungsvariablen müssen gesetzt sein, damit ein bwHC-MTB-File an ein Kafka-Topic
+Folgende Umgebungsvariablen müssen gesetzt sein, damit ein MTB-File an ein Kafka-Topic
 übermittelt wird:
 
 * `APP_KAFKA_OUTPUT_TOPIC`: Zu verwendendes Topic zum Versenden von Anfragen.
@@ -402,19 +384,7 @@ verwenden möchten.
 
 ### Antworten und Statusauswertung
 
-Anfragen an das bwHC-Backend aus Versionen bis 0.9.x wurden wie folgt behandelt:
-
-| HTTP-Response  | Status    |
-|----------------|-----------|
-| `HTTP 200`     | `SUCCESS` |
-| `HTTP 201`     | `WARNING` |
-| `HTTP 400-...` | `ERROR`   |
-
-Dies konnte dazu führen, dass zwar mit einem `HTTP 201` geantwortet wurde, aber dennoch in der
-Issue-Liste die
-Severity `error` aufgetaucht ist.
-
-Ab Version 0.10 wird die Issue-Liste der Antwort verwendet und die darion enthaltene höchste
+Seit Version 0.10 wird die Issue-Liste der Antwort verwendet und die darion enthaltene höchste
 Severity-Stufe als Ergebnis verwendet.
 
 | Höchste Severity | Status    |

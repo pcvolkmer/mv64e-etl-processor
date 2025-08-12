@@ -19,20 +19,11 @@
 
 package dev.dnpm.etl.processor.services
 
-import de.ukw.ccc.bwhc.dto.Consent
-import de.ukw.ccc.bwhc.dto.Diagnosis
-import de.ukw.ccc.bwhc.dto.Icd10
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.config.JacksonConfig
-import dev.pcvolkmer.mv64e.mtb.ConsentProvision
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhMetadata
-import dev.pcvolkmer.mv64e.mtb.Provision
 import org.hl7.fhir.instance.model.api.IBaseResource
 import java.time.Instant
 import java.util.Date
@@ -45,7 +36,6 @@ class TransformationServiceTest {
     fun setup() {
         this.service = TransformationService(
             JacksonConfig().objectMapper(), listOf(
-                Transformation.of("consent.status") from Consent.Status.ACTIVE to Consent.Status.REJECTED,
                 Transformation.of("diagnoses[*].icd10.version") from "2013" to "2014",
             )
         )
@@ -53,74 +43,52 @@ class TransformationServiceTest {
 
     @Test
     fun shouldTransformMtbFile() {
-        val mtbFile = MtbFile.builder().withDiagnoses(
+        val mtbFile = Mtb.builder().diagnoses(
             listOf(
-                Diagnosis.builder().withId("1234").withIcd10(Icd10("F79.9").also {
-                    it.version = "2013"
-                }).build()
+                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.9").version("2013").build()).build()
             )
         ).build()
 
         val actual = this.service.transform(mtbFile)
 
         assertThat(actual).isNotNull
-        assertThat(actual.diagnoses[0].icd10.version).isEqualTo("2014")
+        assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
     }
 
     @Test
     fun shouldOnlyTransformGivenValues() {
-        val mtbFile = MtbFile.builder().withDiagnoses(
+        val mtbFile = Mtb.builder().diagnoses(
             listOf(
-                Diagnosis.builder().withId("1234").withIcd10(Icd10("F79.9").also {
-                    it.version = "2013"
-                }).build(),
-                Diagnosis.builder().withId("5678").withIcd10(Icd10("F79.8").also {
-                    it.version = "2019"
-                }).build()
+                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.9").version("2013").build()).build(),
+                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.8").version("2019").build()).build()
             )
         ).build()
 
         val actual = this.service.transform(mtbFile)
 
         assertThat(actual).isNotNull
-        assertThat(actual.diagnoses[0].icd10.code).isEqualTo("F79.9")
-        assertThat(actual.diagnoses[0].icd10.version).isEqualTo("2014")
-        assertThat(actual.diagnoses[1].icd10.code).isEqualTo("F79.8")
-        assertThat(actual.diagnoses[1].icd10.version).isEqualTo("2019")
-    }
-
-    @Test
-    fun shouldTransformMtbFileWithConsentEnum() {
-        val mtbFile = MtbFile.builder().withConsent(
-            Consent("123", "456", Consent.Status.ACTIVE)
-        ).build()
-
-        val actual = this.service.transform(mtbFile)
-
-        assertThat(actual.consent).isNotNull
-        assertThat(actual.consent.status).isEqualTo(Consent.Status.REJECTED)
+        assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
+        assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
+        assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
+        assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
     }
 
     @Test
     fun shouldTransformConsentValues() {
-        val mtbFile = MtbFile.builder().withDiagnoses(
+        val mtbFile = Mtb.builder().diagnoses(
             listOf(
-                Diagnosis.builder().withId("1234").withIcd10(Icd10("F79.9").also {
-                    it.version = "2013"
-                }).build(),
-                Diagnosis.builder().withId("5678").withIcd10(Icd10("F79.8").also {
-                    it.version = "2019"
-                }).build()
+                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.9").version("2013").build()).build(),
+                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.8").version("2019").build()).build()
             )
         ).build()
 
         val actual = this.service.transform(mtbFile)
 
         assertThat(actual).isNotNull
-        assertThat(actual.diagnoses[0].icd10.code).isEqualTo("F79.9")
-        assertThat(actual.diagnoses[0].icd10.version).isEqualTo("2014")
-        assertThat(actual.diagnoses[1].icd10.code).isEqualTo("F79.8")
-        assertThat(actual.diagnoses[1].icd10.version).isEqualTo("2019")
+        assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
+        assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
+        assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
+        assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
     }
 
     @Test
@@ -154,6 +122,5 @@ class TransformationServiceTest {
         assertThat(transformed.metadata.modelProjectConsent.date).isNotNull
 
     }
-
 
 }

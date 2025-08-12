@@ -24,7 +24,6 @@ import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.RestBwhcMtbFileSender
 import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -57,11 +56,6 @@ class AppRestConfiguration {
         retryTemplate: RetryTemplate,
         reportService: ReportService,
     ): MtbFileSender {
-        if (restTargetProperties.isBwhc) {
-            logger.info("Selected 'RestBwhcMtbFileSender'")
-            return RestBwhcMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
-        }
-
         logger.info("Selected 'RestDipMtbFileSender'")
         return RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
     }

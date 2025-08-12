@@ -20,7 +20,6 @@
 package dev.dnpm.etl.processor.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
@@ -28,7 +27,10 @@ import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
-import dev.dnpm.etl.processor.output.*
+import dev.dnpm.etl.processor.output.DeleteRequest
+import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
+import dev.dnpm.etl.processor.output.MtbFileRequest
+import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
@@ -42,7 +44,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
-import java.lang.RuntimeException
 import java.time.Instant
 import java.util.*
 
@@ -59,17 +60,6 @@ class RequestProcessor(
 ) {
 
     private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
-    fun processMtbFile(mtbFile: MtbFile) {
-        processMtbFile(mtbFile, randomRequestId())
-    }
-
-    fun processMtbFile(mtbFile: MtbFile, requestId: RequestId) {
-        val pid = PatientId(mtbFile.patient.id)
-        mtbFile pseudonymizeWith pseudonymizeService
-        mtbFile anonymizeContentWith pseudonymizeService
-        val request = BwhcV1MtbFileRequest(requestId, transformationService.transform(mtbFile))
-        saveAndSend(request, pid)
-    }
 
     fun processMtbFile(mtbFile: Mtb) {
         processMtbFile(mtbFile, randomRequestId())
@@ -144,7 +134,6 @@ class RequestProcessor(
 
     private fun <T> isDuplication(pseudonymizedMtbFileRequest: MtbFileRequest<T>): Boolean {
         val patientPseudonym = when (pseudonymizedMtbFileRequest) {
-            is BwhcV1MtbFileRequest -> PatientPseudonym(pseudonymizedMtbFileRequest.content.patient.id)
             is DnpmV2MtbFileRequest -> PatientPseudonym(pseudonymizedMtbFileRequest.content.patient.id)
         }
 
@@ -214,7 +203,6 @@ class RequestProcessor(
 
     private fun <T> fingerprint(request: MtbFileRequest<T>): Fingerprint {
         return when (request) {
-            is BwhcV1MtbFileRequest -> fingerprint(objectMapper.writeValueAsString(request.content))
             is DnpmV2MtbFileRequest -> fingerprint(objectMapper.writeValueAsString(request.content))
         }
     }
