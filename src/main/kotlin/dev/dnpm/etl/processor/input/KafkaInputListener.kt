@@ -21,7 +21,12 @@ package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
+import dev.dnpm.etl.processor.PatientId
+import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.pcvolkmer.mv64e.mtb.ConsentProvision
+import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -55,6 +60,36 @@ class KafkaInputListener(
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
         // Do not handle DNPM-V2 for now
         logger.warn("Ignoring MTB File in DNPM V2 format: Not implemented yet")
+
+        val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
+        val patientId = PatientId(mtbFile.patient.id)
+        val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
+        val requestId = if (null != firstRequestIdHeader) {
+            RequestId(String(firstRequestIdHeader.value()))
+        } else {
+            RequestId("")
+        }
+
+        // TODO: Use MV Consent for now - needs to be replaced with proper consent evaluation
+        if (mtbFile.metadata.modelProjectConsent.provisions.filter { it.type == ConsentProvision.PERMIT }.isNotEmpty()) {
+            logger.debug("Accepted MTB File for processing")
+            if (requestId.isBlank()) {
+                requestProcessor.processMtbFile(mtbFile)
+            } else {
+                requestProcessor.processMtbFile(mtbFile, requestId)
+            }
+        } else {
+            logger.debug("Accepted MTB File and process deletion")
+            if (requestId.isBlank()) {
+                requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+            } else {
+                requestProcessor.processDeletion(
+                    patientId,
+                    requestId,
+                    TtpConsentStatus.UNKNOWN_CHECK_FILE
+                )
+            }
+        }
     }
 
 }
