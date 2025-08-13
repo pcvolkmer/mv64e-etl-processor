@@ -19,8 +19,6 @@
 
 package dev.dnpm.etl.processor.consent
 
-import de.ukw.ccc.bwhc.dto.Consent
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.pcvolkmer.mv64e.mtb.ConsentProvision
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.springframework.stereotype.Service
@@ -32,18 +30,6 @@ import org.springframework.stereotype.Service
 class ConsentEvaluator(
     private val consentService: IConsentService
 ) {
-    fun check(mtbFile: MtbFile): ConsentEvaluation {
-        val ttpConsentStatus = consentService.getTtpBroadConsentStatus(mtbFile.patient.id)
-        val consentGiven =
-            (ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE && mtbFile.consent.status == Consent.Status.ACTIVE)
-                    || ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN
-
-        return ConsentEvaluation(
-            ttpConsentStatus,
-            consentGiven
-        )
-    }
-
     fun check(mtbFile: Mtb): ConsentEvaluation {
         val ttpConsentStatus = consentService.getTtpBroadConsentStatus(mtbFile.patient.id)
         val consentGiven = ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN

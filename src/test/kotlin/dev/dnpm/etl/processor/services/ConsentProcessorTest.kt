@@ -52,7 +52,7 @@ class ConsentProcessorTest {
         this.objectMapper = jacksonConfig.objectMapper()
         this.fhirContext = JacksonConfig.fhirContext()
         this.gicsConsentService = gicsConsentService
-        this.appConfigProperties = AppConfigProperties(null, emptyList())
+        this.appConfigProperties = AppConfigProperties(emptyList())
         this.consentProcessor =
             ConsentProcessor(
                 appConfigProperties,

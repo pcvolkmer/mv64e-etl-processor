@@ -21,8 +21,6 @@ package dev.dnpm.etl.processor.output
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import de.ukw.ccc.bwhc.dto.*
-import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
@@ -55,78 +53,6 @@ import java.util.*
 class RestDipMtbFileSenderTest {
 
     @Nested
-    inner class BwhcV1ContentRequest {
-
-        private lateinit var mockRestServiceServer: MockRestServiceServer
-
-        private lateinit var restMtbFileSender: RestMtbFileSender
-
-        private var reportService = ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
-
-        @BeforeEach
-        fun setup() {
-            val restTemplate = RestTemplate()
-            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
-            val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
-
-            this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-
-            this.restMtbFileSender =
-                RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
-        }
-
-        @ParameterizedTest
-        @MethodSource("dev.dnpm.etl.processor.output.RestDipMtbFileSenderTest#mtbFileRequestWithResponseSource")
-        fun shouldReturnExpectedResponseForMtbFilePost(requestWithResponse: RequestWithResponse) {
-            this.mockRestServiceServer
-                .expect(method(HttpMethod.POST))
-                .andExpect(requestTo("http://localhost:9000/api/mtb/etl/patient-record"))
-                .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andRespond {
-                    withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-                }
-
-            val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, bwhcV1mtbFile))
-            assertThat(response.status).isEqualTo(requestWithResponse.response.status)
-            assertThat(response.body).isEqualTo(requestWithResponse.response.body)
-        }
-
-        @ParameterizedTest
-        @MethodSource("dev.dnpm.etl.processor.output.RestDipMtbFileSenderTest#mtbFileRequestWithResponseSource")
-        fun shouldRetryOnMtbFileHttpRequestError(requestWithResponse: RequestWithResponse) {
-            val restTemplate = RestTemplate()
-            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
-            val retryTemplate = AppConfiguration().retryTemplate(AppConfigProperties("http://localhost:9000"))
-            retryTemplate.setBackOffPolicy(NoBackOffPolicy())
-
-            this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
-            this.restMtbFileSender =
-                RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
-
-            val expectedCount = when (requestWithResponse.httpStatus) {
-                // OK - No Retry
-                HttpStatus.OK, HttpStatus.CREATED, HttpStatus.UNPROCESSABLE_ENTITY, HttpStatus.BAD_REQUEST -> ExpectedCount.max(
-                    1
-                )
-                // Request failed - Retry max 3 times
-                else -> ExpectedCount.max(3)
-            }
-
-            this.mockRestServiceServer
-                .expect(expectedCount, method(HttpMethod.POST))
-                .andExpect(requestTo("http://localhost:9000/api/mtb/etl/patient-record"))
-                .andRespond {
-                    withStatus(requestWithResponse.httpStatus).body(requestWithResponse.body).createResponse(it)
-                }
-
-            val response = restMtbFileSender.send(BwhcV1MtbFileRequest(TEST_REQUEST_ID, bwhcV1mtbFile))
-            assertThat(response.status).isEqualTo(requestWithResponse.response.status)
-            assertThat(response.body).isEqualTo(requestWithResponse.response.body)
-        }
-
-    }
-
-    @Nested
     inner class DnpmV2ContentRequest {
 
         private lateinit var mockRestServiceServer: MockRestServiceServer
@@ -138,7 +64,7 @@ class RestDipMtbFileSenderTest {
         @BeforeEach
         fun setup() {
             val restTemplate = RestTemplate()
-            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
+            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
             val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
@@ -176,7 +102,7 @@ class RestDipMtbFileSenderTest {
         @BeforeEach
         fun setup() {
             val restTemplate = RestTemplate()
-            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
+            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
             val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
@@ -204,8 +130,8 @@ class RestDipMtbFileSenderTest {
         @MethodSource("dev.dnpm.etl.processor.output.RestDipMtbFileSenderTest#deleteRequestWithResponseSource")
         fun shouldRetryOnDeleteHttpRequestError(requestWithResponse: RequestWithResponse) {
             val restTemplate = RestTemplate()
-            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null, false)
-            val retryTemplate = AppConfiguration().retryTemplate(AppConfigProperties("http://localhost:9000"))
+            val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
+            val retryTemplate = AppConfiguration().retryTemplate(AppConfigProperties())
             retryTemplate.setBackOffPolicy(NoBackOffPolicy())
 
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
@@ -244,30 +170,6 @@ class RestDipMtbFileSenderTest {
 
         val TEST_REQUEST_ID = RequestId("TestId")
         val TEST_PATIENT_PSEUDONYM = PatientPseudonym("PID")
-
-        val bwhcV1mtbFile: MtbFile = MtbFile.builder()
-            .withPatient(
-                Patient.builder()
-                    .withId("PID")
-                    .withBirthDate("2000-08-08")
-                    .withGender(Patient.Gender.MALE)
-                    .build()
-            )
-            .withConsent(
-                Consent.builder()
-                    .withId("1")
-                    .withStatus(Consent.Status.ACTIVE)
-                    .withPatient("PID")
-                    .build()
-            )
-            .withEpisode(
-                Episode.builder()
-                    .withId("1")
-                    .withPatient("PID")
-                    .withPeriod(PeriodStart("2023-08-08"))
-                    .build()
-            )
-            .build()
 
         fun dnpmV2MtbFile(): Mtb {
             return Mtb().apply {

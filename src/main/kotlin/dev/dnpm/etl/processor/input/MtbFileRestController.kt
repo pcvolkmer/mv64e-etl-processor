@@ -19,7 +19,6 @@
 
 package dev.dnpm.etl.processor.input
 
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
@@ -44,21 +43,7 @@ class MtbFileRestController(
         return ResponseEntity.ok("Test")
     }
 
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun mtbFile(@RequestBody mtbFile: MtbFile): ResponseEntity<Unit> {
-        val consentEvaluation = consentEvaluator.check(mtbFile)
-        if (consentEvaluation.hasConsent()) {
-            logger.debug("Accepted MTB File (bwHC V1) for processing")
-            requestProcessor.processMtbFile(mtbFile)
-        } else {
-            logger.debug("Accepted MTB File (bwHC V1) and process deletion")
-            val patientId = PatientId(mtbFile.patient.id)
-            requestProcessor.processDeletion(patientId, consentEvaluation.getStatus())
-        }
-        return ResponseEntity.accepted().build()
-    }
-
-    @PostMapping(consumes = [CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE, CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
         val consentEvaluation = consentEvaluator.check(mtbFile)
         if (consentEvaluation.hasConsent()) {

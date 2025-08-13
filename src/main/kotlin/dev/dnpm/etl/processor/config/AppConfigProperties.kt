@@ -24,7 +24,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
-    var bwhcUri: String?,
     var transformations: List<TransformationProperties> = listOf(),
     var maxRetryAttempts: Int = 3,
     var duplicationDetection: Boolean = true,
@@ -128,8 +127,7 @@ data class GIcsConfigProperties(
 data class RestTargetProperties(
     val uri: String?,
     val username: String?,
-    val password: String?,
-    val isBwhc: Boolean = false,
+    val password: String?
 ) {
     companion object {
         const val NAME = "app.rest"

@@ -20,11 +20,11 @@
 package dev.dnpm.etl.processor
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.output.BwhcV1MtbFileRequest
+import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -69,7 +69,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
         properties = [
             "app.pseudonymize.generator=buildin",
             "app.consent.service=none",
-            "app.transformations[0].path=diagnoses[*].icd10.version",
+            "app.transformations[0].path=diagnoses[*].code.version",
             "app.transformations[0].from=2013",
             "app.transformations[0].to=2014",
         ]
@@ -94,36 +94,33 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
         fun mtbFileIsTransformed() {
             doAnswer {
                 MtbFileSender.Response(RequestStatus.SUCCESS)
-            }.whenever(mtbFileSender).send(any<BwhcV1MtbFileRequest>())
+            }.whenever(mtbFileSender).send(any<DnpmV2MtbFileRequest>())
 
-            val mtbFile = MtbFile.builder()
-                .withPatient(
+            val mtbFile = Mtb.builder()
+                .patient(
                     Patient.builder()
-                        .withId("TEST_12345678")
-                        .withBirthDate("2000-08-08")
-                        .withGender(Patient.Gender.MALE)
+                        .id("TEST_12345678")
                         .build()
                 )
-                .withConsent(
-                    Consent.builder()
-                        .withId("1")
-                        .withStatus(Consent.Status.ACTIVE)
-                        .withPatient("TEST_12345678")
+                .metadata(
+                    MvhMetadata
+                        .builder()
+                        .modelProjectConsent(
+                            ModelProjectConsent
+                                .builder()
+                                .provisions(
+                                    listOf(Provision.builder().type(ConsentProvision.PERMIT).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                ).build()
+                        )
                         .build()
                 )
-                .withEpisode(
-                    Episode.builder()
-                        .withId("1")
-                        .withPatient("TEST_12345678")
-                        .withPeriod(PeriodStart("2023-08-08"))
-                        .build()
-                )
-                .withDiagnoses(
+                .diagnoses(
                     listOf(
-                        Diagnosis.builder()
-                            .withId("1234")
-                            .withIcd10(Icd10.builder().withCode("F79.9").withVersion("2013").build())
-                            .build()
+                        MtbDiagnosis.builder()
+                            .id("1234")
+                            .patient(Reference.builder().id("TEST_12345678").build())
+                            .code(Coding.builder().code("F79.9").version("2013").build())
+                            .build(),
                     )
                 )
                 .build()
@@ -137,10 +134,10 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
                 }
             }
 
-            val captor = argumentCaptor<BwhcV1MtbFileRequest>()
+            val captor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(mtbFileSender).send(captor.capture())
             assertThat(captor.firstValue.content.diagnoses).hasSize(1).allMatch { diagnosis ->
-                diagnosis.icd10.version == "2014"
+                diagnosis.code.version == "2014"
             }
         }
     }
