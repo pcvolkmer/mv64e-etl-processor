@@ -20,7 +20,7 @@ spring:
 
 app:
   rest:
-    uri: http://localhost:9000/bwhc/etl/api
+    uri: http://localhost/api
   #kafka:
   #  topic: test
   #  response-topic: test_response

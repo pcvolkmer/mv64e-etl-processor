@@ -19,8 +19,8 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
-import de.ukw.ccc.bwhc.dto.*
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
+import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -29,31 +29,26 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
+import java.time.Instant
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class PseudonymizeServiceTest {
 
-    private val mtbFile = MtbFile.builder()
-        .withPatient(
+    private val mtbFile = Mtb.builder()
+        .patient(
             Patient.builder()
-                .withId("123")
-                .withBirthDate("2000-08-08")
-                .withGender(Patient.Gender.MALE)
+                .id("123")
                 .build()
         )
-        .withConsent(
-            Consent.builder()
-                .withId("1")
-                .withStatus(Consent.Status.ACTIVE)
-                .withPatient("123")
-                .build()
-        )
-        .withEpisode(
-            Episode.builder()
-                .withId("1")
-                .withPatient("123")
-                .withPeriod(PeriodStart("2023-08-08"))
-                .build()
+        .episodesOfCare(
+            listOf(
+                MtbEpisodeOfCare.builder()
+                    .id("1")
+                    .patient(Reference.builder().id("123").build())
+                    .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                    .build()
+            )
         )
         .build()
 

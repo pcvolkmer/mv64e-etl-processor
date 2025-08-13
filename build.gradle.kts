@@ -16,7 +16,6 @@ group = "dev.dnpm"
 version = "0.11.0-SNAPSHOT"
 
 var versions = mapOf(
-    "bwhc-dto-java" to "0.4.0",
     "mtb-dto" to "0.1.0-SNAPSHOT",
     "hapi-fhir" to "7.6.1",
     "mockito-kotlin" to "5.4.0",
@@ -81,7 +80,6 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("de.ukw.ccc:bwhc-dto-java:${versions["bwhc-dto-java"]}")
     implementation("dev.pcvolkmer.mv64e:mtb-dto:${versions["mtb-dto"]}") { isChanging = true }
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")

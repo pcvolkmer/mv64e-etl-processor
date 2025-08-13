@@ -20,13 +20,13 @@
 package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.Consent
-import de.ukw.ccc.bwhc.dto.MtbFile
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
+import dev.pcvolkmer.mv64e.mtb.ConsentProvision
+import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -40,7 +40,7 @@ class KafkaInputListener(
 
     override fun onMessage(record: ConsumerRecord<String, String>) {
         when (guessMimeType(record)) {
-            MediaType.APPLICATION_JSON_VALUE -> handleBwhcMessage(record)
+            MediaType.APPLICATION_JSON_VALUE -> handleDnpmV2Message(record)
             CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE -> handleDnpmV2Message(record)
             else -> {
                 /* ignore other messages */
@@ -57,8 +57,11 @@ class KafkaInputListener(
         return record.headers().headers("contentType")?.firstOrNull()?.value().contentToString()
     }
 
-    private fun handleBwhcMessage(record: ConsumerRecord<String, String>) {
-        val mtbFile = objectMapper.readValue(record.value(), MtbFile::class.java)
+    private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
+        // Do not handle DNPM-V2 for now
+        logger.warn("Ignoring MTB File in DNPM V2 format: Not implemented yet")
+
+        val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
         val patientId = PatientId(mtbFile.patient.id)
         val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
         val requestId = if (null != firstRequestIdHeader) {
@@ -67,7 +70,8 @@ class KafkaInputListener(
             RequestId("")
         }
 
-        if (mtbFile.consent.status == Consent.Status.ACTIVE) {
+        // TODO: Use MV Consent for now - needs to be replaced with proper consent evaluation
+        if (mtbFile.metadata.modelProjectConsent.provisions.filter { it.type == ConsentProvision.PERMIT }.isNotEmpty()) {
             logger.debug("Accepted MTB File for processing")
             if (requestId.isBlank()) {
                 requestProcessor.processMtbFile(mtbFile)
@@ -86,11 +90,6 @@ class KafkaInputListener(
                 )
             }
         }
-    }
-
-    private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
-        // Do not handle DNPM-V2 for now
-        logger.warn("Ignoring MTB File in DNPM V2 format: Not implemented yet")
     }
 
 }

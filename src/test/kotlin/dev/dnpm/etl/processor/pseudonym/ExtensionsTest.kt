@@ -21,8 +21,6 @@ package dev.dnpm.etl.processor.pseudonym
 
 import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.ukw.ccc.bwhc.dto.*
-import de.ukw.ccc.bwhc.dto.Patient
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
@@ -49,172 +47,6 @@ import java.util.*
 class ExtensionsTest {
     fun getObjectMapper(): ObjectMapper {
         return JacksonConfig().objectMapper()
-    }
-
-    @Nested
-    inner class UsingBwhcDatamodel {
-
-        val FAKE_MTB_FILE_PATH = "fake_MTBFile.json"
-        val CLEAN_PATIENT_ID = "5dad2f0b-49c6-47d8-a952-7b9e9e0f7549"
-
-
-        private fun fakeMtbFile(): MtbFile {
-            val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
-            return getObjectMapper().readValue(mtbFile, MtbFile::class.java)
-        }
-
-        private fun MtbFile.serialized(): String {
-            return getObjectMapper().writeValueAsString(this)
-        }
-
-        @Test
-        fun shouldNotContainCleanPatientId(@Mock pseudonymizeService: PseudonymizeService) {
-            doAnswer {
-                it.arguments[0]
-                "PSEUDO-ID"
-            }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
-
-            val mtbFile = fakeMtbFile()
-
-            mtbFile.pseudonymizeWith(pseudonymizeService)
-
-            assertThat(mtbFile.patient.id).isEqualTo("PSEUDO-ID")
-            assertThat(mtbFile.serialized()).doesNotContain(CLEAN_PATIENT_ID)
-        }
-
-        @Test
-        fun shouldNotContainAnyUuidAfterRehashingOfIds(@Mock pseudonymizeService: PseudonymizeService) {
-            doAnswer {
-                it.arguments[0]
-                "PSEUDO-ID"
-            }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
-
-            doAnswer {
-                "TESTDOMAIN"
-            }.whenever(pseudonymizeService).prefix()
-
-            val mtbFile = fakeMtbFile()
-
-            mtbFile.pseudonymizeWith(pseudonymizeService)
-            mtbFile.anonymizeContentWith(pseudonymizeService)
-
-            val pattern =
-                "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
-                    .toPattern()
-            val matcher = pattern.matcher(mtbFile.serialized())
-
-            assertThrows<IllegalStateException> {
-                matcher.find()
-                matcher.group()
-            }.also {
-                assertThat(it.message).isEqualTo("No match found")
-            }
-
-        }
-
-        @Test
-        fun shouldRehashIdsWithPrefix(@Mock pseudonymizeService: PseudonymizeService) {
-            doAnswer {
-                it.arguments[0]
-                "PSEUDO-ID"
-            }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
-
-            doAnswer {
-                "TESTDOMAIN"
-            }.whenever(pseudonymizeService).prefix()
-
-            val mtbFile = MtbFile.builder()
-                .withPatient(
-                    Patient.builder()
-                        .withId("1")
-                        .withBirthDate("2000-08-08")
-                        .withGender(Patient.Gender.MALE)
-                        .build()
-                )
-                .withConsent(
-                    Consent.builder()
-                        .withId("1")
-                        .withStatus(Consent.Status.ACTIVE)
-                        .withPatient("123")
-                        .build()
-                )
-                .withEpisode(
-                    Episode.builder()
-                        .withId("1")
-                        .withPatient("1")
-                        .withPeriod(PeriodStart("2023-08-08"))
-                        .build()
-                )
-                .build()
-
-            mtbFile.pseudonymizeWith(pseudonymizeService)
-            mtbFile.anonymizeContentWith(pseudonymizeService)
-
-
-            assertThat(mtbFile.episode.id)
-                // TESTDOMAIN<sha256(TESTDOMAIN-1)[0-41]>
-                .isEqualTo("TESTDOMAIN44e20a53bbbf9f3ae39626d05df7014dcd77d6098")
-        }
-
-        @Test
-        fun shouldNotThrowExceptionOnNullValues(@Mock pseudonymizeService: PseudonymizeService) {
-            doAnswer {
-                it.arguments[0]
-                "PSEUDO-ID"
-            }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
-
-            doAnswer {
-                "TESTDOMAIN"
-            }.whenever(pseudonymizeService).prefix()
-
-            val mtbFile = MtbFile.builder()
-                .withPatient(
-                    Patient.builder()
-                        .withId("1")
-                        .withBirthDate("2000-08-08")
-                        .withGender(Patient.Gender.MALE)
-                        .build()
-                )
-                .withConsent(
-                    Consent.builder()
-                        .withId("1")
-                        .withStatus(Consent.Status.ACTIVE)
-                        .withPatient("123")
-                        .build()
-                )
-                .withEpisode(
-                    Episode.builder()
-                        .withId("1")
-                        .withPatient("1")
-                        .withPeriod(PeriodStart("2023-08-08"))
-                        .build()
-                )
-                .withClaims(null)
-                .withDiagnoses(null)
-                .withCarePlans(null)
-                .withClaimResponses(null)
-                .withEcogStatus(null)
-                .withFamilyMemberDiagnoses(null)
-                .withGeneticCounsellingRequests(null)
-                .withHistologyReevaluationRequests(null)
-                .withHistologyReports(null)
-                .withLastGuidelineTherapies(null)
-                .withMolecularPathologyFindings(null)
-                .withMolecularTherapies(null)
-                .withNgsReports(null)
-                .withPreviousGuidelineTherapies(null)
-                .withRebiopsyRequests(null)
-                .withRecommendations(null)
-                .withResponses(null)
-                .withStudyInclusionRequests(null)
-                .withSpecimens(null)
-                .build()
-
-            mtbFile.pseudonymizeWith(pseudonymizeService)
-            mtbFile.anonymizeContentWith(pseudonymizeService)
-
-            assertThat(mtbFile.episode.id).isNotNull()
-        }
     }
 
     @Nested
@@ -251,7 +83,7 @@ class ExtensionsTest {
 
         private fun addConsentData(mtbFile: Mtb) {
             val gIcsConfigProperties = GIcsConfigProperties("", "", "")
-            val appConfigProperties = AppConfigProperties(null, emptyList())
+            val appConfigProperties = AppConfigProperties(emptyList())
 
             val bundle = Bundle()
             val dummyConsent = ConsentProcessorTest.getDummyGenomDeConsent()
