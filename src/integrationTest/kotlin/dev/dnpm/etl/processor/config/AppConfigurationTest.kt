@@ -20,8 +20,9 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.MtbFileConsentService
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
@@ -53,7 +54,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
         AppSecurityConfiguration::class,
         KafkaAutoConfiguration::class,
         AppKafkaConfiguration::class,
-        AppRestConfiguration::class
+        AppRestConfiguration::class,
+        ConsentEvaluator::class
     ]
 )
 @MockitoBean(types = [ObjectMapper::class])

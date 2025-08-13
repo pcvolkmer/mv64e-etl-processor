@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.pcvolkmer.mv64e.mtb.ConsentProvision
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -34,6 +34,7 @@ import org.springframework.kafka.listener.MessageListener
 
 class KafkaInputListener(
     private val requestProcessor: RequestProcessor,
+    private val consentEvaluator: ConsentEvaluator,
     private val objectMapper: ObjectMapper
 ) : MessageListener<String, String> {
     private val logger = LoggerFactory.getLogger(KafkaInputListener::class.java)
@@ -70,8 +71,7 @@ class KafkaInputListener(
             RequestId("")
         }
 
-        // TODO: Use MV Consent for now - needs to be replaced with proper consent evaluation
-        if (mtbFile.metadata.modelProjectConsent.provisions.filter { it.type == ConsentProvision.PERMIT }.isNotEmpty()) {
+        if (consentEvaluator.check(mtbFile).hasConsent()) {
             logger.debug("Accepted MTB File for processing")
             if (requestId.isBlank()) {
                 requestProcessor.processMtbFile(mtbFile)
