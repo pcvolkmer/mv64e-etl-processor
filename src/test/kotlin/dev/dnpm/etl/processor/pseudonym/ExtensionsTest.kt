@@ -169,6 +169,9 @@ class ExtensionsTest {
                         extIdValue.value =
                             Math.random().toLong().toString()
                     }
+                    simpleVariant.fusionPartner3Prime?.transcriptId?.value =  Math.random().toLong().toString()
+                    simpleVariant.fusionPartner5Prime?.transcriptId?.value =  Math.random().toLong().toString()
+                    simpleVariant.externalIds?.forEach { it-> it?.value = Math.random().toLong().toString()  }
                 }
             }
 
@@ -183,7 +186,8 @@ class ExtensionsTest {
 
             assertThrows<IllegalStateException> {
                 matcher.find()
-                matcher.group()
+                val posSt= "found at pos: "+matcher.start().toString()  +", "+ matcher.end()
+                System.out.println(posSt + " with "+     matcher.group())
             }.also {
                 assertThat(it.message).isEqualTo("No match found")
             }
