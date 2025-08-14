@@ -54,8 +54,14 @@ class Dnpm21BasedConsentEvaluatorTest {
 
         @ParameterizedTest
         @ArgumentsSource(WithGicsMtbFileProvider::class)
-        fun test(mtbFile: Mtb, ttpConsentStatus: TtpConsentStatus, expectedConsentEvaluation: ConsentEvaluation) {
-            whenever(consentService.getTtpBroadConsentStatus(anyString())).thenReturn(ttpConsentStatus)
+        fun test(
+            mtbFile: Mtb,
+            ttpConsentStatus: TtpConsentStatus,
+            expectedConsentEvaluation: ConsentEvaluation
+        ) {
+            whenever(consentService.getTtpBroadConsentStatus(anyString())).thenReturn(
+                ttpConsentStatus
+            )
             assertThat(consentEvaluator.check(mtbFile)).isEqualTo(expectedConsentEvaluation)
         }
     }
@@ -77,7 +83,6 @@ class Dnpm21BasedConsentEvaluatorTest {
         fun test(mtbFile: Mtb, expectedConsentEvaluation: ConsentEvaluation) {
             assertThat(consentEvaluator.check(mtbFile)).isEqualTo(expectedConsentEvaluation)
         }
-
     }
 
     // Util classes
@@ -222,11 +227,34 @@ class Dnpm21BasedConsentEvaluatorTest {
         Arguments.of(
             buildMtb(ConsentProvision.DENY),
             ConsentEvaluation(TtpConsentStatus.UNKNOWN_CHECK_FILE, false)
+        ),
+        // policy REIDENTIFICATION has no effect on ConsentEvaluation
+        Arguments.of(
+            buildMtb(ModelProjectConsentPurpose.REIDENTIFICATION, ConsentProvision.DENY),
+            ConsentEvaluation(TtpConsentStatus.UNKNOWN_CHECK_FILE, false)
+        ), Arguments.of(
+            buildMtb(ModelProjectConsentPurpose.REIDENTIFICATION, ConsentProvision.PERMIT),
+            ConsentEvaluation(TtpConsentStatus.UNKNOWN_CHECK_FILE, false)
+        ),
+        // policy CASE_IDENTIFICATION has no effect on ConsentEvaluation
+        Arguments.of(
+            buildMtb(ModelProjectConsentPurpose.CASE_IDENTIFICATION, ConsentProvision.DENY),
+            ConsentEvaluation(TtpConsentStatus.UNKNOWN_CHECK_FILE, false)
+        ), Arguments.of(
+            buildMtb(ModelProjectConsentPurpose.CASE_IDENTIFICATION, ConsentProvision.PERMIT),
+            ConsentEvaluation(TtpConsentStatus.UNKNOWN_CHECK_FILE, false)
         )
     ) {
 
         companion object {
             fun buildMtb(consentProvision: ConsentProvision): Mtb {
+                return buildMtb(ModelProjectConsentPurpose.SEQUENCING, consentProvision)
+            }
+
+            fun buildMtb(
+                policy: ModelProjectConsentPurpose,
+                consentProvision: ConsentProvision
+            ): Mtb {
                 return Mtb.builder()
                     .patient(
                         Patient.builder().id("TEST_12345678")
@@ -239,7 +267,7 @@ class Dnpm21BasedConsentEvaluatorTest {
                             ModelProjectConsent.builder().provisions(
                                 listOf(
                                     Provision.builder().date(Date()).type(consentProvision)
-                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                        .purpose(policy).build()
                                 )
                             ).build()
                         ).build()
