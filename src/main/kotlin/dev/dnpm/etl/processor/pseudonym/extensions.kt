@@ -200,6 +200,7 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
         }
         it.results?.simpleVariants?.forEach { it ->
             it?.id = it.id?.let(::anonymize)
+            it?.transcriptId?.value = it.transcriptId?.value?.let(::anonymize)
         }
         it.results?.tmb?.id = it.results?.tmb?.id?.let(::anonymize)
         it.results?.tmb?.specimen?.id = it.results?.tmb?.specimen?.id?.let(::anonymize)
@@ -208,7 +209,7 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
         it.results?.brcaness?.specimen?.id = it.results?.brcaness?.specimen?.id?.let(::anonymize)
         it.results?.copyNumberVariants?.forEach { it -> it?.id = it.id?.let(::anonymize) }
         it.results?.hrdScore?.id = it.results?.hrdScore?.id?.let(::anonymize)
-        it.results?.hrdScore?.specimen?.id = it.results?.hrdScore?.specimen?.id?.let (::anonymize)
+        it.results?.hrdScore?.specimen?.id = it.results?.hrdScore?.specimen?.id?.let(::anonymize)
         it.results?.rnaSeqs?.forEach { it -> it?.id = it.id?.let(::anonymize) }
         it.results?.dnaFusions?.forEach { it -> it?.id = it.id?.let(::anonymize) }
         it.specimen?.id = it?.specimen?.id?.let(::anonymize)
