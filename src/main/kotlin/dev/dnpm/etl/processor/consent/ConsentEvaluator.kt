@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.consent
 
 import dev.pcvolkmer.mv64e.mtb.ConsentProvision
+import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.springframework.stereotype.Service
 
@@ -35,7 +36,10 @@ class ConsentEvaluator(
         val consentGiven = ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN
                 || ttpConsentStatus == TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT
                 // Aktuell nur Modellvorhaben Consent im File
-                || ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE && mtbFile.metadata?.modelProjectConsent?.provisions?.any { it.type == ConsentProvision.PERMIT } == true
+                || ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE && mtbFile.metadata?.modelProjectConsent?.provisions?.any {
+                    it.purpose == ModelProjectConsentPurpose.SEQUENCING
+                            && it.type == ConsentProvision.PERMIT
+                } == true
 
         return ConsentEvaluation(ttpConsentStatus, consentGiven)
     }
