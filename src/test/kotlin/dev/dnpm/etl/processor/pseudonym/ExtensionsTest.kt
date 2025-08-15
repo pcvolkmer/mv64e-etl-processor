@@ -138,5 +138,63 @@ class ExtensionsTest {
             assertThat(mtbFile.episodesOfCare).hasSize(1)
             assertThat(mtbFile.episodesOfCare.map { it.id }).isNotNull
         }
+
+        @Test
+        fun shouldNotContainAnyUuidAfterRehashingOfIds(@Mock pseudonymizeService: PseudonymizeService) {
+            doAnswer {
+                it.arguments[0]
+                "PSEUDO-ID"
+            }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+
+            doAnswer {
+                "TESTDOMAIN"
+            }.whenever(pseudonymizeService).prefix()
+
+            val mtbFile = fakeMtbFile()
+
+            /**
+             * replace hex values with random long, so our test does not match false positives
+             */
+            mtbFile.ngsReports.forEach { report ->
+                report.results.simpleVariants.forEach { simpleVariant ->
+                    simpleVariant.externalIds.forEach { extIdValue ->
+                        extIdValue.value =
+                            Math.random().toLong().toString()
+                    }
+                }
+            }
+            mtbFile.ngsReports.forEach { report ->
+                report.results.rnaFusions.forEach { simpleVariant ->
+                    simpleVariant.externalIds.forEach { extIdValue ->
+                        extIdValue.value =
+                            Math.random().toLong().toString()
+                    }
+                    simpleVariant.fusionPartner3Prime?.transcriptId?.value =
+                        Math.random().toLong().toString()
+                    simpleVariant.fusionPartner5Prime?.transcriptId?.value =
+                        Math.random().toLong().toString()
+                    simpleVariant.externalIds?.forEach { it ->
+                        it?.value = Math.random().toLong().toString()
+                    }
+                }
+            }
+
+            mtbFile.pseudonymizeWith(pseudonymizeService)
+            mtbFile.anonymizeContentWith(pseudonymizeService)
+
+            val pattern =
+                "\"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\"".toRegex()
+                    .toPattern()
+            val input = mtbFile.serialized()
+            val matcher = pattern.matcher(input)
+
+            assertThrows<IllegalStateException> {
+                matcher.find()
+                val posSt = "check at pos: " + matcher.start().toString() + ", " + matcher.end()
+                println(posSt + " with " + matcher.group())
+            }.also {
+                assertThat(it.message).isEqualTo("No match found")
+            }
+        }
     }
 }
