@@ -7,7 +7,8 @@ import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.Patient
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.CodeableConcept
@@ -46,7 +47,7 @@ class ConsentProcessorTest {
         @Mock gicsConsentService: GicsConsentService,
     ) {
 
-        this.gIcsConfigProperties = GIcsConfigProperties(null, null, null)
+        this.gIcsConfigProperties = GIcsConfigProperties("https://gics.example.com")
         val jacksonConfig = JacksonConfig()
         this.objectMapper = jacksonConfig.objectMapper()
         this.fhirContext = JacksonConfig.fhirContext()
@@ -67,10 +68,10 @@ class ConsentProcessorTest {
         assertThat(consentProcessor.toString()).isNotNull
         // prep gICS response
         doAnswer { getDummyBroadConsentBundle() }.whenever(gicsConsentService)
-            .getConsent(any(), any(), eq(ConsentDomain.BroadConsent))
+            .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
 
         doAnswer { Bundle() }.whenever(gicsConsentService)
-            .getConsent(any(), any(), eq(ConsentDomain.Modelvorhaben64e))
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
 
         val inputMtb = Mtb.builder()
             .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build()).build()

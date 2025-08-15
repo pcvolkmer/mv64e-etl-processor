@@ -21,7 +21,7 @@ package dev.dnpm.etl.processor.input
 
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
-import dev.dnpm.etl.processor.consent.IGetConsent
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.Mtb
@@ -34,9 +34,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(path = ["mtbfile", "mtb"])
 class MtbFileRestController(
     private val requestProcessor: RequestProcessor,
-    private val iGetConsent: IGetConsent
+    private val consentEvaluator: ConsentEvaluator
 ) {
-
     private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
 
     @GetMapping
@@ -46,8 +45,15 @@ class MtbFileRestController(
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE, CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
     fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
-        logger.debug("Accepted MTB File (DNPM V2) for processing")
-        requestProcessor.processMtbFile(mtbFile)
+        val consentEvaluation = consentEvaluator.check(mtbFile)
+        if (consentEvaluation.hasConsent()) {
+            logger.debug("Accepted MTB File (DNPM V2) for processing")
+            requestProcessor.processMtbFile(mtbFile)
+        } else {
+            logger.debug("Accepted MTB File (DNPM V2) and process deletion")
+            val patientId = PatientId(mtbFile.patient.id)
+            requestProcessor.processDeletion(patientId, consentEvaluation.getStatus())
+        }
         return ResponseEntity.accepted().build()
     }
 

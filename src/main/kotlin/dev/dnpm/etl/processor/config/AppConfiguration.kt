@@ -20,9 +20,9 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.GicsConsentService
-import dev.dnpm.etl.processor.consent.IGetConsent
+import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.Generator
@@ -218,7 +218,7 @@ class AppConfiguration {
         retryTemplate: RetryTemplate,
         restTemplate: RestTemplate,
         appFhirConfig: AppFhirConfig
-    ): IGetConsent {
+    ): IConsentService {
         return GicsConsentService(
             gIcsConfigProperties,
             retryTemplate,
@@ -234,7 +234,7 @@ class AppConfiguration {
         gIcsConfigProperties: GIcsConfigProperties,
         getObjectMapper: ObjectMapper,
         appFhirConfig: AppFhirConfig,
-        gicsConsentService: IGetConsent
+        gicsConsentService: IConsentService
     ): ConsentProcessor {
         return ConsentProcessor(
             configProperties,
@@ -261,8 +261,8 @@ class AppConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    fun iGetConsentService(): IGetConsent {
-        return ConsentByMtbFile()
+    fun iGetConsentService(): IConsentService {
+        return MtbFileConsentService()
     }
 
 }
@@ -271,12 +271,8 @@ class GicsEnabledCondition :
     AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
 
     @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics")
+    @ConditionalOnProperty(name = ["app.consent.gics.uri"])
     class OnGicsServiceSelected {
-        // Just for Condition
-    }
-
-    @ConditionalOnProperty(name = ["app.consent.gics.enabled"], havingValue = "true")
-    class OnGicsEnabled {
         // Just for Condition
     }
 

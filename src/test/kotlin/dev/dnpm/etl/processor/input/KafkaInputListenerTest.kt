@@ -20,8 +20,10 @@
 package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.CustomMediaType
+import dev.dnpm.etl.processor.consent.ConsentEvaluation
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -40,21 +42,32 @@ import java.util.*
 class KafkaInputListenerTest {
 
     private lateinit var requestProcessor: RequestProcessor
+    private lateinit var consentEvaluator: ConsentEvaluator
     private lateinit var objectMapper: ObjectMapper
+
     private lateinit var kafkaInputListener: KafkaInputListener
 
     @BeforeEach
     fun setup(
         @Mock requestProcessor: RequestProcessor,
+        @Mock consentEvaluator: ConsentEvaluator,
     ) {
         this.requestProcessor = requestProcessor
+        this.consentEvaluator = consentEvaluator
         this.objectMapper = ObjectMapper()
 
-        this.kafkaInputListener = KafkaInputListener(requestProcessor, objectMapper)
+        this.kafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
     }
 
     @Test
     fun shouldProcessMtbFileRequest() {
+        whenever(consentEvaluator.check(any())).thenReturn(
+            ConsentEvaluation(
+                TtpConsentStatus.BROAD_CONSENT_GIVEN,
+                true
+            )
+        )
+
         val mtbFile = Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
@@ -64,7 +77,10 @@ class KafkaInputListenerTest {
                         ModelProjectConsent
                             .builder()
                             .provisions(
-                                listOf(Provision.builder().type(ConsentProvision.PERMIT).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                listOf(
+                                    Provision.builder().type(ConsentProvision.PERMIT)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                )
                             ).build()
                     )
                     .build()
@@ -86,6 +102,13 @@ class KafkaInputListenerTest {
 
     @Test
     fun shouldProcessDeleteRequest() {
+        whenever(consentEvaluator.check(any())).thenReturn(
+            ConsentEvaluation(
+                TtpConsentStatus.BROAD_CONSENT_GIVEN,
+                false
+            )
+        )
+
         val mtbFile = Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
@@ -95,7 +118,10 @@ class KafkaInputListenerTest {
                         ModelProjectConsent
                             .builder()
                             .provisions(
-                                listOf(Provision.builder().type(ConsentProvision.DENY).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                listOf(
+                                    Provision.builder().type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                )
                             ).build()
                     )
                     .build()
@@ -120,6 +146,13 @@ class KafkaInputListenerTest {
 
     @Test
     fun shouldProcessMtbFileRequestWithExistingRequestId() {
+        whenever(consentEvaluator.check(any())).thenReturn(
+            ConsentEvaluation(
+                TtpConsentStatus.BROAD_CONSENT_GIVEN,
+                true
+            )
+        )
+
         val mtbFile = Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
@@ -129,7 +162,10 @@ class KafkaInputListenerTest {
                         ModelProjectConsent
                             .builder()
                             .provisions(
-                                listOf(Provision.builder().type(ConsentProvision.PERMIT).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                listOf(
+                                    Provision.builder().type(ConsentProvision.PERMIT)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                )
                             ).build()
                     )
                     .build()
@@ -158,6 +194,13 @@ class KafkaInputListenerTest {
 
     @Test
     fun shouldProcessDeleteRequestWithExistingRequestId() {
+        whenever(consentEvaluator.check(any())).thenReturn(
+            ConsentEvaluation(
+                TtpConsentStatus.BROAD_CONSENT_GIVEN,
+                false
+            )
+        )
+
         val mtbFile = Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
@@ -167,7 +210,10 @@ class KafkaInputListenerTest {
                         ModelProjectConsent
                             .builder()
                             .provisions(
-                                listOf(Provision.builder().type(ConsentProvision.DENY).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                listOf(
+                                    Provision.builder().type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                )
                             ).build()
                     )
                     .build()
@@ -208,7 +254,10 @@ class KafkaInputListenerTest {
                         ModelProjectConsent
                             .builder()
                             .provisions(
-                                listOf(Provision.builder().type(ConsentProvision.DENY).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                listOf(
+                                    Provision.builder().type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                )
                             ).build()
                     )
                     .build()
