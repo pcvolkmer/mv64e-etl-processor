@@ -1,16 +1,17 @@
 {
   "resourceType": "Bundle",
   "type": "collection",
+  "total": 26,
   "entry": [
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61782bc-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d3456c2-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d61782bc-5003-11f0-a144-661e92ac9503",
+        "id": "7d3456c2-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.143+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -20,7 +21,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -58,66 +59,60 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "IDAT_erheben",
+              "display": "Erfassung neuer identifizierender Daten (IDAT)"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.2",
-              "display": "IDAT_erheben"
+              "display": "IDAT erheben"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "IDAT_erheben",
+                      "display": "Erfassung neuer identifizierender Daten (IDAT)"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.2",
-                      "display": "IDAT_erheben"
+                      "display": "IDAT erheben"
                     }
                   ]
                 }
@@ -128,14 +123,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618b6e4-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34babe-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d618b6e4-5003-11f0-a144-661e92ac9503",
+        "id": "7d34babe-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.154+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -145,7 +140,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -183,66 +178,536 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_5J_retro_speichern_verarbeiten",
+              "display": "Retrospektive Krankenkassendaten (KKDAT) aus fünf Jahren vor Einwilligung speichern und codiert verarbeiten zu Zwecken med. Forschung in der verantwortlichen Stelle"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.12",
+              "display": "KKDAT 5J retrospektiv speichern verarbeiten"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_retro_speichern_verarbeiten",
+                      "display": "Retrospektive Krankenkassendaten (KKDAT) aus fünf Jahren vor Einwilligung speichern und codiert verarbeiten zu Zwecken med. Forschung in der verantwortlichen Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.12",
+                      "display": "KKDAT 5J retrospektiv speichern verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34ddfa-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34ddfa-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.163+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "BIOMAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+              "display": "Bereitstellung umcodierter Biomaterialien (BIOMAT)  für wissenschaftliche Nutzung  und Analysen zu Zwecken med. Forschung an ext. Forscher"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.22",
+              "display": "BIOMAT wissenschaftlich nutzen EU DSGVO NIVEAU"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "BIOMAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+                      "display": "Bereitstellung umcodierter Biomaterialien (BIOMAT)  für wissenschaftliche Nutzung  und Analysen zu Zwecken med. Forschung an ext. Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.22",
+                      "display": "BIOMAT wissenschaftlich nutzen EU DSGVO NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d3494cf-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d3494cf-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.172+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_5J_retro_wissenschaftlich_nutzen",
+              "display": "Bereitstellung umcodierter retrospektiver Krankenkassendaten (KKDAT) für wissenschaftliche Nutzung zu Zwecken med. Forschung an externe Forscher"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.13",
+              "display": "KKDAT 5J retrospektiv wissenschaftlich nutzen"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_retro_wissenschaftlich_nutzen",
+                      "display": "Bereitstellung umcodierter retrospektiver Krankenkassendaten (KKDAT) für wissenschaftliche Nutzung zu Zwecken med. Forschung an externe Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.13",
+                      "display": "KKDAT 5J retrospektiv wissenschaftlich nutzen"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34f543-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34f543-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.182+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "BIOMAT_Analysedaten_zusammenfuehren_Dritte",
+              "display": "Zusammenführen von auf Biomaterialien (BIOMAT) basierenden Analysedaten mit Analysedaten Dritter, sofern dort ebenfalls eine Einwilligung vorliegt"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.23",
+              "display": "BIOMAT Analysedaten zusammenfuehren Dritte"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_Analysedaten_zusammenfuehren_Dritte",
+                      "display": "Zusammenführen von auf Biomaterialien (BIOMAT) basierenden Analysedaten mit Analysedaten Dritter, sofern dort ebenfalls eine Einwilligung vorliegt"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.23",
+                      "display": "BIOMAT Analysedaten zusammenfuehren Dritte"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34c628-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34c628-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.191+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "Rekontaktierung_Zusatzbefund",
+              "display": "Rekontaktierung bezüglich Zusatzbefund im Rahmen der am Standort dafür entwickelten Prozesse und der im Nutzungsantrag angegebenen Bedingungen"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.31",
-              "display": "Rekontaktierung_Zusatzbefund"
+              "display": "Rekontaktierung Zusatzbefund"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "Rekontaktierung_Zusatzbefund",
+                      "display": "Rekontaktierung bezüglich Zusatzbefund im Rahmen der am Standort dafür entwickelten Prozesse und der im Nutzungsantrag angegebenen Bedingungen"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.31",
-                      "display": "Rekontaktierung_Zusatzbefund"
+                      "display": "Rekontaktierung Zusatzbefund"
                     }
                   ]
                 }
@@ -253,14 +718,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6180058-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33e453-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d6180058-5003-11f0-a144-661e92ac9503",
+        "id": "7d33e453-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.200+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -270,7 +735,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -308,66 +773,536 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_5J_pro_wissenschaftlich_nutzen",
+              "display": "Bereitstellung umcodierter prospektiver Krankenkassendaten (KKDAT) aus fünf Jahren ab Einwilligung zu Zwecken med. Forschung an ext. Forscher"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.17",
+              "display": "KKDAT 5J prospektiv wissenschaftlich nutzen"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_pro_wissenschaftlich_nutzen",
+                      "display": "Bereitstellung umcodierter prospektiver Krankenkassendaten (KKDAT) aus fünf Jahren ab Einwilligung zu Zwecken med. Forschung an ext. Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.17",
+                      "display": "KKDAT 5J prospektiv wissenschaftlich nutzen"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34ea17-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34ea17-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.212+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "BIOMAT_lagern_verarbeiten",
+              "display": "Lagerung und Verarbeitung von Biomaterialien innerhalb der verantwortlichen Stelle (BIOMAT)"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.20",
+              "display": "BIOMAT lagern verarbeiten"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_lagern_verarbeiten",
+                      "display": "Lagerung und Verarbeitung von Biomaterialien innerhalb der verantwortlichen Stelle (BIOMAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.20",
+                      "display": "BIOMAT lagern verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34a210-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34a210-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.226+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_5J_retro_uebertragen",
+              "display": "Krankenkassendaten (KKDAT) der letzten fünf Kalenderjahre vor Datum Unterschrift übertragen"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.11",
+              "display": "KKDAT 5J retrospektiv uebertragen"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_retro_uebertragen",
+                      "display": "Krankenkassendaten (KKDAT) der letzten fünf Kalenderjahre vor Datum Unterschrift übertragen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.11",
+                      "display": "KKDAT 5J retrospektiv uebertragen"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34aed8-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34aed8-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.237+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_KVNR_5J_retro_uebertragen",
+              "display": "Erlaubnis zur retrospektiven Übermittlung der KVNr., MII-Pseudonym und Zeitraum Datenübermittlung (von:5 Jahre vor Datum Unterschrift; bis: Datum Unterschrift) an zuständige Stelle"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.38",
+              "display": "KKDAT 5J retrospektiv uebertragen KVNR"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_KVNR_5J_retro_uebertragen",
+                      "display": "Erlaubnis zur retrospektiven Übermittlung der KVNr., MII-Pseudonym und Zeitraum Datenübermittlung (von:5 Jahre vor Datum Unterschrift; bis: Datum Unterschrift) an zuständige Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.38",
+                      "display": "KKDAT 5J retrospektiv uebertragen KVNR"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d343bc9-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d343bc9-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.248+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "MDAT_erheben",
+              "display": "Erfassung medizinischer Daten (MDAT)"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.6",
-              "display": "MDAT_erheben"
+              "display": "MDAT erheben"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2030-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2030-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2030-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2030-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "MDAT_erheben",
+                      "display": "Erfassung medizinischer Daten (MDAT)"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.6",
-                      "display": "MDAT_erheben"
+                      "display": "MDAT erheben"
                     }
                   ]
                 }
@@ -378,14 +1313,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d617e5c3-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33b26e-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d617e5c3-5003-11f0-a144-661e92ac9503",
+        "id": "7d33b26e-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.257+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -395,7 +1330,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -433,66 +1368,60 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
             {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_5J_pro_speichern_verarbeiten",
+              "display": "Prospektive Krankenkassendaten (KKDAT) aus fünf Jahren ab Einwilligung speichern und codiert verarbeiten zu Zwecken der med. Forschung in der verantwortlichen Stelle"
+            },
+            {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-              "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
-              "display": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU"
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.16",
+              "display": "KKDAT 5J prospektiv speichern verarbeiten"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
                     {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_pro_speichern_verarbeiten",
+                      "display": "Prospektive Krankenkassendaten (KKDAT) aus fünf Jahren ab Einwilligung speichern und codiert verarbeiten zu Zwecken der med. Forschung in der verantwortlichen Stelle"
+                    },
+                    {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
-                      "display": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_NIVEAU"
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.16",
+                      "display": "KKDAT 5J prospektiv speichern verarbeiten"
                     }
                   ]
                 }
@@ -503,14 +1432,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6186042-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d3409f7-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d6186042-5003-11f0-a144-661e92ac9503",
+        "id": "7d3409f7-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.267+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -520,7 +1449,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -558,66 +1487,179 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
             {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+              "display": "Bereitstellung umcodierter medizinischer Daten (MDAT) für wissenschaftliche Nutzung zu Zwecken med. Forschung an externe Forscher"
+            },
+            {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-              "code": "2.16.840.1.113883.3.1937.777.24.5.3.27",
-              "display": "Rekontaktierung_Verknuepfung_Datenbanken"
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
+              "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+                      "display": "Bereitstellung umcodierter medizinischer Daten (MDAT) für wissenschaftliche Nutzung zu Zwecken med. Forschung an externe Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
+                      "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d348310-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d348310-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.275+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "Rekontaktierung_Verknuepfung_Datenbanken",
+              "display": "Rekontaktierung zur Verknüpfung von Patientendaten mit Daten anderer Datenbanken"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.27",
+              "display": "Rekontaktierung Verknüpfung Datenbanken"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "deny",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "Rekontaktierung_Verknuepfung_Datenbanken",
+                      "display": "Rekontaktierung zur Verknüpfung von Patientendaten mit Daten anderer Datenbanken"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.27",
-                      "display": "Rekontaktierung_Verknuepfung_Datenbanken"
+                      "display": "Rekontaktierung Verknüpfung Datenbanken"
                     }
                   ]
                 }
@@ -628,14 +1670,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618abf6-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d346243-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d618abf6-5003-11f0-a144-661e92ac9503",
+        "id": "7d346243-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.289+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -645,7 +1687,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -683,66 +1725,60 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "Rekontaktierung_weitere_Studien",
+              "display": "Rekontaktierung bezüglich Information zu neuen Forschungsvorhaben oder Studien"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.29",
-              "display": "Rekontaktierung_weitere_Studien"
+              "display": "Rekontaktierung weitere Studien"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "Rekontaktierung_weitere_Studien",
+                      "display": "Rekontaktierung bezüglich Information zu neuen Forschungsvorhaben oder Studien"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.29",
-                      "display": "Rekontaktierung_weitere_Studien"
+                      "display": "Rekontaktierung weitere Studien"
                     }
                   ]
                 }
@@ -753,14 +1789,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618341d-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33f12f-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d618341d-5003-11f0-a144-661e92ac9503",
+        "id": "7d33f12f-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.299+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -770,7 +1806,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -808,66 +1844,60 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "IDAT_bereitstellen_EU_DSGVO_konform",
+              "display": "Herausgabe identifizierender Daten (IDAT) an unabhängige Treuhandstelle zur weiteren Verarbeitung"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.5",
-              "display": "IDAT_bereitstellen_EU_DSGVO_NIVEAU"
+              "display": "IDAT bereitstellen EU DSGVO NIVEAU"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "IDAT_bereitstellen_EU_DSGVO_konform",
+                      "display": "Herausgabe identifizierender Daten (IDAT) an unabhängige Treuhandstelle zur weiteren Verarbeitung"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.5",
-                      "display": "IDAT_bereitstellen_EU_DSGVO_NIVEAU"
+                      "display": "IDAT bereitstellen EU DSGVO NIVEAU"
                     }
                   ]
                 }
@@ -878,14 +1908,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61817be-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34217c-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d61817be-5003-11f0-a144-661e92ac9503",
+        "id": "7d34217c-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.309+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -895,7 +1925,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -933,191 +1963,60 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
             {
-              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-              "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
-              "display": "MDAT_speichern_verarbeiten"
-            }
-          ]
-        },
-        "provision": {
-          "type": "deny",
-          "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
-          },
-          "provision": [
-            {
-              "type": "permit",
-              "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
-              },
-              "code": [
-                {
-                  "coding": [
-                    {
-                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
-                      "display": "MDAT_speichern_verarbeiten"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      }
-    },
-    {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6183b46-5003-11f0-a144-661e92ac9503",
-      "resource": {
-        "resourceType": "Consent",
-        "id": "d6183b46-5003-11f0-a144-661e92ac9503",
-        "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
-          ]
-        },
-        "extension": [
-          {
-            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
-            "extension": [
-              {
-                "url": "domain",
-                "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
-                }
-              },
-              {
-                "url": "status",
-                "valueCoding": {
-                  "system": "http://hl7.org/fhir/publication-status",
-                  "code": "active"
-                }
-              }
-            ]
-          }
-        ],
-        "status": "active",
-        "scope": {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
-              "code": "research"
-            }
-          ]
-        },
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://loinc.org",
-                "code": "57016-8"
-              }
-            ]
-          },
-          {
-            "coding": [
-              {
-                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
-                "code": "policy"
-              }
-            ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
-          }
-        ],
-        "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
-        },
-        "dateTime": "2025-06-23T00:00:00+02:00",
-        "organization": [
-          {
-            "display": "MII"
-          }
-        ],
-        "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
-        },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
-        "policyRule": {
-          "coding": [
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "IDAT_speichern_verarbeiten",
+              "display": "Speicherung und Verarbeitung identifizierender Daten (IDAT) zu Zwecken med. Forschung in der verantwortlichen Stelle"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.3",
-              "display": "IDAT_speichern_verarbeiten"
+              "display": "IDAT speichern, verarbeiten"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "IDAT_speichern_verarbeiten",
+                      "display": "Speicherung und Verarbeitung identifizierender Daten (IDAT) zu Zwecken med. Forschung in der verantwortlichen Stelle"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.3",
-                      "display": "IDAT_speichern_verarbeiten"
+                      "display": "IDAT speichern, verarbeiten"
                     }
                   ]
                 }
@@ -1128,14 +2027,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61848d9-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d3415dc-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d61848d9-5003-11f0-a144-661e92ac9503",
+        "id": "7d3415dc-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.318+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -1145,7 +2044,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -1183,66 +2082,298 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "MDAT_speichern_verarbeiten",
+              "display": "Speicherung und Verarbeitung von medizinischen codierten Daten zu Zwecken med. Forschung innerhalb der verantwortlichen Stelle (MDAT)"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
+              "display": "MDAT speichern, verarbeiten"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "MDAT_speichern_verarbeiten",
+                      "display": "Speicherung und Verarbeitung von medizinischen codierten Daten zu Zwecken med. Forschung innerhalb der verantwortlichen Stelle (MDAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
+                      "display": "MDAT speichern, verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34d165-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34d165-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.330+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "BIOMAT_erheben",
+              "display": "Gewinnung von Biomaterialien (BIOMAT)"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.19",
+              "display": "BIOMAT erheben"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2030-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2030-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_erheben",
+                      "display": "Gewinnung von Biomaterialien (BIOMAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.19",
+                      "display": "BIOMAT erheben"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d342d3c-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d342d3c-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.338+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung",
+              "display": "Rekontaktierung des Betroffenen bei Ergebnissen von erheblicher Bedeutung"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.37",
-              "display": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung"
+              "display": "Rekontaktierung Ergebnisse erheblicher Bedeutung"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung",
+                      "display": "Rekontaktierung des Betroffenen bei Ergebnissen von erheblicher Bedeutung"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.37",
-                      "display": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung"
+                      "display": "Rekontaktierung Ergebnisse erheblicher Bedeutung"
                     }
                   ]
                 }
@@ -1253,14 +2384,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d61886e7-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33c913-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d61886e7-5003-11f0-a144-661e92ac9503",
+        "id": "7d33c913-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.348+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -1270,7 +2401,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -1308,66 +2439,298 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_KVNR_5J_pro_uebertragen",
+              "display": "Erlaubnis zur prospektiven Übermittlung der KVNr., MII-Pseudonym und Zeitraum Datenübermittlung (von: Datum Unterschrift; bis: max. 5 Kalenderjahre nach Unterschrift) an zuständige Stelle"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.39",
+              "display": "KKDAT 5J prospektiv uebertragen KVNR"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2030-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2030-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_KVNR_5J_pro_uebertragen",
+                      "display": "Erlaubnis zur prospektiven Übermittlung der KVNr., MII-Pseudonym und Zeitraum Datenübermittlung (von: Datum Unterschrift; bis: max. 5 Kalenderjahre nach Unterschrift) an zuständige Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.39",
+                      "display": "KKDAT 5J prospektiv uebertragen KVNR"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33597c-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d33597c-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.358+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "BIOMAT_Zusatzmengen_entnehmen",
+              "display": "Entnahme zusätzlicher Mengen von Biomaterialien (BIOMAT) in den in der Einwilligung beschriebenen Grenzen"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.25",
+              "display": "BIOMAT Zusatzmengen entnehmen"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2030-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2030-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_Zusatzmengen_entnehmen",
+                      "display": "Entnahme zusätzlicher Mengen von Biomaterialien (BIOMAT) in den in der Einwilligung beschriebenen Grenzen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.25",
+                      "display": "BIOMAT Zusatzmengen entnehmen"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d34770b-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d34770b-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.366+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "Rekontaktierung_weitere_Erhebung",
+              "display": "Rekontaktierung bezüglich Erhebung zusätzlicher Daten"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.28",
-              "display": "Rekontaktierung_weitere_Erhebung"
+              "display": "Rekontaktierung weitere Erhebung"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "Rekontaktierung_weitere_Erhebung",
+                      "display": "Rekontaktierung bezüglich Erhebung zusätzlicher Daten"
+                    },
                     {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.28",
-                      "display": "Rekontaktierung_weitere_Erhebung"
+                      "display": "Rekontaktierung weitere Erhebung"
                     }
                   ]
                 }
@@ -1378,14 +2741,14 @@
       }
     },
     {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d6182af5-5003-11f0-a144-661e92ac9503",
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d344880-79b1-11f0-ab27-6ed0ed82d0fd",
       "resource": {
         "resourceType": "Consent",
-        "id": "d6182af5-5003-11f0-a144-661e92ac9503",
+        "id": "7d344880-79b1-11f0-ab27-6ed0ed82d0fd",
         "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
+          "lastUpdated": "2025-08-15T11:13:59.375+02:00",
           "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
           ]
         },
         "extension": [
@@ -1395,7 +2758,7 @@
               {
                 "url": "domain",
                 "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
                 }
               },
               {
@@ -1433,191 +2796,298 @@
                 "code": "policy"
               }
             ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
           }
         ],
         "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
         },
-        "dateTime": "2025-06-23T00:00:00+02:00",
+        "dateTime": "2025-08-15T00:00:00+02:00",
         "organization": [
           {
             "display": "MII"
           }
         ],
         "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
         },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
         "policyRule": {
           "coding": [
             {
-              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-              "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
-              "display": "MDAT_zusammenfuehren_Dritte"
-            }
-          ]
-        },
-        "provision": {
-          "type": "deny",
-          "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
-          },
-          "provision": [
-            {
-              "type": "permit",
-              "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
-              },
-              "code": [
-                {
-                  "coding": [
-                    {
-                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
-                      "display": "MDAT_zusammenfuehren_Dritte"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      }
-    },
-    {
-      "fullUrl": "http://127.0.0.1:8090/ttp-fhir/fhir/gics/Consent/d618422d-5003-11f0-a144-661e92ac9503",
-      "resource": {
-        "resourceType": "Consent",
-        "id": "d618422d-5003-11f0-a144-661e92ac9503",
-        "meta": {
-          "lastUpdated": "2025-06-23T09:29:45.532+02:00",
-          "profile": [
-            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
-          ]
-        },
-        "extension": [
-          {
-            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
-            "extension": [
-              {
-                "url": "domain",
-                "valueReference": {
-                  "reference": "ResearchStudy/90a1fcf9-5003-11f0-a144-661e92ac9503"
-                }
-              },
-              {
-                "url": "status",
-                "valueCoding": {
-                  "system": "http://hl7.org/fhir/publication-status",
-                  "code": "active"
-                }
-              }
-            ]
-          }
-        ],
-        "status": "active",
-        "scope": {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
-              "code": "research"
-            }
-          ]
-        },
-        "category": [
-          {
-            "coding": [
-              {
-                "system": "http://loinc.org",
-                "code": "57016-8"
-              }
-            ]
-          },
-          {
-            "coding": [
-              {
-                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
-                "code": "policy"
-              }
-            ]
-          },
-          {
-            "coding": [
-              {
-                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
-                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
-              }
-            ]
-          }
-        ],
-        "patient": {
-          "reference": "Patient/d611d429-5003-11f0-a144-661e92ac9503",
-          "display": "Patienten-ID 12345678"
-        },
-        "dateTime": "2025-06-23T00:00:00+02:00",
-        "organization": [
-          {
-            "display": "MII"
-          }
-        ],
-        "sourceReference": {
-          "reference": "QuestionnaireResponse/d615e32f-5003-11f0-a144-661e92ac9503"
-        },
-        "policy": [
-          {
-            "uri": "2.16.840.1.113883.3.1937.777.24.2.184"
-          },
-          {
-            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
-          }
-        ],
-        "policyRule": {
-          "coding": [
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "IDAT_zusammenfuehren_Dritte",
+              "display": "Zusammenführung identifizierender Daten (IDAT) über die unabhängige Treuhandstelle mit Dritten Forschungspartnern, sofern dort eine Einwilligung vorliegt"
+            },
             {
               "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
               "code": "2.16.840.1.113883.3.1937.777.24.5.3.4",
-              "display": "IDAT_zusammenfuehren_Dritte"
+              "display": "IDAT zusammenfuehren Dritte"
             }
           ]
         },
         "provision": {
           "type": "deny",
           "period": {
-            "start": "2025-06-23T00:00:00+02:00",
-            "end": "2055-06-23T00:00:00+02:00"
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
           },
           "provision": [
             {
               "type": "permit",
               "period": {
-                "start": "2025-06-23T00:00:00+02:00",
-                "end": "2055-06-23T00:00:00+02:00"
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
               },
               "code": [
                 {
                   "coding": [
                     {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "IDAT_zusammenfuehren_Dritte",
+                      "display": "Zusammenführung identifizierender Daten (IDAT) über die unabhängige Treuhandstelle mit Dritten Forschungspartnern, sofern dort eine Einwilligung vorliegt"
+                    },
+                    {
                       "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
                       "code": "2.16.840.1.113883.3.1937.777.24.5.3.4",
-                      "display": "IDAT_zusammenfuehren_Dritte"
+                      "display": "IDAT zusammenfuehren Dritte"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33fe50-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d33fe50-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.384+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+              "code": "MDAT_zusammenfuehren_Dritte",
+              "display": "Zusammenführung medizinischer Daten (MDAT) mit Dritten Forschungspartnern, sofern dort eine Einwilligung vorliegt"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
+              "display": "MDAT zusammenfuehren Dritte"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2055-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2055-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "MDAT_zusammenfuehren_Dritte",
+                      "display": "Zusammenführung medizinischer Daten (MDAT) mit Dritten Forschungspartnern, sofern dort eine Einwilligung vorliegt"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
+                      "display": "MDAT zusammenfuehren Dritte"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d33d781-79b1-11f0-ab27-6ed0ed82d0fd",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "7d33d781-79b1-11f0-ab27-6ed0ed82d0fd",
+        "meta": {
+          "lastUpdated": "2025-08-15T11:13:59.394+02:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/3c3ffec5-79b1-11f0-ab27-6ed0ed82d0fd"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
+                "code": "policy"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
+          "display": "Patienten-ID 644bae7a-56f6-4ee8-b02f-c532e65af5b1"
+        },
+        "dateTime": "2025-08-15T00:00:00+02:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
+        },
+        "policyRule": {
+          "coding": [
+            {
+              "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+              "code": "KKDAT_5J_pro_uebertragen",
+              "display": "Prospektive Krankenkassendaten (KKDAT) für fünf Kalenderjahre nach Datum Unterschrift übertragen"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+              "code": "2.16.840.1.113883.3.1937.777.24.5.3.15",
+              "display": "KKDAT 5J prospektiv uebertragen"
+            }
+          ]
+        },
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-08-15T00:00:00+02:00",
+            "end": "2030-08-15T00:00:00+02:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-08-15T00:00:00+02:00",
+                "end": "2030-08-15T00:00:00+02:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_pro_uebertragen",
+                      "display": "Prospektive Krankenkassendaten (KKDAT) für fünf Kalenderjahre nach Datum Unterschrift übertragen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.15",
+                      "display": "KKDAT 5J prospektiv uebertragen"
                     }
                   ]
                 }
