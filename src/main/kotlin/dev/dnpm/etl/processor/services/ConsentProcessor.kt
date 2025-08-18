@@ -237,11 +237,11 @@ class ConsentProcessor(
 
             isConsentResource && consentIsActive && checkCoding(
                 targetCode, targetSystem, (entry.resource as Consent).policyRule.coding
-            ) && isIsRequestDateInRange(requestDate, (entry.resource as Consent).provision.period)
+            ) && isRequestDateInRange(requestDate, (entry.resource as Consent).provision.period)
         }.map { entry: BundleEntryComponent ->
             val consent = (entry.getResource() as Consent)
             consent.provision.provision.filter { subProvision ->
-                isIsRequestDateInRange(requestDate, subProvision.period)
+                isRequestDateInRange(requestDate, subProvision.period)
                 // search coding entries of current provision for code and system
                 subProvision.code.map { c -> c.coding }.flatten().firstOrNull { code ->
                     targetCode.equals(code.code) && targetSystem.equals(code.system)
@@ -269,7 +269,7 @@ class ConsentProcessor(
         } != null
     }
 
-    fun isIsRequestDateInRange(requestDate: Date?, provPeriod: Period): Boolean {
+    fun isRequestDateInRange(requestDate: Date?, provPeriod: Period): Boolean {
         val isRequestDateAfterOrEqualStart = provPeriod.getStart().compareTo(requestDate)
         val isRequestDateBeforeOrEqualEnd = provPeriod.getEnd().compareTo(requestDate)
         return isRequestDateAfterOrEqualStart <= 0 && isRequestDateBeforeOrEqualEnd >= 0
