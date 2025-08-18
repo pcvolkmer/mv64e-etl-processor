@@ -78,7 +78,7 @@ class ConsentProcessorTest {
         val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
 
         assertThat(checkResult).isTrue
-        assertThat(inputMtb.metadata.researchConsents).hasSize(13)
+        assertThat(inputMtb.metadata.researchConsents).hasSize(26)
     }
 
     companion object {
@@ -93,13 +93,13 @@ class ConsentProcessorTest {
                 )
             )
             consent.provision.period.start =
-                Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
+                Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
             consent.provision.period.end =
                 Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
 
             val addProvision1 = consent.provision.addProvision()
             addProvision1.setType(Consent.ConsentProvisionType.fromCode("permit"))
-            addProvision1.period.start = Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
+            addProvision1.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
             addProvision1.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
             addProvision1.code.addLast(
                 CodeableConcept(
@@ -113,7 +113,7 @@ class ConsentProcessorTest {
 
             val addProvision2 = consent.provision.addProvision()
             addProvision2.setType(Consent.ConsentProvisionType.fromCode("deny"))
-            addProvision2.period.start = Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))
+            addProvision2.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
             addProvision2.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
             addProvision2.code.addLast(
                 CodeableConcept(
@@ -130,13 +130,14 @@ class ConsentProcessorTest {
 
     @ParameterizedTest
     @CsvSource(
-        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-07-23T00:00:00+02:00,PERMIT,expect permit",
-        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-06-23T00:00:00+02:00,PERMIT,expect permit date is exactly on start",
-        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2055-06-23T00:00:00+02:00,PERMIT,expect permit date is exactly on end",
-        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2021-06-23T00:00:00+02:00,NULL,date is before start",
-        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2060-06-23T00:00:00+02:00,NULL,date is after end",
-        "2.16.840.1.113883.3.1937.777.24.5.3.8,XXXX,2025-07-23T00:00:00+02:00,NULL,system not found - therefore expect NULL",
-        "2.16.840.1.113883.3.1937.777.24.5.3.27,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-07-23T00:00:00+02:00,DENY,provision is denied"
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,PERMIT,expect permit",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,PERMIT,expect permit date is exactly on start",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2055-08-15T00:00:00+02:00,PERMIT,expect permit date is exactly on end",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2021-08-15T00:00:00+02:00,NULL,date is before start",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2060-08-15T00:00:00+02:00,NULL,date is after end",
+        "2.16.840.1.113883.3.1937.777.24.5.3.27,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,DENY,provision is denied",
+        "unknownCode,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,NULL,code does not exist - therefore expect NULL",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,XXXX,2025-08-15T00:00:00+02:00,NULL,system not found - therefore expect NULL",
     )
     fun getProvisionTypeByPolicyCode(
         code: String?, system: String?, timeStamp: String, expected: String?,
@@ -153,6 +154,27 @@ class ConsentProcessorTest {
 
         assertThat(result).`as`(desc)
             .isEqualTo(Consent.ConsentProvisionType.valueOf(expected!!))
+    }
+
+    @Test
+    fun getProvisionTypeOnEmptyConsent(
+    ) {
+        val emptyResources = Bundle().addEntry(Bundle.BundleEntryComponent().setResource(Consent()))
+
+        val requestDate = Date.from(OffsetDateTime.parse("2025-08-15T00:00:00+02:00").toInstant())
+
+        val result: Consent.ConsentProvisionType =
+            consentProcessor.getProvisionTypeByPolicyCode(
+                emptyResources,
+                "anyCode",
+                "anySystem",
+                requestDate
+            )
+        assertThat(result).isNotNull()
+
+
+        assertThat(result).`as`("empty consent resource - expect NULL")
+            .isEqualTo(Consent.ConsentProvisionType.NULL)
     }
 
     fun getDummyBroadConsentBundle(): Bundle {

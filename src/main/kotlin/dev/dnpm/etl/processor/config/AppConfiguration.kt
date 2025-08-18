@@ -92,6 +92,7 @@ class AppConfiguration {
         restTemplate: RestTemplate,
         appFhirConfig: AppFhirConfig
     ): Generator {
+        logger.info("Selected 'GpasPseudonym Generator'")
         return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate, appFhirConfig)
     }
 
@@ -102,6 +103,7 @@ class AppConfiguration {
     )
     @Bean
     fun buildinPseudonymGenerator(): Generator {
+        logger.info("Selected 'BUILDIN Pseudonym Generator'")
         return AnonymizingGenerator()
     }
 

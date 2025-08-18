@@ -222,60 +222,56 @@ class ConsentProcessor(
 
     /**
      * @param consentBundle            consent resource
-     * @param policyAndProvisionCode   policyRule and provision code value
-     * @param policyAndProvisionSystem policyRule and provision system value
+     * @param targetCode   policyRule and provision code value
+     * @param targetSystem policyRule and provision system value
      * @param requestDate              date which must be within validation period of provision
      * @return type of provision, will be [org.hl7.fhir.r4.model.Consent.ConsentProvisionType.NULL] if none is found.
      */
     fun getProvisionTypeByPolicyCode(
-        consentBundle: Bundle,
-        policyAndProvisionCode: String?,
-        policyAndProvisionSystem: String?,
-        requestDate: Date?
+        consentBundle: Bundle, targetCode: String?, targetSystem: String?, requestDate: Date?
     ): Consent.ConsentProvisionType {
         val entriesOfInterest = consentBundle.entry.filter { entry ->
-            entry.resource.isResource && entry.resource.resourceType == ResourceType.Consent && (entry.resource as Consent).status == ConsentState.ACTIVE && checkCoding(
-                policyAndProvisionCode,
-                policyAndProvisionSystem,
-                (entry.resource as Consent).policyRule.codingFirstRep
-            ) && isIsRequestDateInRange(
-                requestDate, (entry.resource as Consent).provision.period
-            )
-        }.map { consentWithTargetPolicy: BundleEntryComponent ->
-            val provision = (consentWithTargetPolicy.getResource() as Consent).getProvision()
-            val provisionComponentByCode =
-                provision.getProvision().stream().filter { prov: ProvisionComponent? ->
-                    checkCoding(
-                        policyAndProvisionCode,
-                        policyAndProvisionSystem,
-                        prov!!.getCodeFirstRep().getCodingFirstRep()
-                    ) && isIsRequestDateInRange(
-                        requestDate, prov.getPeriod()
-                    )
-                }.findFirst()
-            if (provisionComponentByCode.isPresent) {
-                // actual provision we search for
-                return@map provisionComponentByCode.get().getType()
-            } else {
-                if (provision.type != null) return provision.type
+            val isConsentResource =
+                entry.resource.isResource && entry.resource.resourceType == ResourceType.Consent
+            val consentIsActive = (entry.resource as Consent).status == ConsentState.ACTIVE
 
+            isConsentResource && consentIsActive && checkCoding(
+                targetCode, targetSystem, (entry.resource as Consent).policyRule.coding
+            ) && isRequestDateInRange(requestDate, (entry.resource as Consent).provision.period)
+        }.map { entry: BundleEntryComponent ->
+            val consent = (entry.getResource() as Consent)
+            consent.provision.provision.filter { subProvision ->
+                isRequestDateInRange(requestDate, subProvision.period)
+                // search coding entries of current provision for code and system
+                subProvision.code.map { c -> c.coding }.flatten().firstOrNull { code ->
+                    targetCode.equals(code.code) && targetSystem.equals(code.system)
+                } != null
+            }.map { subProvision ->
+                subProvision
             }
-            return Consent.ConsentProvisionType.NULL
-        }.firstOrNull()
+        }.flatten()
 
-        if (entriesOfInterest == null) return Consent.ConsentProvisionType.NULL
-        return entriesOfInterest
+        if (!entriesOfInterest.isEmpty()) {
+            return entriesOfInterest.first().type
+        }
+        return Consent.ConsentProvisionType.NULL
     }
 
     fun checkCoding(
-        researchAllowedPolicyOid: String?, researchAllowedPolicySystem: String?, coding: Coding
+        researchAllowedPolicyOid: String?,
+        researchAllowedPolicySystem: String?,
+        policyRules: Collection<Coding>
     ): Boolean {
-        return coding.getSystem() == researchAllowedPolicySystem && (coding.getCode() == researchAllowedPolicyOid)
+        return policyRules.find { code ->
+            researchAllowedPolicySystem.equals(code.getSystem()) && (researchAllowedPolicyOid.equals(
+                code.getCode()
+            ))
+        } != null
     }
 
-    fun isIsRequestDateInRange(requestdate: Date?, provPeriod: Period): Boolean {
-        val isRequestDateAfterOrEqualStart = provPeriod.getStart().compareTo(requestdate)
-        val isRequestDateBeforeOrEqualEnd = provPeriod.getEnd().compareTo(requestdate)
+    fun isRequestDateInRange(requestDate: Date?, provPeriod: Period): Boolean {
+        val isRequestDateAfterOrEqualStart = provPeriod.getStart().compareTo(requestDate)
+        val isRequestDateBeforeOrEqualEnd = provPeriod.getEnd().compareTo(requestDate)
         return isRequestDateAfterOrEqualStart <= 0 && isRequestDateBeforeOrEqualEnd >= 0
     }
 

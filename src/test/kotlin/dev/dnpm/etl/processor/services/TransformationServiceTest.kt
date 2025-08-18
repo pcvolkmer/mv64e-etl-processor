@@ -97,18 +97,18 @@ class TransformationServiceTest {
 
         assertThat(mvhMetadata).isNotNull
         mvhMetadata.modelProjectConsent =
-            ModelProjectConsent.builder().date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z")))
+            ModelProjectConsent.builder().date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
                 .version("1").provisions(
                     listOf(
                         Provision.builder().type(ConsentProvision.PERMIT)
                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
-                            .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build(),
+                            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))).build(),
                         Provision.builder().type(ConsentProvision.PERMIT)
                             .purpose(ModelProjectConsentPurpose.REIDENTIFICATION)
-                            .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build(),
+                            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))).build(),
                         Provision.builder().type(ConsentProvision.DENY)
                             .purpose(ModelProjectConsentPurpose.CASE_IDENTIFICATION)
-                            .date(Date.from(Instant.parse("2025-06-23T00:00:00.00Z"))).build()
+                            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))).build()
                     )
                 ).build()
         val consent = ConsentProcessorTest.getDummyGenomDeConsent()
