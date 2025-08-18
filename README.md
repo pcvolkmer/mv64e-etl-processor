@@ -39,10 +39,10 @@ und werden anschließend verworfen.
 #### Test Betriebsbereitschaft
 Um die voll Betriebsbereitschaft herzustellen, muss eine erfolgreiche Übertragung mit dem
 Submission-Typ *Test* erfolgt sein. Über die Umgebungsvariable wird dieser Übertragungsmodus
-aktiviert. Alle Datensätze mit erteilter Teilnahme am Modelvorhaben werden mit der Test-Kennung
-übertragen.
+aktiviert. Alle Datensätze mit erteilter Teilnahme am Modelvorhaben werden mit der Test-Submission-Kennung
+übertragen, unabhängig vom ursprünglichen Wert.
 
-`APP_GENOM_DE_TEST_SUBMISSION` -> `true` | `false` (falls fehlt, wird `true` angenommen)
+`APP_GENOM_DE_TEST_SUBMISSION` -> `true` | `false` (falls fehlt, wird `false` angenommen)
 
 ### Datenübermittlung über HTTP/REST
 

@@ -27,7 +27,7 @@ data class AppConfigProperties(
     var transformations: List<TransformationProperties> = listOf(),
     var maxRetryAttempts: Int = 3,
     var duplicationDetection: Boolean = true,
-    var genomDeTestSubmission: Boolean = true
+    var genomDeTestSubmission: Boolean = false
 ) {
     companion object {
         const val NAME = "app"
