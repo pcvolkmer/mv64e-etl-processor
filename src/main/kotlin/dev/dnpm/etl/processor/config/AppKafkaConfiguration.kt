@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
@@ -100,9 +101,10 @@ class AppKafkaConfiguration {
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
     fun kafkaInputListener(
         requestProcessor: RequestProcessor,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
+        consentEvaluator: ConsentEvaluator
     ): KafkaInputListener {
-        return KafkaInputListener(requestProcessor, objectMapper)
+        return KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
     }
 
     @Bean

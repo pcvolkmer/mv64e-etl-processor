@@ -20,11 +20,11 @@
 package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.anyValueClass
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.ConsentEvaluation
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
-import dev.dnpm.etl.processor.consent.IGetConsent
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -57,32 +57,37 @@ import java.util.*
     classes = [
         MtbFileRestController::class,
         AppSecurityConfiguration::class,
-        ConsentByMtbFile::class, IGetConsent::class
+        MtbFileConsentService::class
     ]
 )
-@MockitoBean(types = [TokenRepository::class, RequestProcessor::class])
+@MockitoBean(types = [TokenRepository::class, RequestProcessor::class,  ConsentEvaluator::class])
 @TestPropertySource(
     properties = [
         "app.pseudonymize.generator=BUILDIN",
         "app.security.admin-user=admin",
         "app.security.admin-password={noop}very-secret",
-        "app.security.enable-tokens=true",
-        "app.consent.gics.enabled=false"
+        "app.security.enable-tokens=true"
     ]
 )
 class MtbFileRestControllerTest {
 
-    private lateinit var mockMvc: MockMvc
-
-    private lateinit var requestProcessor: RequestProcessor
+    lateinit var mockMvc: MockMvc
+    lateinit var requestProcessor: RequestProcessor
+    lateinit var consentEvaluator: ConsentEvaluator
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
-        @Autowired requestProcessor: RequestProcessor
+        @Autowired requestProcessor: RequestProcessor,
+        @Autowired consentEvaluator: ConsentEvaluator
     ) {
         this.mockMvc = mockMvc
         this.requestProcessor = requestProcessor
+        this.consentEvaluator = consentEvaluator
+
+        doAnswer {
+            ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true)
+        }.whenever(consentEvaluator).check(any())
     }
 
     @Test
@@ -167,8 +172,7 @@ class MtbFileRestControllerTest {
             "app.security.admin-user=admin",
             "app.security.admin-password={noop}very-secret",
             "app.security.enable-tokens=true",
-            "app.security.enable-oidc=true",
-            "app.consent.gics.enabled=false"
+            "app.security.enable-oidc=true"
         ]
     )
     inner class WithOidcEnabled {

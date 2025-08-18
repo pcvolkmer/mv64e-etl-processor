@@ -6,9 +6,9 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.ConsentDomain
-import dev.dnpm.etl.processor.consent.IGetConsent
+import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.mtb.*
 import org.apache.commons.lang3.NotImplementedException
@@ -31,7 +31,7 @@ class ConsentProcessor(
     private val gIcsConfigProperties: GIcsConfigProperties,
     private val objectMapper: ObjectMapper,
     private val fhirContext: FhirContext,
-    private val consentService: IGetConsent
+    private val consentService: IConsentService
 ) {
     private var logger: Logger = LoggerFactory.getLogger("ConsentProcessor")
 
@@ -49,7 +49,7 @@ class ConsentProcessor(
      *
      */
     fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
-        if (consentService is ConsentByMtbFile) {
+        if (consentService is MtbFileConsentService) {
             // consent check is disabled
             return true
         }
@@ -70,7 +70,7 @@ class ConsentProcessor(
          * broad consent
          */
         val broadConsent = consentService.getConsent(
-            personIdentifierValue, requestDate, ConsentDomain.BroadConsent
+            personIdentifierValue, requestDate, ConsentDomain.BROAD_CONSENT
         )
         val broadConsentHasBeenAsked = !broadConsent.entry.isEmpty()
 
@@ -78,7 +78,7 @@ class ConsentProcessor(
         if (!broadConsentHasBeenAsked) return false
 
         val genomeDeConsent = consentService.getConsent(
-            personIdentifierValue, requestDate, ConsentDomain.Modelvorhaben64e
+            personIdentifierValue, requestDate, ConsentDomain.MODELLVORHABEN_64E
         )
 
         addGenomeDbProvisions(mtbFile, genomeDeConsent)
@@ -88,11 +88,11 @@ class ConsentProcessor(
         embedBroadConsentResources(mtbFile, broadConsent)
 
         val broadConsentStatus = getProvisionTypeByPolicyCode(
-            broadConsent, requestDate, ConsentDomain.BroadConsent
+            broadConsent, requestDate, ConsentDomain.BROAD_CONSENT
         )
 
         val genomDeSequencingStatus = getProvisionTypeByPolicyCode(
-            genomeDeConsent, requestDate, ConsentDomain.Modelvorhaben64e
+            genomeDeConsent, requestDate, ConsentDomain.MODELLVORHABEN_64E
         )
 
         if (Consent.ConsentProvisionType.NULL == broadConsentStatus) {
@@ -204,10 +204,10 @@ class ConsentProcessor(
     ): Consent.ConsentProvisionType {
         val code: String?
         val system: String?
-        if (ConsentDomain.BroadConsent == consentDomain) {
+        if (ConsentDomain.BROAD_CONSENT == consentDomain) {
             code = gIcsConfigProperties.broadConsentPolicyCode
             system = gIcsConfigProperties.broadConsentPolicySystem
-        } else if (ConsentDomain.Modelvorhaben64e == consentDomain) {
+        } else if (ConsentDomain.MODELLVORHABEN_64E == consentDomain) {
             code = gIcsConfigProperties.genomeDePolicyCode
             system = gIcsConfigProperties.genomeDePolicySystem
         } else {

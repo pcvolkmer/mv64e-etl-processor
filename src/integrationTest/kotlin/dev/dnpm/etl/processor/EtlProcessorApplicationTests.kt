@@ -102,6 +102,18 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
                         .id("TEST_12345678")
                         .build()
                 )
+                .metadata(
+                    MvhMetadata
+                        .builder()
+                        .modelProjectConsent(
+                            ModelProjectConsent
+                                .builder()
+                                .provisions(
+                                    listOf(Provision.builder().type(ConsentProvision.PERMIT).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
+                                ).build()
+                        )
+                        .build()
+                )
                 .diagnoses(
                     listOf(
                         MtbDiagnosis.builder()

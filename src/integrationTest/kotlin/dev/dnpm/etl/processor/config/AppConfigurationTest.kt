@@ -20,8 +20,9 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.ConsentByMtbFile
+import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
@@ -53,7 +54,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
         AppSecurityConfiguration::class,
         KafkaAutoConfiguration::class,
         AppKafkaConfiguration::class,
-        AppRestConfiguration::class
+        AppRestConfiguration::class,
+        ConsentEvaluator::class
     ]
 )
 @MockitoBean(types = [ObjectMapper::class])
@@ -281,25 +283,11 @@ class AppConfigurationTest {
     @Nested
     @TestPropertySource(
         properties = [
-            "app.consent.service=GICS"
+            "app.consent.service=GICS",
+            "app.consent.gics.uri=http://localhost:9000",
         ]
     )
     inner class AppConfigurationConsentGicsTest(private val context: ApplicationContext) {
-
-        @Test
-        fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
-        }
-
-    }
-
-    @Nested
-    @TestPropertySource(
-        properties = [
-            "app.consent.gics.enabled=true"
-        ]
-    )
-    inner class AppConfigurationConsentGicsEnabledTest(private val context: ApplicationContext) {
 
         @Test
         fun shouldUseConfiguredGenerator() {
@@ -313,7 +301,7 @@ class AppConfigurationTest {
 
         @Test
         fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(ConsentByMtbFile::class.java)).isNotNull
+            assertThat(context.getBean(MtbFileConsentService::class.java)).isNotNull
         }
 
     }
