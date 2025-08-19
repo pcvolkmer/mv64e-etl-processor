@@ -6,9 +6,9 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IConsentService
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.mtb.*
 import org.apache.commons.lang3.NotImplementedException
@@ -177,19 +177,12 @@ class ConsentProcessor(
         }
     }
 
-    /**
-     *  fixme: currently we do not have information about submission type
-     */
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
         if (appConfigProperties.genomDeTestSubmission) {
-
-            // fixme: remove INITIAL and uncomment when data model is updated
-            mtbFile.metadata.type = MvhSubmissionType.INITIAL
-            // mtbFile.metadata.type = MvhSubmissionType.Test
-
+            mtbFile.metadata.type = MvhSubmissionType.TEST
             logger.info("genomeDe submission mit TEST")
-
         } else {
+            // later we need some differentiation for other submission types, too
             mtbFile.metadata.type = MvhSubmissionType.INITIAL
         }
     }
