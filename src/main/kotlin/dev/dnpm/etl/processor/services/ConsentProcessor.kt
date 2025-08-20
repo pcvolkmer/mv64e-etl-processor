@@ -182,8 +182,10 @@ class ConsentProcessor(
             mtbFile.metadata.type = MvhSubmissionType.TEST
             logger.info("genomeDe submission mit TEST")
         } else {
-            // later we need some differentiation for other submission types, too
-            mtbFile.metadata.type = MvhSubmissionType.INITIAL
+            mtbFile.metadata.type = when (mtbFile.metadata.type) {
+                null -> MvhSubmissionType.INITIAL
+                else -> mtbFile.metadata.type
+            }
         }
     }
 
