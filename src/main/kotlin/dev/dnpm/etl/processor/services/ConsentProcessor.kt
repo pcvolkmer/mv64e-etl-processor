@@ -6,9 +6,9 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IConsentService
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.mtb.*
 import org.apache.commons.lang3.NotImplementedException
@@ -72,7 +72,7 @@ class ConsentProcessor(
         val broadConsent = consentService.getConsent(
             personIdentifierValue, requestDate, ConsentDomain.BROAD_CONSENT
         )
-        val broadConsentHasBeenAsked = !broadConsent.entry.isEmpty()
+        val broadConsentHasBeenAsked = broadConsent.entry.isNotEmpty()
 
         // fast exit - if patient has not been asked, we can skip and exit
         if (!broadConsentHasBeenAsked) return false
@@ -83,7 +83,7 @@ class ConsentProcessor(
 
         addGenomeDbProvisions(mtbFile, genomeDeConsent)
 
-        if (!genomeDeConsent.entry.isEmpty()) setGenomDeSubmissionType(mtbFile)
+        if (genomeDeConsent.entry.isNotEmpty()) setGenomDeSubmissionType(mtbFile)
 
         embedBroadConsentResources(mtbFile, broadConsent)
 
@@ -105,8 +105,8 @@ class ConsentProcessor(
     }
 
     fun embedBroadConsentResources(mtbFile: Mtb, broadConsent: Bundle) {
-        for (entry in broadConsent.getEntry()) {
-            val resource = entry.getResource()
+        for (entry in broadConsent.entry) {
+            val resource = entry.resource
             if (resource is Consent) {
                 // since jackson convertValue does not work here,
                 // we need another step to back to string, before we convert to object map
@@ -124,14 +124,14 @@ class ConsentProcessor(
     }
 
     fun addGenomeDbProvisions(mtbFile: Mtb, consentGnomeDe: Bundle) {
-        for (entry in consentGnomeDe.getEntry()) {
-            val resource = entry.getResource()
+        for (entry in consentGnomeDe.entry) {
+            val resource = entry.resource
             if (resource !is Consent) {
                 continue
             }
 
             // We expect only one provision in collection, therefore get first or none
-            val provisions = resource.getProvision().getProvision()
+            val provisions = resource.provision.provision
             if (provisions.isEmpty()) {
                 continue
             }
@@ -139,10 +139,10 @@ class ConsentProcessor(
             val provisionComponent: ProvisionComponent = provisions.first()
 
             var provisionCode: String? = null
-            if (provisionComponent.getCode() != null && !provisionComponent.getCode().isEmpty()) {
-                val codableConcept: CodeableConcept = provisionComponent.getCode().first()
-                if (codableConcept.getCoding() != null && !codableConcept.getCoding().isEmpty()) {
-                    provisionCode = codableConcept.getCoding().first().getCode()
+            if (provisionComponent.code != null && provisionComponent.code.isNotEmpty()) {
+                val codableConcept: CodeableConcept = provisionComponent.code.first()
+                if (codableConcept.coding != null && codableConcept.coding.isNotEmpty()) {
+                    provisionCode = codableConcept.coding.first().code
                 }
             }
 
@@ -153,12 +153,12 @@ class ConsentProcessor(
 
                     if (ModelProjectConsentPurpose.SEQUENCING == modelProjectConsentPurpose) {
                         // CONVENTION: wrapping date is date of SEQUENCING consent
-                        mtbFile.metadata.modelProjectConsent.date = resource.getDateTime()
+                        mtbFile.metadata.modelProjectConsent.date = resource.dateTime
                     }
 
                     val provision = Provision.builder()
-                        .type(ConsentProvision.valueOf(provisionComponent.getType().name))
-                        .date(provisionComponent.getPeriod().getStart())
+                        .type(ConsentProvision.valueOf(provisionComponent.type.name))
+                        .date(provisionComponent.period.start)
                         .purpose(modelProjectConsentPurpose).build()
 
                     mtbFile.metadata.modelProjectConsent.provisions.add(provision)
@@ -170,27 +170,22 @@ class ConsentProcessor(
                 }
             }
 
-            if (!mtbFile.metadata.modelProjectConsent.provisions.isEmpty()) {
+            if (mtbFile.metadata.modelProjectConsent.provisions.isNotEmpty()) {
                 mtbFile.metadata.modelProjectConsent.version =
                     gIcsConfigProperties.genomeDeConsentVersion
             }
         }
     }
 
-    /**
-     *  fixme: currently we do not have information about submission type
-     */
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
         if (appConfigProperties.genomDeTestSubmission) {
-
-            // fixme: remove INITIAL and uncomment when data model is updated
-            mtbFile.metadata.type = MvhSubmissionType.INITIAL
-            // mtbFile.metadata.type = MvhSubmissionType.Test
-
+            mtbFile.metadata.type = MvhSubmissionType.TEST
             logger.info("genomeDe submission mit TEST")
-
         } else {
-            mtbFile.metadata.type = MvhSubmissionType.INITIAL
+            mtbFile.metadata.type = when (mtbFile.metadata.type) {
+                null -> MvhSubmissionType.INITIAL
+                else -> mtbFile.metadata.type
+            }
         }
     }
 
@@ -251,7 +246,7 @@ class ConsentProcessor(
             }
         }.flatten()
 
-        if (!entriesOfInterest.isEmpty()) {
+        if (entriesOfInterest.isNotEmpty()) {
             return entriesOfInterest.first().type
         }
         return Consent.ConsentProvisionType.NULL
@@ -270,8 +265,8 @@ class ConsentProcessor(
     }
 
     fun isRequestDateInRange(requestDate: Date?, provPeriod: Period): Boolean {
-        val isRequestDateAfterOrEqualStart = provPeriod.getStart().compareTo(requestDate)
-        val isRequestDateBeforeOrEqualEnd = provPeriod.getEnd().compareTo(requestDate)
+        val isRequestDateAfterOrEqualStart = provPeriod.start.compareTo(requestDate)
+        val isRequestDateBeforeOrEqualEnd = provPeriod.end.compareTo(requestDate)
         return isRequestDateAfterOrEqualStart <= 0 && isRequestDateBeforeOrEqualEnd >= 0
     }
 

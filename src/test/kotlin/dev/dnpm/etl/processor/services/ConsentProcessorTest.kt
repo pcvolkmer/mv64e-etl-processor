@@ -8,6 +8,7 @@ import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import dev.pcvolkmer.mv64e.mtb.Patient
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -189,6 +191,42 @@ class ConsentProcessorTest {
 
         return FhirContext.forR4().newJsonParser()
             .parseResource<Bundle>(Bundle::class.java, bundle)
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun mvSubmissionTypeIsSet(isTestSubmission: Boolean) {
+        appConfigProperties.genomDeTestSubmission = isTestSubmission
+        val fixture =
+            ConsentProcessor(
+                appConfigProperties,
+                gIcsConfigProperties,
+                objectMapper,
+                fhirContext,
+                gicsConsentService
+            )
+
+        doAnswer { getDummyBroadConsentBundle() }.whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
+
+        doAnswer {
+            Bundle().addEntry(
+                Bundle.BundleEntryComponent().setResource(getDummyGenomDeConsent())
+            )
+        }.whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
+
+        val inputMtb = Mtb.builder()
+            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build()).build()
+        val checkResult = fixture.consentGatedCheckAndTryEmbedding(inputMtb)
+        assertThat(checkResult).isNotNull
+
+        if (isTestSubmission)
+            assertThat(inputMtb.metadata.type).isEqualTo(MvhSubmissionType.TEST)
+        else {
+            assertThat(inputMtb.metadata.type).isEqualTo(MvhSubmissionType.INITIAL)
+        }
+
     }
 
 }
