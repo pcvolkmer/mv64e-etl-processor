@@ -154,7 +154,7 @@ tasks.jacocoTestReport {
 }
 
 tasks.named<BootBuildImage>("bootBuildImage") {
-    imageName.set("ghcr.io/pcvolkmer/etl-processor")
+    imageName.set("ghcr.io/pcvolkmer/mv64e-etl-processor")
 
     // Binding for CA Certs
     bindings.set(listOf(
@@ -164,8 +164,8 @@ tasks.named<BootBuildImage>("bootBuildImage") {
     environment.set(environment.get() + mapOf(
         // Enable this line to embed CA Certs into image on build time
         //"BP_EMBED_CERTS" to "true",
-        "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/etl-processor",
+        "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/mv64e-etl-processor",
         "BP_OCI_LICENSES" to "AGPLv3",
-        "BP_OCI_DESCRIPTION" to "ETL Processor for bwHC MTB files"
+        "BP_OCI_DESCRIPTION" to "ETL Processor for MV § 64e and DNPM:DIP"
     ))
 }
