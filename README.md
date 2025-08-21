@@ -1,12 +1,13 @@
-# ETL-Processor for DNPM:DIP [![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
+# ETL-Processor für das MV gem. §64e und DNPM:DIP
+[![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
 
-Diese Anwendung versendet ein MTB-File im DNPM-Datenmodell 2.1 an DNPM:DIP und pseudonymisiert
-die Patienten-ID.
+Diese Anwendung pseudonymisiert/anonymisiert Daten im DNPM-Datenmodell 2.1 für das Modellvorhaben
+Genomsequenzierung nach §64e unter Beachtung des Consents und sendet sie an DNPM:DIP.
 
 ## Einordnung innerhalb einer DNPM-ETL-Strecke
 
-Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin *
-*[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)**.
+Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin
+**[mv64e-onkostar-plugin-export](https://github.com/pcvolkmer/mv64e-onkostar-plugin-export)**.
 
 Der Inhalt einer Anfrage, wenn ein MTB-File, wird pseudonymisiert und auf Duplikate geprüft.
 Duplikate werden verworfen, Änderungen werden weitergeleitet.
@@ -16,6 +17,14 @@ Löschanfragen werden immer als Löschanfrage an DNPM:DIP weitergeleitet.
 Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand der Anwendung gewährt.
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
+
+### 🔥 Wichtige Änderungen in Version 0.11
+
+Ab Version 0.11 wird ausschließlich [DNPM:DIP](https://github.com/dnpm-dip) unterstützt.
+
+Zudem wurde der Name des Pakets in **mv64e-etl-processor** geändert.
+
+## Funktionsweise
 
 ### Duplikaterkennung
 
@@ -71,10 +80,6 @@ verarbeitet.
 Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
 
 ## Konfiguration
-
-### 🔥 Wichtige Änderungen in Version 0.11
-
-Ab Version 0.11 wird ausschließlich [DNPM:DIP](https://github.com/dnpm-dip) unterstützt.
 
 ### Pseudonymisierung der Patienten-ID
 

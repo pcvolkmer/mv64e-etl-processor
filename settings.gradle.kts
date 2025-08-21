@@ -1,1 +1,1 @@
-rootProject.name = "etl-processor"
+rootProject.name = "mv64e-etl-processor"
