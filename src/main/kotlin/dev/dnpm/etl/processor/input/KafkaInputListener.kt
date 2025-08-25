@@ -31,6 +31,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.kafka.listener.MessageListener
+import java.nio.charset.Charset
 
 class KafkaInputListener(
     private val requestProcessor: RequestProcessor,
@@ -49,19 +50,16 @@ class KafkaInputListener(
         }
     }
 
-    private fun guessMimeType(record: ConsumerRecord<String, String>): String {
+    private fun guessMimeType(record: ConsumerRecord<String, String>): String? {
         if (record.headers().headers("contentType").toList().isEmpty()) {
             // Fallback if no contentType set (old behavior)
             return MediaType.APPLICATION_JSON_VALUE
         }
 
-        return record.headers().headers("contentType")?.firstOrNull()?.value().contentToString()
+        return record.headers().headers("contentType")?.firstOrNull()?.value()?.toString(Charset.forName("UTF-8"))
     }
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
-        // Do not handle DNPM-V2 for now
-        logger.warn("Ignoring MTB File in DNPM V2 format: Not implemented yet")
-
         val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
         val patientId = PatientId(mtbFile.patient.id)
         val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
