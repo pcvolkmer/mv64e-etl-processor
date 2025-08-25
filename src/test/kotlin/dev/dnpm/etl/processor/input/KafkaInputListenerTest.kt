@@ -244,7 +244,14 @@ class KafkaInputListenerTest {
     }
 
     @Test
-    fun shouldNotProcessDnpmV2Request() {
+    fun shouldProcessDnpmV2Request() {
+        whenever(consentEvaluator.check(any())).thenReturn(
+            ConsentEvaluation(
+                TtpConsentStatus.BROAD_CONSENT_GIVEN,
+                false
+            )
+        )
+
         val mtbFile = Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
@@ -285,7 +292,7 @@ class KafkaInputListenerTest {
                 Optional.empty()
             )
         )
-        verify(requestProcessor, times(0)).processDeletion(
+        verify(requestProcessor, times(1)).processDeletion(
             anyValueClass(), anyValueClass(), eq(
                 TtpConsentStatus.UNKNOWN_CHECK_FILE
             )
