@@ -163,6 +163,8 @@ class KafkaMtbFileSenderTest {
             assertThat(captor.firstValue.key()).isEqualTo("{\"pid\": \"PID\"}")
             assertThat(captor.firstValue.headers().headers("contentType")).isNotNull
             assertThat(captor.firstValue.headers().headers("contentType")?.firstOrNull()?.value()).isEqualTo(CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+            assertThat(captor.firstValue.headers().headers("requestId")).isNotNull
+            assertThat(captor.firstValue.headers().headers("requestId")?.firstOrNull()?.value()).isEqualTo(TEST_REQUEST_ID.value.toByteArray())
             assertThat(captor.firstValue.value()).isNotNull
             assertThat(captor.firstValue.value()).isEqualTo(objectMapper.writeValueAsString(dnmpV2kafkaRecordData(TEST_REQUEST_ID)))
         }
