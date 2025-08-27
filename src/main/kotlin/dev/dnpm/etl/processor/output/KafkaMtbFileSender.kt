@@ -27,7 +27,6 @@ import dev.pcvolkmer.mv64e.mtb.Mtb
 import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.retry.support.RetryTemplate
 
@@ -47,8 +46,9 @@ class KafkaMtbFileSender(
                     ProducerRecord(
                         kafkaProperties.outputTopic,
                         key(request),
-                        objectMapper.writeValueAsString(request)
+                        objectMapper.writeValueAsString(request),
                     )
+                record.headers().add("requestId", request.requestId.value.toByteArray())
                 when (request) {
                     is DnpmV2MtbFileRequest -> record.headers()
                         .add(
@@ -82,7 +82,6 @@ class KafkaMtbFileSender(
                     ProducerRecord(
                         kafkaProperties.outputTopic,
                         key(request),
-                        // Always use old BwhcV1FileRequest with Consent REJECT
                         objectMapper.writeValueAsString(
                             DnpmV2MtbFileRequest(
                                 request.requestId,
@@ -90,7 +89,7 @@ class KafkaMtbFileSender(
                             )
                         )
                     )
-
+                record.headers().add("requestId", request.requestId.value.toByteArray())
                 val result = kafkaTemplate.send(record)
                 if (result.get() != null) {
                     logger.debug("Sent deletion request via KafkaMtbFileSender")
