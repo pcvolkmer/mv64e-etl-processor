@@ -427,9 +427,9 @@ Die PEM-Datei mit dem/den Root CA Zertifikat(en) muss dabei im vorbereiteten Ver
 #### Integration zur Laufzeit
 
 Hier muss die Umgebungsvariable `SERVICE_BINDING_ROOT` z.B. auf den Wert `/bindings` gesetzt sein.
-Zudem muss ein Verzeichnis `bindings/ca-certificates` - analog zum Verzeichnis [
-`bindings/ca-certificates`](bindings/ca-certificates) mit einer PEM-Datei als Docker-Volume
-eingebunden werden.
+Zudem muss ein Verzeichnis `bindings/ca-certificates` - analog zum Verzeichnis
+[`bindings/ca-certificates`](bindings/ca-certificates) mit einer PEM-Datei und der 
+Datei [`bindings/ca-certificates/type`](bindings/ca-certificates/type) als Docker-Volume eingebunden werden.
 
 Beispiel für Docker-Compose:
 
