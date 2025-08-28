@@ -268,7 +268,7 @@ zur Nutzung des MTB-File-Endpunkts eine HTTP-Basic-Authentifizierung voraussetze
 ![Tokenverwaltung](docs/tokens.png)
 
 In diesem Fall kann der Endpunkt für das Onkostar-Plugin *
-*[onkostar-plugin-dnpmexport](https://github.com/CCC-MF/onkostar-plugin-dnpmexport)** wie folgt
+*[mv64e-onkostar-plugin-export](https://github.com/pcvolkmer/mv64e-onkostar-plugin-export)** wie folgt
 konfiguriert werden:
 
 ```
