@@ -5,7 +5,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
@@ -111,6 +111,8 @@ dependencies {
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
+    // Fix for CVE-2024-25710
+    integrationTestImplementation("org.apache.commons:commons-compress:1.26.0")
 }
 
 tasks.withType<KotlinCompile> {
