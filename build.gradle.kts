@@ -7,22 +7,22 @@ plugins {
     war
     id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
+    kotlin("jvm") version "2.2.10"
+    kotlin("plugin.spring") version "2.2.10"
     jacoco
 }
 
 group = "dev.dnpm"
-version = "0.11.0-SNAPSHOT"
+version = "0.12.0-SNAPSHOT"
 
 var versions = mapOf(
     "mtb-dto" to "0.1.0-SNAPSHOT",
-    "hapi-fhir" to "7.6.1",
-    "mockito-kotlin" to "5.4.0",
-    "archunit" to "1.3.0",
+    "hapi-fhir" to "8.4.0",
+    "mockito-kotlin" to "6.0.0",
+    "archunit" to "1.4.1",
     // Webjars
     "webjars-locator" to "0.52",
-    "echarts" to "5.4.3",
+    "echarts" to "6.0.0",
     "htmx.org" to "1.9.12"
 )
 
