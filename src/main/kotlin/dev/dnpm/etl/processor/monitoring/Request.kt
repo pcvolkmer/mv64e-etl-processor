@@ -30,6 +30,7 @@ import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @Table("request")
@@ -65,6 +66,12 @@ data class Request(
         processedAt: Instant
     ) :
             this(null, uuid, patientPseudonym, pid, fingerprint, type, status, processedAt)
+
+    fun isPendingUnknown(): Boolean {
+        return this.status == RequestStatus.UNKNOWN && this.processedAt.isBefore(
+            Instant.now().minus(10, ChronoUnit.MINUTES)
+        )
+    }
 }
 
 @JvmRecord
@@ -90,19 +97,23 @@ interface RequestRepository : CrudRepository<Request, Long>, PagingAndSortingRep
     @Query("SELECT count(*) AS count, status FROM request WHERE type = 'MTB_FILE' GROUP BY status ORDER BY status, count DESC;")
     fun countStates(): List<CountedState>
 
-    @Query("SELECT count(*) AS count, status FROM (" +
-            "SELECT status, rank() OVER (PARTITION BY patient_pseudonym ORDER BY processed_at DESC) AS rank FROM request " +
-            "WHERE type = 'MTB_FILE' AND status NOT IN ('DUPLICATION') " +
-            ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
+    @Query(
+        "SELECT count(*) AS count, status FROM (" +
+                "SELECT status, rank() OVER (PARTITION BY patient_pseudonym ORDER BY processed_at DESC) AS rank FROM request " +
+                "WHERE type = 'MTB_FILE' AND status NOT IN ('DUPLICATION') " +
+                ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;"
+    )
     fun findPatientUniqueStates(): List<CountedState>
 
     @Query("SELECT count(*) AS count, status FROM request WHERE type = 'DELETE' GROUP BY status ORDER BY status, count DESC;")
     fun countDeleteStates(): List<CountedState>
 
-    @Query("SELECT count(*) AS count, status FROM (" +
-            "SELECT status, rank() OVER (PARTITION BY patient_pseudonym ORDER BY processed_at DESC) AS rank FROM request " +
-            "WHERE type = 'DELETE'" +
-            ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;")
+    @Query(
+        "SELECT count(*) AS count, status FROM (" +
+                "SELECT status, rank() OVER (PARTITION BY patient_pseudonym ORDER BY processed_at DESC) AS rank FROM request " +
+                "WHERE type = 'DELETE'" +
+                ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;"
+    )
     fun findPatientUniqueDeleteStates(): List<CountedState>
 
 }
