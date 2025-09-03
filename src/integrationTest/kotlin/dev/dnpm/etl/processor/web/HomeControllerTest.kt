@@ -282,6 +282,30 @@ class HomeControllerTest {
             assertThat(page.querySelectorAll("tbody tr")).isEmpty()
             assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
         }
+
+        @Test
+        @WithMockUser(username = "admin", roles = ["ADMIN"])
+        fun testShouldShowNoConsentStatusBadge() {
+            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(
+                PageImpl(
+                    listOf(
+                        Request(
+                            1L,
+                            randomRequestId(),
+                            PatientPseudonym("PSEUDO1"),
+                            PatientId("PATIENT1"),
+                            Fingerprint("ashdkasdh"),
+                            RequestType.MTB_FILE,
+                            RequestStatus.NO_CONSENT
+                        )
+                    )
+                )
+            )
+
+            val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
+            assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
+            assertThat(page.querySelectorAll("tbody tr > td > small").first().textContent).isEqualTo("NO_CONSENT")
+        }
     }
 
 }
