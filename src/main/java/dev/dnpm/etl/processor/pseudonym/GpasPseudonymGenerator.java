@@ -23,8 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GPasConfigProperties;
-import java.net.URI;
-import java.net.URISyntaxException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.net.URIBuilder;
@@ -39,8 +37,10 @@ import org.springframework.http.*;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class GpasPseudonymGenerator implements Generator {
 
@@ -150,23 +150,23 @@ public class GpasPseudonymGenerator implements Generator {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
                 return responseEntity;
             }
-        } catch (RestClientException rce) {
-            if (rce instanceof BadRequest) {
-                String msg = "gPas or request configuration is incorrect. Please check both."
-                    + rce.getMessage();
-                log.debug(
-                    msg);
-                throw new PseudonymRequestFailed(msg, rce);
-            }
-            if (rce instanceof Unauthorized) {
-                var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s".formatted(
-                    rce.getMessage());
-                log.error(msg);
-                throw new PseudonymRequestFailed(msg, rce);
-            }
-        } catch (Exception unexpected) {
+        } catch (BadRequest e) {
+            String msg = "gPas or request configuration is incorrect. Please check both."
+                + e.getMessage();
+            log.debug(
+                msg);
+            throw new PseudonymRequestFailed(msg, e);
+        } catch (Unauthorized e) {
+            var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s"
+                .formatted(e.getMessage());
+            log.error(msg);
+            throw new PseudonymRequestFailed(msg, e);
+        }
+        catch (Exception unexpected) {
             throw new PseudonymRequestFailed(
-                "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
+                "API request due unexpected error unsuccessful gPas unsuccessful.",
+                unexpected
+            );
         }
         throw new PseudonymRequestFailed(
             "API request due unexpected error unsuccessful gPas unsuccessful.");
