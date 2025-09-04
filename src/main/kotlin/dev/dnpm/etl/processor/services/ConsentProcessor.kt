@@ -241,9 +241,9 @@ class ConsentProcessor(
             consent.provision.provision.filter { subProvision ->
                 isRequestDateInRange(requestDate, subProvision.period)
                 // search coding entries of current provision for code and system
-                subProvision.code.map { c -> c.coding }.flatten().firstOrNull { code ->
+                subProvision.code.map { c -> c.coding }.flatten().any { code ->
                     targetCode.equals(code.code) && targetSystem.equals(code.system)
-                } != null
+                }
             }.map { subProvision ->
                 subProvision
             }
@@ -260,11 +260,11 @@ class ConsentProcessor(
         researchAllowedPolicySystem: String?,
         policyRules: Collection<Coding>
     ): Boolean {
-        return policyRules.find { code ->
+        return policyRules.any { code ->
             researchAllowedPolicySystem.equals(code.getSystem()) && (researchAllowedPolicyOid.equals(
                 code.getCode()
             ))
-        } != null
+        }
     }
 
     fun isRequestDateInRange(requestDate: Date?, provPeriod: Period): Boolean {

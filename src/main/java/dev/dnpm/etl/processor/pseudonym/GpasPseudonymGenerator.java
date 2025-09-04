@@ -52,10 +52,10 @@ public class GpasPseudonymGenerator implements Generator {
     private final RestTemplate restTemplate;
     private final @NotNull String genomDeTanDomain;
     private final @NotNull String pidPsnDomain;
-    protected final static String createOrGetPsn = "$pseudonymizeAllowCreate";
-    protected final static String createMultiDomainPsn = "$pseudonymize-secondary";
-    private final static String SINGLE_PSN_PART_NAME = "pseudonym";
-    private final static String MULTI_PSN_PART_NAME = "value";
+    protected static final String CREATE_OR_GET_PSN = "$pseudonymizeAllowCreate";
+    protected static final String CREATE_MULTI_DOMAIN_PSN = "$pseudonymize-secondary";
+    private static final String SINGLE_PSN_PART_NAME = "pseudonym";
+    private static final String MULTI_PSN_PART_NAME = "value";
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate,
         RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
@@ -85,7 +85,7 @@ public class GpasPseudonymGenerator implements Generator {
         switch (domainType) {
             case SINGLE_PSN_DOMAIN -> {
                 final var requestBody = createSinglePsnRequestBody(id, pidPsnDomain);
-                final var responseEntity = getGpasPseudonym(requestBody, createOrGetPsn);
+                final var responseEntity = getGpasPseudonym(requestBody, CREATE_OR_GET_PSN);
                 final var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
                     .parseResource(responseEntity.getBody());
 
@@ -93,7 +93,7 @@ public class GpasPseudonymGenerator implements Generator {
             }
             case MULTI_PSN_DOMAIN -> {
                 final var requestBody = createMultiPsnRequestBody(id, genomDeTanDomain);
-                final var responseEntity = getGpasPseudonym(requestBody, createMultiDomainPsn);
+                final var responseEntity = getGpasPseudonym(requestBody, CREATE_MULTI_DOMAIN_PSN);
                 final var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
                     .parseResource(responseEntity.getBody());
 
