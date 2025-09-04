@@ -23,8 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GPasConfigProperties;
-import java.net.URI;
-import java.net.URISyntaxException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.net.URIBuilder;
@@ -39,8 +37,10 @@ import org.springframework.http.*;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class GpasPseudonymGenerator implements Generator {
 
@@ -52,10 +52,10 @@ public class GpasPseudonymGenerator implements Generator {
     private final RestTemplate restTemplate;
     private final @NotNull String genomDeTanDomain;
     private final @NotNull String pidPsnDomain;
-    protected final static String createOrGetPsn = "$pseudonymizeAllowCreate";
-    protected final static String createMultiDomainPsn = "$pseudonymize-secondary";
-    private final static String SINGLE_PSN_PART_NAME = "pseudonym";
-    private final static String MULTI_PSN_PART_NAME = "value";
+    protected static final String CREATE_OR_GET_PSN = "$pseudonymizeAllowCreate";
+    protected static final String CREATE_MULTI_DOMAIN_PSN = "$pseudonymize-secondary";
+    private static final String SINGLE_PSN_PART_NAME = "pseudonym";
+    private static final String MULTI_PSN_PART_NAME = "value";
 
     public GpasPseudonymGenerator(GPasConfigProperties gpasCfg, RetryTemplate retryTemplate,
         RestTemplate restTemplate, AppFhirConfig appFhirConfig) {
@@ -85,7 +85,7 @@ public class GpasPseudonymGenerator implements Generator {
         switch (domainType) {
             case SINGLE_PSN_DOMAIN -> {
                 final var requestBody = createSinglePsnRequestBody(id, pidPsnDomain);
-                final var responseEntity = getGpasPseudonym(requestBody, createOrGetPsn);
+                final var responseEntity = getGpasPseudonym(requestBody, CREATE_OR_GET_PSN);
                 final var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
                     .parseResource(responseEntity.getBody());
 
@@ -93,7 +93,7 @@ public class GpasPseudonymGenerator implements Generator {
             }
             case MULTI_PSN_DOMAIN -> {
                 final var requestBody = createMultiPsnRequestBody(id, genomDeTanDomain);
-                final var responseEntity = getGpasPseudonym(requestBody, createMultiDomainPsn);
+                final var responseEntity = getGpasPseudonym(requestBody, CREATE_MULTI_DOMAIN_PSN);
                 final var gPasPseudonymResult = (Parameters) r4Context.newJsonParser()
                     .parseResource(responseEntity.getBody());
 
@@ -150,23 +150,22 @@ public class GpasPseudonymGenerator implements Generator {
                 log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
                 return responseEntity;
             }
-        } catch (RestClientException rce) {
-            if (rce instanceof BadRequest) {
-                String msg = "gPas or request configuration is incorrect. Please check both."
-                    + rce.getMessage();
-                log.debug(
-                    msg);
-                throw new PseudonymRequestFailed(msg, rce);
-            }
-            if (rce instanceof Unauthorized) {
-                var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s".formatted(
-                    rce.getMessage());
-                log.error(msg);
-                throw new PseudonymRequestFailed(msg, rce);
-            }
-        } catch (Exception unexpected) {
+        } catch (BadRequest e) {
+            String msg = "gPas or request configuration is incorrect. Please check both."
+                + e.getMessage();
+            log.error(msg);
+            throw new PseudonymRequestFailed(msg, e);
+        } catch (Unauthorized e) {
+            var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s"
+                .formatted(e.getMessage());
+            log.error(msg);
+            throw new PseudonymRequestFailed(msg, e);
+        }
+        catch (Exception unexpected) {
             throw new PseudonymRequestFailed(
-                "API request due unexpected error unsuccessful gPas unsuccessful.", unexpected);
+                "API request due unexpected error unsuccessful gPas unsuccessful.",
+                unexpected
+            );
         }
         throw new PseudonymRequestFailed(
             "API request due unexpected error unsuccessful gPas unsuccessful.");
