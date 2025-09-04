@@ -137,15 +137,7 @@ class ConsentProcessor(
             }
 
             val provisionComponent: ProvisionComponent = provisions.first()
-
-            var provisionCode: String? = null
-            if (provisionComponent.code != null && provisionComponent.code.isNotEmpty()) {
-                val codableConcept: CodeableConcept = provisionComponent.code.first()
-                if (codableConcept.coding != null && codableConcept.coding.isNotEmpty()) {
-                    provisionCode = codableConcept.coding.first().code
-                }
-            }
-
+            val provisionCode = getProvisionCode(provisionComponent)
             if (provisionCode != null) {
                 try {
                     val modelProjectConsentPurpose =
@@ -175,6 +167,17 @@ class ConsentProcessor(
                     gIcsConfigProperties.genomeDeConsentVersion
             }
         }
+    }
+
+    private fun getProvisionCode(provisionComponent: ProvisionComponent): String? {
+        var provisionCode: String? = null
+        if (provisionComponent.code != null && provisionComponent.code.isNotEmpty()) {
+            val codableConcept: CodeableConcept = provisionComponent.code.first()
+            if (codableConcept.coding != null && codableConcept.coding.isNotEmpty()) {
+                provisionCode = codableConcept.coding.first().code
+            }
+        }
+        return provisionCode
     }
 
     private fun setGenomDeSubmissionType(mtbFile: Mtb) {
