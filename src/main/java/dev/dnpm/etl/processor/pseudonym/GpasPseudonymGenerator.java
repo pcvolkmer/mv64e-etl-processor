@@ -153,8 +153,7 @@ public class GpasPseudonymGenerator implements Generator {
         } catch (BadRequest e) {
             String msg = "gPas or request configuration is incorrect. Please check both."
                 + e.getMessage();
-            log.debug(
-                msg);
+            log.error(msg);
             throw new PseudonymRequestFailed(msg, e);
         } catch (Unauthorized e) {
             var msg = "gPas access credentials are invalid  check your configuration. msg:  '%s"
