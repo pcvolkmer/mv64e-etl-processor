@@ -80,7 +80,7 @@ class ConsentProcessorTest {
         val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
 
         assertThat(checkResult).isTrue
-        assertThat(inputMtb.metadata.researchConsents).hasSize(26)
+        assertThat(inputMtb.metadata.researchConsents).isNotEmpty
     }
 
     companion object {

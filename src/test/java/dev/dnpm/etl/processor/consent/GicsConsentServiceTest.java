@@ -24,14 +24,15 @@ import java.time.Instant;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @ContextConfiguration(classes = {AppConfiguration.class, ObjectMapper.class})
 @TestPropertySource(properties = {
-    "app.consent.service=gics",
-    "app.consent.gics.uri=http://localhost:8090/ttp-fhir/fhir/gics"
+        "app.consent.service=gics",
+        "app.consent.gics.uri=http://localhost:8090/ttp-fhir/fhir/gics"
 })
 @RestClientTest
 class GicsConsentServiceTest {
@@ -46,8 +47,8 @@ class GicsConsentServiceTest {
 
     @BeforeEach
     void setUp(
-        @Autowired AppFhirConfig appFhirConfig,
-        @Autowired GIcsConfigProperties gIcsConfigProperties
+            @Autowired AppFhirConfig appFhirConfig,
+            @Autowired GIcsConfigProperties gIcsConfigProperties
     ) {
         this.appFhirConfig = appFhirConfig;
         this.gIcsConfigProperties = gIcsConfigProperties;
@@ -56,33 +57,33 @@ class GicsConsentServiceTest {
 
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
         this.gicsConsentService = new GicsConsentService(
-            this.gIcsConfigProperties,
-            RetryTemplate.builder().maxAttempts(1).build(),
-            restTemplate,
-            this.appFhirConfig
+                this.gIcsConfigProperties,
+                RetryTemplate.builder().maxAttempts(1).build(),
+                restTemplate,
+                this.appFhirConfig
         );
     }
 
     @Test
     void shouldReturnTtpBroadConsentStatus() {
         final Parameters consentedResponse = new Parameters()
-            .addParameter(
-                new ParametersParameterComponent()
-                    .setName("consented")
-                    .setValue(new BooleanType().setValue(true))
-            );
+                .addParameter(
+                        new ParametersParameterComponent()
+                                .setName("consented")
+                                .setValue(new BooleanType().setValue(true))
+                );
 
         mockRestServiceServer
-            .expect(
-                requestTo(
-                    "http://localhost:8090/ttp-fhir/fhir/gics" + GicsConsentService.IS_CONSENTED_ENDPOINT)
-            )
-            .andRespond(
-                withSuccess(
-                    appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(consentedResponse),
-                    MediaType.APPLICATION_JSON
+                .expect(
+                        requestTo(
+                                "http://localhost:8090/ttp-fhir/fhir/gics" + GicsConsentService.IS_CONSENTED_ENDPOINT)
                 )
-            );
+                .andRespond(
+                        withSuccess(
+                                appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(consentedResponse),
+                                MediaType.APPLICATION_JSON
+                        )
+                );
 
         var consentStatus = gicsConsentService.getTtpBroadConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.BROAD_CONSENT_GIVEN);
@@ -91,22 +92,22 @@ class GicsConsentServiceTest {
     @Test
     void shouldReturnRevokedConsent() {
         final Parameters revokedResponse = new Parameters()
-            .addParameter(
-                new ParametersParameterComponent()
-                    .setName("consented")
-                    .setValue(new BooleanType().setValue(false))
-            );
+                .addParameter(
+                        new ParametersParameterComponent()
+                                .setName("consented")
+                                .setValue(new BooleanType().setValue(false))
+                );
 
         mockRestServiceServer
-            .expect(
-                requestTo(
-                    "http://localhost:8090/ttp-fhir/fhir/gics" + GicsConsentService.IS_CONSENTED_ENDPOINT)
-            )
-            .andRespond(
-                withSuccess(
-                    appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(revokedResponse),
-                    MediaType.APPLICATION_JSON)
-            );
+                .expect(
+                        requestTo(
+                                "http://localhost:8090/ttp-fhir/fhir/gics" + GicsConsentService.IS_CONSENTED_ENDPOINT)
+                )
+                .andRespond(
+                        withSuccess(
+                                appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(revokedResponse),
+                                MediaType.APPLICATION_JSON)
+                );
 
         var consentStatus = gicsConsentService.getTtpBroadConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED);
@@ -116,23 +117,23 @@ class GicsConsentServiceTest {
     @Test
     void shouldReturnInvalidParameterResponse() {
         final OperationOutcome responseWithErrorOutcome = new OperationOutcome()
-            .addIssue(
-                new OperationOutcomeIssueComponent()
-                    .setSeverity(IssueSeverity.ERROR)
-                    .setCode(IssueType.PROCESSING)
-                    .setDiagnostics("Invalid policy parameter...")
-            );
+                .addIssue(
+                        new OperationOutcomeIssueComponent()
+                                .setSeverity(IssueSeverity.ERROR)
+                                .setCode(IssueType.PROCESSING)
+                                .setDiagnostics("Invalid policy parameter...")
+                );
 
         mockRestServiceServer
-            .expect(
-                requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT)
-            )
-            .andRespond(
-                withSuccess(
-                    appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(responseWithErrorOutcome),
-                    MediaType.APPLICATION_JSON
+                .expect(
+                        requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT)
                 )
-            );
+                .andRespond(
+                        withSuccess(
+                                appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(responseWithErrorOutcome),
+                                MediaType.APPLICATION_JSON
+                        )
+                );
 
         var consentStatus = gicsConsentService.getTtpBroadConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.FAILED_TO_ASK);
@@ -141,12 +142,12 @@ class GicsConsentServiceTest {
     @Test
     void shouldReturnRequestError() {
         mockRestServiceServer
-            .expect(
-                requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT)
-            )
-            .andRespond(
-                withServerError()
-            );
+                .expect(
+                        requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT)
+                )
+                .andRespond(
+                        withServerError()
+                );
 
         var consentStatus = gicsConsentService.getTtpBroadConsentStatus("123456");
         assertThat(consentStatus).isEqualTo(TtpConsentStatus.FAILED_TO_ASK);
@@ -156,26 +157,29 @@ class GicsConsentServiceTest {
     void buildRequestParameterCurrentPolicyStatesForPersonTest() {
         String pid = "12345678";
         var result = gicsConsentService
-            .buildRequestParameterCurrentPolicyStatesForPerson(
-                pid,
-                Date.from(Instant.now()),
-                ConsentDomain.MODELLVORHABEN_64E
-            );
+                .buildRequestParameterCurrentPolicyStatesForPerson(
+                        pid,
+                        Date.from(Instant.now()),
+                        ConsentDomain.MODELLVORHABEN_64E
+                );
 
         assertThat(result.getParameter())
-            .as("should contain 3 parameter resources")
-            .hasSize(3);
+                .as("should contain 3 parameter resources")
+                .hasSize(3);
 
         assertThat(((StringType) result.getParameter("domain").getValue()).getValue())
-            .isEqualTo(
-                gIcsConfigProperties.getGenomDeConsentDomainName()
-            );
+                .isEqualTo(
+                        gIcsConfigProperties.getGenomDeConsentDomainName()
+                );
 
         assertThat(((Identifier) result.getParameter("personIdentifier").getValue()).getValue())
-            .isEqualTo(
-                pid
-            );
+                .isEqualTo(
+                        pid
+                );
     }
 
-
+    @Test
+    public void convertGicsResultToMiiBroadConsent() {
+        fail("todo: implement Test gicsConsentService.convertGicsResultToMiiBroadConsent");
+    }
 }
