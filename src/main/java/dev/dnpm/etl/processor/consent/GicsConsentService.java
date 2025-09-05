@@ -328,6 +328,8 @@ public class GicsConsentService implements IConsentService {
             consentAsOne.getMeta().addProfile(BROAD_CONSENT_PROFILE_URI);
         }
 
+        consentAsOne.setPolicyRule(null);
+
         gIcsResultBundle.getEntry().stream().skip(1).forEach(c -> consentAsOne.getProvision().addProvision(((Consent) c.getResource()).getProvision().getProvisionFirstRep()));
 
         gIcsResultBundle.getEntry().clear();
