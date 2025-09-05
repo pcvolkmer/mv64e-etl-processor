@@ -40,7 +40,6 @@ public class GicsConsentService implements IConsentService {
     private final FhirContext fhirContext;
     private final GIcsConfigProperties gIcsConfigProperties;
     private final String BROAD_CONSENT_PROFILE_URI = "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung";
-    ;
     private final String BROAD_CONSENT_POLICY = "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1791";
 
     public GicsConsentService(
