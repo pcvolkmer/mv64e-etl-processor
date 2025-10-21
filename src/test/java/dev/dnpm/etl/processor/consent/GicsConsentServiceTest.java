@@ -1,9 +1,11 @@
 package dev.dnpm.etl.processor.consent;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.AppConfiguration;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -20,8 +22,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -179,7 +183,22 @@ class GicsConsentServiceTest {
     }
 
     @Test
-    public void convertGicsResultToMiiBroadConsent() {
-        fail("todo: implement Test gicsConsentService.convertGicsResultToMiiBroadConsent");
+    void convertGicsResultToMiiBroadConsent() throws Exception {
+        var fhirJsonParser = FhirContext.forR4().newJsonParser();
+        fhirJsonParser.setPrettyPrint(true);
+
+        var gicsInputStream = Objects.requireNonNull(
+                this.getClass().getClassLoader().getResourceAsStream("fake_broadConsent_gics_response_permit.json")
+        );
+        var gicsConsentBundle = (Bundle) fhirJsonParser.parseResource(IOUtils.toString(gicsInputStream, StandardCharsets.UTF_8));
+
+        var miiInputStream = Objects.requireNonNull(
+                this.getClass().getClassLoader().getResourceAsStream("fake_broadConsent_mii_response_permit.json")
+        );
+        var miiConsent = IOUtils.toString(miiInputStream, StandardCharsets.UTF_8);
+
+        var actual = gicsConsentService.convertGicsResultToMiiBroadConsent(gicsConsentBundle);
+
+        assertThat(fhirJsonParser.encodeToString(actual)).isEqualTo(miiConsent);
     }
 }
