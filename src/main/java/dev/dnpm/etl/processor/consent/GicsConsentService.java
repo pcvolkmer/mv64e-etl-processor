@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
+import kotlin.random.Random;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -306,7 +308,7 @@ public class GicsConsentService implements IConsentService {
     public Bundle getConsent(String patientId, Date requestDate, ConsentDomain consentDomain) {
         Bundle gIcsResultBundle = currentConsentForPersonAndTemplate(patientId, consentDomain, requestDate);
         if (ConsentDomain.BROAD_CONSENT == consentDomain) {
-            return convertGicsResultToMiiBroadConsent(gIcsResultBundle);
+            return anonymizeBroadConsent(convertGicsResultToMiiBroadConsent(gIcsResultBundle));
         }
         return gIcsResultBundle;
     }
@@ -335,5 +337,21 @@ public class GicsConsentService implements IConsentService {
         gIcsResultBundle.getEntry().clear();
         gIcsResultBundle.addEntry(bundleEntryComponent);
         return gIcsResultBundle;
+    }
+
+    protected Bundle anonymizeBroadConsent(Bundle bundle) {
+        Bundle.BundleEntryComponent bundleEntryComponent = bundle.getEntry().getFirst();
+        hashBundleEntry(bundleEntryComponent);
+        return bundle;
+    }
+
+    private static void hashBundleEntry(Bundle.BundleEntryComponent entry) {
+        String id = entry.getResource().getIdPart();
+        var hash = DigestUtils.sha256Hex("%s_%s".formatted(Random.Default.toString(), id));
+
+        entry.getResource().setId(hash);
+        entry.setFullUrl(entry.getFullUrl().replace(id, hash));
+        var consent = (Consent) entry.getResource();
+        consent.getSource().setProperty("reference", new StringType("QuestionnaireResponse/%s".formatted(hash)));
     }
 }
