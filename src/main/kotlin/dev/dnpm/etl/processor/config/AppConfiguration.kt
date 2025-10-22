@@ -20,19 +20,17 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.IConsentService
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.monitoring.*
-import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
-import dev.dnpm.etl.processor.pseudonym.Generator
-import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
-import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
+import dev.dnpm.etl.processor.pseudonym.*
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -85,6 +83,37 @@ class AppConfiguration {
     }
 
     @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
+    @ConditionalOnProperty(value = ["app.pseudonymize.gpas.soap-endpoint"])
+    @Bean
+    fun gpasSoapProxyFactoryBean(gpasConfigProperties: GPasConfigProperties): JaxWsProxyFactoryBean {
+        val proxyFactory = JaxWsProxyFactoryBean()
+        proxyFactory.serviceClass = GpasSoapService::class.java
+        proxyFactory.address = gpasConfigProperties.soapEndpoint
+        return proxyFactory
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
+    @ConditionalOnProperty(value = ["app.pseudonymize.gpas.soap-endpoint"])
+    @Bean
+    fun gpasSoapProxy(gpasConfigProperties: GPasConfigProperties): GpasSoapService {
+        return gpasSoapProxyFactoryBean(gpasConfigProperties).create() as GpasSoapService
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
+    @ConditionalOnProperty(value = ["app.pseudonymize.gpas.soap-endpoint"])
+    @Bean
+    fun gpasSoapPseudonymGenerator(
+        configProperties: GPasConfigProperties,
+        retryTemplate: RetryTemplate,
+        gpasSoapService: GpasSoapService,
+        appFhirConfig: AppFhirConfig
+    ): Generator {
+        logger.info("Selected 'GpasSoapPseudonym Generator'")
+        return GpasSoapPseudonymGenerator(configProperties, retryTemplate, gpasSoapService, appFhirConfig)
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "GPAS")
+    @ConditionalOnProperty(value = ["app.pseudonymize.gpas.uri"])
     @Bean
     fun gpasPseudonymGenerator(
         configProperties: GPasConfigProperties,

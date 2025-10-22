@@ -112,8 +112,13 @@ Ab Version 2025.1 (Multi-Pseudonym Support)
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
 * `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`: gPas Domänenname für Patienten ID
-* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
+* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPAS Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
   Clinical data node)
+
+Soll anstelle der REST-Schnittstelle von gPAS die SOAP-Schnittstelle verwendet werden,
+so ist nicht die URI der gPAS-Instanz anzugeben, sondern der SOAP-Endpoint:
+
+* `APP_PSEUDONYMIZE_GPAS_SOAP_ENDPOINT`: SOAP-Endpoint der gPAS-Instanz (e.g. http://127.0.0.1:9990/gpas/gpasService)
 
 ### (Externe) Consent-Services
 

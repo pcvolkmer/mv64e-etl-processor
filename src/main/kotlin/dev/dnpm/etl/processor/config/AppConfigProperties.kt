@@ -47,6 +47,7 @@ data class PseudonymizeConfigProperties(
 @ConfigurationProperties(GPasConfigProperties.NAME)
 data class GPasConfigProperties(
     val uri: String?,
+    val soapEndpoint: String?,
     val patientDomain: String = "etl-processor",
     val genomDeTanDomain: String = "ccdn",
     val username: String?,
