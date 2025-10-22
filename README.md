@@ -120,8 +120,6 @@ so ist nicht die URI der gPAS-Instanz anzugeben, sondern der SOAP-Endpoint:
 
 * `APP_PSEUDONYMIZE_GPAS_SOAP_ENDPOINT`: SOAP-Endpoint der gPAS-Instanz (e.g. http://127.0.0.1:9990/gpas/gpasService)
 
-*Achtung!* Unterstützung für gPAS Multi-Pseudonym-Domäne für genomDE Vorgangsnummern noch nicht betriebsbereit!
-
 ### (Externe) Consent-Services
 
 Consent-Services können konfiguriert werden.
