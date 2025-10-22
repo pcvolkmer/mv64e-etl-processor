@@ -7,6 +7,7 @@ plugins {
     war
     id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.7"
+    id("com.diffplug.spotless") version "8.0.0"
     kotlin("jvm") version "2.2.10"
     kotlin("plugin.spring") version "2.2.10"
     jacoco
@@ -127,6 +128,7 @@ tasks.withType<Test> {
     testLogging {
         events(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
     }
+    dependsOn(tasks.spotlessCheck)
 }
 
 tasks.register<Test>("integrationTest") {
@@ -170,4 +172,12 @@ tasks.named<BootBuildImage>("bootBuildImage") {
         "BP_OCI_LICENSES" to "AGPLv3",
         "BP_OCI_DESCRIPTION" to "ETL Processor for MV § 64e and DNPM:DIP"
     ))
+}
+
+spotless {
+    java {
+        importOrder()
+        removeUnusedImports()
+        googleJavaFormat()
+    }
 }

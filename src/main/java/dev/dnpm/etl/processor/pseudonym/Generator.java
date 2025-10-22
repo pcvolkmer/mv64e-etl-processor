@@ -21,8 +21,7 @@ package dev.dnpm.etl.processor.pseudonym;
 
 public interface Generator {
 
-    String generate(String id);
+  String generate(String id);
 
-    String generateGenomDeTan(String id);
-
+  String generateGenomDeTan(String id);
 }
