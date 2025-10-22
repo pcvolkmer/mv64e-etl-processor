@@ -336,6 +336,12 @@ für HTTP nicht gibt.
 Wird die Umgebungsvariable `APP_KAFKA_INPUT_TOPIC` gesetzt, kann eine Nachricht auch über dieses
 Kafka-Topic an den ETL-Prozessor übermittelt werden.
 
+Soll eine SSL-gesicherte Verbindung zu Kafka verwendet werden, so sind die SSL-Zertifikate in
+der Spring-Konfiguration anzugeben.
+Ein Beispiel findet sich in [`application-dev.yml`](src/main/resources/application-dev.yml).
+Dies kann auch mit Umgebungsvariablen wie `SPRING_KAFKA_SECURITY_...` und `SPRING_KAFKA_SSL_...`
+umgesetzt werden.
+
 ##### Retention Time
 
 Generell werden in Apache Kafka alle Records entsprechend der Konfiguration vorgehalten.
