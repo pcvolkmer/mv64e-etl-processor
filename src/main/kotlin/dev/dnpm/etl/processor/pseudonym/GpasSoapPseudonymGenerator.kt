@@ -18,7 +18,9 @@ class GpasSoapPseudonymGenerator(
     }
 
     override fun generateGenomDeTan(id: String): String {
-        throw NotImplementedError()
+        return retryTemplate.execute<String, Exception> {
+            gpasSoapService.createPseudonymsFor(id, gpasCfg.genomDeTanDomain, 1).first()
+        }
     }
 }
 
