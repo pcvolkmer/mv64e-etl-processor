@@ -29,6 +29,7 @@ import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
+import dev.dnpm.etl.processor.pseudonym.GpasSoapPseudonymGenerator
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -201,7 +202,8 @@ class AppConfigurationTest {
         @Nested
         @TestPropertySource(
             properties = [
-                "app.pseudonymize.generator=gpas"
+                "app.pseudonymize.generator=gpas",
+                "app.pseudonymize.gpas.uri=http://localhost/"
             ]
         )
         inner class AppConfigurationPseudonymizeGeneratorGpasTest(private val context: ApplicationContext) {
@@ -209,6 +211,22 @@ class AppConfigurationTest {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
+            }
+
+        }
+
+        @Nested
+        @TestPropertySource(
+            properties = [
+                "app.pseudonymize.generator=gpas",
+                "app.pseudonymize.gpas.soap-endpoint=http://localhost/"
+            ]
+        )
+        inner class AppConfigurationPseudonymizeGeneratorGpasSoapTest(private val context: ApplicationContext) {
+
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean(GpasSoapPseudonymGenerator::class.java)).isNotNull
             }
 
         }

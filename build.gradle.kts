@@ -19,6 +19,7 @@ version = "0.12.0-SNAPSHOT"
 var versions = mapOf(
     "mtb-dto" to "0.1.0-SNAPSHOT",
     "hapi-fhir" to "8.4.0",
+    "apache-cxf" to "4.1.3",
     "mockito-kotlin" to "6.0.0",
     "archunit" to "1.4.1",
     // Webjars
@@ -91,6 +92,9 @@ dependencies {
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
     // Fix for CVE-2025-48924
     implementation("org.apache.commons:commons-lang3:3.18.0")
+    // gPAS via Soap
+    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:${versions["apache-cxf"]}")
+    implementation("org.apache.cxf:cxf-rt-transports-http:${versions["apache-cxf"]}")
 
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
