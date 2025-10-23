@@ -43,6 +43,11 @@
           "system": "http://fhir.de/ConsentManagement/CodeSystem/ResultType",
           "code": "policy"
         } ]
+      }, {
+        "coding": [ {
+          "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+          "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+        } ]
       } ],
       "patient": {
         "reference": "Patient/7d2da57f-79b1-11f0-ab27-6ed0ed82d0fd",
