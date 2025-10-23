@@ -318,6 +318,13 @@ public class GicsConsentService implements IConsentService {
 
     consentAsOne.setPolicyRule(null);
 
+    consentAsOne
+        .getCategory()
+        .removeIf(
+            category ->
+                category.hasCoding(
+                    "http://fhir.de/ConsentManagement/CodeSystem/ResultType", "policy"));
+
     final var miiConsentCategory = new CodeableConcept();
     miiConsentCategory.addCoding(
         new Coding()
