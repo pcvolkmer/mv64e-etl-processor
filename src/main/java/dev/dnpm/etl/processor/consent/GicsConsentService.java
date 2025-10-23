@@ -321,9 +321,9 @@ public class GicsConsentService implements IConsentService {
     final var miiConsentCategory = new CodeableConcept();
     miiConsentCategory.addCoding(
         new Coding()
-                .setSystem("https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category")
-                .setCode("2.16.840.1.113883.3.1937.777.24.2.184")
-    );
+            .setSystem(
+                "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category")
+            .setCode("2.16.840.1.113883.3.1937.777.24.2.184"));
     consentAsOne.addCategory(miiConsentCategory);
 
     gIcsResultBundle.getEntry().stream()
