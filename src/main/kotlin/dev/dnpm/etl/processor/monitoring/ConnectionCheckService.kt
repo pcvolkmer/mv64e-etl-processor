@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.config.RestTargetProperties
 import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.errors.TimeoutException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.*
 import org.springframework.scheduling.annotation.Scheduled
@@ -83,6 +84,7 @@ class KafkaConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : OutputConnectionCheckService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private var result = ConnectionCheckResult.KafkaConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
@@ -95,7 +97,8 @@ class KafkaConnectionCheckService(
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (_: TimeoutException) {
+        } catch (ex: TimeoutException) {
+            logger.error("Connection-Timeout error: {}", ex.message)
             ConnectionCheckResult.KafkaConnectionCheckResult(
                 false,
                 Instant.now(),
@@ -121,27 +124,33 @@ class RestConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : OutputConnectionCheckService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private var result = ConnectionCheckResult.RestConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
     @Scheduled(cron = "0 * * * * *")
     fun check() {
         result = try {
-            val available = restTemplate.getForEntity(
+            val statusCode = restTemplate.getForEntity(
                 UriComponentsBuilder.fromUriString(restTargetProperties.uri.toString())
                     .pathSegment("mtb")
                     .pathSegment("kaplan-meier")
                     .pathSegment("config")
                     .toUriString(),
                 String::class.java
-            ).statusCode == HttpStatus.OK
+            ).statusCode
+            val available = statusCode == HttpStatus.OK
 
+            if (available.not()) {
+                logger.error("Invalid response code {}, expected HTTP status 200", statusCode)
+            }
             ConnectionCheckResult.RestConnectionCheckResult(
                 available,
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (_: Exception) {
+        } catch (ex: Exception) {
+            logger.error("Connection-Check error: {}", ex.message)
             ConnectionCheckResult.RestConnectionCheckResult(
                 false,
                 Instant.now(),
@@ -166,6 +175,7 @@ class GPasConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : ConnectionCheckService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private var result = ConnectionCheckResult.GPasConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
@@ -182,19 +192,24 @@ class GPasConnectionCheckService(
                 headers.setBasicAuth(gPasConfigProperties.username, gPasConfigProperties.password)
             }
 
-            val available = restTemplate.exchange(
+            val statusCode = restTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 HttpEntity<Void>(headers),
                 Void::class.java
-            ).statusCode == HttpStatus.OK
+            ).statusCode
+            val available = statusCode == HttpStatus.OK
 
+            if (available.not()) {
+                logger.error("Invalid response code {}, expected HTTP status 200", statusCode)
+            }
             ConnectionCheckResult.GPasConnectionCheckResult(
                 available,
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (_: Exception) {
+        } catch (ex: Exception) {
+            logger.error("Connection-Check error: {}", ex.message)
             ConnectionCheckResult.GPasConnectionCheckResult(
                 false,
                 Instant.now(),
@@ -219,6 +234,7 @@ class GIcsConnectionCheckService(
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : ConnectionCheckService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private var result = ConnectionCheckResult.GIcsConnectionCheckResult(false, Instant.now(), Instant.now())
 
     @PostConstruct
@@ -235,19 +251,24 @@ class GIcsConnectionCheckService(
                 headers.setBasicAuth(gIcsConfigProperties.username, gIcsConfigProperties.password)
             }
 
-            val available = restTemplate.exchange(
+            val statusCode = restTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 HttpEntity<Void>(headers),
                 Void::class.java
-            ).statusCode == HttpStatus.OK
+            ).statusCode
+            val available = statusCode == HttpStatus.OK
 
+            if (available.not()) {
+                logger.error("Invalid response code {}, expected HTTP status 200", statusCode)
+            }
             ConnectionCheckResult.GIcsConnectionCheckResult(
                 available,
                 Instant.now(),
                 if (result.available == available) { result.lastChange } else { Instant.now() }
             )
-        } catch (_: Exception) {
+        } catch (ex: Exception) {
+            logger.error("Connection-Check error: {}", ex.message)
             ConnectionCheckResult.GIcsConnectionCheckResult(
                 false,
                 Instant.now(),
