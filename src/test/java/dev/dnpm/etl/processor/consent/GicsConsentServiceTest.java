@@ -210,4 +210,30 @@ class GicsConsentServiceTest {
     var actual = gicsConsentService.anonymizeBroadConsent(miiConsentBundle);
     assertThat(fhirJsonParser.encodeToString(actual)).doesNotContain(currentPatientId);
   }
+
+  @Test
+  void miiBroadConsentShouldNotBeConvertedAgain() throws Exception {
+    var fhirJsonParser = FhirContext.forR4().newJsonParser();
+    fhirJsonParser.setPrettyPrint(true);
+
+    var gicsInputStream =
+        Objects.requireNonNull(
+            this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("fake_broadConsent_mii_response_permit.json"));
+    var gicsConsentBundle =
+        (Bundle)
+            fhirJsonParser.parseResource(IOUtils.toString(gicsInputStream, StandardCharsets.UTF_8));
+
+    var miiInputStream =
+        Objects.requireNonNull(
+            this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("fake_broadConsent_mii_response_permit.json"));
+    var miiConsent = IOUtils.toString(miiInputStream, StandardCharsets.UTF_8);
+
+    var actual = gicsConsentService.convertGicsResultToMiiBroadConsent(gicsConsentBundle);
+
+    assertThat(fhirJsonParser.encodeToString(actual)).isEqualTo(miiConsent);
+  }
 }
