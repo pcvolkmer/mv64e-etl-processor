@@ -307,6 +307,11 @@ public class GicsConsentService implements IConsentService {
     Bundle.BundleEntryComponent bundleEntryComponent = gIcsResultBundle.getEntry().getFirst();
 
     var consentAsOne = (Consent) bundleEntryComponent.getResource();
+
+    if (isMiiConsent(consentAsOne)) {
+      return gIcsResultBundle;
+    }
+
     if (consentAsOne.getPolicy().stream().noneMatch(p -> p.getUri().equals(BROAD_CONSENT_POLICY))) {
       consentAsOne.addPolicy(new Consent.ConsentPolicyComponent().setUri(BROAD_CONSENT_POLICY));
     }
@@ -345,6 +350,19 @@ public class GicsConsentService implements IConsentService {
     gIcsResultBundle.getEntry().clear();
     gIcsResultBundle.addEntry(bundleEntryComponent);
     return gIcsResultBundle;
+  }
+
+  private static boolean isMiiConsent(Consent consent) {
+    for (var category : consent.getCategory()) {
+      for (var categoryCoding : category.getCoding()) {
+        if ("https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category"
+                .equals(categoryCoding.getSystem())
+            && "2.16.840.1.113883.3.1937.777.24.2.184".equals(categoryCoding.getCode())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   protected Bundle anonymizeBroadConsent(Bundle bundle) {
