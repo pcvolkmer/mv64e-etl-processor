@@ -244,7 +244,7 @@ public class GicsConsentService implements IConsentService {
                     new Coding()
                         .setSystem("https://ths-greifswald.de/fhir/CodeSystem/gics/IdMatchingType")
                         .setCode("AT_LEAST_ONE")))
-        .addParameter("ignoreVersionNumber", false)
+        .addParameter("ignoreVersionNumber", true)
         .addParameter("unknownStateIsConsideredAsDecline", false)
         .addParameter("requestDate", new DateType().setValue(requestDate));
 
