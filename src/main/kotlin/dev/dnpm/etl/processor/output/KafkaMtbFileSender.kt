@@ -46,7 +46,7 @@ class KafkaMtbFileSender(
                     ProducerRecord(
                         kafkaProperties.outputTopic,
                         key(request),
-                        objectMapper.writeValueAsString(request),
+                        objectMapper.writeValueAsString(request.content),
                     )
                 record.headers().add("requestId", request.requestId.value.toByteArray())
                 when (request) {

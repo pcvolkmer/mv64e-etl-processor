@@ -224,8 +224,8 @@ class KafkaMtbFileSenderTest {
             }
         }
 
-        fun dnmpV2kafkaRecordData(requestId: RequestId): MtbRequest {
-            return DnpmV2MtbFileRequest(requestId, dnpmV2MtbFile())
+        fun dnmpV2kafkaRecordData(requestId: RequestId): Mtb {
+            return DnpmV2MtbFileRequest(requestId, dnpmV2MtbFile()).content
         }
 
         data class TestData(val requestStatus: RequestStatus, val exception: Throwable? = null)
