@@ -1,6 +1,7 @@
 package dev.dnpm.etl.processor.config
 
 import ca.uhn.fhir.context.FhirContext
+import com.fasterxml.jackson.annotation.JsonInclude
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -24,4 +25,5 @@ class JacksonConfig {
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(
             JavaTimeModule()
         )
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 }
