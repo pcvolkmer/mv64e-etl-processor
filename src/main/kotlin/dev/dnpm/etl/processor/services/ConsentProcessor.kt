@@ -14,7 +14,6 @@ import dev.pcvolkmer.mv64e.mtb.*
 import org.apache.commons.lang3.NotImplementedException
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
-import org.hl7.fhir.r4.model.Coding
 import org.hl7.fhir.r4.model.Consent.ConsentState
 import org.hl7.fhir.r4.model.Consent.ProvisionComponent
 import org.slf4j.Logger
@@ -233,9 +232,13 @@ class ConsentProcessor(
                 entry.resource.isResource && entry.resource.resourceType == ResourceType.Consent
             val consentIsActive = (entry.resource as Consent).status == ConsentState.ACTIVE
 
-            isConsentResource && consentIsActive && checkCoding(
-                targetCode, targetSystem, (entry.resource as Consent).policyRule.coding
-            ) && isRequestDateInRange(requestDate, (entry.resource as Consent).provision.period)
+            val provisions = (entry.resource as Consent).provision.provision
+
+            val isValidCoding = checkProvisionExist(
+                targetCode, targetSystem, provisions
+            )
+
+            isConsentResource && consentIsActive && isValidCoding && isRequestDateInRange(requestDate, (entry.resource as Consent).provision.period)
         }.map { entry: BundleEntryComponent ->
             val consent = (entry.getResource() as Consent)
             consent.provision.provision.filter { subProvision ->
@@ -255,15 +258,13 @@ class ConsentProcessor(
         return Consent.ConsentProvisionType.NULL
     }
 
-    fun checkCoding(
+    fun checkProvisionExist(
         researchAllowedPolicyOid: String?,
         researchAllowedPolicySystem: String?,
-        policyRules: Collection<Coding>
+        provisions: Collection<ProvisionComponent>
     ): Boolean {
-        return policyRules.any { code ->
-            researchAllowedPolicySystem.equals(code.getSystem()) && (researchAllowedPolicyOid.equals(
-                code.getCode()
-            ))
+        return provisions.any { provision ->
+            provision.code.any { codeableConcept -> codeableConcept.coding.any { it.system == researchAllowedPolicySystem && it.code == researchAllowedPolicyOid }  }
         }
     }
 

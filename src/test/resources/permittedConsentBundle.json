@@ -1,0 +1,692 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://gics:8080/ttp-fhir/fhir/gics/Consent/XXXX",
+      "resource": {
+        "resourceType": "Consent",
+        "id": "XXXX",
+        "meta": {
+          "lastUpdated": "2025-10-31T14:21:04.630+01:00",
+          "profile": [
+            "http://fhir.de/ConsentManagement/StructureDefinition/Consent",
+            "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://fhir.de/ConsentManagement/StructureDefinition/DomainReference",
+            "extension": [
+              {
+                "url": "domain",
+                "valueReference": {
+                  "reference": "ResearchStudy/VVVVV"
+                }
+              },
+              {
+                "url": "status",
+                "valueCoding": {
+                  "system": "http://hl7.org/fhir/publication-status",
+                  "code": "active"
+                }
+              }
+            ]
+          }
+        ],
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "research"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "57016-8"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "https://www.medizininformatik-initiative.de/fhir/modul-consent/CodeSystem/mii-cs-consent-consent_category",
+                "code": "2.16.840.1.113883.3.1937.777.24.2.184"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/psn-pat-here",
+          "display": "Patienten-ID PID-HERE"
+        },
+        "dateTime": "2025-10-13T00:00:00+01:00",
+        "organization": [
+          {
+            "display": "MII"
+          }
+        ],
+        "sourceReference": {
+          "reference": "QuestionnaireResponse/XXXX"
+        },
+        "policy": [
+          {
+            "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1791"
+          }
+        ],
+        "provision": {
+          "type": "deny",
+          "period": {
+            "start": "2025-10-13T00:00:00+01:00",
+            "end": "2055-10-13T00:00:00+01:00"
+          },
+          "provision": [
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "IDAT_erheben",
+                      "display": "Erfassung neuer identifizierender Daten (IDAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.2",
+                      "display": "IDAT erheben"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_retro_speichern_verarbeiten",
+                      "display": "Retrospektive Krankenkassendaten (KKDAT) aus fünf Jahren vor Einwilligung speichern und codiert verarbeiten zu Zwecken med. Forschung in der verantwortlichen Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.12",
+                      "display": "KKDAT 5J retrospektiv speichern verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "BIOMAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+                      "display": "Bereitstellung umcodierter Biomaterialien (BIOMAT)  für wissenschaftliche Nutzung  und Analysen zu Zwecken med. Forschung an ext. Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.22",
+                      "display": "BIOMAT wissenschaftlich nutzen EU DSGVO NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_retro_wissenschaftlich_nutzen",
+                      "display": "Bereitstellung umcodierter retrospektiver Krankenkassendaten (KKDAT) für wissenschaftliche Nutzung zu Zwecken med. Forschung an externe Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.13",
+                      "display": "KKDAT 5J retrospektiv wissenschaftlich nutzen"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_Analysedaten_zusammenfuehren_Dritte",
+                      "display": "Zusammenführen von auf Biomaterialien (BIOMAT) basierenden Analysedaten mit Analysedaten Dritter, sofern dort ebenfalls eine Einwilligung vorliegt"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.23",
+                      "display": "BIOMAT Analysedaten zusammenfuehren Dritte"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "Rekontaktierung_Zusatzbefund",
+                      "display": "Rekontaktierung bezüglich Zusatzbefund im Rahmen der am Standort dafür entwickelten Prozesse und der im Nutzungsantrag angegebenen Bedingungen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.31",
+                      "display": "Rekontaktierung Zusatzbefund"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_pro_wissenschaftlich_nutzen",
+                      "display": "Bereitstellung umcodierter prospektiver Krankenkassendaten (KKDAT) aus fünf Jahren ab Einwilligung zu Zwecken med. Forschung an ext. Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.17",
+                      "display": "KKDAT 5J prospektiv wissenschaftlich nutzen"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_lagern_verarbeiten",
+                      "display": "Lagerung und Verarbeitung von Biomaterialien innerhalb der verantwortlichen Stelle (BIOMAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.20",
+                      "display": "BIOMAT lagern verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_retro_uebertragen",
+                      "display": "Krankenkassendaten (KKDAT) der letzten fünf Kalenderjahre vor Datum Unterschrift übertragen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.11",
+                      "display": "KKDAT 5J retrospektiv uebertragen"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_KVNR_5J_retro_uebertragen",
+                      "display": "Erlaubnis zur retrospektiven Übermittlung der KVNr., MII-Pseudonym und Zeitraum Datenübermittlung (von:5 Jahre vor Datum Unterschrift; bis: Datum Unterschrift) an zuständige Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.38",
+                      "display": "KKDAT 5J retrospektiv uebertragen KVNR"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2030-03-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "MDAT_erheben",
+                      "display": "Erfassung medizinischer Daten (MDAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.6",
+                      "display": "MDAT erheben"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_pro_speichern_verarbeiten",
+                      "display": "Prospektive Krankenkassendaten (KKDAT) aus fünf Jahren ab Einwilligung speichern und codiert verarbeiten zu Zwecken der med. Forschung in der verantwortlichen Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.16",
+                      "display": "KKDAT 5J prospektiv speichern verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "MDAT_wissenschaftlich_nutzen_EU_DSGVO_konform",
+                      "display": "Bereitstellung umcodierter medizinischer Daten (MDAT) für wissenschaftliche Nutzung zu Zwecken med. Forschung an externe Forscher"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.8",
+                      "display": "MDAT wissenschaftlich nutzen EU DSGVO NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "Rekontaktierung_Verknuepfung_Datenbanken",
+                      "display": "Rekontaktierung zur Verknüpfung von Patientendaten mit Daten anderer Datenbanken"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.27",
+                      "display": "Rekontaktierung Verknüpfung Datenbanken"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "Rekontaktierung_weitere_Studien",
+                      "display": "Rekontaktierung bezüglich Information zu neuen Forschungsvorhaben oder Studien"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.29",
+                      "display": "Rekontaktierung weitere Studien"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "IDAT_bereitstellen_EU_DSGVO_konform",
+                      "display": "Herausgabe identifizierender Daten (IDAT) an unabhängige Treuhandstelle zur weiteren Verarbeitung"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.5",
+                      "display": "IDAT bereitstellen EU DSGVO NIVEAU"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "IDAT_speichern_verarbeiten",
+                      "display": "Speicherung und Verarbeitung identifizierender Daten (IDAT) zu Zwecken med. Forschung in der verantwortlichen Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.3",
+                      "display": "IDAT speichern, verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "MDAT_speichern_verarbeiten",
+                      "display": "Speicherung und Verarbeitung von medizinischen codierten Daten zu Zwecken med. Forschung innerhalb der verantwortlichen Stelle (MDAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.7",
+                      "display": "MDAT speichern, verarbeiten"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2030-03-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_erheben",
+                      "display": "Gewinnung von Biomaterialien (BIOMAT)"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.19",
+                      "display": "BIOMAT erheben"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "Rekontaktierung_Ergebnisse_erheblicher_Bedeutung",
+                      "display": "Rekontaktierung des Betroffenen bei Ergebnissen von erheblicher Bedeutung"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.37",
+                      "display": "Rekontaktierung Ergebnisse erheblicher Bedeutung"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2030-03-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_KVNR_5J_pro_uebertragen",
+                      "display": "Erlaubnis zur prospektiven Übermittlung der KVNr., MII-Pseudonym und Zeitraum Datenübermittlung (von: Datum Unterschrift; bis: max. 5 Kalenderjahre nach Unterschrift) an zuständige Stelle"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.39",
+                      "display": "KKDAT 5J prospektiv uebertragen KVNR"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2030-03-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "BIOMAT_Zusatzmengen_entnehmen",
+                      "display": "Entnahme zusätzlicher Mengen von Biomaterialien (BIOMAT) in den in der Einwilligung beschriebenen Grenzen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.25",
+                      "display": "BIOMAT Zusatzmengen entnehmen"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "Rekontaktierung_weitere_Erhebung",
+                      "display": "Rekontaktierung bezüglich Erhebung zusätzlicher Daten"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.28",
+                      "display": "Rekontaktierung weitere Erhebung"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "IDAT_zusammenfuehren_Dritte",
+                      "display": "Zusammenführung identifizierender Daten (IDAT) über die unabhängige Treuhandstelle mit Dritten Forschungspartnern, sofern dort eine Einwilligung vorliegt"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.4",
+                      "display": "IDAT zusammenfuehren Dritte"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2055-10-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy",
+                      "code": "MDAT_zusammenfuehren_Dritte",
+                      "display": "Zusammenführung medizinischer Daten (MDAT) mit Dritten Forschungspartnern, sofern dort eine Einwilligung vorliegt"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.9",
+                      "display": "MDAT zusammenfuehren Dritte"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "permit",
+              "period": {
+                "start": "2025-10-13T00:00:00+01:00",
+                "end": "2030-03-13T00:00:00+01:00"
+              },
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/MII",
+                      "code": "KKDAT_5J_pro_uebertragen",
+                      "display": "Prospektive Krankenkassendaten (KKDAT) für fünf Kalenderjahre nach Datum Unterschrift übertragen"
+                    },
+                    {
+                      "system": "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
+                      "code": "2.16.840.1.113883.3.1937.777.24.5.3.15",
+                      "display": "KKDAT 5J prospektiv uebertragen"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
