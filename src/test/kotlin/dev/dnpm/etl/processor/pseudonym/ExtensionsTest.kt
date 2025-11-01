@@ -112,7 +112,7 @@ class ExtensionsTest {
             }.whenever(pseudonymizeService).prefix()
 
             val mtbFile = Mtb().apply {
-                this.patient = dev.pcvolkmer.mv64e.mtb.Patient().apply {
+                this.patient = Patient().apply {
                     this.id = "PID"
                     this.birthDate = Date.from(Instant.now())
                     this.gender = GenderCoding().apply {
@@ -173,7 +173,7 @@ class ExtensionsTest {
                         Math.random().toLong().toString()
                     simpleVariant.fusionPartner5Prime?.transcriptId?.value =
                         Math.random().toLong().toString()
-                    simpleVariant.externalIds?.forEach { it ->
+                    simpleVariant.externalIds?.forEach {
                         it?.value = Math.random().toLong().toString()
                     }
                 }
@@ -196,5 +196,64 @@ class ExtensionsTest {
                 assertThat(it.message).isEqualTo("No match found")
             }
         }
+    }
+
+    @Test
+    fun shouldUseSameAnonymIdForDiagnosisAndDiagnosisReferences(@Mock pseudonymizeService: PseudonymizeService) {
+
+        doAnswer {
+            it.arguments[0]
+            "PSEUDO-ID"
+        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+
+        doAnswer {
+            "TESTDOMAIN"
+        }.whenever(pseudonymizeService).prefix()
+
+        val mtbFile = Mtb().apply {
+            this.patient = Patient().apply {
+                this.id = "PID"
+                this.birthDate = Date.from(Instant.now())
+                this.gender = GenderCoding().apply {
+                    this.code = GenderCodingCode.MALE
+                }
+            }
+            this.diagnoses = listOf(
+                MtbDiagnosis().apply {
+                    this.id = "Diagnosis-1"
+                }
+            )
+            this.guidelineTherapies = listOf(
+                MtbSystemicTherapy().apply {
+                    this.id = "Systemic-Therapy-1"
+                    this.reason = Reference().apply {
+                        this.id = "Diagnosis-1"
+                    }
+                }
+            )
+            this.guidelineProcedures = listOf(
+                OncoProcedure().apply {
+                    this.id = "Onco-Procedure-1"
+                    this.reason = Reference().apply {
+                        this.id = "Diagnosis-1"
+                    }
+                }
+            )
+            this.specimens = listOf(
+                TumorSpecimen().apply {
+                    this.id = "Specimen-1"
+                    this.diagnosis = Reference().apply {
+                        this.id = "Diagnosis-1"
+                    }
+                }
+            )
+        }
+
+        mtbFile.pseudonymizeWith(pseudonymizeService)
+        mtbFile.anonymizeContentWith(pseudonymizeService)
+
+        assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.guidelineTherapies.first().reason.id)
+        assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.guidelineProcedures.first().reason.id)
+        assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.specimens.first().diagnosis.id)
     }
 }
