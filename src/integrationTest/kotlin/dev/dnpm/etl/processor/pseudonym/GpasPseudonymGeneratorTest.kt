@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.pseudonym
 
 import dev.dnpm.etl.processor.config.AppFhirConfig
 import dev.dnpm.etl.processor.config.GPasConfigProperties
+import org.apache.hc.core5.net.URIBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,6 +38,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
+import java.net.URI
 
 class GpasPseudonymGeneratorTest {
 
@@ -49,7 +51,7 @@ class GpasPseudonymGeneratorTest {
     fun setup() {
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
         val gPasConfigProperties = GPasConfigProperties(
-            "https://localhost:9990/ttp-fhir/fhir/gpas",
+            CONFIGURED_URI,
             null,
             "test", "test2",
             null,
@@ -64,53 +66,58 @@ class GpasPseudonymGeneratorTest {
 
     @Test
     fun shouldReturnExpectedPseudonym() {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.POST)
-            requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
-        }.andRespond {
-            withStatus(HttpStatus.OK).body(
-                getDummyResponseBody(
-                    "1234",
-                    "test",
-                    "test1234ABCDEF567890"
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.POST))
+            .andExpect(requestTo(EXPECTED_URI))
+            .andRespond {
+                withStatus(HttpStatus.OK).body(
+                    getDummyResponseBody(
+                        "1234",
+                        "test",
+                        "test1234ABCDEF567890"
+                    )
                 )
-            )
-                .createResponse(it)
-        }
+                    .createResponse(it)
+            }
 
         assertThat(this.generator.generate("ID1234")).isEqualTo("test1234ABCDEF567890")
     }
 
     @Test
     fun shouldThrowExceptionIfGpasNotAvailable() {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.POST)
-            requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
-        }.andRespond {
-            withException(IOException("Simulated IO error")).createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.POST))
+            .andExpect(requestTo(EXPECTED_URI))
+            .andRespond {
+                withException(IOException("Simulated IO error")).createResponse(it)
+            }
 
         assertThrows<PseudonymRequestFailed> { this.generator.generate("ID1234") }
     }
 
     @Test
     fun shouldThrowExceptionIfGpasDoesNotReturn2xxResponse() {
-        this.mockRestServiceServer.expect {
-            method(HttpMethod.POST)
-            requestTo("https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate")
-        }.andRespond {
-            withStatus(HttpStatus.FOUND)
-                .header(
-                    HttpHeaders.LOCATION,
-                    "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate"
-                )
-                .createResponse(it)
-        }
+        this.mockRestServiceServer
+            .expect(method(HttpMethod.POST))
+            .andExpect(requestTo(EXPECTED_URI))
+            .andRespond {
+                withStatus(HttpStatus.FOUND)
+                    .header(
+                        HttpHeaders.LOCATION,
+                        "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate"
+                    )
+                    .createResponse(it)
+            }
 
         assertThrows<PseudonymRequestFailed> { this.generator.generate("ID1234") }
     }
 
     companion object {
+
+        const val CONFIGURED_URI = "https://localhost/ttp-fhir/fhir/gpas"
+
+        val EXPECTED_URI = URIBuilder(URI.create(CONFIGURED_URI)).appendPath($$"$pseudonymizeAllowCreate")
+            .build()!!
 
         fun getDummyResponseBody(original: String, target: String, pseudonym: String) = """{
           "resourceType": "Parameters",
