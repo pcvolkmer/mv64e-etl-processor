@@ -223,6 +223,16 @@ class ExtensionsTest {
                     this.id = "Diagnosis-1"
                 }
             )
+            this.episodesOfCare = listOf(
+                MtbEpisodeOfCare().apply {
+                    this.id = "Episode-1"
+                    this.diagnoses = listOf(
+                        Reference().apply {
+                            this.id = "Diagnosis-1"
+                        }
+                    )
+                }
+            )
             this.guidelineTherapies = listOf(
                 MtbSystemicTherapy().apply {
                     this.id = "Systemic-Therapy-1"
@@ -252,6 +262,7 @@ class ExtensionsTest {
         mtbFile.pseudonymizeWith(pseudonymizeService)
         mtbFile.anonymizeContentWith(pseudonymizeService)
 
+        assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.episodesOfCare.first().diagnoses.first().id)
         assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.guidelineTherapies.first().reason.id)
         assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.guidelineProcedures.first().reason.id)
         assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.specimens.first().diagnosis.id)

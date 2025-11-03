@@ -125,35 +125,32 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
 
     this.carePlans?.onEach { carePlan ->
         carePlan?.apply {
-            id = id?.let { anonymize(it) }
+            this.id = id?.let { anonymize(it) }
 
-            diagnoses?.forEach { it -> it?.id = it.id?.let(::anonymize) }
-            geneticCounselingRecommendation?.apply {
-                id = geneticCounselingRecommendation.id?.let(::anonymize)
+            this.geneticCounselingRecommendation?.apply {
+                this.id = this.id?.let(::anonymize)
             }
-            rebiopsyRequests?.forEach { it ->
+            this.rebiopsyRequests?.forEach { it ->
                 it.id = it.id?.let(::anonymize)
                 it.tumorEntity?.id = it.tumorEntity?.id?.let(::anonymize)
             }
-            histologyReevaluationRequests?.forEach { it ->
+            this.histologyReevaluationRequests?.forEach { it ->
                 it.id = it?.id?.let(::anonymize)
                 it.specimen?.id = it.specimen?.id?.let(::anonymize)
             }
 
-            medicationRecommendations?.forEach { it ->
+            this.medicationRecommendations?.forEach { it ->
                 it.id = it?.id?.let(::anonymize)
                 it.supportingVariants?.forEach { it ->
                     it.variant?.id = it.variant?.id?.let(::anonymize)
                 }
                 it.reason?.id = it.reason?.id?.let(::anonymize)
             }
-            reason?.id = reason?.id?.let(::anonymize)
-            studyEnrollmentRecommendations?.forEach { it ->
+            this.reason?.id = this.reason?.id?.let(::anonymize)
+            this.studyEnrollmentRecommendations?.forEach { it ->
                 it?.reason?.id = it.reason?.id?.let(::anonymize)
             }
-
-            procedureRecommendations?.forEach { it ->
-
+            this.procedureRecommendations?.forEach { it ->
                 it.id = it?.id?.let(::anonymize)
                 it.supportingVariants?.forEach { it ->
                     it.variant?.id = it.variant?.id?.let(::anonymize)
@@ -161,16 +158,11 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
 
                 it.reason?.id = it.reason?.id?.let(::anonymize)
 
-                studyEnrollmentRecommendations?.forEach { it ->
-
-                    it.id = it?.id?.let(::anonymize)
-                    it.supportingVariants.forEach { it ->
-                        it.variant?.id = it?.variant?.id?.let(::anonymize)
-                    }
-                    responses?.forEach { it ->
-                        it.id = it?.id?.let(::anonymize)
-                        it.id = it?.id?.let(::anonymize)
-                    }
+            }
+            this.studyEnrollmentRecommendations?.forEach { it ->
+                it.id = it?.id?.let(::anonymize)
+                it.supportingVariants.forEach { it ->
+                    it.variant?.id = it?.variant?.id?.let(::anonymize)
                 }
             }
         }
