@@ -21,13 +21,14 @@ package dev.dnpm.etl.processor.monitoring
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.ReportService.Issue
 import dev.dnpm.etl.processor.monitoring.ReportService.Severity
-import java.util.Optional
+import java.util.*
 
 class ReportService(
     private val objectMapper: ObjectMapper
@@ -55,12 +56,19 @@ class ReportService(
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private data class DataQualityReport(val issues: List<Issue>)
+    private data class DataQualityReport(
+        @param:JsonProperty(value = "issues")
+        val issues: List<Issue>
+    )
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Issue(
+        @param:JsonProperty(value = "severity")
         val severity: Severity,
-        @JsonAlias("details") val message: String,
+        @param:JsonProperty(value = "message")
+        @param:JsonAlias("details")
+        val message: String,
+        @param:JsonProperty(value = "path")
         val path: Optional<String> = Optional.empty()
     )
 
