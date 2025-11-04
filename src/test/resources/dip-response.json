@@ -1,0 +1,36 @@
+{
+  "patient": "TEST-PATIENT0123456789abcdef",
+  "issues": [
+    {
+      "severity": "error",
+      "message": "MVH-Einschluss-Fallkonferenz darf nicht vor oder ohne Einwilligung zur Teilnahme stattgefunden haben",
+      "path": "/Datum der MVH-Einwilligung"
+    },
+    {
+      "severity": "warning",
+      "message": "Fehlende Angabe 'Tumor-Grading'",
+      "path": "/Diagnose[0123456789abcdef]/Tumor-Grading"
+    },
+    {
+      "severity": "fatal",
+      "message": "Nicht auflösbare Referenz-ID '0123456789abcdef' auf Objekt 'Diagnose'",
+      "path": "/Systemische-Therapie[0123456789abcdef]/Therapie-Grund (Diagnose)"
+    },
+    {
+      "severity": "warning",
+      "message": "Fehlende Angabe",
+      "path": "/Kostenübernahme-Anträge"
+    },
+    {
+      "severity": "info",
+      "message": "Sonstige Info",
+      "path": "/Kostenübernahme-Antworten"
+    },
+    {
+      "severity": "warning",
+      "message": "Fehlende Angabe",
+      "path": "/MTB-Therapien"
+    }
+  ],
+  "createdAt": "2025-11-04T10:00:00.000000000Z"
+}
