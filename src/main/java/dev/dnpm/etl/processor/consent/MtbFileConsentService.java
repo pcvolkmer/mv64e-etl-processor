@@ -2,6 +2,7 @@ package dev.dnpm.etl.processor.consent;
 
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,8 @@ public class MtbFileConsentService implements IConsentService {
   }
 
   @Override
-  public TtpConsentStatus getTtpBroadConsentStatus(String personIdentifierValue) {
+  @NonNull
+  public TtpConsentStatus getTtpBroadConsentStatus(@NonNull String personIdentifierValue) {
     return TtpConsentStatus.UNKNOWN_CHECK_FILE;
   }
 
@@ -24,8 +26,11 @@ public class MtbFileConsentService implements IConsentService {
    * @return empty bundle
    */
   @Override
+  @NonNull
   public Bundle getConsent(
-      String personIdentifierValue, Date requestDate, ConsentDomain consentDomain) {
+      @NonNull String personIdentifierValue,
+      @NonNull Date requestDate,
+      @NonNull ConsentDomain consentDomain) {
     return new Bundle();
   }
 }

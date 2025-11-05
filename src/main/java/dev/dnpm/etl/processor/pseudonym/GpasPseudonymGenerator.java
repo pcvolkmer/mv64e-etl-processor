@@ -32,7 +32,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -49,8 +49,8 @@ public class GpasPseudonymGenerator implements Generator {
   private final RetryTemplate retryTemplate;
   private final Logger log = LoggerFactory.getLogger(GpasPseudonymGenerator.class);
   private final RestTemplate restTemplate;
-  private final @NotNull String genomDeTanDomain;
-  private final @NotNull String pidPsnDomain;
+  private final @NonNull String genomDeTanDomain;
+  private final @NonNull String pidPsnDomain;
   protected static final String CREATE_OR_GET_PSN = "$pseudonymizeAllowCreate";
   protected static final String CREATE_MULTI_DOMAIN_PSN = "$pseudonymize-secondary";
   private static final String SINGLE_PSN_PART_NAME = "pseudonym";
@@ -73,11 +73,13 @@ public class GpasPseudonymGenerator implements Generator {
   }
 
   @Override
+  @NonNull
   public String generate(String id) {
     return generate(id, PsnDomainType.SINGLE_PSN_DOMAIN);
   }
 
   @Override
+  @NonNull
   public String generateGenomDeTan(String id) {
     return generate(id, PsnDomainType.MULTI_PSN_DOMAIN);
   }
@@ -106,7 +108,7 @@ public class GpasPseudonymGenerator implements Generator {
             .formatted(domainType));
   }
 
-  @NotNull
+  @NonNull
   public static String unwrapPseudonym(Parameters gPasPseudonymResult, String targetPartName) {
     final var parameters = gPasPseudonymResult.getParameter().stream().findFirst();
 
@@ -140,7 +142,7 @@ public class GpasPseudonymGenerator implements Generator {
     return psnValue.replaceAll(forbiddenCharsRegex, "_");
   }
 
-  @NotNull
+  @NonNull
   protected ResponseEntity<String> getGpasPseudonym(String gPasRequestBody, String apiEndpoint) {
 
     HttpEntity<String> requestEntity = new HttpEntity<>(gPasRequestBody, this.httpHeader);
@@ -211,7 +213,7 @@ public class GpasPseudonymGenerator implements Generator {
     return iParser.encodeResourceToString(param);
   }
 
-  @NotNull
+  @NonNull
   protected HttpHeaders getHttpHeaders(String gPasUserName, String gPasPassword) {
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);

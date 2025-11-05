@@ -11,7 +11,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -172,7 +172,8 @@ public class GicsConsentService implements IConsentService {
   }
 
   @Override
-  public TtpConsentStatus getTtpBroadConsentStatus(String personIdentifierValue) {
+  @NonNull
+  public TtpConsentStatus getTtpBroadConsentStatus(@NonNull String personIdentifierValue) {
     var consentStatusResponse =
         callGicsApi(
             getFhirRequestParameters(personIdentifierValue),
@@ -211,7 +212,7 @@ public class GicsConsentService implements IConsentService {
     }
   }
 
-  @NotNull
+  @NonNull
   private String getConsentDomainName(ConsentDomain targetConsentDomain) {
     return switch (targetConsentDomain) {
       case BROAD_CONSENT -> gIcsConfigProperties.getBroadConsentDomainName();
@@ -289,7 +290,9 @@ public class GicsConsentService implements IConsentService {
   }
 
   @Override
-  public Bundle getConsent(String patientId, Date requestDate, ConsentDomain consentDomain) {
+  @NonNull
+  public Bundle getConsent(
+      @NonNull String patientId, @NonNull Date requestDate, @NonNull ConsentDomain consentDomain) {
     Bundle gIcsResultBundle =
         currentConsentForPersonAndTemplate(patientId, consentDomain, requestDate);
     if (ConsentDomain.BROAD_CONSENT == consentDomain) {

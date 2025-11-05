@@ -19,9 +19,11 @@
 
 package dev.dnpm.etl.processor.pseudonym;
 
+import org.jspecify.annotations.NonNull;
+
 public interface Generator {
 
-  String generate(String id);
+  @NonNull String generate(String id);
 
-  String generateGenomDeTan(String id);
+  @NonNull String generateGenomDeTan(String id);
 }
