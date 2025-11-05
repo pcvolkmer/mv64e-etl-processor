@@ -5,7 +5,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.5.6"
+    id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
     kotlin("jvm") version "2.2.10"
@@ -20,7 +20,7 @@ var versions = mapOf(
     "mtb-dto" to "0.1.0-SNAPSHOT",
     "hapi-fhir" to "8.4.0",
     "apache-cxf" to "4.1.3",
-    "mockito-kotlin" to "6.0.0",
+    "mockito-kotlin" to "6.1.0",
     "archunit" to "1.4.1",
     // Webjars
     "webjars-locator" to "0.52",
@@ -117,7 +117,7 @@ dependencies {
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
     // Fix for CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:1.26.0")
+    integrationTestImplementation("org.apache.commons:commons-compress:1.27.1")
 }
 
 tasks.withType<KotlinCompile> {
