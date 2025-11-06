@@ -75,13 +75,13 @@ public class GpasPseudonymGenerator implements Generator {
 
   @Override
   @NonNull
-  public String generate(String id) {
+  public String generate(@NonNull String id) {
     return generate(id, PsnDomainType.SINGLE_PSN_DOMAIN);
   }
 
   @Override
   @NonNull
-  public String generateGenomDeTan(String id) {
+  public String generateGenomDeTan(@NonNull String id) {
     return generate(id, PsnDomainType.MULTI_PSN_DOMAIN);
   }
 
