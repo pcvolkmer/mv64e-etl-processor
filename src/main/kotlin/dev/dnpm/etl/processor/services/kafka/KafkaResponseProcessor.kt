@@ -73,9 +73,9 @@ class KafkaResponseProcessor(
     }
 
     data class ResponseBody(
-        @JsonProperty("request_id") @JsonAlias("requestId") val requestId: String,
-        @JsonProperty("status_code") @JsonAlias("statusCode") val statusCode: Int,
-        @JsonProperty("status_body") @JsonAlias("statusBody") val statusBody: Map<String, Any>
+        @param:JsonProperty("request_id") @param:JsonAlias("requestId") val requestId: String,
+        @param:JsonProperty("status_code") @param:JsonAlias("statusCode") val statusCode: Int,
+        @param:JsonProperty("status_body") @param:JsonAlias("statusBody") val statusBody: Map<String, Any>
     )
 
 }

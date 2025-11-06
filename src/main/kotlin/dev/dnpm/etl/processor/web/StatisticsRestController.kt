@@ -39,7 +39,7 @@ import java.time.temporal.ChronoUnit
 @RestController
 @RequestMapping(path = ["/statistics"])
 class StatisticsRestController(
-    @Qualifier("statisticsUpdateProducer")
+    @param:Qualifier("statisticsUpdateProducer")
     private val statisticsUpdateProducer: Sinks.Many<Any>,
     private val requestService: RequestService
 ) {
