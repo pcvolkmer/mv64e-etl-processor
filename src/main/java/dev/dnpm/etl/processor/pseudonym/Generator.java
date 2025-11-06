@@ -19,6 +19,9 @@
 
 package dev.dnpm.etl.processor.pseudonym;
 
+import org.jspecify.annotations.NullMarked;
+
+@NullMarked
 public interface Generator {
 
   String generate(String id);

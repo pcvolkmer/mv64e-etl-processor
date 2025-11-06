@@ -2,7 +2,9 @@ package dev.dnpm.etl.processor.consent;
 
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public interface IConsentService {
 
   /**

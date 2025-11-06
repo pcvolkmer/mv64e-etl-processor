@@ -1,3 +1,5 @@
+import net.ltgt.gradle.errorprone.errorprone
+import net.ltgt.gradle.nullaway.nullaway
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -8,6 +10,8 @@ plugins {
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
+    id("net.ltgt.errorprone") version "4.3.0"
+    id("net.ltgt.nullaway") version "2.3.0"
     kotlin("jvm") version "2.2.10"
     kotlin("plugin.spring") version "2.2.10"
     jacoco
@@ -90,6 +94,7 @@ dependencies {
     implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
     implementation("org.webjars.npm:echarts:${versions["echarts"]}")
     implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
+    implementation("org.jspecify:jspecify:1.0.0")
     // Fix for CVE-2025-48924
     implementation("org.apache.commons:commons-lang3:3.18.0")
     // gPAS via Soap
@@ -118,6 +123,20 @@ dependencies {
     integrationTestImplementation("org.springframework:spring-webflux")
     // Fix for CVE-2024-25710
     integrationTestImplementation("org.apache.commons:commons-compress:1.27.1")
+
+    errorprone("com.google.errorprone:error_prone_core:2.43.0")
+    errorprone("com.uber.nullaway:nullaway:0.12.11")
+}
+
+tasks.withType<JavaCompile> {
+    options.errorprone.nullaway {
+        error()
+        annotatedPackages.add("dev.dnpm.etl")
+    }
+    options.errorprone.disableAllChecks = true
+    options.errorprone {
+        disableAllWarnings = true
+    }
 }
 
 tasks.withType<KotlinCompile> {
