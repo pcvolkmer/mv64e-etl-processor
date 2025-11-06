@@ -2,8 +2,9 @@ package dev.dnpm.etl.processor.consent;
 
 import java.util.Date;
 import org.hl7.fhir.r4.model.Bundle;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public interface IConsentService {
 
   /**
@@ -13,7 +14,7 @@ public interface IConsentService {
    * @return status of broad consent
    * @apiNote cannot not differ between not asked and rejected
    */
-  @NonNull TtpConsentStatus getTtpBroadConsentStatus(@NonNull String personIdentifierValue);
+  TtpConsentStatus getTtpBroadConsentStatus(String personIdentifierValue);
 
   /**
    * Get broad consent policies with respect to a request date
@@ -23,8 +24,5 @@ public interface IConsentService {
    * @return consent policies as bundle;
    *     <p>if empty patient has not been asked, yet.
    */
-  @NonNull Bundle getConsent(
-      @NonNull String personIdentifierValue,
-      @NonNull Date requestDate,
-      @NonNull ConsentDomain consentDomain);
+  Bundle getConsent(String personIdentifierValue, Date requestDate, ConsentDomain consentDomain);
 }

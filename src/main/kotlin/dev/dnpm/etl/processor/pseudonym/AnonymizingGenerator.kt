@@ -35,7 +35,7 @@ class AnonymizingGenerator : Generator {
     }
 
     @OptIn(ExperimentalStdlibApi::class)
-    override fun generateGenomDeTan(id: String?): String {
+    override fun generateGenomDeTan(id: String): String {
 
         val bytes = ByteArray(64 / 2)
         getSecureRandom().nextBytes(bytes)

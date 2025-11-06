@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -135,6 +136,7 @@ public class GicsConsentService implements IConsentService {
     return headers;
   }
 
+  @Nullable
   protected String callGicsApi(Parameters parameter, String endpoint) {
     var parameterAsXml = fhirContext.newXmlParser().encodeResourceToString(parameter);
     HttpEntity<String> requestEntity =
@@ -258,7 +260,7 @@ public class GicsConsentService implements IConsentService {
     return requestParameter;
   }
 
-  private TtpConsentStatus evaluateConsentResponse(String consentStatusResponse) {
+  private TtpConsentStatus evaluateConsentResponse(@Nullable String consentStatusResponse) {
     if (consentStatusResponse == null) {
       return TtpConsentStatus.FAILED_TO_ASK;
     }
