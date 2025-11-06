@@ -50,6 +50,7 @@ class GpasPseudonymGeneratorTest {
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
         val gPasConfigProperties = GPasConfigProperties(
             "https://localhost:9990/ttp-fhir/fhir/gpas",
+            null,
             "test", "test2",
             null,
             null

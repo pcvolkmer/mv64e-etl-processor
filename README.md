@@ -111,8 +111,8 @@ Ab Version 2025.1 (Multi-Pseudonym Support)
 * `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz REST API (e.g. http://127.0.0.1:9990/ttp-fhir/fhir/gpas)
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`: gPas Domänenname für Patienten ID
-* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPas Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
+* `APP_PSEUDONYMIZE_GPAS_PATIENT_DOMAIN`: gPas Domänenname für Patienten ID (ebenfalls gültig: `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`)
+* `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPAS Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
   Clinical data node)
 
 ### (Externe) Consent-Services
@@ -335,6 +335,12 @@ für HTTP nicht gibt.
 
 Wird die Umgebungsvariable `APP_KAFKA_INPUT_TOPIC` gesetzt, kann eine Nachricht auch über dieses
 Kafka-Topic an den ETL-Prozessor übermittelt werden.
+
+Soll eine SSL-gesicherte Verbindung zu Kafka verwendet werden, so sind die SSL-Zertifikate in
+der Spring-Konfiguration anzugeben.
+Ein Beispiel findet sich in [`application-dev.yml`](src/main/resources/application-dev.yml).
+Dies kann auch mit Umgebungsvariablen wie `SPRING_KAFKA_SECURITY_...` und `SPRING_KAFKA_SSL_...`
+umgesetzt werden.
 
 ##### Retention Time
 

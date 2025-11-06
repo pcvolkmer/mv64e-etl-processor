@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.config
 
 import dev.dnpm.etl.processor.security.Role
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty
 
 @ConfigurationProperties(AppConfigProperties.NAME)
 data class AppConfigProperties(
@@ -47,7 +48,9 @@ data class PseudonymizeConfigProperties(
 @ConfigurationProperties(GPasConfigProperties.NAME)
 data class GPasConfigProperties(
     val uri: String?,
-    val patientDomain: String = "etl-processor",
+    @get:DeprecatedConfigurationProperty(since = "0.12")
+    val pidDomain: String?,
+    val patientDomain: String = pidDomain ?: "etl-processor",
     val genomDeTanDomain: String = "ccdn",
     val username: String?,
     val password: String?,

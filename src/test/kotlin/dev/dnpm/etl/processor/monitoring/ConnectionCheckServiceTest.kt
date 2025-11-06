@@ -74,6 +74,7 @@ class ConnectionCheckServiceTest {
 
             val gpasTargetProperties = GPasConfigProperties(
                 "http://localhost/gpas",
+                null,
                 "patientDomain",
                 "genomDeTanDomain",
                 "username",
