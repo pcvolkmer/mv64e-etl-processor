@@ -40,7 +40,7 @@ import reactor.core.publisher.Sinks
 @Controller
 @RequestMapping(path = ["configs"])
 class ConfigController(
-    @Qualifier("connectionCheckUpdateProducer")
+    @param:Qualifier("connectionCheckUpdateProducer")
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
     private val transformationService: TransformationService,
     private val pseudonymGenerator: Generator,

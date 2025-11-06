@@ -80,7 +80,7 @@ sealed class ConnectionCheckResult {
 
 class KafkaConnectionCheckService(
     private val consumer: Consumer<String, String>,
-    @Qualifier("connectionCheckUpdateProducer")
+    @param:Qualifier("connectionCheckUpdateProducer")
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : OutputConnectionCheckService {
 
@@ -120,7 +120,7 @@ class KafkaConnectionCheckService(
 class RestConnectionCheckService(
     private val restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
-    @Qualifier("connectionCheckUpdateProducer")
+    @param:Qualifier("connectionCheckUpdateProducer")
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : OutputConnectionCheckService {
 
@@ -171,7 +171,7 @@ class RestConnectionCheckService(
 class GPasConnectionCheckService(
     private val restTemplate: RestTemplate,
     private val gPasConfigProperties: GPasConfigProperties,
-    @Qualifier("connectionCheckUpdateProducer")
+    @param:Qualifier("connectionCheckUpdateProducer")
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : ConnectionCheckService {
 
@@ -229,7 +229,7 @@ class GPasConnectionCheckService(
 class GIcsConnectionCheckService(
     private val restTemplate: RestTemplate,
     private val gIcsConfigProperties: GIcsConfigProperties,
-    @Qualifier("connectionCheckUpdateProducer")
+    @param:Qualifier("connectionCheckUpdateProducer")
     private val connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
 ) : ConnectionCheckService {
 
