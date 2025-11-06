@@ -111,7 +111,7 @@ Ab Version 2025.1 (Multi-Pseudonym Support)
 * `APP_PSEUDONYMIZE_GPAS_URI`: URI der gPAS-Instanz REST API (e.g. http://127.0.0.1:9990/ttp-fhir/fhir/gpas)
 * `APP_PSEUDONYMIZE_GPAS_USERNAME`: gPas Basic-Auth Benutzername
 * `APP_PSEUDONYMIZE_GPAS_PASSWORD`: gPas Basic-Auth Passwort
-* `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`: gPas Domänenname für Patienten ID
+* `APP_PSEUDONYMIZE_GPAS_PATIENT_DOMAIN`: gPas Domänenname für Patienten ID (ebenfalls gültig: `APP_PSEUDONYMIZE_GPAS_PID_DOMAIN`)
 * `APP_PSEUDONYMIZE_GPAS_GENOM_DE_TAN_DOMAIN`: gPAS Multi-Pseudonym-Domäne für genomDE Vorgangsnummern (
   Clinical data node)
 

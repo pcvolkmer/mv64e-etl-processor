@@ -53,6 +53,7 @@ class GpasPseudonymGeneratorTest {
         val gPasConfigProperties = GPasConfigProperties(
             CONFIGURED_URI,
             null,
+            null,
             "test", "test2",
             null,
             null
@@ -104,7 +105,7 @@ class GpasPseudonymGeneratorTest {
                 withStatus(HttpStatus.FOUND)
                     .header(
                         HttpHeaders.LOCATION,
-                        "https://localhost/ttp-fhir/fhir/gpas/\$pseudonymizeAllowCreate"
+                        $$"https://localhost/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate"
                     )
                     .createResponse(it)
             }
