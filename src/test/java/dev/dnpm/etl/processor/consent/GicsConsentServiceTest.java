@@ -1,5 +1,6 @@
 package dev.dnpm.etl.processor.consent;
 
+import static dev.dnpm.etl.processor.consent.GicsConsentService.IS_CONSENTED_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -10,11 +11,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dnpm.etl.processor.config.AppConfiguration;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 import org.apache.commons.io.IOUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -48,6 +51,10 @@ class GicsConsentServiceTest {
 
   GicsConsentService gicsConsentService;
 
+  static URI expectedGicsConsentedEndpoint() throws Exception {
+    return new URIBuilder(URI.create(GICS_BASE_URI)).appendPath(IS_CONSENTED_ENDPOINT).build();
+  }
+
   @BeforeEach
   void setUp(
       @Autowired AppFhirConfig appFhirConfig,
@@ -67,7 +74,7 @@ class GicsConsentServiceTest {
   }
 
   @Test
-  void shouldReturnTtpBroadConsentStatus() {
+  void shouldReturnTtpBroadConsentStatus() throws Exception {
     final Parameters consentedResponse =
         new Parameters()
             .addParameter(
@@ -76,10 +83,7 @@ class GicsConsentServiceTest {
                     .setValue(new BooleanType().setValue(true)));
 
     mockRestServiceServer
-        .expect(
-            requestTo(
-                "http://localhost:8090/ttp-fhir/fhir/gics"
-                    + GicsConsentService.IS_CONSENTED_ENDPOINT))
+        .expect(requestTo(expectedGicsConsentedEndpoint()))
         .andRespond(
             withSuccess(
                 appFhirConfig
@@ -93,7 +97,7 @@ class GicsConsentServiceTest {
   }
 
   @Test
-  void shouldReturnRevokedConsent() {
+  void shouldReturnRevokedConsent() throws Exception {
     final Parameters revokedResponse =
         new Parameters()
             .addParameter(
@@ -102,10 +106,7 @@ class GicsConsentServiceTest {
                     .setValue(new BooleanType().setValue(false)));
 
     mockRestServiceServer
-        .expect(
-            requestTo(
-                "http://localhost:8090/ttp-fhir/fhir/gics"
-                    + GicsConsentService.IS_CONSENTED_ENDPOINT))
+        .expect(requestTo(expectedGicsConsentedEndpoint()))
         .andRespond(
             withSuccess(
                 appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(revokedResponse),
@@ -116,7 +117,7 @@ class GicsConsentServiceTest {
   }
 
   @Test
-  void shouldReturnInvalidParameterResponse() {
+  void shouldReturnInvalidParameterResponse() throws Exception {
     final OperationOutcome responseWithErrorOutcome =
         new OperationOutcome()
             .addIssue(
@@ -126,7 +127,7 @@ class GicsConsentServiceTest {
                     .setDiagnostics("Invalid policy parameter..."));
 
     mockRestServiceServer
-        .expect(requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT))
+        .expect(requestTo(expectedGicsConsentedEndpoint()))
         .andRespond(
             withSuccess(
                 appFhirConfig
@@ -140,9 +141,9 @@ class GicsConsentServiceTest {
   }
 
   @Test
-  void shouldReturnRequestError() {
+  void shouldReturnRequestError() throws Exception {
     mockRestServiceServer
-        .expect(requestTo(GICS_BASE_URI + GicsConsentService.IS_CONSENTED_ENDPOINT))
+        .expect(requestTo(expectedGicsConsentedEndpoint()))
         .andRespond(withServerError());
 
     var consentStatus = gicsConsentService.getTtpBroadConsentStatus("123456");
