@@ -5,6 +5,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +19,9 @@ import org.springframework.retry.TerminatedRetryException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 
 /**
@@ -118,9 +119,21 @@ public class GicsConsentService implements IConsentService {
         return result;
     }
 
-    private URI endpointUri(String endpoint) {
-        assert this.gIcsConfigProperties.getUri() != null;
-        return UriComponentsBuilder.fromUriString(this.gIcsConfigProperties.getUri()).path(endpoint).build().toUri();
+    private URI endpointUri(String endpoint) throws URISyntaxException {
+        if (null == this.gIcsConfigProperties.getUri()) {
+            throw new URISyntaxException("null", "URI must not be null");
+        }
+        var gPasUrl1 = this.gIcsConfigProperties.getUri();
+        if (this.gIcsConfigProperties.getUri().lastIndexOf("/")
+                == this.gIcsConfigProperties.getUri().length() - 1) {
+            gPasUrl1 =
+                    this.gIcsConfigProperties
+                            .getUri()
+                            .substring(0, this.gIcsConfigProperties.getUri().length() - 1);
+        }
+        var urlBuilder = new URIBuilder(new URI(gPasUrl1)).appendPath(endpoint);
+
+        return urlBuilder.build();
     }
 
     private HttpHeaders headersWithHttpBasicAuth() {
@@ -169,7 +182,11 @@ public class GicsConsentService implements IConsentService {
                 terminatedRetryException.getMessage());
             log.error(msg);
             return null;
-        }
+        } catch (URISyntaxException e) {
+      var msg = String.format("Invalid URI for consents status request: '%s", e.getMessage());
+      log.error(msg);
+      return null;
+    }
     }
 
     @Override
