@@ -107,6 +107,11 @@ data class GIcsConfigProperties(
     val broadConsentPolicySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
 
     /**
+     * Consent Policy uri for MII Broad Consent Version
+     */
+    val broadConsentPolicyUri: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790",
+
+    /**
      * Value to expect in case of positiv consent
      */
     val genomeDePolicyCode: String = "sequencing",
