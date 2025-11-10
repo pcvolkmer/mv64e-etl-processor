@@ -40,8 +40,6 @@ public class GicsConsentService implements IConsentService {
       "/$currentPolicyStatesForPerson";
   private static final String BROAD_CONSENT_PROFILE_URI =
       "https://www.medizininformatik-initiative.de/fhir/modul-consent/StructureDefinition/mii-pr-consent-einwilligung";
-  private static final String BROAD_CONSENT_POLICY =
-      "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1791";
 
   private final RetryTemplate retryTemplate;
   private final RestTemplate restTemplate;
@@ -331,8 +329,11 @@ public class GicsConsentService implements IConsentService {
       return gIcsResultBundle;
     }
 
-    if (consentAsOne.getPolicy().stream().noneMatch(p -> p.getUri().equals(BROAD_CONSENT_POLICY))) {
-      consentAsOne.addPolicy(new Consent.ConsentPolicyComponent().setUri(BROAD_CONSENT_POLICY));
+    if (consentAsOne.getPolicy().stream()
+        .noneMatch(p -> p.getUri().equals(gIcsConfigProperties.getBroadConsentPolicyUri()))) {
+      consentAsOne.addPolicy(
+          new Consent.ConsentPolicyComponent()
+              .setUri(gIcsConfigProperties.getBroadConsentPolicyUri()));
     }
 
     if (consentAsOne.getMeta().getProfile().stream()

@@ -176,6 +176,8 @@ Modelvorhaben §64e.
   Falls leer wird `2.16.840.1.113883.3.1937.777.24.5.3.6` angenommen.
 * `APP_CONSENT_GICS_POLICYSYSTEM`: Das System der Einwilligung-Regel der Objekt-IDs. Falls leer wird
   `urn:oid:2.16.840.1.113883.3.1937.777.24.5.3` angenommen.
+* `APP_CONSENT_GICS_POLICYURI`: Die Version der Einwilligung. Falls leer wird Version 1.6d
+  (`urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790`) angenommen.
 
 ### Anmeldung mit einem Passwort
 

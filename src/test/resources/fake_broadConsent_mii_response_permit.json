@@ -56,7 +56,7 @@
         "reference": "QuestionnaireResponse/7d314bc5-79b1-11f0-ab27-6ed0ed82d0fd"
       },
       "policy": [ {
-        "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1791"
+        "uri": "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790"
       } ],
       "provision": {
         "type": "deny",
