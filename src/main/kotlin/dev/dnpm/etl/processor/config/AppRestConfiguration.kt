@@ -37,16 +37,11 @@ import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
 
 @Configuration
-@EnableConfigurationProperties(
-    value = [
-        RestTargetProperties::class
-    ]
-)
+@EnableConfigurationProperties(value = [RestTargetProperties::class])
 @ConditionalOnProperty(value = ["app.rest.uri"])
 @ConditionalOnMissingBean(MtbFileSender::class)
 @Order(-10)
 class AppRestConfiguration {
-
     private val logger = LoggerFactory.getLogger(AppRestConfiguration::class.java)
 
     @Bean
@@ -64,10 +59,11 @@ class AppRestConfiguration {
     fun restConnectionCheckService(
         restTemplate: RestTemplate,
         restTargetProperties: RestTargetProperties,
-        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
-    ): ConnectionCheckService {
-        return RestConnectionCheckService(restTemplate, restTargetProperties, connectionCheckUpdateProducer)
-    }
-
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
+    ): ConnectionCheckService =
+        RestConnectionCheckService(
+            restTemplate,
+            restTargetProperties,
+            connectionCheckUpdateProducer,
+        )
 }
-

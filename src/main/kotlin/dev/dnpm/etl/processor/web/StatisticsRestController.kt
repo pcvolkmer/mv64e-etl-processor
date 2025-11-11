@@ -41,140 +41,168 @@ import java.time.temporal.ChronoUnit
 class StatisticsRestController(
     @param:Qualifier("statisticsUpdateProducer")
     private val statisticsUpdateProducer: Sinks.Many<Any>,
-    private val requestService: RequestService
+    private val requestService: RequestService,
 ) {
-
     @GetMapping(path = ["requeststates"])
-    fun requestStates(@RequestParam(required = false, defaultValue = "false") delete: Boolean): List<NameValue> {
-        val states = if (delete) {
-            requestService.countDeleteStates()
-        } else {
-            requestService.countStates()
-        }
+    fun requestStates(
+        @RequestParam(required = false, defaultValue = "false") delete: Boolean,
+    ): List<NameValue> {
+        val states =
+            if (delete) {
+                requestService.countDeleteStates()
+            } else {
+                requestService.countStates()
+            }
 
         return states
             .map {
-                val color = when (it.status) {
+                val color =
+                    when (it.status) {
+                        RequestStatus.ERROR -> "red"
+                        RequestStatus.WARNING -> "darkorange"
+                        RequestStatus.SUCCESS -> "green"
+                        else -> "slategray"
+                    }
+                NameValue(it.status.toString(), it.count, color)
+            }.sortedByDescending { it.value }
+    }
+
+    @GetMapping(path = ["requestslastmonth"])
+    fun requestsLastMonth(
+        @RequestParam(required = false, defaultValue = "false") delete: Boolean,
+    ): List<DateNameValues> {
+        val requestType =
+            if (delete) {
+                RequestType.DELETE
+            } else {
+                RequestType.MTB_FILE
+            }
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("Europe/Berlin"))
+        val data =
+            requestService
+                .findAll()
+                .filter { it.type == requestType }
+                .filter { it.processedAt.isAfter(Instant.now().minus(30, ChronoUnit.DAYS)) }
+                .groupBy { formatter.format(it.processedAt) }
+                .map {
+                    val requestList =
+                        it.value
+                            .groupBy { request -> request.status }
+                            .map { request -> Pair(request.key, request.value.size) }
+                            .toMap()
+                    Pair(
+                        it.key.toString(),
+                        DateNameValues(
+                            it.key.toString(),
+                            NameValues(
+                                error = requestList[RequestStatus.ERROR] ?: 0,
+                                warning = requestList[RequestStatus.WARNING] ?: 0,
+                                success = requestList[RequestStatus.SUCCESS] ?: 0,
+                                duplication = requestList[RequestStatus.DUPLICATION] ?: 0,
+                                unknown = requestList[RequestStatus.UNKNOWN] ?: 0,
+                            ),
+                        ),
+                    )
+                }.toMap()
+
+        return (0L..30L)
+            .map { Instant.now().minus(it, ChronoUnit.DAYS) }
+            .map { formatter.format(it) }
+            .map { DateNameValues(it, data[it]?.nameValues ?: NameValues()) }
+            .sortedBy { it.date }
+    }
+
+    @GetMapping(path = ["requestpatientstates"])
+    fun requestPatientStates(
+        @RequestParam(required = false, defaultValue = "false") delete: Boolean,
+    ): List<NameValue> {
+        val states =
+            if (delete) {
+                requestService.findPatientUniqueDeleteStates()
+            } else {
+                requestService.findPatientUniqueStates()
+            }
+
+        return states.map {
+            val color =
+                when (it.status) {
                     RequestStatus.ERROR -> "red"
                     RequestStatus.WARNING -> "darkorange"
                     RequestStatus.SUCCESS -> "green"
                     else -> "slategray"
                 }
-                NameValue(it.status.toString(), it.count, color)
-            }
-            .sortedByDescending { it.value }
-    }
-
-    @GetMapping(path = ["requestslastmonth"])
-    fun requestsLastMonth(
-        @RequestParam(
-            required = false,
-            defaultValue = "false"
-        ) delete: Boolean
-    ): List<DateNameValues> {
-        val requestType = if (delete) {
-            RequestType.DELETE
-        } else {
-            RequestType.MTB_FILE
-        }
-
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("Europe/Berlin"))
-        val data = requestService.findAll()
-            .filter { it.type == requestType }
-            .filter { it.processedAt.isAfter(Instant.now().minus(30, ChronoUnit.DAYS)) }
-            .groupBy { formatter.format(it.processedAt) }
-            .map {
-                val requestList = it.value
-                    .groupBy { request -> request.status }
-                    .map { request ->
-                        Pair(request.key, request.value.size)
-                    }
-                    .toMap()
-                Pair(
-                    it.key.toString(),
-                    DateNameValues(
-                        it.key.toString(), NameValues(
-                            error = requestList[RequestStatus.ERROR] ?: 0,
-                            warning = requestList[RequestStatus.WARNING] ?: 0,
-                            success = requestList[RequestStatus.SUCCESS] ?: 0,
-                            duplication = requestList[RequestStatus.DUPLICATION] ?: 0,
-                            unknown = requestList[RequestStatus.UNKNOWN] ?: 0,
-                        )
-                    )
-                )
-            }.toMap()
-
-        return (0L..30L).map { Instant.now().minus(it, ChronoUnit.DAYS) }
-            .map { formatter.format(it) }
-            .map {
-                DateNameValues(it, data[it]?.nameValues ?: NameValues())
-            }
-            .sortedBy { it.date }
-    }
-
-    @GetMapping(path = ["requestpatientstates"])
-    fun requestPatientStates(@RequestParam(required = false, defaultValue = "false") delete: Boolean): List<NameValue> {
-        val states = if (delete) {
-            requestService.findPatientUniqueDeleteStates()
-        } else {
-            requestService.findPatientUniqueStates()
-        }
-
-        return states.map {
-            val color = when (it.status) {
-                RequestStatus.ERROR -> "red"
-                RequestStatus.WARNING -> "darkorange"
-                RequestStatus.SUCCESS -> "green"
-                else -> "slategray"
-            }
             NameValue(it.status.toString(), it.count, color)
         }
     }
 
     @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun updater(): Flux<ServerSentEvent<Any>> {
-        return statisticsUpdateProducer.asFlux().flatMap {
+    fun updater(): Flux<ServerSentEvent<Any>> =
+        statisticsUpdateProducer.asFlux().flatMap {
             Flux.fromIterable(
                 listOf(
-                    ServerSentEvent.builder<Any>()
-                        .event("requeststates").id("none").data(this.requestStates(false))
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("requeststates")
+                        .id("none")
+                        .data(this.requestStates(false))
                         .build(),
-                    ServerSentEvent.builder<Any>()
-                        .event("requestslastmonth").id("none").data(this.requestsLastMonth(false))
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("requestslastmonth")
+                        .id("none")
+                        .data(this.requestsLastMonth(false))
                         .build(),
-                    ServerSentEvent.builder<Any>()
-                        .event("requestpatientstates").id("none").data(this.requestPatientStates(false))
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("requestpatientstates")
+                        .id("none")
+                        .data(this.requestPatientStates(false))
                         .build(),
-
-                    ServerSentEvent.builder<Any>()
-                        .event("deleterequeststates").id("none").data(this.requestStates(true))
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("deleterequeststates")
+                        .id("none")
+                        .data(this.requestStates(true))
                         .build(),
-                    ServerSentEvent.builder<Any>()
-                        .event("deleterequestslastmonth").id("none").data(this.requestsLastMonth(true))
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("deleterequestslastmonth")
+                        .id("none")
+                        .data(this.requestsLastMonth(true))
                         .build(),
-                    ServerSentEvent.builder<Any>()
-                        .event("deleterequestpatientstates").id("none").data(this.requestPatientStates(true))
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("deleterequestpatientstates")
+                        .id("none")
+                        .data(this.requestPatientStates(true))
                         .build(),
-
-                    ServerSentEvent.builder<Any>()
-                        .event("newrequest").id("none").data("newrequest")
-                        .build()
-                )
+                    ServerSentEvent
+                        .builder<Any>()
+                        .event("newrequest")
+                        .id("none")
+                        .data("newrequest")
+                        .build(),
+                ),
             )
-
         }
-    }
-
 }
 
-data class NameValue(val name: String, val value: Int, val color: String)
+data class NameValue(
+    val name: String,
+    val value: Int,
+    val color: String,
+)
 
-data class DateNameValues(val date: String, val nameValues: NameValues)
+data class DateNameValues(
+    val date: String,
+    val nameValues: NameValues,
+)
 
 data class NameValues(
     val error: Int = 0,
     val warning: Int = 0,
     val success: Int = 0,
     val duplication: Int = 0,
-    val unknown: Int = 0
+    val unknown: Int = 0,
 )

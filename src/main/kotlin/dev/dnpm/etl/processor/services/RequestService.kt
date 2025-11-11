@@ -22,55 +22,63 @@ package dev.dnpm.etl.processor.services
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.*
+import java.util.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
-class RequestService(
-    private val requestRepository: RequestRepository
-) {
+class RequestService(private val requestRepository: RequestRepository) {
 
-    fun save(request: Request) = requestRepository.save(request)
+  fun save(request: Request) = requestRepository.save(request)
 
-    fun findAll(): Iterable<Request> = requestRepository.findAll()
+  fun findAll(): Iterable<Request> = requestRepository.findAll()
 
-    fun findAll(pageable: Pageable): Page<Request> = requestRepository.findAll(pageable)
+  fun findAll(pageable: Pageable): Page<Request> = requestRepository.findAll(pageable)
 
-    fun findByUuid(uuid: RequestId): Optional<Request> =
-        requestRepository.findByUuidEquals(uuid)
+  fun findByUuid(uuid: RequestId): Optional<Request> = requestRepository.findByUuidEquals(uuid)
 
-    fun findRequestByPatientId(patientPseudonym: PatientPseudonym, pageable: Pageable): Page<Request> = requestRepository.findRequestByPatientPseudonym(patientPseudonym, pageable)
+  fun findRequestByPatientId(
+      patientPseudonym: PatientPseudonym,
+      pageable: Pageable,
+  ): Page<Request> = requestRepository.findRequestByPatientPseudonym(patientPseudonym, pageable)
 
-    fun allRequestsByPatientPseudonym(patientPseudonym: PatientPseudonym) = requestRepository
-        .findAllByPatientPseudonymOrderByProcessedAtDesc(patientPseudonym)
+  fun allRequestsByPatientPseudonym(patientPseudonym: PatientPseudonym) =
+      requestRepository.findAllByPatientPseudonymOrderByProcessedAtDesc(patientPseudonym)
 
-    fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: PatientPseudonym) =
-        Companion.lastMtbFileRequestForPatientPseudonym(allRequestsByPatientPseudonym(patientPseudonym))
+  fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: PatientPseudonym) =
+      Companion.lastMtbFileRequestForPatientPseudonym(
+          allRequestsByPatientPseudonym(patientPseudonym)
+      )
 
-    fun isLastRequestWithKnownStatusDeletion(patientPseudonym: PatientPseudonym) =
-        Companion.isLastRequestWithKnownStatusDeletion(allRequestsByPatientPseudonym(patientPseudonym))
+  fun isLastRequestWithKnownStatusDeletion(patientPseudonym: PatientPseudonym) =
+      Companion.isLastRequestWithKnownStatusDeletion(
+          allRequestsByPatientPseudonym(patientPseudonym)
+      )
 
-    fun countStates(): Iterable<CountedState> = requestRepository.countStates()
+  fun countStates(): Iterable<CountedState> = requestRepository.countStates()
 
-    fun countDeleteStates(): Iterable<CountedState> = requestRepository.countDeleteStates()
+  fun countDeleteStates(): Iterable<CountedState> = requestRepository.countDeleteStates()
 
-    fun findPatientUniqueStates(): List<CountedState> = requestRepository.findPatientUniqueStates()
+  fun findPatientUniqueStates(): List<CountedState> = requestRepository.findPatientUniqueStates()
 
-    fun findPatientUniqueDeleteStates(): List<CountedState> = requestRepository.findPatientUniqueDeleteStates()
+  fun findPatientUniqueDeleteStates(): List<CountedState> =
+      requestRepository.findPatientUniqueDeleteStates()
 
-    companion object {
+  companion object {
 
-        fun lastMtbFileRequestForPatientPseudonym(allRequests: List<Request>) = allRequests
+    fun lastMtbFileRequestForPatientPseudonym(allRequests: List<Request>) =
+        allRequests
             .filter { it.type == RequestType.MTB_FILE }
             .sortedByDescending { it.processedAt }
-            .firstOrNull { it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING }
+            .firstOrNull {
+              it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING
+            }
 
-        fun isLastRequestWithKnownStatusDeletion(allRequests: List<Request>) = allRequests
+    fun isLastRequestWithKnownStatusDeletion(allRequests: List<Request>) =
+        allRequests
             .filter { it.status != RequestStatus.UNKNOWN }
-            .maxByOrNull { it.processedAt }?.type == RequestType.DELETE
-
-    }
-
+            .maxByOrNull { it.processedAt }
+            ?.type == RequestType.DELETE
+  }
 }

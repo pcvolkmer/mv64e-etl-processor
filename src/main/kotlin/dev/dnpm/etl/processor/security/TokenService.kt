@@ -20,6 +20,8 @@
 package dev.dnpm.etl.processor.security
 
 import jakarta.annotation.PostConstruct
+import java.time.Instant
+import java.util.*
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
@@ -27,57 +29,50 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
-import java.time.Instant
-import java.util.*
 
 class TokenService(
     private val userDetailsManager: InMemoryUserDetailsManager,
     private val passwordEncoder: PasswordEncoder,
-    private val tokenRepository: TokenRepository
+    private val tokenRepository: TokenRepository,
 ) {
 
-    @PostConstruct
-    fun setup() {
-        tokenRepository.findAll().forEach {
-            userDetailsManager.createUser(
-                User.withUsername(it.username)
-                    .password(it.password)
-                    .roles("MTBFILE")
-                    .build()
-            )
-        }
+  @PostConstruct
+  fun setup() {
+    tokenRepository.findAll().forEach {
+      userDetailsManager.createUser(
+          User.withUsername(it.username).password(it.password).roles("MTBFILE").build()
+      )
+    }
+  }
+
+  fun addToken(name: String): Result<String> {
+    val username = name.lowercase().replace("""[^a-z0-9]""".toRegex(), "")
+    if (userDetailsManager.userExists(username)) {
+      return Result.failure(RuntimeException("Cannot use token name"))
     }
 
-    fun addToken(name: String): Result<String> {
-        val username = name.lowercase().replace("""[^a-z0-9]""".toRegex(), "")
-        if (userDetailsManager.userExists(username)) {
-            return Result.failure(RuntimeException("Cannot use token name"))
-        }
+    val password =
+        Base64.getEncoder().encodeToString(UUID.randomUUID().toString().encodeToByteArray())
+    val encodedPassword = passwordEncoder.encode(password).toString()
 
-        val password = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().encodeToByteArray())
-        val encodedPassword = passwordEncoder.encode(password).toString()
+    userDetailsManager.createUser(
+        User.withUsername(username).password(encodedPassword).roles("MTBFILE").build()
+    )
 
-        userDetailsManager.createUser(
-            User.withUsername(username)
-                .password(encodedPassword)
-                .roles("MTBFILE")
-                .build()
-        )
+    tokenRepository.save(Token(name = name, username = username, password = encodedPassword))
 
-        tokenRepository.save(Token(name = name, username = username, password = encodedPassword))
+    return Result.success("$username:$password")
+  }
 
-        return Result.success("$username:$password")
-    }
+  fun deleteToken(id: Long) {
+    val token = tokenRepository.findByIdOrNull(id) ?: return
+    userDetailsManager.deleteUser(token.username)
+    tokenRepository.delete(token)
+  }
 
-    fun deleteToken(id: Long) {
-        val token = tokenRepository.findByIdOrNull(id) ?: return
-        userDetailsManager.deleteUser(token.username)
-        tokenRepository.delete(token)
-    }
-
-    fun findAll(): List<Token> {
-        return tokenRepository.findAll().toList()
-    }
+  fun findAll(): List<Token> {
+    return tokenRepository.findAll().toList()
+  }
 }
 
 @Table("token")
@@ -86,7 +81,7 @@ data class Token(
     val name: String,
     val username: String,
     val password: String,
-    val createdAt: Instant = Instant.now()
+    val createdAt: Instant = Instant.now(),
 )
 
 interface TokenRepository : CrudRepository<Token, Long>

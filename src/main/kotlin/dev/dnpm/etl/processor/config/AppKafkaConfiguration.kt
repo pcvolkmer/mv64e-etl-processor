@@ -45,14 +45,11 @@ import org.springframework.retry.support.RetryTemplate
 import reactor.core.publisher.Sinks
 
 @Configuration
-@EnableConfigurationProperties(
-    value = [KafkaProperties::class]
-)
+@EnableConfigurationProperties(value = [KafkaProperties::class])
 @ConditionalOnProperty(value = ["app.kafka.servers"])
 @ConditionalOnMissingBean(MtbFileSender::class)
 @Order(-5)
 class AppKafkaConfiguration {
-
     private val logger = LoggerFactory.getLogger(AppKafkaConfiguration::class.java)
 
     @Bean
@@ -60,7 +57,7 @@ class AppKafkaConfiguration {
         kafkaTemplate: KafkaTemplate<String, String>,
         kafkaProperties: KafkaProperties,
         retryTemplate: RetryTemplate,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
     ): MtbFileSender {
         logger.info("Selected 'KafkaMtbFileSender'")
         return KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
@@ -70,7 +67,7 @@ class AppKafkaConfiguration {
     fun kafkaResponseListenerContainer(
         consumerFactory: ConsumerFactory<String, String>,
         kafkaProperties: KafkaProperties,
-        kafkaResponseProcessor: KafkaResponseProcessor
+        kafkaResponseProcessor: KafkaResponseProcessor,
     ): KafkaMessageListenerContainer<String, String> {
         val containerProperties = ContainerProperties(kafkaProperties.outputResponseTopic)
         containerProperties.messageListener = kafkaResponseProcessor
@@ -80,17 +77,15 @@ class AppKafkaConfiguration {
     @Bean
     fun kafkaResponseProcessor(
         applicationEventPublisher: ApplicationEventPublisher,
-        objectMapper: ObjectMapper
-    ): KafkaResponseProcessor {
-        return KafkaResponseProcessor(applicationEventPublisher, objectMapper)
-    }
+        objectMapper: ObjectMapper,
+    ): KafkaResponseProcessor = KafkaResponseProcessor(applicationEventPublisher, objectMapper)
 
     @Bean
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
     fun kafkaInputListenerContainer(
         consumerFactory: ConsumerFactory<String, String>,
         kafkaProperties: KafkaProperties,
-        kafkaInputListener: KafkaInputListener
+        kafkaInputListener: KafkaInputListener,
     ): KafkaMessageListenerContainer<String, String> {
         val containerProperties = ContainerProperties(kafkaProperties.inputTopic)
         containerProperties.messageListener = kafkaInputListener
@@ -102,17 +97,16 @@ class AppKafkaConfiguration {
     fun kafkaInputListener(
         requestProcessor: RequestProcessor,
         objectMapper: ObjectMapper,
-        consentEvaluator: ConsentEvaluator
-    ): KafkaInputListener {
-        return KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
-    }
+        consentEvaluator: ConsentEvaluator,
+    ): KafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
 
     @Bean
     fun kafkaConnectionCheckService(
         consumerFactory: ConsumerFactory<String, String>,
-        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
-    ): ConnectionCheckService {
-        return KafkaConnectionCheckService(consumerFactory.createConsumer(), connectionCheckUpdateProducer)
-    }
-
+        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
+    ): ConnectionCheckService =
+        KafkaConnectionCheckService(
+            consumerFactory.createConsumer(),
+            connectionCheckUpdateProducer,
+        )
 }

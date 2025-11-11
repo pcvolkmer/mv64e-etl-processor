@@ -28,11 +28,9 @@ import java.time.Instant
 @Controller
 @RequestMapping(path = ["/statistics"])
 class StatisticsController {
-
     @GetMapping
     fun index(model: Model): String {
         model.addAttribute("now", Instant.now())
         return "statistics"
     }
-
 }

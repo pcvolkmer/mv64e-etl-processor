@@ -22,79 +22,76 @@ package dev.dnpm.etl.processor.services
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.RequestStatus
+import java.time.Instant
+import java.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Sinks
-import java.time.Instant
-import java.util.*
 
 @Service
 class ResponseProcessor(
     private val requestService: RequestService,
-    private val statisticsUpdateProducer: Sinks.Many<Any>
+    private val statisticsUpdateProducer: Sinks.Many<Any>,
 ) {
 
-    private val logger = LoggerFactory.getLogger(ResponseProcessor::class.java)
+  private val logger = LoggerFactory.getLogger(ResponseProcessor::class.java)
 
-    @EventListener(classes = [ResponseEvent::class])
-    fun handleResponseEvent(event: ResponseEvent) {
-        requestService.findByUuid(event.requestUuid).ifPresentOrElse({
-            it.processedAt = event.timestamp
-            it.status = event.status
+  @EventListener(classes = [ResponseEvent::class])
+  fun handleResponseEvent(event: ResponseEvent) {
+    requestService
+        .findByUuid(event.requestUuid)
+        .ifPresentOrElse(
+            {
+              it.processedAt = event.timestamp
+              it.status = event.status
 
-            when (event.status) {
+              when (event.status) {
                 RequestStatus.SUCCESS -> {
-                    it.report = Report(
-                        "Keine Probleme erkannt",
-                    )
+                  it.report =
+                      Report(
+                          "Keine Probleme erkannt",
+                      )
                 }
 
                 RequestStatus.WARNING -> {
-                    it.report = Report(
-                        "Warnungen über mangelhafte Daten",
-                        event.body.orElse("")
-                    )
+                  it.report = Report("Warnungen über mangelhafte Daten", event.body.orElse(""))
                 }
 
                 RequestStatus.ERROR -> {
-                    it.report = Report(
-                        "Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar",
-                        event.body.orElse("")
-                    )
+                  it.report =
+                      Report(
+                          "Fehler bei der Datenübertragung oder Inhalt nicht verarbeitbar",
+                          event.body.orElse(""),
+                      )
                 }
 
                 RequestStatus.DUPLICATION -> {
-                    it.report = Report(
-                        "Duplikat erkannt"
-                    )
+                  it.report = Report("Duplikat erkannt")
                 }
 
                 RequestStatus.NO_CONSENT -> {
-                    it.report = Report(
-                        "Einwilligung Status fehlt, widerrufen oder ungeklärt."
-                    )
+                  it.report = Report("Einwilligung Status fehlt, widerrufen oder ungeklärt.")
                 }
 
                 else -> {
-                    logger.error("Cannot process response: Unknown response!")
-                    return@ifPresentOrElse
+                  logger.error("Cannot process response: Unknown response!")
+                  return@ifPresentOrElse
                 }
-            }
+              }
 
-            requestService.save(it)
+              requestService.save(it)
 
-            statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
-        }, {
-            logger.error("Response for unknown request '${event.requestUuid}'!")
-        })
-    }
-
+              statisticsUpdateProducer.emitNext("", Sinks.EmitFailureHandler.FAIL_FAST)
+            },
+            { logger.error("Response for unknown request '${event.requestUuid}'!") },
+        )
+  }
 }
 
 data class ResponseEvent(
     val requestUuid: RequestId,
     val timestamp: Instant,
     val status: RequestStatus,
-    val body: Optional<String> = Optional.empty()
+    val body: Optional<String> = Optional.empty(),
 )

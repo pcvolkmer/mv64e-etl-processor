@@ -19,33 +19,30 @@
 
 package dev.dnpm.etl.processor
 
-import org.springframework.http.MediaType
 import java.util.*
+import org.springframework.http.MediaType
 
 class Fingerprint(val value: String) {
-    override fun hashCode() = value.hashCode()
+  override fun hashCode() = value.hashCode()
 
-    override fun equals(other: Any?) = other is Fingerprint && other.value == value
+  override fun equals(other: Any?) = other is Fingerprint && other.value == value
 
-    companion object {
-        fun empty() = Fingerprint("")
-    }
+  companion object {
+    fun empty() = Fingerprint("")
+  }
 }
 
 @JvmInline
 value class RequestId(val value: String) {
 
-    fun isBlank() = value.isBlank()
-
+  fun isBlank() = value.isBlank()
 }
 
 fun randomRequestId() = RequestId(UUID.randomUUID().toString())
 
-@JvmInline
-value class PatientId(val value: String)
+@JvmInline value class PatientId(val value: String)
 
-@JvmInline
-value class PatientPseudonym(val value: String)
+@JvmInline value class PatientPseudonym(val value: String)
 
 fun emptyPatientPseudonym() = PatientPseudonym("")
 
@@ -55,9 +52,9 @@ fun emptyPatientPseudonym() = PatientPseudonym("")
  * @since 0.11.0
  */
 object CustomMediaType {
-    val APPLICATION_VND_DNPM_V2_MTB_JSON = MediaType("application", "vnd.dnpm.v2.mtb+json")
-    const val APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE = "application/vnd.dnpm.v2.mtb+json"
+  val APPLICATION_VND_DNPM_V2_MTB_JSON = MediaType("application", "vnd.dnpm.v2.mtb+json")
+  const val APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE = "application/vnd.dnpm.v2.mtb+json"
 
-    val APPLICATION_VND_DNPM_V2_RD_JSON = MediaType("application", "vnd.dnpm.v2.rd+json")
-    const val APPLICATION_VND_DNPM_V2_RD_JSON_VALUE = "application/vnd.dnpm.v2.rd+json"
+  val APPLICATION_VND_DNPM_V2_RD_JSON = MediaType("application", "vnd.dnpm.v2.rd+json")
+  const val APPLICATION_VND_DNPM_V2_RD_JSON_VALUE = "application/vnd.dnpm.v2.rd+json"
 }

@@ -38,14 +38,14 @@ import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import dev.pcvolkmer.mv64e.mtb.ConsentProvision
 import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import java.time.Instant
+import java.util.*
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
-import java.time.Instant
-import java.util.*
 
 @Service
 class RequestProcessor(
@@ -56,163 +56,178 @@ class RequestProcessor(
     private val objectMapper: ObjectMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val appConfigProperties: AppConfigProperties,
-    private val consentProcessor: ConsentProcessor?
+    private val consentProcessor: ConsentProcessor?,
 ) {
 
-    private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
+  private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
 
-    fun processMtbFile(mtbFile: Mtb) {
-        processMtbFile(mtbFile, randomRequestId())
+  fun processMtbFile(mtbFile: Mtb) {
+    processMtbFile(mtbFile, randomRequestId())
+  }
+
+  fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
+    val pid = PatientId(extractPatientIdentifier(mtbFile))
+
+    val isConsentOk =
+        consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) ||
+            consentProcessor == null
+    if (isConsentOk) {
+      if (isGenomDeConsented(mtbFile)) {
+        mtbFile addGenomDeTan pseudonymizeService
+      }
+      mtbFile pseudonymizeWith pseudonymizeService
+      mtbFile anonymizeContentWith pseudonymizeService
+      val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
+      saveAndSend(request, pid)
+    } else {
+      logger.warn("consent check failed file will not be processed further!")
+      applicationEventPublisher.publishEvent(
+          ResponseEvent(requestId, Instant.now(), RequestStatus.NO_CONSENT)
+      )
     }
+  }
 
-
-    fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
-        val pid = PatientId(extractPatientIdentifier(mtbFile))
-
-        val isConsentOk =
-            consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) || consentProcessor == null
-        if (isConsentOk) {
-            if (isGenomDeConsented(mtbFile)) {
-                mtbFile addGenomDeTan pseudonymizeService
-            }
-            mtbFile pseudonymizeWith pseudonymizeService
-            mtbFile anonymizeContentWith pseudonymizeService
-            val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
-            saveAndSend(request, pid)
-        } else {
-            logger.warn("consent check failed file will not be processed further!")
-            applicationEventPublisher.publishEvent(
-                ResponseEvent(
-                    requestId, Instant.now(), RequestStatus.NO_CONSENT
-                )
-            )
-        }
-    }
-
-    private fun isGenomDeConsented(mtbFile: Mtb): Boolean {
-        val isModelProjectConsented = mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
-            p.purpose == ModelProjectConsentPurpose.SEQUENCING && p.type == ConsentProvision.PERMIT
+  private fun isGenomDeConsented(mtbFile: Mtb): Boolean {
+    val isModelProjectConsented =
+        mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
+          p.purpose == ModelProjectConsentPurpose.SEQUENCING && p.type == ConsentProvision.PERMIT
         } == true
-        return isModelProjectConsented
+    return isModelProjectConsented
+  }
+
+  private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
+    requestService.save(
+        Request(
+            request.requestId,
+            request.patientPseudonym(),
+            pid,
+            fingerprint(request),
+            RequestType.MTB_FILE,
+            RequestStatus.UNKNOWN,
+        )
+    )
+
+    if (appConfigProperties.duplicationDetection && isDuplication(request)) {
+      applicationEventPublisher.publishEvent(
+          ResponseEvent(request.requestId, Instant.now(), RequestStatus.DUPLICATION)
+      )
+      return
     }
 
-    private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
-        requestService.save(
-            Request(
-                request.requestId,
-                request.patientPseudonym(),
-                pid,
-                fingerprint(request),
-                RequestType.MTB_FILE,
-                RequestStatus.UNKNOWN
-            )
-        )
+    val responseStatus = sender.send(request)
 
-        if (appConfigProperties.duplicationDetection && isDuplication(request)) {
-            applicationEventPublisher.publishEvent(
-                ResponseEvent(
-                    request.requestId, Instant.now(), RequestStatus.DUPLICATION
-                )
-            )
-            return
+    applicationEventPublisher.publishEvent(
+        ResponseEvent(
+            request.requestId,
+            Instant.now(),
+            responseStatus.status,
+            when (responseStatus.status) {
+              RequestStatus.ERROR,
+              RequestStatus.WARNING -> Optional.of(responseStatus.body)
+              else -> Optional.empty()
+            },
+        )
+    )
+  }
+
+  private fun <T> isDuplication(pseudonymizedMtbFileRequest: MtbFileRequest<T>): Boolean {
+    val patientPseudonym =
+        when (pseudonymizedMtbFileRequest) {
+          is DnpmV2MtbFileRequest ->
+              PatientPseudonym(pseudonymizedMtbFileRequest.content.patient.id)
         }
 
-        val responseStatus = sender.send(request)
+    val lastMtbFileRequestForPatient =
+        requestService.lastMtbFileRequestForPatientPseudonym(patientPseudonym)
+    val isLastRequestDeletion =
+        requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
 
-        applicationEventPublisher.publishEvent(
-            ResponseEvent(
-                request.requestId,
-                Instant.now(),
-                responseStatus.status,
-                when (responseStatus.status) {
-                    RequestStatus.ERROR, RequestStatus.WARNING -> Optional.of(responseStatus.body)
-                    else -> Optional.empty()
-                }
-            )
-        )
-    }
+    return null != lastMtbFileRequestForPatient &&
+        !isLastRequestDeletion &&
+        lastMtbFileRequestForPatient.fingerprint == fingerprint(pseudonymizedMtbFileRequest)
+  }
 
-    private fun <T> isDuplication(pseudonymizedMtbFileRequest: MtbFileRequest<T>): Boolean {
-        val patientPseudonym = when (pseudonymizedMtbFileRequest) {
-            is DnpmV2MtbFileRequest -> PatientPseudonym(pseudonymizedMtbFileRequest.content.patient.id)
-        }
+  fun processDeletion(patientId: PatientId, isConsented: TtpConsentStatus) {
+    processDeletion(patientId, randomRequestId(), isConsented)
+  }
 
-        val lastMtbFileRequestForPatient =
-            requestService.lastMtbFileRequestForPatientPseudonym(patientPseudonym)
-        val isLastRequestDeletion =
-            requestService.isLastRequestWithKnownStatusDeletion(patientPseudonym)
+  fun processDeletion(patientId: PatientId, requestId: RequestId, isConsented: TtpConsentStatus) {
+    try {
+      val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
 
-        return null != lastMtbFileRequestForPatient && !isLastRequestDeletion && lastMtbFileRequestForPatient.fingerprint == fingerprint(
-            pseudonymizedMtbFileRequest
-        )
-    }
-
-    fun processDeletion(patientId: PatientId, isConsented: TtpConsentStatus) {
-        processDeletion(patientId, randomRequestId(), isConsented)
-    }
-
-    fun processDeletion(patientId: PatientId, requestId: RequestId, isConsented: TtpConsentStatus) {
-        try {
-            val patientPseudonym = pseudonymizeService.patientPseudonym(patientId)
-
-            val requestStatus: RequestStatus = when (isConsented) {
-                TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED, TtpConsentStatus.BROAD_CONSENT_MISSING, TtpConsentStatus.BROAD_CONSENT_REJECTED -> RequestStatus.NO_CONSENT
-                TtpConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
-                TtpConsentStatus.BROAD_CONSENT_GIVEN, TtpConsentStatus.UNKNOWN_CHECK_FILE -> RequestStatus.UNKNOWN
-                TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT, TtpConsentStatus.GENOM_DE_CONSENT_MISSING, TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED -> {
-                    throw RuntimeException("processDelete should never deal with '" + isConsented.name + "' consent status. This is a bug and need to be fixed!")
-                }
+      val requestStatus: RequestStatus =
+          when (isConsented) {
+            TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED,
+            TtpConsentStatus.BROAD_CONSENT_MISSING,
+            TtpConsentStatus.BROAD_CONSENT_REJECTED -> RequestStatus.NO_CONSENT
+            TtpConsentStatus.FAILED_TO_ASK -> RequestStatus.ERROR
+            TtpConsentStatus.BROAD_CONSENT_GIVEN,
+            TtpConsentStatus.UNKNOWN_CHECK_FILE -> RequestStatus.UNKNOWN
+            TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT,
+            TtpConsentStatus.GENOM_DE_CONSENT_MISSING,
+            TtpConsentStatus.GENOM_DE_SEQUENCING_REJECTED -> {
+              throw RuntimeException(
+                  "processDelete should never deal with '" +
+                      isConsented.name +
+                      "' consent status. This is a bug and need to be fixed!"
+              )
             }
+          }
 
-            requestService.save(
-                Request(
-                    requestId,
-                    patientPseudonym,
-                    patientId,
-                    fingerprint(patientPseudonym.value),
-                    RequestType.DELETE,
-                    requestStatus
-                )
-            )
+      requestService.save(
+          Request(
+              requestId,
+              patientPseudonym,
+              patientId,
+              fingerprint(patientPseudonym.value),
+              RequestType.DELETE,
+              requestStatus,
+          )
+      )
 
-            val responseStatus = sender.send(DeleteRequest(requestId, patientPseudonym))
+      val responseStatus = sender.send(DeleteRequest(requestId, patientPseudonym))
 
-            applicationEventPublisher.publishEvent(
-                ResponseEvent(
-                    requestId, Instant.now(), responseStatus.status, when (responseStatus.status) {
-                        RequestStatus.WARNING, RequestStatus.ERROR -> Optional.of(responseStatus.body)
-                        else -> Optional.empty()
-                    }
-                )
-            )
-
-        } catch (_: Exception) {
-            requestService.save(
-                Request(
-                    uuid = requestId,
-                    patientPseudonym = emptyPatientPseudonym(),
-                    pid = patientId,
-                    fingerprint = Fingerprint.empty(),
-                    status = RequestStatus.ERROR,
-                    type = RequestType.DELETE,
-                    report = Report("Fehler bei der Pseudonymisierung")
-                )
-            )
-        }
+      applicationEventPublisher.publishEvent(
+          ResponseEvent(
+              requestId,
+              Instant.now(),
+              responseStatus.status,
+              when (responseStatus.status) {
+                RequestStatus.WARNING,
+                RequestStatus.ERROR -> Optional.of(responseStatus.body)
+                else -> Optional.empty()
+              },
+          )
+      )
+    } catch (_: Exception) {
+      requestService.save(
+          Request(
+              uuid = requestId,
+              patientPseudonym = emptyPatientPseudonym(),
+              pid = patientId,
+              fingerprint = Fingerprint.empty(),
+              status = RequestStatus.ERROR,
+              type = RequestType.DELETE,
+              report = Report("Fehler bei der Pseudonymisierung"),
+          )
+      )
     }
+  }
 
-    private fun <T> fingerprint(request: MtbFileRequest<T>): Fingerprint {
-        return when (request) {
-            is DnpmV2MtbFileRequest -> fingerprint(objectMapper.writeValueAsString(request.content))
-        }
+  private fun <T> fingerprint(request: MtbFileRequest<T>): Fingerprint {
+    return when (request) {
+      is DnpmV2MtbFileRequest -> fingerprint(objectMapper.writeValueAsString(request.content))
     }
+  }
 
-    private fun fingerprint(s: String): Fingerprint {
-        return Fingerprint(
-            Base32().encodeAsString(DigestUtils.sha256(s)).replace("=", "").lowercase()
-        )
-    }
-
+  private fun fingerprint(s: String): Fingerprint {
+    return Fingerprint(
+        Base32()
+            .encodeAsString(DigestUtils.sha256(s))
+            .replace("=", "")
+            .lowercase()
+    )
+  }
 }
 
 private fun extractPatientIdentifier(mtbFile: Mtb): String = mtbFile.patient.id

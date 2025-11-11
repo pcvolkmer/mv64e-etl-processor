@@ -28,20 +28,21 @@ import org.springframework.web.bind.annotation.GetMapping
 @Controller
 class LoginController(
     private val securityConfigProperties: SecurityConfigProperties?,
-    private val oAuth2ClientProperties: OAuth2ClientProperties?
+    private val oAuth2ClientProperties: OAuth2ClientProperties?,
 ) {
-
     @GetMapping(path = ["/login"])
     fun login(model: Model): String {
         if (securityConfigProperties?.enableOidc == true) {
             model.addAttribute(
                 "oidcLogins",
-                oAuth2ClientProperties?.registration?.map { (key, value) -> Pair(key, value.clientName) }.orEmpty()
+                oAuth2ClientProperties
+                    ?.registration
+                    ?.map { (key, value) -> Pair(key, value.clientName) }
+                    .orEmpty(),
             )
         } else {
             model.addAttribute("oidcLogins", emptyList<Pair<String, String>>())
         }
         return "login"
     }
-
 }

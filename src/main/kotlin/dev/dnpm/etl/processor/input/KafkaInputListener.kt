@@ -36,7 +36,7 @@ import java.nio.charset.Charset
 class KafkaInputListener(
     private val requestProcessor: RequestProcessor,
     private val consentEvaluator: ConsentEvaluator,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : MessageListener<String, String> {
     private val logger = LoggerFactory.getLogger(KafkaInputListener::class.java)
 
@@ -45,29 +45,40 @@ class KafkaInputListener(
             MediaType.APPLICATION_JSON_VALUE -> handleDnpmV2Message(record)
             CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE -> handleDnpmV2Message(record)
             else -> {
-                /* ignore other messages */
+                // ignore other messages
             }
         }
     }
 
     private fun guessMimeType(record: ConsumerRecord<String, String>): String? {
-        if (record.headers().headers("contentType").toList().isEmpty()) {
+        if (record
+                .headers()
+                .headers("contentType")
+                .toList()
+                .isEmpty()
+        ) {
             // Fallback if no contentType set (old behavior)
             return MediaType.APPLICATION_JSON_VALUE
         }
 
-        return record.headers().headers("contentType")?.firstOrNull()?.value()?.toString(Charset.forName("UTF-8"))
+        return record
+            .headers()
+            .headers("contentType")
+            ?.firstOrNull()
+            ?.value()
+            ?.toString(Charset.forName("UTF-8"))
     }
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
         val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
         val patientId = PatientId(mtbFile.patient.id)
         val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
-        val requestId = if (null != firstRequestIdHeader) {
-            RequestId(String(firstRequestIdHeader.value()))
-        } else {
-            RequestId("")
-        }
+        val requestId =
+            if (null != firstRequestIdHeader) {
+                RequestId(String(firstRequestIdHeader.value()))
+            } else {
+                RequestId("")
+            }
 
         if (consentEvaluator.check(mtbFile).hasConsent()) {
             logger.debug("Accepted MTB File for processing")
@@ -81,13 +92,8 @@ class KafkaInputListener(
             if (requestId.isBlank()) {
                 requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
             } else {
-                requestProcessor.processDeletion(
-                    patientId,
-                    requestId,
-                    TtpConsentStatus.UNKNOWN_CHECK_FILE
-                )
+                requestProcessor.processDeletion(patientId, requestId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
             }
         }
     }
-
 }

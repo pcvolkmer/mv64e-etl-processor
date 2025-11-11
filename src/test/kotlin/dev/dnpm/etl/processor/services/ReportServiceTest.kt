@@ -32,17 +32,18 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 class ReportServiceTest {
-
     private lateinit var reportService: ReportService
 
     @BeforeEach
     fun setup() {
-        this.reportService = ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
+        this.reportService =
+            ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
     }
 
     @Test
     fun shouldParseDataQualityReport() {
-        val json = """
+        val json =
+            """
             {
                 "patient": "4711",
                 "issues": [
@@ -52,7 +53,7 @@ class ReportServiceTest {
                     { "severity": "fatal", "message": "Fatal Message" }
                 ]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val actual = this.reportService.deserialize(json)
 
@@ -71,7 +72,10 @@ class ReportServiceTest {
 
     @ParameterizedTest
     @MethodSource("testData")
-    fun shouldParseDataQualityReport(json: String, requestStatus: RequestStatus) {
+    fun shouldParseDataQualityReport(
+        json: String,
+        requestStatus: RequestStatus,
+    ) {
         val actual = this.reportService.deserialize(json)
         assertThat(actual.asRequestStatus()).isEqualTo(requestStatus)
     }
@@ -88,74 +92,71 @@ class ReportServiceTest {
     }
 
     companion object {
-
         @JvmStatic
-        fun testData(): Set<Arguments> {
-            return setOf(
+        fun testData(): Set<Arguments> =
+            setOf(
                 Arguments.of(
                     """
-                        {
-                            "patient": "4711",
-                            "issues": [
-                                { "severity": "info", "message": "Info Message" },
-                                { "severity": "warning", "message": "Warning Message" },
-                                { "severity": "error", "message": "Error Message" },
-                                { "severity": "fatal", "message": "Fatal Message" }
-                            ]
-                        }
+                    {
+                        "patient": "4711",
+                        "issues": [
+                            { "severity": "info", "message": "Info Message" },
+                            { "severity": "warning", "message": "Warning Message" },
+                            { "severity": "error", "message": "Error Message" },
+                            { "severity": "fatal", "message": "Fatal Message" }
+                        ]
+                    }
                     """.trimIndent(),
-                    RequestStatus.ERROR
+                    RequestStatus.ERROR,
                 ),
                 Arguments.of(
                     """
-                        {
-                            "patient": "4711",
-                            "issues": [
-                                { "severity": "info", "message": "Info Message" },
-                                { "severity": "warning", "message": "Warning Message" },
-                                { "severity": "error", "message": "Error Message" }
-                            ]
-                        }
+                    {
+                        "patient": "4711",
+                        "issues": [
+                            { "severity": "info", "message": "Info Message" },
+                            { "severity": "warning", "message": "Warning Message" },
+                            { "severity": "error", "message": "Error Message" }
+                        ]
+                    }
                     """.trimIndent(),
-                    RequestStatus.ERROR
+                    RequestStatus.ERROR,
                 ),
                 Arguments.of(
                     """
-                        {
-                            "patient": "4711",
-                            "issues": [
-                                { "severity": "error", "message": "Error Message" }
-                                { "severity": "info", "message": "Info Message" }
-                            ]
-                        }
+                    {
+                        "patient": "4711",
+                        "issues": [
+                            { "severity": "error", "message": "Error Message" }
+                            { "severity": "info", "message": "Info Message" }
+                        ]
+                    }
                     """.trimIndent(),
-                    RequestStatus.ERROR
+                    RequestStatus.ERROR,
                 ),
                 Arguments.of(
                     """
-                        {
-                            "patient": "4711",
-                            "issues": [
-                                { "severity": "info", "message": "Info Message" },
-                                { "severity": "warning", "message": "Warning Message" }
-                            ]
-                        }
+                    {
+                        "patient": "4711",
+                        "issues": [
+                            { "severity": "info", "message": "Info Message" },
+                            { "severity": "warning", "message": "Warning Message" }
+                        ]
+                    }
                     """.trimIndent(),
-                    RequestStatus.WARNING
+                    RequestStatus.WARNING,
                 ),
                 Arguments.of(
                     """
-                        {
-                            "patient": "4711",
-                            "issues": [
-                                { "severity": "info", "message": "Info Message" }
-                            ]
-                        }
+                    {
+                        "patient": "4711",
+                        "issues": [
+                            { "severity": "info", "message": "Info Message" }
+                        ]
+                    }
                     """.trimIndent(),
-                    RequestStatus.SUCCESS
-                )
+                    RequestStatus.SUCCESS,
+                ),
             )
-        }
     }
-
 }

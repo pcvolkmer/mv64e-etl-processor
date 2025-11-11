@@ -7,7 +7,9 @@ import org.hl7.fhir.r4.model.Consent
 
 class ConsentResourceSerializer : JsonSerializer<Consent>() {
     override fun serialize(
-        value: Consent, gen: JsonGenerator, serializers: SerializerProvider
+        value: Consent,
+        gen: JsonGenerator,
+        serializers: SerializerProvider,
     ) {
         val json = JacksonConfig.fhirContext().newJsonParser().encodeResourceToString(value)
         gen.writeRawValue(json)

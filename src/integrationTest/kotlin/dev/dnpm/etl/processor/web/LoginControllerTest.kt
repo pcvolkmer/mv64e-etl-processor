@@ -42,30 +42,26 @@ import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
 @WebMvcTest(controllers = [LoginController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
 @ContextConfiguration(
-    classes = [
-        LoginController::class,
-        AppConfiguration::class,
-        AppSecurityConfiguration::class
-    ]
+    classes = [LoginController::class, AppConfiguration::class, AppSecurityConfiguration::class],
 )
 @TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=BUILDIN",
-        "app.security.admin-user=admin",
-        "app.security.admin-password={noop}very-secret",
-        "app.security.enable-tokens=true"
-    ]
+    properties =
+        [
+            "app.pseudonymize.generator=BUILDIN",
+            "app.security.admin-user=admin",
+            "app.security.admin-password={noop}very-secret",
+            "app.security.enable-tokens=true",
+        ],
 )
-@MockitoBean(
-    types = [TokenService::class]
-)
+@MockitoBean(types = [TokenService::class])
 class LoginControllerTest {
-
     private lateinit var mockMvc: MockMvc
     private lateinit var webClient: WebClient
 
     @BeforeEach
-    fun setup(@Autowired mockMvc: MockMvc) {
+    fun setup(
+        @Autowired mockMvc: MockMvc,
+    ) {
         this.mockMvc = mockMvc
         this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
     }
@@ -82,7 +78,11 @@ class LoginControllerTest {
     fun testShouldShowLoginForm() {
         val page = webClient.getPage<HtmlPage>("http://localhost/login")
         assertThat(
-            page.getElementsByTagName("main").first().firstElementChild.getAttribute("class")
+            page
+                .getElementsByTagName("main")
+                .first()
+                .firstElementChild
+                .getAttribute("class"),
         ).isEqualTo("login-form")
     }
 }

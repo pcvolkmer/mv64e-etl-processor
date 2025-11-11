@@ -27,6 +27,9 @@ import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.services.RequestService
+import java.io.IOException
+import java.time.Instant
+import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.htmlunit.WebClient
 import org.htmlunit.html.HtmlPage
@@ -51,261 +54,248 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
-import java.io.IOException
-import java.time.Instant
-import java.util.*
 
 @WebMvcTest(controllers = [HomeController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
 @ContextConfiguration(
-    classes = [
-        HomeController::class,
-        AppConfiguration::class,
-        AppSecurityConfiguration::class
-    ]
+    classes = [HomeController::class, AppConfiguration::class, AppSecurityConfiguration::class]
 )
 @TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=BUILDIN",
-        "app.security.admin-user=admin",
-        "app.security.admin-password={noop}very-secret"
-    ]
+    properties =
+        [
+            "app.pseudonymize.generator=BUILDIN",
+            "app.security.admin-user=admin",
+            "app.security.admin-password={noop}very-secret",
+        ]
 )
-@MockitoBean(
-    types = [RequestService::class]
-)
+@MockitoBean(types = [RequestService::class])
 class HomeControllerTest {
 
-    private lateinit var mockMvc: MockMvc
-    private lateinit var webClient: WebClient
+  private lateinit var mockMvc: MockMvc
+  private lateinit var webClient: WebClient
+
+  @BeforeEach
+  fun setup(@Autowired mockMvc: MockMvc, @Autowired requestService: RequestService) {
+    this.mockMvc = mockMvc
+    this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
+
+    whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())
+  }
+
+  @Test
+  fun testShouldRequestHomePage() {
+    mockMvc.get("/").andExpect {
+      status { isOk() }
+      view { name("index") }
+    }
+  }
+
+  @Nested
+  inner class WithRequests {
+
+    private lateinit var requestService: RequestService
 
     @BeforeEach
-    fun setup(
-        @Autowired mockMvc: MockMvc,
-        @Autowired requestService: RequestService
-    ) {
-        this.mockMvc = mockMvc
-        this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
-
-        whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())
+    fun setup(@Autowired requestService: RequestService) {
+      this.requestService = requestService
     }
 
     @Test
-    fun testShouldRequestHomePage() {
-        mockMvc.get("/").andExpect {
-            status { isOk() }
-            view { name("index") }
-        }
+    fun testShouldShowHomePage() {
+      whenever(requestService.findAll(any<Pageable>()))
+          .thenReturn(
+              PageImpl(
+                  listOf(
+                      Request(
+                          2L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("ashdkasdh"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.SUCCESS,
+                      ),
+                      Request(
+                          1L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("asdasdasd"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.ERROR,
+                      ),
+                  )
+              )
+          )
+
+      val page = webClient.getPage<HtmlPage>("http://localhost/")
+      assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
+      assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
     }
 
-    @Nested
-    inner class WithRequests {
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldShowRequestDetails() {
+      val requestId = randomRequestId()
 
-        private lateinit var requestService: RequestService
+      whenever(requestService.findByUuid(anyValueClass()))
+          .thenReturn(
+              Optional.of(
+                  Request(
+                      2L,
+                      requestId,
+                      PatientPseudonym("PSEUDO1"),
+                      PatientId("PATIENT1"),
+                      Fingerprint("ashdkasdh"),
+                      RequestType.MTB_FILE,
+                      RequestStatus.SUCCESS,
+                      Instant.now(),
+                      Report("Test"),
+                  )
+              )
+          )
 
-        @BeforeEach
-        fun setup(
-            @Autowired requestService: RequestService
-        ) {
-            this.requestService = requestService
-        }
-
-        @Test
-        fun testShouldShowHomePage() {
-            whenever(requestService.findAll(any<Pageable>())).thenReturn(
-                PageImpl(
-                    listOf(
-                        Request(
-                            2L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("ashdkasdh"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.SUCCESS
-                        ),
-                        Request(
-                            1L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("asdasdasd"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.ERROR
-                        )
-                    )
-                )
-            )
-
-            val page = webClient.getPage<HtmlPage>("http://localhost/")
-            assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
-            assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldShowRequestDetails() {
-            val requestId = randomRequestId()
-
-            whenever(requestService.findByUuid(anyValueClass())).thenReturn(
-                Optional.of(
-                    Request(
-                        2L,
-                        requestId,
-                        PatientPseudonym("PSEUDO1"),
-                        PatientId("PATIENT1"),
-                        Fingerprint("ashdkasdh"),
-                        RequestType.MTB_FILE,
-                        RequestStatus.SUCCESS,
-                        Instant.now(),
-                        Report("Test")
-                    )
-                )
-            )
-
-            val page = webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
-            assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
-            assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldShowPatientDetails() {
-            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(
-                PageImpl(
-                    listOf(
-                        Request(
-                            2L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("ashdkasdh"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.SUCCESS
-                        ),
-                        Request(
-                            1L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("asdasdasd"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.ERROR
-                        )
-                    )
-                )
-            )
-
-            val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-            assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
-            assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldShowPatientPseudonym() {
-            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(
-                PageImpl(
-                    listOf(
-                        Request(
-                            2L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("ashdkasdh"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.SUCCESS
-                        ),
-                        Request(
-                            1L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("asdasdasd"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.ERROR
-                        )
-                    )
-                )
-            )
-
-            val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-            assertThat(page.querySelectorAll("h2 > span")).hasSize(1)
-            assertThat(page.querySelectorAll("h2 > span").first().textContent).isEqualTo("PSEUDO1")
-        }
-
+      val page = webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
+      assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
+      assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
     }
 
-    @Nested
-    inner class WithoutRequests {
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldShowPatientDetails() {
+      whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>()))
+          .thenReturn(
+              PageImpl(
+                  listOf(
+                      Request(
+                          2L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("ashdkasdh"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.SUCCESS,
+                      ),
+                      Request(
+                          1L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("asdasdasd"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.ERROR,
+                      ),
+                  )
+              )
+          )
 
-        private lateinit var requestService: RequestService
-
-        @BeforeEach
-        fun setup(
-            @Autowired requestService: RequestService
-        ) {
-            this.requestService = requestService
-
-            whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())
-        }
-
-        @Test
-        fun testShouldShowHomePage() {
-            val page = webClient.getPage<HtmlPage>("http://localhost/")
-            assertThat(page.querySelectorAll("tbody tr")).isEmpty()
-            assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldThrowNotFoundExceptionForUnknownReport() {
-            val requestId = randomRequestId()
-
-            whenever(requestService.findByUuid(anyValueClass())).thenReturn(
-                Optional.empty()
-            )
-
-            assertThrows<IOException> {
-                webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
-            }.also {
-                assertThat(it).hasRootCauseInstanceOf(NotFoundException::class.java)
-            }
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldShowEmptyPatientDetails() {
-            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(Page.empty())
-
-            val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-            assertThat(page.querySelectorAll("tbody tr")).isEmpty()
-            assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldShowNoConsentStatusBadge() {
-            whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>())).thenReturn(
-                PageImpl(
-                    listOf(
-                        Request(
-                            1L,
-                            randomRequestId(),
-                            PatientPseudonym("PSEUDO1"),
-                            PatientId("PATIENT1"),
-                            Fingerprint("ashdkasdh"),
-                            RequestType.MTB_FILE,
-                            RequestStatus.NO_CONSENT
-                        )
-                    )
-                )
-            )
-
-            val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-            assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
-            assertThat(page.querySelectorAll("tbody tr > td > small").first().textContent).isEqualTo("NO_CONSENT")
-        }
+      val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
+      assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
+      assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldShowPatientPseudonym() {
+      whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>()))
+          .thenReturn(
+              PageImpl(
+                  listOf(
+                      Request(
+                          2L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("ashdkasdh"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.SUCCESS,
+                      ),
+                      Request(
+                          1L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("asdasdasd"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.ERROR,
+                      ),
+                  )
+              )
+          )
+
+      val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
+      assertThat(page.querySelectorAll("h2 > span")).hasSize(1)
+      assertThat(page.querySelectorAll("h2 > span").first().textContent).isEqualTo("PSEUDO1")
+    }
+  }
+
+  @Nested
+  inner class WithoutRequests {
+
+    private lateinit var requestService: RequestService
+
+    @BeforeEach
+    fun setup(@Autowired requestService: RequestService) {
+      this.requestService = requestService
+
+      whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())
+    }
+
+    @Test
+    fun testShouldShowHomePage() {
+      val page = webClient.getPage<HtmlPage>("http://localhost/")
+      assertThat(page.querySelectorAll("tbody tr")).isEmpty()
+      assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldThrowNotFoundExceptionForUnknownReport() {
+      val requestId = randomRequestId()
+
+      whenever(requestService.findByUuid(anyValueClass())).thenReturn(Optional.empty())
+
+      assertThrows<IOException> {
+            webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
+          }
+          .also { assertThat(it).hasRootCauseInstanceOf(NotFoundException::class.java) }
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldShowEmptyPatientDetails() {
+      whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>()))
+          .thenReturn(Page.empty())
+
+      val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
+      assertThat(page.querySelectorAll("tbody tr")).isEmpty()
+      assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldShowNoConsentStatusBadge() {
+      whenever(requestService.findRequestByPatientId(anyValueClass(), any<Pageable>()))
+          .thenReturn(
+              PageImpl(
+                  listOf(
+                      Request(
+                          1L,
+                          randomRequestId(),
+                          PatientPseudonym("PSEUDO1"),
+                          PatientId("PATIENT1"),
+                          Fingerprint("ashdkasdh"),
+                          RequestType.MTB_FILE,
+                          RequestStatus.NO_CONSENT,
+                      )
+                  )
+              )
+          )
+
+      val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
+      assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
+      assertThat(page.querySelectorAll("tbody tr > td > small").first().textContent)
+          .isEqualTo("NO_CONSENT")
+    }
+  }
 }

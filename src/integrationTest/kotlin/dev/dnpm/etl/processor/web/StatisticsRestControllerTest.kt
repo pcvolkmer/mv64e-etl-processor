@@ -57,28 +57,22 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
-
 @WebMvcTest(controllers = [StatisticsRestController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
 @ContextConfiguration(
-    classes = [
-        StatisticsRestController::class,
-        AppConfiguration::class,
-        AppSecurityConfiguration::class
-    ]
+    classes =
+        [StatisticsRestController::class, AppConfiguration::class, AppSecurityConfiguration::class],
 )
 @TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=BUILDIN",
-        "app.security.admin-user=admin",
-        "app.security.admin-password={noop}very-secret"
-    ]
+    properties =
+        [
+            "app.pseudonymize.generator=BUILDIN",
+            "app.security.admin-user=admin",
+            "app.security.admin-password={noop}very-secret",
+        ],
 )
-@MockitoBean(
-    types = [RequestService::class]
-)
+@MockitoBean(types = [RequestService::class])
 class StatisticsRestControllerTest {
-
     private lateinit var mockMvc: MockMvc
 
     private lateinit var statisticsUpdateProducer: Sinks.Many<Any>
@@ -88,7 +82,7 @@ class StatisticsRestControllerTest {
     fun setup(
         @Autowired mockMvc: MockMvc,
         @Autowired statisticsUpdateProducer: Sinks.Many<Any>,
-        @Autowired requestService: RequestService
+        @Autowired requestService: RequestService,
     ) {
         this.mockMvc = mockMvc
         this.statisticsUpdateProducer = statisticsUpdateProducer
@@ -100,40 +94,38 @@ class StatisticsRestControllerTest {
         @Test
         fun testShouldRequestStatesForMtbFiles() {
             doAnswer { _ ->
-                listOf(
-                    CountedState(42, RequestStatus.WARNING),
-                    CountedState(1, RequestStatus.UNKNOWN)
-                )
-            }.whenever(requestService).countStates()
+                listOf(CountedState(42, RequestStatus.WARNING), CountedState(1, RequestStatus.UNKNOWN))
+            }.whenever(requestService)
+                .countStates()
 
             mockMvc.get("/statistics/requeststates").andExpect {
-                status { isOk() }.also {
-                    jsonPath("$", hasSize<Int>(2))
-                    jsonPath("$[0].name", equalTo(RequestStatus.WARNING.name))
-                    jsonPath("$[0].value", equalTo(42))
-                    jsonPath("$[1].name", equalTo(RequestStatus.UNKNOWN.name))
-                    jsonPath("$[1].value", equalTo(1))
-                }
+                status { isOk() }
+                    .also {
+                        jsonPath("$", hasSize<Int>(2))
+                        jsonPath("$[0].name", equalTo(RequestStatus.WARNING.name))
+                        jsonPath("$[0].value", equalTo(42))
+                        jsonPath("$[1].name", equalTo(RequestStatus.UNKNOWN.name))
+                        jsonPath("$[1].value", equalTo(1))
+                    }
             }
         }
 
         @Test
         fun testShouldRequestStatesForDeletes() {
             doAnswer { _ ->
-                listOf(
-                    CountedState(42, RequestStatus.SUCCESS),
-                    CountedState(1, RequestStatus.ERROR)
-                )
-            }.whenever(requestService).countDeleteStates()
+                listOf(CountedState(42, RequestStatus.SUCCESS), CountedState(1, RequestStatus.ERROR))
+            }.whenever(requestService)
+                .countDeleteStates()
 
             mockMvc.get("/statistics/requeststates?delete=true").andExpect {
-                status { isOk() }.also {
-                    jsonPath("$", hasSize<Int>(2))
-                    jsonPath("$[0].name", equalTo(RequestStatus.SUCCESS.name))
-                    jsonPath("$[0].value", equalTo(42))
-                    jsonPath("$[1].name", equalTo(RequestStatus.ERROR.name))
-                    jsonPath("$[1].value", equalTo(1))
-                }
+                status { isOk() }
+                    .also {
+                        jsonPath("$", hasSize<Int>(2))
+                        jsonPath("$[0].name", equalTo(RequestStatus.SUCCESS.name))
+                        jsonPath("$[0].value", equalTo(42))
+                        jsonPath("$[1].name", equalTo(RequestStatus.ERROR.name))
+                        jsonPath("$[1].value", equalTo(1))
+                    }
             }
         }
     }
@@ -143,47 +135,44 @@ class StatisticsRestControllerTest {
         @Test
         fun testShouldRequestPatientStatesForMtbFiles() {
             doAnswer { _ ->
-                listOf(
-                    CountedState(42, RequestStatus.WARNING),
-                    CountedState(1, RequestStatus.UNKNOWN)
-                )
-            }.whenever(requestService).findPatientUniqueStates()
+                listOf(CountedState(42, RequestStatus.WARNING), CountedState(1, RequestStatus.UNKNOWN))
+            }.whenever(requestService)
+                .findPatientUniqueStates()
 
             mockMvc.get("/statistics/requestpatientstates").andExpect {
-                status { isOk() }.also {
-                    jsonPath("$", hasSize<Int>(2))
-                    jsonPath("$[0].name", equalTo(RequestStatus.WARNING.name))
-                    jsonPath("$[0].value", equalTo(42))
-                    jsonPath("$[1].name", equalTo(RequestStatus.UNKNOWN.name))
-                    jsonPath("$[1].value", equalTo(1))
-                }
+                status { isOk() }
+                    .also {
+                        jsonPath("$", hasSize<Int>(2))
+                        jsonPath("$[0].name", equalTo(RequestStatus.WARNING.name))
+                        jsonPath("$[0].value", equalTo(42))
+                        jsonPath("$[1].name", equalTo(RequestStatus.UNKNOWN.name))
+                        jsonPath("$[1].value", equalTo(1))
+                    }
             }
         }
 
         @Test
         fun testShouldRequestPatientStatesForDeletes() {
             doAnswer { _ ->
-                listOf(
-                    CountedState(42, RequestStatus.SUCCESS),
-                    CountedState(1, RequestStatus.ERROR)
-                )
-            }.whenever(requestService).findPatientUniqueDeleteStates()
+                listOf(CountedState(42, RequestStatus.SUCCESS), CountedState(1, RequestStatus.ERROR))
+            }.whenever(requestService)
+                .findPatientUniqueDeleteStates()
 
             mockMvc.get("/statistics/requestpatientstates?delete=true").andExpect {
-                status { isOk() }.also {
-                    jsonPath("$", hasSize<Int>(2))
-                    jsonPath("$[0].name", equalTo(RequestStatus.SUCCESS.name))
-                    jsonPath("$[0].value", equalTo(42))
-                    jsonPath("$[1].name", equalTo(RequestStatus.ERROR.name))
-                    jsonPath("$[1].value", equalTo(1))
-                }
+                status { isOk() }
+                    .also {
+                        jsonPath("$", hasSize<Int>(2))
+                        jsonPath("$[0].name", equalTo(RequestStatus.SUCCESS.name))
+                        jsonPath("$[0].value", equalTo(42))
+                        jsonPath("$[1].name", equalTo(RequestStatus.ERROR.name))
+                        jsonPath("$[1].value", equalTo(1))
+                    }
             }
         }
     }
 
     @Nested
     inner class LastMonthStatesTest {
-
         @BeforeEach
         fun setup() {
             val zoneId = ZoneId.of("Europe/Berlin")
@@ -197,7 +186,12 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef1"),
                         RequestType.MTB_FILE,
                         RequestStatus.SUCCESS,
-                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(2, ChronoUnit.DAYS).toInstant()
+                        Instant
+                            .now()
+                            .atZone(zoneId)
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .minus(2, ChronoUnit.DAYS)
+                            .toInstant(),
                     ),
                     Request(
                         2,
@@ -207,7 +201,12 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
                         RequestStatus.WARNING,
-                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(2, ChronoUnit.DAYS).toInstant()
+                        Instant
+                            .now()
+                            .atZone(zoneId)
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .minus(2, ChronoUnit.DAYS)
+                            .toInstant(),
                     ),
                     Request(
                         3,
@@ -217,7 +216,12 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdee1"),
                         RequestType.DELETE,
                         RequestStatus.ERROR,
-                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS).toInstant()
+                        Instant
+                            .now()
+                            .atZone(zoneId)
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .minus(1, ChronoUnit.DAYS)
+                            .toInstant(),
                     ),
                     Request(
                         4,
@@ -227,7 +231,12 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
                         RequestStatus.DUPLICATION,
-                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).minus(1, ChronoUnit.DAYS).toInstant()
+                        Instant
+                            .now()
+                            .atZone(zoneId)
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .minus(1, ChronoUnit.DAYS)
+                            .toInstant(),
                     ),
                     Request(
                         5,
@@ -237,49 +246,54 @@ class StatisticsRestControllerTest {
                         Fingerprint("0123456789abcdef2"),
                         RequestType.DELETE,
                         RequestStatus.UNKNOWN,
-                        Instant.now().atZone(zoneId).truncatedTo(ChronoUnit.DAYS).toInstant()
+                        Instant
+                            .now()
+                            .atZone(zoneId)
+                            .truncatedTo(ChronoUnit.DAYS)
+                            .toInstant(),
                     ),
                 )
-            }.whenever(requestService).findAll()
+            }.whenever(requestService)
+                .findAll()
         }
 
         @Test
         fun testShouldRequestLastMonthForMtbFiles() {
             mockMvc.get("/statistics/requestslastmonth").andExpect {
-                status { isOk() }.also {
-                    jsonPath("$", hasSize<Int>(31))
-                }.also {
-                    jsonPath("$[28].nameValues.error", equalTo(0))
-                    jsonPath("$[28].nameValues.warning", equalTo(1))
-                    jsonPath("$[28].nameValues.success", equalTo(1))
-                    jsonPath("$[28].nameValues.duplication", equalTo(0))
-                    jsonPath("$[28].nameValues.unknown", equalTo(0))
-                    jsonPath("$[29].nameValues.error", equalTo(0))
-                    jsonPath("$[29].nameValues.warning", equalTo(0))
-                    jsonPath("$[29].nameValues.success", equalTo(0))
-                    jsonPath("$[29].nameValues.duplication", equalTo(1))
-                    jsonPath("$[29].nameValues.unknown", equalTo(0))
-                }
+                status { isOk() }
+                    .also { jsonPath("$", hasSize<Int>(31)) }
+                    .also {
+                        jsonPath("$[28].nameValues.error", equalTo(0))
+                        jsonPath("$[28].nameValues.warning", equalTo(1))
+                        jsonPath("$[28].nameValues.success", equalTo(1))
+                        jsonPath("$[28].nameValues.duplication", equalTo(0))
+                        jsonPath("$[28].nameValues.unknown", equalTo(0))
+                        jsonPath("$[29].nameValues.error", equalTo(0))
+                        jsonPath("$[29].nameValues.warning", equalTo(0))
+                        jsonPath("$[29].nameValues.success", equalTo(0))
+                        jsonPath("$[29].nameValues.duplication", equalTo(1))
+                        jsonPath("$[29].nameValues.unknown", equalTo(0))
+                    }
             }
         }
 
         @Test
         fun testShouldRequestLastMonthForDeletes() {
             mockMvc.get("/statistics/requestslastmonth?delete=true").andExpect {
-                status { isOk() }.also {
-                    jsonPath("$", hasSize<Int>(31))
-                }.also {
-                    jsonPath("$[29].nameValues.error", equalTo(1))
-                    jsonPath("$[29].nameValues.warning", equalTo(0))
-                    jsonPath("$[29].nameValues.success", equalTo(0))
-                    jsonPath("$[29].nameValues.duplication", equalTo(0))
-                    jsonPath("$[29].nameValues.unknown", equalTo(0))
-                    jsonPath("$[30].nameValues.error", equalTo(0))
-                    jsonPath("$[30].nameValues.warning", equalTo(0))
-                    jsonPath("$[30].nameValues.success", equalTo(0))
-                    jsonPath("$[30].nameValues.duplication", equalTo(0))
-                    jsonPath("$[30].nameValues.unknown", equalTo(1))
-                }
+                status { isOk() }
+                    .also { jsonPath("$", hasSize<Int>(31)) }
+                    .also {
+                        jsonPath("$[29].nameValues.error", equalTo(1))
+                        jsonPath("$[29].nameValues.warning", equalTo(0))
+                        jsonPath("$[29].nameValues.success", equalTo(0))
+                        jsonPath("$[29].nameValues.duplication", equalTo(0))
+                        jsonPath("$[29].nameValues.unknown", equalTo(0))
+                        jsonPath("$[30].nameValues.error", equalTo(0))
+                        jsonPath("$[30].nameValues.warning", equalTo(0))
+                        jsonPath("$[30].nameValues.success", equalTo(0))
+                        jsonPath("$[30].nameValues.duplication", equalTo(0))
+                        jsonPath("$[30].nameValues.unknown", equalTo(1))
+                    }
             }
         }
     }
@@ -289,26 +303,27 @@ class StatisticsRestControllerTest {
         private lateinit var webClient: WebTestClient
 
         @BeforeEach
-        fun setup(
-            applicationContext: WebApplicationContext,
-        ) {
-            this.webClient = MockMvcWebTestClient
-                .bindToApplicationContext(applicationContext).build()
+        fun setup(applicationContext: WebApplicationContext) {
+            this.webClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build()
         }
 
         @Test
         fun testShouldRequestSSE() {
             statisticsUpdateProducer.emitComplete { _, _ -> true }
 
-            val result = webClient.get().uri("http://localhost/statistics/events").accept(TEXT_EVENT_STREAM).exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(TEXT_EVENT_STREAM)
-                .returnResult(String::class.java)
+            val result =
+                webClient
+                    .get()
+                    .uri("http://localhost/statistics/events")
+                    .accept(TEXT_EVENT_STREAM)
+                    .exchange()
+                    .expectStatus()
+                    .isOk()
+                    .expectHeader()
+                    .contentType(TEXT_EVENT_STREAM)
+                    .returnResult(String::class.java)
 
-            StepVerifier.create(result.responseBody)
-                .expectComplete()
-                .verify()
+            StepVerifier.create(result.responseBody).expectComplete().verify()
         }
     }
-
 }

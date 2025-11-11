@@ -30,26 +30,22 @@ class RestDipMtbFileSender(
     restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
     retryTemplate: RetryTemplate,
-    reportService: ReportService
+    reportService: ReportService,
 ) : RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService) {
-
-    override fun sendUrl(): String {
-        return UriComponentsBuilder
+    override fun sendUrl(): String =
+        UriComponentsBuilder
             .fromUriString(restTargetProperties.uri.toString())
             .pathSegment("mtb")
             .pathSegment("etl")
             .pathSegment("patient-record")
             .toUriString()
-    }
 
-    override fun deleteUrl(patientId: PatientPseudonym): String {
-        return UriComponentsBuilder
+    override fun deleteUrl(patientId: PatientPseudonym): String =
+        UriComponentsBuilder
             .fromUriString(restTargetProperties.uri.toString())
             .pathSegment("mtb")
             .pathSegment("etl")
             .pathSegment("patient")
             .pathSegment(patientId.value)
             .toUriString()
-    }
-
 }

@@ -32,6 +32,7 @@ import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.security.UserRoleService
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.services.TransformationService
+import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.htmlunit.WebClient
 import org.htmlunit.html.HtmlPage
@@ -64,320 +65,288 @@ import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
 import org.springframework.web.context.WebApplicationContext
 import reactor.core.publisher.Sinks
 import reactor.test.StepVerifier
-import java.time.Instant
 
 abstract class MockSink : Sinks.Many<Boolean>
 
 @WebMvcTest(controllers = [ConfigController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
 @ContextConfiguration(
-    classes = [
-        ConfigController::class,
-        AppConfiguration::class,
-        AppSecurityConfiguration::class
-    ]
+    classes = [ConfigController::class, AppConfiguration::class, AppSecurityConfiguration::class]
 )
-@TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=BUILDIN"
-    ]
-)
+@TestPropertySource(properties = ["app.pseudonymize.generator=BUILDIN"])
 @MockitoBean(name = "configsUpdateProducer", types = [MockSink::class])
 @MockitoBean(
-    types = [
-        Generator::class,
-        MtbFileSender::class,
-        RequestProcessor::class,
-        TransformationService::class,
-        GPasConnectionCheckService::class,
-        RestConnectionCheckService::class,
-        GIcsConnectionCheckService::class
-    ]
+    types =
+        [
+            Generator::class,
+            MtbFileSender::class,
+            RequestProcessor::class,
+            TransformationService::class,
+            GPasConnectionCheckService::class,
+            RestConnectionCheckService::class,
+            GIcsConnectionCheckService::class,
+        ]
 )
 class ConfigControllerTest {
 
-    private lateinit var mockMvc: MockMvc
-    private lateinit var webClient: WebClient
+  private lateinit var mockMvc: MockMvc
+  private lateinit var webClient: WebClient
 
-    private lateinit var requestProcessor: RequestProcessor
-    private lateinit var connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+  private lateinit var requestProcessor: RequestProcessor
+  private lateinit var connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
+
+  @BeforeEach
+  fun setup(
+      @Autowired mockMvc: MockMvc,
+      @Autowired requestProcessor: RequestProcessor,
+      @Autowired connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
+  ) {
+    this.mockMvc = mockMvc
+    this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
+    this.requestProcessor = requestProcessor
+    this.connectionCheckUpdateProducer = connectionCheckUpdateProducer
+
+    webClient.options.isThrowExceptionOnScriptError = false
+  }
+
+  @Test
+  fun testShouldRequestConfigPageIfLoggedIn() {
+    mockMvc
+        .get("/configs") {
+          with(user("admin").roles("ADMIN"))
+          accept(MediaType.TEXT_HTML)
+        }
+        .andExpect {
+          status { isOk() }
+          view { name("configs") }
+        }
+  }
+
+  @Test
+  fun testShouldRedirectToLoginPageIfNotLoggedIn() {
+    mockMvc
+        .get("/configs") {
+          with(anonymous())
+          accept(MediaType.TEXT_HTML)
+        }
+        .andExpect {
+          status { isFound() }
+          header { stringValues(HttpHeaders.LOCATION, "http://localhost/login") }
+        }
+  }
+
+  @Nested
+  @TestPropertySource(
+      properties = ["app.security.enable-tokens=true", "app.security.admin-user=admin"]
+  )
+  @MockitoBean(types = [TokenService::class])
+  inner class WithTokensEnabled {
+    private lateinit var tokenService: TokenService
 
     @BeforeEach
-    fun setup(
-        @Autowired mockMvc: MockMvc,
-        @Autowired requestProcessor: RequestProcessor,
-        @Autowired connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>
-    ) {
-        this.mockMvc = mockMvc
-        this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
-        this.requestProcessor = requestProcessor
-        this.connectionCheckUpdateProducer = connectionCheckUpdateProducer
+    fun setup(@Autowired tokenService: TokenService) {
+      webClient.options.isThrowExceptionOnScriptError = false
 
-        webClient.options.isThrowExceptionOnScriptError = false
+      this.tokenService = tokenService
     }
 
     @Test
-    fun testShouldRequestConfigPageIfLoggedIn() {
-        mockMvc.get("/configs") {
+    fun testShouldSaveNewToken() {
+      mockMvc
+          .post("/configs/tokens") {
             with(user("admin").roles("ADMIN"))
             accept(MediaType.TEXT_HTML)
-        }.andExpect {
-            status { isOk() }
-            view { name("configs") }
-        }
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            content = "name=Testtoken"
+          }
+          .andExpect {
+            status { is2xxSuccessful() }
+            view { name("configs/tokens") }
+          }
+
+      val captor = argumentCaptor<String>()
+      verify(tokenService, times(1)).addToken(captor.capture())
+
+      assertThat(captor.firstValue).isEqualTo("Testtoken")
     }
 
     @Test
-    fun testShouldRedirectToLoginPageIfNotLoggedIn() {
-        mockMvc.get("/configs") {
-            with(anonymous())
+    fun testShouldNotSaveTokenWithExstingName() {
+      whenever(tokenService.addToken(anyString()))
+          .thenReturn(Result.failure(RuntimeException("Testfailure")))
+
+      mockMvc
+          .post("/configs/tokens") {
+            with(user("admin").roles("ADMIN"))
             accept(MediaType.TEXT_HTML)
-        }.andExpect {
-            status { isFound() }
-            header {
-                stringValues(HttpHeaders.LOCATION, "http://localhost/login")
-            }
-        }
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            content = "name=Testtoken"
+          }
+          .andExpect {
+            status { is2xxSuccessful() }
+            view { name("configs/tokens") }
+          }
+
+      val captor = argumentCaptor<String>()
+      verify(tokenService, times(1)).addToken(captor.capture())
+
+      assertThat(captor.firstValue).isEqualTo("Testtoken")
     }
 
-    @Nested
-    @TestPropertySource(
-        properties = [
-            "app.security.enable-tokens=true",
-            "app.security.admin-user=admin"
-        ]
-    )
-    @MockitoBean(
-        types = [
-            TokenService::class
-        ]
-    )
-    inner class WithTokensEnabled {
-        private lateinit var tokenService: TokenService
+    @Test
+    fun testShouldDeleteToken() {
+      mockMvc
+          .delete("/configs/tokens/42") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+          }
+          .andExpect {
+            status { is2xxSuccessful() }
+            view { name("configs/tokens") }
+          }
 
-        @BeforeEach
-        fun setup(
-            @Autowired tokenService: TokenService
-        ) {
-            webClient.options.isThrowExceptionOnScriptError = false
+      val captor = argumentCaptor<Long>()
+      verify(tokenService, times(1)).deleteToken(captor.capture())
 
-            this.tokenService = tokenService
-        }
-
-        @Test
-        fun testShouldSaveNewToken() {
-            mockMvc.post("/configs/tokens") {
-                with(user("admin").roles("ADMIN"))
-                accept(MediaType.TEXT_HTML)
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = "name=Testtoken"
-            }.andExpect {
-                status { is2xxSuccessful() }
-                view { name("configs/tokens") }
-            }
-
-            val captor = argumentCaptor<String>()
-            verify(tokenService, times(1)).addToken(captor.capture())
-
-            assertThat(captor.firstValue).isEqualTo("Testtoken")
-        }
-
-        @Test
-        fun testShouldNotSaveTokenWithExstingName() {
-            whenever(tokenService.addToken(anyString())).thenReturn(
-                Result.failure(
-                    RuntimeException(
-                        "Testfailure"
-                    )
-                )
-            )
-
-            mockMvc.post("/configs/tokens") {
-                with(user("admin").roles("ADMIN"))
-                accept(MediaType.TEXT_HTML)
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = "name=Testtoken"
-            }.andExpect {
-                status { is2xxSuccessful() }
-                view { name("configs/tokens") }
-            }
-
-            val captor = argumentCaptor<String>()
-            verify(tokenService, times(1)).addToken(captor.capture())
-
-            assertThat(captor.firstValue).isEqualTo("Testtoken")
-        }
-
-        @Test
-        fun testShouldDeleteToken() {
-            mockMvc.delete("/configs/tokens/42") {
-                with(user("admin").roles("ADMIN"))
-                accept(MediaType.TEXT_HTML)
-            }.andExpect {
-                status { is2xxSuccessful() }
-                view { name("configs/tokens") }
-            }
-
-            val captor = argumentCaptor<Long>()
-            verify(tokenService, times(1)).deleteToken(captor.capture())
-
-            assertThat(captor.firstValue).isEqualTo(42)
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldRenderConfigPageWithTokens() {
-            val page = webClient.getPage<HtmlPage>("http://localhost/configs")
-            assertThat(
-                page.getElementById("tokens")
-            ).isNotNull
-        }
+      assertThat(captor.firstValue).isEqualTo(42)
     }
 
-    @Nested
-    @TestPropertySource(
-        properties = [
-            "app.security.enable-tokens=false"
-        ]
-    )
-    inner class WithTokensDisabled {
-        @BeforeEach
-        fun setup() {
-            webClient.options.isThrowExceptionOnScriptError = false
-        }
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldRenderConfigPageWithTokens() {
+      val page = webClient.getPage<HtmlPage>("http://localhost/configs")
+      assertThat(page.getElementById("tokens")).isNotNull
+    }
+  }
 
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldRenderConfigPageWithoutTokens() {
-            val page = webClient.getPage<HtmlPage>("http://localhost/configs")
-            assertThat(
-                page.getElementById("tokens")
-            ).isNull()
-        }
+  @Nested
+  @TestPropertySource(properties = ["app.security.enable-tokens=false"])
+  inner class WithTokensDisabled {
+    @BeforeEach
+    fun setup() {
+      webClient.options.isThrowExceptionOnScriptError = false
     }
 
-    @Nested
-    @TestPropertySource(
-        properties = [
-            "app.security.enable-tokens=false",
-            "app.security.admin-user=admin",
-            "app.security.admin-password={noop}very-secret"
-        ]
-    )
-    @MockitoBean(
-        types = [
-            UserRoleService::class
-        ]
-    )
-    inner class WithUserRolesEnabled {
-        private lateinit var userRoleService: UserRoleService
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldRenderConfigPageWithoutTokens() {
+      val page = webClient.getPage<HtmlPage>("http://localhost/configs")
+      assertThat(page.getElementById("tokens")).isNull()
+    }
+  }
 
-        @BeforeEach
-        fun setup(
-            @Autowired userRoleService: UserRoleService
-        ) {
-            webClient.options.isThrowExceptionOnScriptError = false
+  @Nested
+  @TestPropertySource(
+      properties =
+          [
+              "app.security.enable-tokens=false",
+              "app.security.admin-user=admin",
+              "app.security.admin-password={noop}very-secret",
+          ]
+  )
+  @MockitoBean(types = [UserRoleService::class])
+  inner class WithUserRolesEnabled {
+    private lateinit var userRoleService: UserRoleService
 
-            this.userRoleService = userRoleService
-        }
+    @BeforeEach
+    fun setup(@Autowired userRoleService: UserRoleService) {
+      webClient.options.isThrowExceptionOnScriptError = false
 
-        @Test
-        fun testShouldDeleteUserRole() {
-            mockMvc.delete("/configs/userroles/42") {
-                with(user("admin").roles("ADMIN"))
-                accept(MediaType.TEXT_HTML)
-            }.andExpect {
-                status { is2xxSuccessful() }
-                view { name("configs/userroles") }
-            }
-
-            val captor = argumentCaptor<Long>()
-            verify(userRoleService, times(1)).deleteUserRole(captor.capture())
-
-            assertThat(captor.firstValue).isEqualTo(42)
-        }
-
-        @Test
-        fun testShouldUpdateUserRole() {
-            mockMvc.put("/configs/userroles/42") {
-                with(user("admin").roles("ADMIN"))
-                accept(MediaType.TEXT_HTML)
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = "role=ADMIN"
-            }.andExpect {
-                status { is2xxSuccessful() }
-                view { name("configs/userroles") }
-            }
-
-            val idCaptor = argumentCaptor<Long>()
-            val roleCaptor = argumentCaptor<Role>()
-            verify(userRoleService, times(1)).updateUserRole(
-                idCaptor.capture(),
-                roleCaptor.capture()
-            )
-
-            assertThat(idCaptor.firstValue).isEqualTo(42)
-            assertThat(roleCaptor.firstValue).isEqualTo(Role.ADMIN)
-        }
-
-        @Test
-        @WithMockUser(username = "admin", roles = ["ADMIN"])
-        fun testShouldRenderConfigPageWithUserRoles() {
-            val page = webClient.getPage<HtmlPage>("http://localhost/configs")
-            assertThat(
-                page.getElementById("userroles")
-            ).isNotNull
-        }
+      this.userRoleService = userRoleService
     }
 
-    @Nested
-    inner class WithUserRolesDisabled {
-        @BeforeEach
-        fun setup() {
-            webClient.options.isThrowExceptionOnScriptError = false
-        }
+    @Test
+    fun testShouldDeleteUserRole() {
+      mockMvc
+          .delete("/configs/userroles/42") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+          }
+          .andExpect {
+            status { is2xxSuccessful() }
+            view { name("configs/userroles") }
+          }
 
-        @Test
-        fun testShouldRenderConfigPageWithoutUserRoles() {
-            val page = webClient.getPage<HtmlPage>("http://localhost/configs")
-            assertThat(
-                page.getElementById("userroles")
-            ).isNull()
-        }
+      val captor = argumentCaptor<Long>()
+      verify(userRoleService, times(1)).deleteUserRole(captor.capture())
+
+      assertThat(captor.firstValue).isEqualTo(42)
     }
 
-    @Nested
-    inner class SseTest {
-        private lateinit var webClient: WebTestClient
+    @Test
+    fun testShouldUpdateUserRole() {
+      mockMvc
+          .put("/configs/userroles/42") {
+            with(user("admin").roles("ADMIN"))
+            accept(MediaType.TEXT_HTML)
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            content = "role=ADMIN"
+          }
+          .andExpect {
+            status { is2xxSuccessful() }
+            view { name("configs/userroles") }
+          }
 
-        @BeforeEach
-        fun setup(
-            applicationContext: WebApplicationContext
-        ) {
-            this.webClient = MockMvcWebTestClient
-                .bindToApplicationContext(applicationContext).build()
-        }
+      val idCaptor = argumentCaptor<Long>()
+      val roleCaptor = argumentCaptor<Role>()
+      verify(userRoleService, times(1)).updateUserRole(idCaptor.capture(), roleCaptor.capture())
 
-        @Test
-        fun testShouldRequestGPasSSE() {
-            val expectedEvent =
-                ConnectionCheckResult.GPasConnectionCheckResult(true, Instant.now(), Instant.now())
-
-            connectionCheckUpdateProducer.tryEmitNext(expectedEvent)
-            connectionCheckUpdateProducer.emitComplete { _, _ -> true }
-
-            val result =
-                webClient.get().uri("http://localhost/configs/events").accept(TEXT_EVENT_STREAM)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectHeader().contentType(TEXT_EVENT_STREAM)
-                    .returnResult(ConnectionCheckResult.GPasConnectionCheckResult::class.java)
-
-            StepVerifier.create(result.responseBody)
-                .expectNext(expectedEvent)
-                .expectComplete()
-                .verify()
-        }
+      assertThat(idCaptor.firstValue).isEqualTo(42)
+      assertThat(roleCaptor.firstValue).isEqualTo(Role.ADMIN)
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    fun testShouldRenderConfigPageWithUserRoles() {
+      val page = webClient.getPage<HtmlPage>("http://localhost/configs")
+      assertThat(page.getElementById("userroles")).isNotNull
+    }
+  }
+
+  @Nested
+  inner class WithUserRolesDisabled {
+    @BeforeEach
+    fun setup() {
+      webClient.options.isThrowExceptionOnScriptError = false
+    }
+
+    @Test
+    fun testShouldRenderConfigPageWithoutUserRoles() {
+      val page = webClient.getPage<HtmlPage>("http://localhost/configs")
+      assertThat(page.getElementById("userroles")).isNull()
+    }
+  }
+
+  @Nested
+  inner class SseTest {
+    private lateinit var webClient: WebTestClient
+
+    @BeforeEach
+    fun setup(applicationContext: WebApplicationContext) {
+      this.webClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build()
+    }
+
+    @Test
+    fun testShouldRequestGPasSSE() {
+      val expectedEvent =
+          ConnectionCheckResult.GPasConnectionCheckResult(true, Instant.now(), Instant.now())
+
+      connectionCheckUpdateProducer.tryEmitNext(expectedEvent)
+      connectionCheckUpdateProducer.emitComplete { _, _ -> true }
+
+      val result =
+          webClient
+              .get()
+              .uri("http://localhost/configs/events")
+              .accept(TEXT_EVENT_STREAM)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectHeader()
+              .contentType(TEXT_EVENT_STREAM)
+              .returnResult(ConnectionCheckResult.GPasConnectionCheckResult::class.java)
+
+      StepVerifier.create(result.responseBody).expectNext(expectedEvent).expectComplete().verify()
+    }
+  }
 }

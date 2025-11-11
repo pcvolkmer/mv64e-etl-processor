@@ -35,6 +35,8 @@ import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.randomRequestId
 import dev.pcvolkmer.mv64e.mtb.*
+import java.time.Instant
+import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,42 +49,40 @@ import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationEventPublisher
-import java.time.Instant
-import java.util.*
-
 
 @ExtendWith(MockitoExtension::class)
 class RequestProcessorTest {
 
-    private lateinit var pseudonymizeService: PseudonymizeService
-    private lateinit var transformationService: TransformationService
-    private lateinit var sender: MtbFileSender
-    private lateinit var requestService: RequestService
-    private lateinit var applicationEventPublisher: ApplicationEventPublisher
-    private lateinit var appConfigProperties: AppConfigProperties
-    private lateinit var consentProcessor: ConsentProcessor
-    private lateinit var requestProcessor: RequestProcessor
+  private lateinit var pseudonymizeService: PseudonymizeService
+  private lateinit var transformationService: TransformationService
+  private lateinit var sender: MtbFileSender
+  private lateinit var requestService: RequestService
+  private lateinit var applicationEventPublisher: ApplicationEventPublisher
+  private lateinit var appConfigProperties: AppConfigProperties
+  private lateinit var consentProcessor: ConsentProcessor
+  private lateinit var requestProcessor: RequestProcessor
 
-    @BeforeEach
-    fun setup(
-        @Mock pseudonymizeService: PseudonymizeService,
-        @Mock transformationService: TransformationService,
-        @Mock sender: RestMtbFileSender,
-        @Mock requestService: RequestService,
-        @Mock applicationEventPublisher: ApplicationEventPublisher,
-        @Mock consentProcessor: ConsentProcessor
-    ) {
-        this.pseudonymizeService = pseudonymizeService
-        this.transformationService = transformationService
-        this.sender = sender
-        this.requestService = requestService
-        this.applicationEventPublisher = applicationEventPublisher
-        this.appConfigProperties = AppConfigProperties()
-        this.consentProcessor = consentProcessor
+  @BeforeEach
+  fun setup(
+      @Mock pseudonymizeService: PseudonymizeService,
+      @Mock transformationService: TransformationService,
+      @Mock sender: RestMtbFileSender,
+      @Mock requestService: RequestService,
+      @Mock applicationEventPublisher: ApplicationEventPublisher,
+      @Mock consentProcessor: ConsentProcessor,
+  ) {
+    this.pseudonymizeService = pseudonymizeService
+    this.transformationService = transformationService
+    this.sender = sender
+    this.requestService = requestService
+    this.applicationEventPublisher = applicationEventPublisher
+    this.appConfigProperties = AppConfigProperties()
+    this.consentProcessor = consentProcessor
 
-        val objectMapper = ObjectMapper()
+    val objectMapper = ObjectMapper()
 
-        requestProcessor = RequestProcessor(
+    requestProcessor =
+        RequestProcessor(
             pseudonymizeService,
             transformationService,
             sender,
@@ -90,224 +90,228 @@ class RequestProcessorTest {
             objectMapper,
             applicationEventPublisher,
             appConfigProperties,
-            consentProcessor
+            consentProcessor,
         )
-    }
+  }
 
-    @Test
-    fun testShouldSendMtbFileDuplicationAndSaveUnknownRequestStatusAtFirst() {
-        doAnswer {
-            Request(
-                1L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("6vkiti5bk6ikwifpajpt7cygmd3dvw54d6lwfhzlynb3pqtzferq"),
-                RequestType.MTB_FILE,
-                RequestStatus.SUCCESS,
-                Instant.parse("2023-08-08T02:00:00Z")
-            )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendMtbFileDuplicationAndSaveUnknownRequestStatusAtFirst() {
+    doAnswer {
+          Request(
+              1L,
+              randomRequestId(),
+              PatientPseudonym("TEST_12345678901"),
+              PatientId("P1"),
+              Fingerprint("6vkiti5bk6ikwifpajpt7cygmd3dvw54d6lwfhzlynb3pqtzferq"),
+              RequestType.MTB_FILE,
+              RequestStatus.SUCCESS,
+              Instant.parse("2023-08-08T02:00:00Z"),
+          )
+        }
+        .whenever(requestService)
+        .lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
-        doAnswer {
-            false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
+    doAnswer { false }
+        .whenever(requestService)
+        .isLastRequestWithKnownStatusDeletion(anyValueClass())
 
-        doAnswer {
-            it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
 
-        doAnswer {
-            it.arguments[0]
-        }.whenever(transformationService).transform(any<Mtb>())
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
-        val mtbFile = Mtb.builder()
-            .patient(
-                Patient.builder()
-                    .id("123")
-                    .build()
-            )
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
             .episodesOfCare(
                 listOf(
                     MtbEpisodeOfCare.builder()
                         .id("1")
                         .patient(Reference.builder().id("123").build())
-                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2023-08-08T02:00:00.00Z"))).build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2023-08-08T02:00:00.00Z")))
+                                .build()
+                        )
                         .build()
                 )
             )
             .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+    this.requestProcessor.processMtbFile(mtbFile)
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
-    }
+    val requestCaptor = argumentCaptor<Request>()
+    verify(requestService, times(1)).save(requestCaptor.capture())
+    assertThat(requestCaptor.firstValue).isNotNull
+    assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+  }
 
-    @Test
-    fun testShouldDetectMtbFileDuplicationAndSendDuplicationEvent() {
-        doAnswer {
-            Request(
-                1L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("4gcjwtjjtcczybsljxepdfpkaeusvd7g3vogfqpmphyffyzfx7dq"),
-                RequestType.MTB_FILE,
-                RequestStatus.SUCCESS,
-                Instant.parse("2023-08-08T02:00:00Z")
-            )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
+  @Test
+  fun testShouldDetectMtbFileDuplicationAndSendDuplicationEvent() {
+    doAnswer {
+          Request(
+              1L,
+              randomRequestId(),
+              PatientPseudonym("TEST_12345678901"),
+              PatientId("P1"),
+              Fingerprint("4gcjwtjjtcczybsljxepdfpkaeusvd7g3vogfqpmphyffyzfx7dq"),
+              RequestType.MTB_FILE,
+              RequestStatus.SUCCESS,
+              Instant.parse("2023-08-08T02:00:00Z"),
+          )
+        }
+        .whenever(requestService)
+        .lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
-        doAnswer {
-            false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
+    doAnswer { false }
+        .whenever(requestService)
+        .isLastRequestWithKnownStatusDeletion(anyValueClass())
 
-        doAnswer {
-            it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
 
-        doAnswer {
-            it.arguments[0]
-        }.whenever(transformationService).transform(any<Mtb>())
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
-        val mtbFile = Mtb.builder()
-            .patient(
-                Patient.builder()
-                    .id("123")
-                    .build()
-            )
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
             .episodesOfCare(
                 listOf(
                     MtbEpisodeOfCare.builder()
                         .id("1")
                         .patient(Reference.builder().id("123").build())
-                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
                         .build()
                 )
             )
             .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+    this.requestProcessor.processMtbFile(mtbFile)
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue).isNotNull
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.DUPLICATION)
-    }
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.DUPLICATION)
+  }
 
-    @Test
-    fun testShouldSendMtbFileAndSendSuccessEvent() {
-        doAnswer {
-            Request(
-                1L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("different"),
-                RequestType.MTB_FILE,
-                RequestStatus.SUCCESS,
-                Instant.parse("2023-08-08T02:00:00Z")
-            )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendMtbFileAndSendSuccessEvent() {
+    doAnswer {
+          Request(
+              1L,
+              randomRequestId(),
+              PatientPseudonym("TEST_12345678901"),
+              PatientId("P1"),
+              Fingerprint("different"),
+              RequestType.MTB_FILE,
+              RequestStatus.SUCCESS,
+              Instant.parse("2023-08-08T02:00:00Z"),
+          )
+        }
+        .whenever(requestService)
+        .lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
-        doAnswer {
-            false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
+    doAnswer { false }
+        .whenever(requestService)
+        .isLastRequestWithKnownStatusDeletion(anyValueClass())
 
-        doAnswer {
-            MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<DnpmV2MtbFileRequest>())
+    doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+        .whenever(sender)
+        .send(any<DnpmV2MtbFileRequest>())
 
-        doAnswer {
-            it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
 
-        doAnswer {
-            it.arguments[0]
-        }.whenever(transformationService).transform(any<Mtb>())
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
-        val mtbFile = Mtb.builder()
-            .patient(
-                Patient.builder()
-                    .id("123")
-                    .build()
-            )
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
             .episodesOfCare(
                 listOf(
                     MtbEpisodeOfCare.builder()
                         .id("1")
                         .patient(Reference.builder().id("123").build())
-                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
                         .build()
                 )
             )
             .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+    this.requestProcessor.processMtbFile(mtbFile)
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue).isNotNull
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
-    }
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+  }
 
-    @Test
-    fun testShouldSendMtbFileAndSendErrorEvent() {
-        doAnswer {
-            Request(
-                1L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("different"),
-                RequestType.MTB_FILE,
-                RequestStatus.SUCCESS,
-                Instant.parse("2023-08-08T02:00:00Z")
-            )
-        }.whenever(requestService).lastMtbFileRequestForPatientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendMtbFileAndSendErrorEvent() {
+    doAnswer {
+          Request(
+              1L,
+              randomRequestId(),
+              PatientPseudonym("TEST_12345678901"),
+              PatientId("P1"),
+              Fingerprint("different"),
+              RequestType.MTB_FILE,
+              RequestStatus.SUCCESS,
+              Instant.parse("2023-08-08T02:00:00Z"),
+          )
+        }
+        .whenever(requestService)
+        .lastMtbFileRequestForPatientPseudonym(anyValueClass())
 
-        doAnswer {
-            false
-        }.whenever(requestService).isLastRequestWithKnownStatusDeletion(anyValueClass())
+    doAnswer { false }
+        .whenever(requestService)
+        .isLastRequestWithKnownStatusDeletion(anyValueClass())
 
-        doAnswer {
-            MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.whenever(sender).send(any<DnpmV2MtbFileRequest>())
+    doAnswer { MtbFileSender.Response(status = RequestStatus.ERROR) }
+        .whenever(sender)
+        .send(any<DnpmV2MtbFileRequest>())
 
-        doAnswer {
-            it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
 
-        doAnswer {
-            it.arguments[0]
-        }.whenever(transformationService).transform(any<Mtb>())
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
-        val mtbFile = Mtb.builder()
-            .patient(
-                Patient.builder()
-                    .id("123")
-                    .build()
-            )
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
             .metadata(
-                MvhMetadata
-                    .builder()
+                MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent
-                            .builder()
+                        ModelProjectConsent.builder()
                             .provisions(
-                                listOf(Provision.builder().type(ConsentProvision.PERMIT).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
-                            ).build()
+                                listOf(
+                                    Provision.builder()
+                                        .type(ConsentProvision.PERMIT)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
+                                )
+                            )
+                            .build()
                     )
                     .build()
             )
@@ -316,143 +320,139 @@ class RequestProcessorTest {
                     MtbEpisodeOfCare.builder()
                         .id("1")
                         .patient(Reference.builder().id("123").build())
-                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
                         .build()
                 )
             )
             .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+    this.requestProcessor.processMtbFile(mtbFile)
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue).isNotNull
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
-    }
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+  }
 
-    @Test
-    fun testShouldSendDeleteRequestAndSaveUnknownRequestStatusAtFirst() {
-        doAnswer {
-            "PSEUDONYM"
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendDeleteRequestAndSaveUnknownRequestStatusAtFirst() {
+    doAnswer { "PSEUDONYM" }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        doAnswer {
-            MtbFileSender.Response(status = RequestStatus.UNKNOWN)
-        }.whenever(sender).send(any<DeleteRequest>())
+    doAnswer { MtbFileSender.Response(status = RequestStatus.UNKNOWN) }
+        .whenever(sender)
+        .send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(
-            TEST_PATIENT_ID,
-            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
-        )
+    this.requestProcessor.processDeletion(
+        TEST_PATIENT_ID,
+        isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE,
+    )
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
-    }
+    val requestCaptor = argumentCaptor<Request>()
+    verify(requestService, times(1)).save(requestCaptor.capture())
+    assertThat(requestCaptor.firstValue).isNotNull
+    assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+  }
 
-    @Test
-    fun testShouldSendDeleteRequestAndSendSuccessEvent() {
-        doAnswer {
-            "PSEUDONYM"
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendDeleteRequestAndSendSuccessEvent() {
+    doAnswer { "PSEUDONYM" }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        doAnswer {
-            MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<DeleteRequest>())
+    doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+        .whenever(sender)
+        .send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(
-            TEST_PATIENT_ID,
-            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
-        )
+    this.requestProcessor.processDeletion(
+        TEST_PATIENT_ID,
+        isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE,
+    )
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue).isNotNull
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
-    }
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+  }
 
-    @Test
-    fun testShouldSendDeleteRequestAndSendErrorEvent() {
-        doAnswer {
-            "PSEUDONYM"
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendDeleteRequestAndSendErrorEvent() {
+    doAnswer { "PSEUDONYM" }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        doAnswer {
-            MtbFileSender.Response(status = RequestStatus.ERROR)
-        }.whenever(sender).send(any<DeleteRequest>())
+    doAnswer { MtbFileSender.Response(status = RequestStatus.ERROR) }
+        .whenever(sender)
+        .send(any<DeleteRequest>())
 
-        this.requestProcessor.processDeletion(
-            TEST_PATIENT_ID,
-            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
-        )
+    this.requestProcessor.processDeletion(
+        TEST_PATIENT_ID,
+        isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE,
+    )
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue).isNotNull
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
-    }
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+  }
 
-    @Test
-    fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
-        doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+  @Test
+  fun testShouldSendDeleteRequestWithPseudonymErrorAndSaveErrorRequestStatus() {
+    doThrow(RuntimeException()).whenever(pseudonymizeService).patientPseudonym(anyValueClass())
 
-        this.requestProcessor.processDeletion(
-            TEST_PATIENT_ID,
-            isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE
-        )
+    this.requestProcessor.processDeletion(
+        TEST_PATIENT_ID,
+        isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE,
+    )
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
-    }
+    val requestCaptor = argumentCaptor<Request>()
+    verify(requestService, times(1)).save(requestCaptor.capture())
+    assertThat(requestCaptor.firstValue).isNotNull
+    assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+  }
 
-    @Test
-    fun testShouldNotDetectMtbFileDuplicationIfDuplicationNotConfigured() {
-        this.appConfigProperties.duplicationDetection = false
+  @Test
+  fun testShouldNotDetectMtbFileDuplicationIfDuplicationNotConfigured() {
+    this.appConfigProperties.duplicationDetection = false
 
-        doAnswer {
-            it.arguments[0] as String
-        }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
 
-        doAnswer {
-            it.arguments[0]
-        }.whenever(transformationService).transform(any<Mtb>())
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        doAnswer {
-            MtbFileSender.Response(status = RequestStatus.SUCCESS)
-        }.whenever(sender).send(any<DnpmV2MtbFileRequest>())
+    doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+        .whenever(sender)
+        .send(any<DnpmV2MtbFileRequest>())
 
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
-        val mtbFile = Mtb.builder()
-            .patient(
-                Patient.builder()
-                    .id("123")
-                    .build()
-            )
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
             .episodesOfCare(
                 listOf(
                     MtbEpisodeOfCare.builder()
                         .id("1")
                         .patient(Reference.builder().id("123").build())
-                        .period(PeriodDate.builder().start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z"))).build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
                         .build()
                 )
             )
             .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+    this.requestProcessor.processMtbFile(mtbFile)
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue).isNotNull
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
-    }
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+  }
 
-    companion object {
-        val TEST_PATIENT_ID = PatientId("TEST_12345678901")
-    }
-
+  companion object {
+    val TEST_PATIENT_ID = PatientId("TEST_12345678901")
+  }
 }

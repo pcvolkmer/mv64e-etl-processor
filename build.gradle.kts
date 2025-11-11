@@ -203,4 +203,17 @@ spotless {
         removeUnusedImports()
         googleJavaFormat()
     }
+    kotlin {
+        ktlint()
+        suppressLintsFor {
+            step = "ktlint"
+            shortCode = "standard:filename"
+        }
+        suppressLintsFor {
+            step = "ktlint"
+            shortCode = "standard:no-wildcard-imports"
+        }
+        leadingTabsToSpaces()
+        endWithNewline()
+    }
 }

@@ -38,9 +38,8 @@ abstract class RestMtbFileSender(
     private val restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
     private val retryTemplate: RetryTemplate,
-    private val reportService: ReportService
+    private val reportService: ReportService,
 ) : MtbFileSender {
-
     private val logger = LoggerFactory.getLogger(RestMtbFileSender::class.java)
 
     abstract fun sendUrl(): String
@@ -52,27 +51,29 @@ abstract class RestMtbFileSender(
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(request.content, headers)
-                val response = restTemplate.postForEntity(
-                    sendUrl(),
-                    entityReq,
-                    String::class.java
-                )
+                val response = restTemplate.postForEntity(sendUrl(), entityReq, String::class.java)
                 if (!response.statusCode.is2xxSuccessful) {
                     logger.warn("Error sending to remote system: {}", response.body)
                     return@execute MtbFileSender.Response(
                         reportService.deserialize(response.body).asRequestStatus(),
-                        "Status-Code: ${response.statusCode.value()}"
+                        "Status-Code: ${response.statusCode.value()}",
                     )
                 }
                 logger.debug("Sent file via RestMtbFileSender")
-                return@execute MtbFileSender.Response(reportService.deserialize(response.body).asRequestStatus(), response.body.orEmpty())
+                return@execute MtbFileSender.Response(
+                    reportService.deserialize(response.body).asRequestStatus(),
+                    response.body.orEmpty(),
+                )
             }
         } catch (e: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientResponseException) {
             logger.info(restTargetProperties.uri!!.toString())
             logger.error("Request data not accepted by remote system", e)
-            return MtbFileSender.Response(reportService.deserialize(e.responseBodyAsString).asRequestStatus(), e.responseBodyAsString)
+            return MtbFileSender.Response(
+                reportService.deserialize(e.responseBodyAsString).asRequestStatus(),
+                e.responseBodyAsString,
+            )
         }
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
@@ -82,11 +83,7 @@ abstract class RestMtbFileSender(
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(null, headers)
-                restTemplate.delete(
-                    deleteUrl(request.patientId),
-                    entityReq,
-                    String::class.java
-                )
+                restTemplate.delete(deleteUrl(request.patientId), entityReq, String::class.java)
                 logger.debug("Sent file via RestMtbFileSender")
                 return@execute MtbFileSender.Response(RequestStatus.SUCCESS)
             }
@@ -99,18 +96,17 @@ abstract class RestMtbFileSender(
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
 
-    override fun endpoint(): String {
-        return this.restTargetProperties.uri.orEmpty()
-    }
+    override fun endpoint(): String = this.restTargetProperties.uri.orEmpty()
 
     private fun getHttpHeaders(request: MtbRequest): HttpHeaders {
         val username = restTargetProperties.username
         val password = restTargetProperties.password
         val headers = HttpHeaders()
-        headers.contentType = when (request) {
-            is DnpmV2MtbFileRequest -> CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-            else -> MediaType.APPLICATION_JSON
-        }
+        headers.contentType =
+            when (request) {
+                is DnpmV2MtbFileRequest -> CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+                else -> MediaType.APPLICATION_JSON
+            }
 
         if (username.isNullOrBlank() || password.isNullOrBlank()) {
             return headers
@@ -119,5 +115,4 @@ abstract class RestMtbFileSender(
         headers.setBasicAuth(username, password)
         return headers
     }
-
 }

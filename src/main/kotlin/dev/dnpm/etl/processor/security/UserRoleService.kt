@@ -25,9 +25,12 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser
 
 class UserRoleService(
     private val userRoleRepository: UserRoleRepository,
-    private val sessionRegistry: SessionRegistry
+    private val sessionRegistry: SessionRegistry,
 ) {
-    fun updateUserRole(id: Long, role: Role) {
+    fun updateUserRole(
+        id: Long,
+        role: Role,
+    ) {
         val userRole = userRoleRepository.findByIdOrNull(id) ?: return
         userRole.role = role
         userRoleRepository.save(userRole)
@@ -40,19 +43,13 @@ class UserRoleService(
         expireSessionFor(userRole.username)
     }
 
-    fun findAll(): List<UserRole> {
-        return userRoleRepository.findAll().toList()
-    }
+    fun findAll(): List<UserRole> = userRoleRepository.findAll().toList()
 
     private fun expireSessionFor(username: String) {
         sessionRegistry.allPrincipals
             .filterIsInstance<OidcUser>()
             .filter { it.preferredUsername == username }
-            .flatMap {
-                sessionRegistry.getAllSessions(it, true)
-            }
-            .onEach {
-                it.expireNow()
-            }
+            .flatMap { sessionRegistry.getAllSessions(it, true) }
+            .onEach { it.expireNow() }
     }
 }

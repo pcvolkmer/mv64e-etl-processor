@@ -25,13 +25,13 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 
 abstract class AbstractTestcontainerTest {
-
     companion object {
         @Container
-        val dbContainer = CustomPostgreSQLContainer("postgres:10-alpine")
-            .withDatabaseName("test")
-            .withUsername("test")
-            .withPassword("test") ?: throw RuntimeException("Failed to create testcontainer!")
+        val dbContainer =
+            CustomPostgreSQLContainer("postgres:10-alpine")
+                .withDatabaseName("test")
+                .withUsername("test")
+                .withPassword("test") ?: throw RuntimeException("Failed to create testcontainer!")
 
         @DynamicPropertySource
         @JvmStatic
@@ -41,10 +41,11 @@ abstract class AbstractTestcontainerTest {
             registry.add("spring.datasource.password", dbContainer::getPassword)
         }
     }
-
 }
 
-class CustomPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<CustomPostgreSQLContainer>(dockerImageName) {
+class CustomPostgreSQLContainer(
+    dockerImageName: String,
+) : PostgreSQLContainer<CustomPostgreSQLContainer>(dockerImageName) {
     override fun stop() {
         // Keep Testcontainer alive until JVM destroys it
     }

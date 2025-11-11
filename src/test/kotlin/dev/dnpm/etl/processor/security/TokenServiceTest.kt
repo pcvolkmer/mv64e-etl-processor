@@ -19,6 +19,8 @@
 
 package dev.dnpm.etl.processor.security
 
+import java.util.*
+import java.util.function.Consumer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,124 +32,128 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
-import java.util.*
-import java.util.function.Consumer
 
 @ExtendWith(MockitoExtension::class)
 class TokenServiceTest {
 
-    private lateinit var userDetailsManager: InMemoryUserDetailsManager
-    private lateinit var passwordEncoder: PasswordEncoder
-    private lateinit var tokenRepository: TokenRepository
+  private lateinit var userDetailsManager: InMemoryUserDetailsManager
+  private lateinit var passwordEncoder: PasswordEncoder
+  private lateinit var tokenRepository: TokenRepository
 
-    private lateinit var tokenService: TokenService
+  private lateinit var tokenService: TokenService
 
-    @BeforeEach
-    fun setup(
-        @Mock userDetailsManager: InMemoryUserDetailsManager,
-        @Mock passwordEncoder: PasswordEncoder,
-        @Mock tokenRepository: TokenRepository
-    ) {
-        this.userDetailsManager = userDetailsManager
-        this.passwordEncoder = passwordEncoder
-        this.tokenRepository = tokenRepository
+  @BeforeEach
+  fun setup(
+      @Mock userDetailsManager: InMemoryUserDetailsManager,
+      @Mock passwordEncoder: PasswordEncoder,
+      @Mock tokenRepository: TokenRepository,
+  ) {
+    this.userDetailsManager = userDetailsManager
+    this.passwordEncoder = passwordEncoder
+    this.tokenRepository = tokenRepository
 
-        this.tokenService = TokenService(userDetailsManager, passwordEncoder, tokenRepository)
-    }
+    this.tokenService = TokenService(userDetailsManager, passwordEncoder, tokenRepository)
+  }
 
-    @Test
-    fun shouldEncodePasswordForNewToken() {
-        doAnswer { "{test}verysecret" }.whenever(passwordEncoder).encode(anyString())
+  @Test
+  fun shouldEncodePasswordForNewToken() {
+    doAnswer { "{test}verysecret" }.whenever(passwordEncoder).encode(anyString())
 
-        val actual = this.tokenService.addToken("Test Token")
+    val actual = this.tokenService.addToken("Test Token")
 
-        assertThat(actual).satisfies(
+    assertThat(actual)
+        .satisfies(
             Consumer { assertThat(it.isSuccess).isTrue() },
-            Consumer { assertThat(it.getOrNull()).matches("testtoken:[A-Za-z0-9]{48}$") }
+            Consumer { assertThat(it.getOrNull()).matches("testtoken:[A-Za-z0-9]{48}$") },
         )
-    }
+  }
 
-    @Test
-    fun shouldContainAlphanumTokenUserPart() {
-        doAnswer { "{test}verysecret" }.whenever(passwordEncoder).encode(anyString())
+  @Test
+  fun shouldContainAlphanumTokenUserPart() {
+    doAnswer { "{test}verysecret" }.whenever(passwordEncoder).encode(anyString())
 
-        val actual = this.tokenService.addToken("Test Token")
+    val actual = this.tokenService.addToken("Test Token")
 
-        assertThat(actual).satisfies(
+    assertThat(actual)
+        .satisfies(
             Consumer { assertThat(it.isSuccess).isTrue() },
-            Consumer { assertThat(it.getOrDefault("")).startsWith("testtoken:") }
+            Consumer { assertThat(it.getOrDefault("")).startsWith("testtoken:") },
         )
-    }
+  }
 
-    @Test
-    fun shouldNotAllowSameTokenUserPartTwice() {
-        doReturn(true).whenever(userDetailsManager).userExists(anyString())
+  @Test
+  fun shouldNotAllowSameTokenUserPartTwice() {
+    doReturn(true).whenever(userDetailsManager).userExists(anyString())
 
-        val actual = this.tokenService.addToken("Test Token")
+    val actual = this.tokenService.addToken("Test Token")
 
-        assertThat(actual).satisfies(Consumer { assertThat(it.isFailure).isTrue() })
-        verify(tokenRepository, never()).save(any())
-    }
+    assertThat(actual).satisfies(Consumer { assertThat(it.isFailure).isTrue() })
+    verify(tokenRepository, never()).save(any())
+  }
 
-    @Test
-    fun shouldSaveNewToken() {
-        doAnswer { "{test}verysecret" }.whenever(passwordEncoder).encode(anyString())
+  @Test
+  fun shouldSaveNewToken() {
+    doAnswer { "{test}verysecret" }.whenever(passwordEncoder).encode(anyString())
 
-        val actual = this.tokenService.addToken("Test Token")
+    val actual = this.tokenService.addToken("Test Token")
 
-        val captor = argumentCaptor<Token>()
-        verify(tokenRepository, times(1)).save(captor.capture())
+    val captor = argumentCaptor<Token>()
+    verify(tokenRepository, times(1)).save(captor.capture())
 
-        assertThat(actual).satisfies(Consumer { assertThat(it.isSuccess).isTrue() })
-        assertThat(captor.firstValue).satisfies(
+    assertThat(actual).satisfies(Consumer { assertThat(it.isSuccess).isTrue() })
+    assertThat(captor.firstValue)
+        .satisfies(
             Consumer { assertThat(it.name).isEqualTo("Test Token") },
             Consumer { assertThat(it.username).isEqualTo("testtoken") },
-            Consumer { assertThat(it.password).isEqualTo("{test}verysecret") }
+            Consumer { assertThat(it.password).isEqualTo("{test}verysecret") },
         )
-    }
+  }
 
-    @Test
-    fun shouldDeleteExistingToken() {
-        doAnswer {
-            val id = it.arguments[0] as Long
-            Optional.of(Token(id, "Test Token", "testtoken", "{test}hsdajfgadskjhfgsdkfjg"))
-        }.whenever(tokenRepository).findById(anyLong())
+  @Test
+  fun shouldDeleteExistingToken() {
+    doAnswer {
+          val id = it.arguments[0] as Long
+          Optional.of(Token(id, "Test Token", "testtoken", "{test}hsdajfgadskjhfgsdkfjg"))
+        }
+        .whenever(tokenRepository)
+        .findById(anyLong())
 
-        this.tokenService.deleteToken(42)
+    this.tokenService.deleteToken(42)
 
-        val stringCaptor = argumentCaptor<String>()
-        verify(userDetailsManager, times(1)).deleteUser(stringCaptor.capture())
-        assertThat(stringCaptor.firstValue).isEqualTo("testtoken")
+    val stringCaptor = argumentCaptor<String>()
+    verify(userDetailsManager, times(1)).deleteUser(stringCaptor.capture())
+    assertThat(stringCaptor.firstValue).isEqualTo("testtoken")
 
-        val tokenCaptor = argumentCaptor<Token>()
-        verify(tokenRepository, times(1)).delete(tokenCaptor.capture())
-        assertThat(tokenCaptor.firstValue.id).isEqualTo(42)
-    }
+    val tokenCaptor = argumentCaptor<Token>()
+    verify(tokenRepository, times(1)).delete(tokenCaptor.capture())
+    assertThat(tokenCaptor.firstValue.id).isEqualTo(42)
+  }
 
-    @Test
-    fun shouldReturnAllTokensFromRepository() {
-        val expected = listOf(
+  @Test
+  fun shouldReturnAllTokensFromRepository() {
+    val expected =
+        listOf(
             Token(1, "Test Token 1", "testtoken1", "{test}hsdajfgadskjhfgsdkfjg"),
-            Token(2, "Test Token 2", "testtoken2", "{test}asdasdasdasdasdasdasd")
+            Token(2, "Test Token 2", "testtoken2", "{test}asdasdasdasdasdasdasd"),
         )
 
-        doReturn(expected).whenever(tokenRepository).findAll()
+    doReturn(expected).whenever(tokenRepository).findAll()
 
-        assertThat(tokenService.findAll()).isEqualTo(expected)
-    }
+    assertThat(tokenService.findAll()).isEqualTo(expected)
+  }
 
-    @Test
-    fun shouldAddAllTokensFromRepositoryToUserDataManager() {
-        val expected = listOf(
+  @Test
+  fun shouldAddAllTokensFromRepositoryToUserDataManager() {
+    val expected =
+        listOf(
             Token(1, "Test Token 1", "testtoken1", "{test}hsdajfgadskjhfgsdkfjg"),
-            Token(2, "Test Token 2", "testtoken2", "{test}asdasdasdasdasdasdasd")
+            Token(2, "Test Token 2", "testtoken2", "{test}asdasdasdasdasdasdasd"),
         )
 
-        doReturn(expected).whenever(tokenRepository).findAll()
+    doReturn(expected).whenever(tokenRepository).findAll()
 
-        tokenService.setup()
+    tokenService.setup()
 
-        verify(userDetailsManager, times(expected.size)).createUser(any())
-    }
-
+    verify(userDetailsManager, times(expected.size)).createUser(any())
+  }
 }

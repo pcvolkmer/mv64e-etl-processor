@@ -34,9 +34,8 @@ class KafkaMtbFileSender(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val kafkaProperties: KafkaProperties,
     private val retryTemplate: RetryTemplate,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) : MtbFileSender {
-
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
     override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
@@ -50,11 +49,13 @@ class KafkaMtbFileSender(
                     )
                 record.headers().add("requestId", request.requestId.value.toByteArray())
                 when (request) {
-                    is DnpmV2MtbFileRequest -> record.headers()
-                        .add(
-                            "contentType",
-                            CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray()
-                        )
+                    is DnpmV2MtbFileRequest ->
+                        record
+                            .headers()
+                            .add(
+                                "contentType",
+                                CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray(),
+                            )
                 }
 
                 val result = kafkaTemplate.send(record)
@@ -72,9 +73,7 @@ class KafkaMtbFileSender(
     }
 
     override fun send(request: DeleteRequest): MtbFileSender.Response {
-        val dummyMtbFile = Mtb.builder()
-            .metadata(MvhMetadata())
-            .build()
+        val dummyMtbFile = Mtb.builder().metadata(MvhMetadata()).build()
 
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
@@ -83,11 +82,8 @@ class KafkaMtbFileSender(
                         kafkaProperties.outputTopic,
                         key(request),
                         objectMapper.writeValueAsString(
-                            DnpmV2MtbFileRequest(
-                                request.requestId,
-                                dummyMtbFile
-                            )
-                        )
+                            DnpmV2MtbFileRequest(request.requestId, dummyMtbFile),
+                        ),
                     )
                 record.headers().add("requestId", request.requestId.value.toByteArray())
                 val result = kafkaTemplate.send(record)
@@ -104,15 +100,14 @@ class KafkaMtbFileSender(
         }
     }
 
-    override fun endpoint(): String {
-        return "${this.kafkaProperties.servers} (${this.kafkaProperties.outputTopic}/${this.kafkaProperties.outputResponseTopic})"
-    }
+    override fun endpoint(): String =
+        "${this.kafkaProperties.servers} (${this.kafkaProperties.outputTopic}/${this.kafkaProperties.outputResponseTopic})"
 
-    private fun key(request: MtbRequest): String {
-        return when (request) {
+    private fun key(request: MtbRequest): String =
+        when (request) {
             is DnpmV2MtbFileRequest -> "{\"pid\": \"${request.content.patient.id}\"}"
             is DeleteRequest -> "{\"pid\": \"${request.patientId.value}\"}"
-            else -> throw IllegalArgumentException("Unsupported request type: ${request::class.simpleName}")
+            else ->
+                throw IllegalArgumentException("Unsupported request type: ${request::class.simpleName}")
         }
-    }
 }

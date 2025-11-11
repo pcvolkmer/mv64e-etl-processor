@@ -29,18 +29,18 @@ interface MtbFileSender {
 
     fun endpoint(): String
 
-    data class Response(val status: RequestStatus, val body: String = "")
+    data class Response(
+        val status: RequestStatus,
+        val body: String = "",
+    )
 }
 
-fun Int.asRequestStatus(): RequestStatus {
-    return when (this) {
+fun Int.asRequestStatus(): RequestStatus =
+    when (this) {
         200 -> RequestStatus.SUCCESS
         201 -> RequestStatus.WARNING
-        in 400 .. 999 ->  RequestStatus.ERROR
-        else ->  RequestStatus.UNKNOWN
+        in 400..999 -> RequestStatus.ERROR
+        else -> RequestStatus.UNKNOWN
     }
-}
 
-fun HttpStatusCode.asRequestStatus(): RequestStatus {
-    return this.value().asRequestStatus()
-}
+fun HttpStatusCode.asRequestStatus(): RequestStatus = this.value().asRequestStatus()

@@ -38,26 +38,25 @@ import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
 @WebMvcTest(controllers = [StatisticsController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
 @ContextConfiguration(
-    classes = [
-        StatisticsController::class,
-        AppConfiguration::class,
-        AppSecurityConfiguration::class
-    ]
+    classes =
+        [StatisticsController::class, AppConfiguration::class, AppSecurityConfiguration::class],
 )
 @TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=BUILDIN",
-        "app.security.admin-user=admin",
-        "app.security.admin-password={noop}very-secret"
-    ]
+    properties =
+        [
+            "app.pseudonymize.generator=BUILDIN",
+            "app.security.admin-user=admin",
+            "app.security.admin-password={noop}very-secret",
+        ],
 )
 class StatisticsControllerTest {
-
     private lateinit var mockMvc: MockMvc
     private lateinit var webClient: WebClient
 
     @BeforeEach
-    fun setup(@Autowired mockMvc: MockMvc) {
+    fun setup(
+        @Autowired mockMvc: MockMvc,
+    ) {
         this.mockMvc = mockMvc
         this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
     }
@@ -69,5 +68,4 @@ class StatisticsControllerTest {
             view { name("statistics") }
         }
     }
-
 }
