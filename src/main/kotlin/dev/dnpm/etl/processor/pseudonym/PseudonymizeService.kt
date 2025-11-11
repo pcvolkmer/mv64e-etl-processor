@@ -25,22 +25,16 @@ import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 
 class PseudonymizeService(
     private val generator: Generator,
-    private val configProperties: PseudonymizeConfigProperties
+    private val configProperties: PseudonymizeConfigProperties,
 ) {
-
-    fun patientPseudonym(patientId: PatientId): PatientPseudonym {
-        return when (generator) {
+    fun patientPseudonym(patientId: PatientId): PatientPseudonym =
+        when (generator) {
             is GpasPseudonymGenerator -> PatientPseudonym(generator.generate(patientId.value))
-            else -> PatientPseudonym("${configProperties.prefix}_${generator.generate(patientId.value)}")
+            else ->
+                PatientPseudonym("${configProperties.prefix}_${generator.generate(patientId.value)}")
         }
-    }
 
-    fun genomDeTan(patientId: PatientId): String {
-        return generator.generateGenomDeTan(patientId.value)
-    }
+    fun genomDeTan(patientId: PatientId): String = generator.generateGenomDeTan(patientId.value)
 
-    fun prefix(): String {
-        return configProperties.prefix
-    }
-
+    fun prefix(): String = configProperties.prefix
 }

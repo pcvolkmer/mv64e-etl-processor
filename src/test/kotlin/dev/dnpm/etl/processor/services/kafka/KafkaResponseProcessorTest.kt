@@ -39,7 +39,6 @@ import org.springframework.http.HttpStatus
 
 @ExtendWith(MockitoExtension::class)
 class KafkaResponseProcessorTest {
-
     private lateinit var eventPublisher: ApplicationEventPublisher
     private lateinit var objectMapper: ObjectMapper
 
@@ -48,9 +47,9 @@ class KafkaResponseProcessorTest {
     private fun createKafkaRecord(
         requestId: String,
         statusCode: Int = 200,
-        statusBody: Map<String, Any>? = mapOf()
-    ): ConsumerRecord<String, String> {
-        return ConsumerRecord<String, String>(
+        statusBody: Map<String, Any>? = mapOf(),
+    ): ConsumerRecord<String, String> =
+        ConsumerRecord<String, String>(
             "test-topic",
             0,
             0,
@@ -58,14 +57,15 @@ class KafkaResponseProcessorTest {
             if (statusBody == null) {
                 ""
             } else {
-                this.objectMapper.writeValueAsString(KafkaResponseProcessor.ResponseBody(requestId, statusCode, statusBody))
-            }
+                this.objectMapper.writeValueAsString(
+                    KafkaResponseProcessor.ResponseBody(requestId, statusCode, statusBody),
+                )
+            },
         )
-    }
 
     @BeforeEach
     fun setup(
-        @Mock eventPublisher: ApplicationEventPublisher
+        @Mock eventPublisher: ApplicationEventPublisher,
     ) {
         this.eventPublisher = eventPublisher
         this.objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
@@ -75,18 +75,19 @@ class KafkaResponseProcessorTest {
 
     @Test
     fun shouldNotProcessRecordsWithoutRequestIdInBody() {
-        val record = ConsumerRecord<String, String>(
-            "test-topic",
-            0,
-            0,
-            null,
-            """
+        val record =
+            ConsumerRecord<String, String>(
+                "test-topic",
+                0,
+                0,
+                null,
+                """
                 {
                     "statusCode": 200,
                     "statusBody": {}
                 }
-            """.trimIndent()
-        )
+                """.trimIndent(),
+            )
 
         this.kafkaResponseProcessor.onMessage(record)
 
@@ -95,19 +96,20 @@ class KafkaResponseProcessorTest {
 
     @Test
     fun shouldProcessRecordsWithAliasNames() {
-        val record = ConsumerRecord<String, String>(
-            "test-topic",
-            0,
-            0,
-            null,
-            """
+        val record =
+            ConsumerRecord<String, String>(
+                "test-topic",
+                0,
+                0,
+                null,
+                """
                 {
                     "request_id": "test0123456789",
                     "status_code": 200,
                     "status_body": {}
                 }
-            """.trimIndent()
-        )
+                """.trimIndent(),
+            )
 
         this.kafkaResponseProcessor.onMessage(record)
 
@@ -116,7 +118,9 @@ class KafkaResponseProcessorTest {
 
     @Test
     fun shouldNotProcessRecordsWithoutValidStatusBody() {
-        this.kafkaResponseProcessor.onMessage(createKafkaRecord(requestId = "TestID1234", statusBody = null))
+        this.kafkaResponseProcessor.onMessage(
+            createKafkaRecord(requestId = "TestID1234", statusBody = null),
+        )
 
         verify(eventPublisher, never()).publishEvent(any<ResponseEvent>())
     }
@@ -129,21 +133,16 @@ class KafkaResponseProcessorTest {
     }
 
     companion object {
-
         @JvmStatic
-        fun statusCodeSource(): Set<Int> {
-            return setOf(
+        fun statusCodeSource(): Set<Int> =
+            setOf(
                 HttpStatus.OK,
                 HttpStatus.CREATED,
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.NOT_FOUND,
                 HttpStatus.UNPROCESSABLE_ENTITY,
-                HttpStatus.INTERNAL_SERVER_ERROR
-            )
-                .map { it.value() }
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            ).map { it.value() }
                 .toSet()
-        }
-
     }
-
 }

@@ -23,11 +23,11 @@ import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.pseudonym.Generator
 import dev.dnpm.etl.processor.security.Role
-import dev.dnpm.etl.processor.security.UserRole
 import dev.dnpm.etl.processor.security.Token
 import dev.dnpm.etl.processor.security.TokenService
-import dev.dnpm.etl.processor.services.TransformationService
+import dev.dnpm.etl.processor.security.UserRole
 import dev.dnpm.etl.processor.security.UserRoleService
+import dev.dnpm.etl.processor.services.TransformationService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
@@ -47,175 +47,193 @@ class ConfigController(
     private val mtbFileSender: MtbFileSender,
     private val connectionCheckServices: List<ConnectionCheckService>,
     private val tokenService: TokenService?,
-    private val userRoleService: UserRoleService?
+    private val userRoleService: UserRoleService?,
 ) {
 
-    @GetMapping
-    fun index(model: Model): String {
-        val outputConnectionAvailable =
-            connectionCheckServices.filterIsInstance<OutputConnectionCheckService>().firstOrNull()?.connectionAvailable()
+  @GetMapping
+  fun index(model: Model): String {
+    val outputConnectionAvailable =
+        connectionCheckServices
+            .filterIsInstance<OutputConnectionCheckService>()
+            .firstOrNull()
+            ?.connectionAvailable()
 
-        val gPasConnectionAvailable =
-            connectionCheckServices.filterIsInstance<GPasConnectionCheckService>().firstOrNull()?.connectionAvailable()
+    val gPasConnectionAvailable =
+        connectionCheckServices
+            .filterIsInstance<GPasConnectionCheckService>()
+            .firstOrNull()
+            ?.connectionAvailable()
 
-        val gIcsConnectionAvailable =
-            connectionCheckServices.filterIsInstance<GIcsConnectionCheckService>().firstOrNull()?.connectionAvailable()
+    val gIcsConnectionAvailable =
+        connectionCheckServices
+            .filterIsInstance<GIcsConnectionCheckService>()
+            .firstOrNull()
+            ?.connectionAvailable()
 
-        model.addAttribute("pseudonymGenerator", pseudonymGenerator.javaClass.simpleName)
-        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
-        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
-        model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
-        model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
-        model.addAttribute("gIcsConnectionAvailable", gIcsConnectionAvailable)
-        model.addAttribute("tokensEnabled", tokenService != null)
-        if (tokenService != null) {
-            model.addAttribute("tokens", tokenService.findAll())
-        } else {
-            model.addAttribute("tokens", emptyList<Token>())
-        }
-        model.addAttribute("transformations", transformationService.getTransformations())
-        if (userRoleService != null) {
-            model.addAttribute("userRolesEnabled", true)
-            model.addAttribute("userRoles", userRoleService.findAll())
-        } else {
-            model.addAttribute("userRolesEnabled", false)
-            model.addAttribute("userRoles", emptyList<UserRole>())
-        }
-        return "configs"
+    model.addAttribute("pseudonymGenerator", pseudonymGenerator.javaClass.simpleName)
+    model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+    model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+    model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
+    model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
+    model.addAttribute("gIcsConnectionAvailable", gIcsConnectionAvailable)
+    model.addAttribute("tokensEnabled", tokenService != null)
+    if (tokenService != null) {
+      model.addAttribute("tokens", tokenService.findAll())
+    } else {
+      model.addAttribute("tokens", emptyList<Token>())
+    }
+    model.addAttribute("transformations", transformationService.getTransformations())
+    if (userRoleService != null) {
+      model.addAttribute("userRolesEnabled", true)
+      model.addAttribute("userRoles", userRoleService.findAll())
+    } else {
+      model.addAttribute("userRolesEnabled", false)
+      model.addAttribute("userRoles", emptyList<UserRole>())
+    }
+    return "configs"
+  }
+
+  @GetMapping(params = ["outputConnectionAvailable"])
+  fun outputConnectionAvailable(model: Model): String {
+    val outputConnectionAvailable =
+        connectionCheckServices
+            .filterIsInstance<OutputConnectionCheckService>()
+            .first()
+            .connectionAvailable()
+
+    model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+    model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+    model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
+    if (tokenService != null) {
+      model.addAttribute("tokensEnabled", true)
+      model.addAttribute("tokens", tokenService.findAll())
+    } else {
+      model.addAttribute("tokens", listOf<Token>())
     }
 
-    @GetMapping(params = ["outputConnectionAvailable"])
-    fun outputConnectionAvailable(model: Model): String {
-        val outputConnectionAvailable =
-            connectionCheckServices.filterIsInstance<OutputConnectionCheckService>().first().connectionAvailable()
+    return "configs/outputConnectionAvailable"
+  }
 
-        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
-        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
-        model.addAttribute("outputConnectionAvailable", outputConnectionAvailable)
-        if (tokenService != null) {
-            model.addAttribute("tokensEnabled", true)
-            model.addAttribute("tokens", tokenService.findAll())
-        } else {
-            model.addAttribute("tokens", listOf<Token>())
-        }
+  @GetMapping(params = ["gPasConnectionAvailable"])
+  fun gPasConnectionAvailable(model: Model): String {
+    val gPasConnectionAvailable =
+        connectionCheckServices
+            .filterIsInstance<GPasConnectionCheckService>()
+            .firstOrNull()
+            ?.connectionAvailable()
 
-        return "configs/outputConnectionAvailable"
+    model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+    model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+    model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
+    if (tokenService != null) {
+      model.addAttribute("tokensEnabled", true)
+      model.addAttribute("tokens", tokenService.findAll())
+    } else {
+      model.addAttribute("tokens", listOf<Token>())
     }
 
-    @GetMapping(params = ["gPasConnectionAvailable"])
-    fun gPasConnectionAvailable(model: Model): String {
-        val gPasConnectionAvailable =
-            connectionCheckServices.filterIsInstance<GPasConnectionCheckService>().firstOrNull()?.connectionAvailable()
+    return "configs/gPasConnectionAvailable"
+  }
 
-        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
-        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
-        model.addAttribute("gPasConnectionAvailable", gPasConnectionAvailable)
-        if (tokenService != null) {
-            model.addAttribute("tokensEnabled", true)
-            model.addAttribute("tokens", tokenService.findAll())
-        } else {
-            model.addAttribute("tokens", listOf<Token>())
-        }
+  @GetMapping(params = ["gIcsConnectionAvailable"])
+  fun gIcsConnectionAvailable(model: Model): String {
+    val gIcsConnectionAvailable =
+        connectionCheckServices
+            .filterIsInstance<GIcsConnectionCheckService>()
+            .firstOrNull()
+            ?.connectionAvailable()
 
-        return "configs/gPasConnectionAvailable"
+    model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
+    model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
+    model.addAttribute("gIcsConnectionAvailable", gIcsConnectionAvailable)
+    if (tokenService != null) {
+      model.addAttribute("tokensEnabled", true)
+      model.addAttribute("tokens", tokenService.findAll())
+    } else {
+      model.addAttribute("tokens", listOf<Token>())
     }
 
-    @GetMapping(params = ["gIcsConnectionAvailable"])
-    fun gIcsConnectionAvailable(model: Model): String {
-        val gIcsConnectionAvailable =
-            connectionCheckServices.filterIsInstance<GIcsConnectionCheckService>().firstOrNull()?.connectionAvailable()
+    return "configs/gIcsConnectionAvailable"
+  }
 
-        model.addAttribute("mtbFileSender", mtbFileSender.javaClass.simpleName)
-        model.addAttribute("mtbFileEndpoint", mtbFileSender.endpoint())
-        model.addAttribute("gIcsConnectionAvailable", gIcsConnectionAvailable)
-        if (tokenService != null) {
-            model.addAttribute("tokensEnabled", true)
-            model.addAttribute("tokens", tokenService.findAll())
-        } else {
-            model.addAttribute("tokens", listOf<Token>())
-        }
-
-        return "configs/gIcsConnectionAvailable"
+  @PostMapping(path = ["tokens"])
+  fun addToken(@ModelAttribute("name") name: String, model: Model): String {
+    if (tokenService == null) {
+      model.addAttribute("tokensEnabled", false)
+      model.addAttribute("success", false)
+    } else {
+      model.addAttribute("tokensEnabled", true)
+      val result = tokenService.addToken(name)
+      result.onSuccess {
+        model.addAttribute("newTokenValue", it)
+        model.addAttribute("success", true)
+      }
+      result.onFailure { model.addAttribute("success", false) }
+      model.addAttribute("tokens", tokenService.findAll())
     }
 
-    @PostMapping(path = ["tokens"])
-    fun addToken(@ModelAttribute("name") name: String, model: Model): String {
-        if (tokenService == null) {
-            model.addAttribute("tokensEnabled", false)
-            model.addAttribute("success", false)
-        } else {
-            model.addAttribute("tokensEnabled", true)
-            val result = tokenService.addToken(name)
-            result.onSuccess {
-                model.addAttribute("newTokenValue", it)
-                model.addAttribute("success", true)
-            }
-            result.onFailure {
-                model.addAttribute("success", false)
-            }
-            model.addAttribute("tokens", tokenService.findAll())
-        }
+    return "configs/tokens"
+  }
 
-        return "configs/tokens"
+  @DeleteMapping(path = ["tokens/{id}"])
+  fun deleteToken(@PathVariable id: Long, model: Model): String {
+    if (tokenService != null) {
+      tokenService.deleteToken(id)
+
+      model.addAttribute("tokensEnabled", true)
+      model.addAttribute("tokens", tokenService.findAll())
+    } else {
+      model.addAttribute("tokensEnabled", false)
+      model.addAttribute("tokens", listOf<Token>())
     }
+    return "configs/tokens"
+  }
 
-    @DeleteMapping(path = ["tokens/{id}"])
-    fun deleteToken(@PathVariable id: Long, model: Model): String {
-        if (tokenService != null) {
-            tokenService.deleteToken(id)
+  @DeleteMapping(path = ["userroles/{id}"])
+  fun deleteUserRole(@PathVariable id: Long, model: Model): String {
+    if (userRoleService != null) {
+      userRoleService.deleteUserRole(id)
 
-            model.addAttribute("tokensEnabled", true)
-            model.addAttribute("tokens", tokenService.findAll())
-        } else {
-            model.addAttribute("tokensEnabled", false)
-            model.addAttribute("tokens", listOf<Token>())
-        }
-        return "configs/tokens"
+      model.addAttribute("userRolesEnabled", true)
+      model.addAttribute("userRoles", userRoleService.findAll())
+    } else {
+      model.addAttribute("userRolesEnabled", false)
+      model.addAttribute("userRoles", emptyList<UserRole>())
     }
+    return "configs/userroles"
+  }
 
-    @DeleteMapping(path = ["userroles/{id}"])
-    fun deleteUserRole(@PathVariable id: Long, model: Model): String {
-        if (userRoleService != null) {
-            userRoleService.deleteUserRole(id)
+  @PutMapping(path = ["userroles/{id}"])
+  fun updateUserRole(
+      @PathVariable id: Long,
+      @ModelAttribute("role") role: Role,
+      model: Model,
+  ): String {
+    if (userRoleService != null) {
+      userRoleService.updateUserRole(id, role)
 
-            model.addAttribute("userRolesEnabled", true)
-            model.addAttribute("userRoles", userRoleService.findAll())
-        } else {
-            model.addAttribute("userRolesEnabled", false)
-            model.addAttribute("userRoles", emptyList<UserRole>())
-        }
-        return "configs/userroles"
+      model.addAttribute("userRolesEnabled", true)
+      model.addAttribute("userRoles", userRoleService.findAll())
+    } else {
+      model.addAttribute("userRolesEnabled", false)
+      model.addAttribute("userRoles", emptyList<UserRole>())
     }
+    return "configs/userroles"
+  }
 
-    @PutMapping(path = ["userroles/{id}"])
-    fun updateUserRole(@PathVariable id: Long, @ModelAttribute("role") role: Role, model: Model): String {
-        if (userRoleService != null) {
-            userRoleService.updateUserRole(id, role)
+  @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+  @ResponseBody
+  fun events(): Flux<ServerSentEvent<Any>> {
+    return connectionCheckUpdateProducer.asFlux().map {
+      val event =
+          when (it) {
+            is ConnectionCheckResult.KafkaConnectionCheckResult -> "output-connection-check"
+            is ConnectionCheckResult.RestConnectionCheckResult -> "output-connection-check"
+            is ConnectionCheckResult.GPasConnectionCheckResult -> "gpas-connection-check"
+            is ConnectionCheckResult.GIcsConnectionCheckResult -> "gics-connection-check"
+          }
 
-            model.addAttribute("userRolesEnabled", true)
-            model.addAttribute("userRoles", userRoleService.findAll())
-        } else {
-            model.addAttribute("userRolesEnabled", false)
-            model.addAttribute("userRoles", emptyList<UserRole>())
-        }
-        return "configs/userroles"
+      ServerSentEvent.builder<Any>().event(event).id("none").data(it).build()
     }
-
-    @GetMapping(path = ["events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    @ResponseBody
-    fun events(): Flux<ServerSentEvent<Any>> {
-        return connectionCheckUpdateProducer.asFlux().map {
-            val event = when (it) {
-                is ConnectionCheckResult.KafkaConnectionCheckResult -> "output-connection-check"
-                is ConnectionCheckResult.RestConnectionCheckResult -> "output-connection-check"
-                is ConnectionCheckResult.GPasConnectionCheckResult -> "gpas-connection-check"
-                is ConnectionCheckResult.GIcsConnectionCheckResult -> "gics-connection-check"
-            }
-
-            ServerSentEvent.builder<Any>()
-                .event(event).id("none").data(it)
-                .build()
-        }
-    }
-
+  }
 }

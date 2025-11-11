@@ -24,8 +24,10 @@ import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
 import dev.pcvolkmer.mv64e.mtb.Mtb
 
-class TransformationService(private val objectMapper: ObjectMapper, private val transformations: List<Transformation>) {
-
+class TransformationService(
+    private val objectMapper: ObjectMapper,
+    private val transformations: List<Transformation>,
+) {
     fun transform(mtbFile: Mtb): Mtb {
         val json = transform(objectMapper.writeValueAsString(mtbFile))
         return objectMapper.readValue(json, Mtb::class.java)
@@ -41,12 +43,24 @@ class TransformationService(private val objectMapper: ObjectMapper, private val 
                 val before = transformation.path.substringBeforeLast(".")
                 val last = transformation.path.substringAfterLast(".")
 
-                val existingValue = if (transformation.existingValue is Number) transformation.existingValue else transformation.existingValue.toString()
-                val newValue = if (transformation.newValue is Number) transformation.newValue else transformation.newValue.toString()
+                val existingValue =
+                    if (transformation.existingValue is Number) {
+                        transformation.existingValue
+                    } else {
+                        transformation.existingValue.toString()
+                    }
+                val newValue =
+                    if (transformation.newValue is Number) {
+                        transformation.newValue
+                    } else {
+                        transformation.newValue.toString()
+                    }
 
-                jsonPath.set("$.$before.[?]$last", newValue, {
-                    it.item(HashMap::class.java)[last] == existingValue
-                })
+                jsonPath.set(
+                    "$.$before.[?]$last",
+                    newValue,
+                    { it.item(HashMap::class.java)[last] == existingValue },
+                )
             } catch (e: PathNotFoundException) {
                 // Ignore
             }
@@ -57,35 +71,30 @@ class TransformationService(private val objectMapper: ObjectMapper, private val 
         return json
     }
 
-    fun getTransformations(): List<Transformation> {
-        return this.transformations
-    }
-
+    fun getTransformations(): List<Transformation> = this.transformations
 }
 
-class Transformation private constructor(val path: String) {
+class Transformation
+    private constructor(
+        val path: String,
+    ) {
+        lateinit var existingValue: Any
+            private set
 
-    lateinit var existingValue: Any
-        private set
-    lateinit var newValue: Any
-        private set
+        lateinit var newValue: Any
+            private set
 
-    infix fun from(value: Any): Transformation {
-        this.existingValue = value
-        return this
-    }
-
-    infix fun to(value: Any): Transformation {
-        this.newValue = value
-        return this
-    }
-
-    companion object {
-
-        fun of(path: String): Transformation {
-            return Transformation(path)
+        infix fun from(value: Any): Transformation {
+            this.existingValue = value
+            return this
         }
 
-    }
+        infix fun to(value: Any): Transformation {
+            this.newValue = value
+            return this
+        }
 
-}
+        companion object {
+            fun of(path: String): Transformation = Transformation(path)
+        }
+    }

@@ -19,11 +19,13 @@
 
 package dev.dnpm.etl.processor.monitoring
 
-enum class RequestStatus(val value: String) {
+enum class RequestStatus(
+    val value: String,
+) {
     SUCCESS("success"),
     WARNING("warning"),
     ERROR("error"),
     UNKNOWN("unknown"),
     DUPLICATION("duplication"),
-    NO_CONSENT("no-consent")
+    NO_CONSENT("no-consent"),
 }

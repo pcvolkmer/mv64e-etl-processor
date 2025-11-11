@@ -34,34 +34,36 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(path = ["mtbfile", "mtb"])
 class MtbFileRestController(
     private val requestProcessor: RequestProcessor,
-    private val consentEvaluator: ConsentEvaluator
+    private val consentEvaluator: ConsentEvaluator,
 ) {
-    private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
+  private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
 
-    @GetMapping
-    fun info(): ResponseEntity<String> {
-        return ResponseEntity.ok("Test")
+  @GetMapping
+  fun info(): ResponseEntity<String> {
+    return ResponseEntity.ok("Test")
+  }
+
+  @PostMapping(
+      consumes =
+          [MediaType.APPLICATION_JSON_VALUE, CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE]
+  )
+  fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
+    val consentEvaluation = consentEvaluator.check(mtbFile)
+    if (consentEvaluation.hasConsent()) {
+      logger.debug("Accepted MTB File (DNPM V2) for processing")
+      requestProcessor.processMtbFile(mtbFile)
+    } else {
+      logger.debug("Accepted MTB File (DNPM V2) and process deletion")
+      val patientId = PatientId(mtbFile.patient.id)
+      requestProcessor.processDeletion(patientId, consentEvaluation.getStatus())
     }
+    return ResponseEntity.accepted().build()
+  }
 
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE, CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE])
-    fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
-        val consentEvaluation = consentEvaluator.check(mtbFile)
-        if (consentEvaluation.hasConsent()) {
-            logger.debug("Accepted MTB File (DNPM V2) for processing")
-            requestProcessor.processMtbFile(mtbFile)
-        } else {
-            logger.debug("Accepted MTB File (DNPM V2) and process deletion")
-            val patientId = PatientId(mtbFile.patient.id)
-            requestProcessor.processDeletion(patientId, consentEvaluation.getStatus())
-        }
-        return ResponseEntity.accepted().build()
-    }
-
-    @DeleteMapping(path = ["{patientId}"])
-    fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
-        logger.debug("Accepted patient ID to process deletion")
-        requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
-        return ResponseEntity.accepted().build()
-    }
-
+  @DeleteMapping(path = ["{patientId}"])
+  fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
+    logger.debug("Accepted patient ID to process deletion")
+    requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
+    return ResponseEntity.accepted().build()
+  }
 }

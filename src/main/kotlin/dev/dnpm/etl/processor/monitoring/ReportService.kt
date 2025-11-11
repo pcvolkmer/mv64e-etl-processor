@@ -30,61 +30,53 @@ import dev.dnpm.etl.processor.monitoring.ReportService.Issue
 import dev.dnpm.etl.processor.monitoring.ReportService.Severity
 import java.util.*
 
-class ReportService(
-    private val objectMapper: ObjectMapper
-) {
+class ReportService(private val objectMapper: ObjectMapper) {
 
-    fun deserialize(dataQualityReport: String?): List<Issue> {
-        if (dataQualityReport.isNullOrBlank()) {
-            return listOf()
-        }
-        return try {
-            objectMapper
-                .readValue(dataQualityReport, DataQualityReport::class.java)
-                .issues
-                .sortedBy { it.severity }
-        } catch (e: Exception) {
-            val otherIssue =
-                Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
-            return when (e) {
-                is JsonMappingException -> listOf(otherIssue)
-                is JsonParseException -> listOf(otherIssue)
-                else -> throw e
-            }
-        }
+  fun deserialize(dataQualityReport: String?): List<Issue> {
+    if (dataQualityReport.isNullOrBlank()) {
+      return listOf()
     }
-
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private data class DataQualityReport(
-        @param:JsonProperty(value = "issues")
-        val issues: List<Issue>
-    )
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Issue(
-        @param:JsonProperty(value = "severity")
-        val severity: Severity,
-        @param:JsonProperty(value = "message")
-        @param:JsonAlias("details")
-        val message: String,
-        @param:JsonProperty(value = "path")
-        val path: Optional<String> = Optional.empty()
-    )
-
-    enum class Severity(@JsonValue val value: String) {
-        FATAL("fatal"),
-        ERROR("error"),
-        WARNING("warning"),
-        INFO("info")
+    return try {
+      objectMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues.sortedBy {
+        it.severity
+      }
+    } catch (e: Exception) {
+      val otherIssue =
+          Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
+      return when (e) {
+        is JsonMappingException -> listOf(otherIssue)
+        is JsonParseException -> listOf(otherIssue)
+        else -> throw e
+      }
     }
+  }
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  private data class DataQualityReport(
+      @param:JsonProperty(value = "issues") val issues: List<Issue>
+  )
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  data class Issue(
+      @param:JsonProperty(value = "severity") val severity: Severity,
+      @param:JsonProperty(value = "message") @param:JsonAlias("details") val message: String,
+      @param:JsonProperty(value = "path") val path: Optional<String> = Optional.empty(),
+  )
+
+  enum class Severity(@JsonValue val value: String) {
+    FATAL("fatal"),
+    ERROR("error"),
+    WARNING("warning"),
+    INFO("info"),
+  }
 }
 
 fun List<Issue>.asRequestStatus(): RequestStatus {
-    val severity = this.minOfOrNull { it.severity }
-    return when (severity) {
-        Severity.FATAL, Severity.ERROR -> RequestStatus.ERROR
-        Severity.WARNING -> RequestStatus.WARNING
-        else -> RequestStatus.SUCCESS
-    }
+  val severity = this.minOfOrNull { it.severity }
+  return when (severity) {
+    Severity.FATAL,
+    Severity.ERROR -> RequestStatus.ERROR
+    Severity.WARNING -> RequestStatus.WARNING
+    else -> RequestStatus.SUCCESS
+  }
 }

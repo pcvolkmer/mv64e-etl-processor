@@ -21,106 +21,139 @@ package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.pcvolkmer.mv64e.mtb.*
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.hl7.fhir.instance.model.api.IBaseResource
 import java.time.Instant
 import java.util.Date
+import org.assertj.core.api.Assertions.assertThat
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class TransformationServiceTest {
 
-    private lateinit var service: TransformationService
+  private lateinit var service: TransformationService
 
-    @BeforeEach
-    fun setup() {
-        this.service = TransformationService(
-            JacksonConfig().objectMapper(), listOf(
+  @BeforeEach
+  fun setup() {
+    this.service =
+        TransformationService(
+            JacksonConfig().objectMapper(),
+            listOf(
                 Transformation.of("diagnoses[*].code.version") from "2013" to "2014",
-            )
+            ),
         )
-    }
+  }
 
-    @Test
-    fun shouldTransformMtbFile() {
-        val mtbFile = Mtb.builder().diagnoses(
-            listOf(
-                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.9").version("2013").build()).build()
+  @Test
+  fun shouldTransformMtbFile() {
+    val mtbFile =
+        Mtb.builder()
+            .diagnoses(
+                listOf(
+                    MtbDiagnosis.builder()
+                        .id("1234")
+                        .code(Coding.builder().code("F79.9").version("2013").build())
+                        .build()
+                )
             )
-        ).build()
+            .build()
 
-        val actual = this.service.transform(mtbFile)
+    val actual = this.service.transform(mtbFile)
 
-        assertThat(actual).isNotNull
-        assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
-    }
+    assertThat(actual).isNotNull
+    assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
+  }
 
-    @Test
-    fun shouldOnlyTransformGivenValues() {
-        val mtbFile = Mtb.builder().diagnoses(
-            listOf(
-                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.9").version("2013").build()).build(),
-                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.8").version("2019").build()).build()
+  @Test
+  fun shouldOnlyTransformGivenValues() {
+    val mtbFile =
+        Mtb.builder()
+            .diagnoses(
+                listOf(
+                    MtbDiagnosis.builder()
+                        .id("1234")
+                        .code(Coding.builder().code("F79.9").version("2013").build())
+                        .build(),
+                    MtbDiagnosis.builder()
+                        .id("1234")
+                        .code(Coding.builder().code("F79.8").version("2019").build())
+                        .build(),
+                )
             )
-        ).build()
+            .build()
 
-        val actual = this.service.transform(mtbFile)
+    val actual = this.service.transform(mtbFile)
 
-        assertThat(actual).isNotNull
-        assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
-        assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
-        assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
-        assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
-    }
+    assertThat(actual).isNotNull
+    assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
+    assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
+    assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
+    assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
+  }
 
-    @Test
-    fun shouldTransformConsentValues() {
-        val mtbFile = Mtb.builder().diagnoses(
-            listOf(
-                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.9").version("2013").build()).build(),
-                MtbDiagnosis.builder().id("1234").code(Coding.builder().code("F79.8").version("2019").build()).build()
+  @Test
+  fun shouldTransformConsentValues() {
+    val mtbFile =
+        Mtb.builder()
+            .diagnoses(
+                listOf(
+                    MtbDiagnosis.builder()
+                        .id("1234")
+                        .code(Coding.builder().code("F79.9").version("2013").build())
+                        .build(),
+                    MtbDiagnosis.builder()
+                        .id("1234")
+                        .code(Coding.builder().code("F79.8").version("2019").build())
+                        .build(),
+                )
             )
-        ).build()
+            .build()
 
-        val actual = this.service.transform(mtbFile)
+    val actual = this.service.transform(mtbFile)
 
-        assertThat(actual).isNotNull
-        assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
-        assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
-        assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
-        assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
-    }
+    assertThat(actual).isNotNull
+    assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
+    assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
+    assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
+    assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
+  }
 
-    @Test
-    fun shouldTransformConsent() {
-        val mvhMetadata = MvhMetadata.builder().transferTan("transfertan12345").build()
+  @Test
+  fun shouldTransformConsent() {
+    val mvhMetadata = MvhMetadata.builder().transferTan("transfertan12345").build()
 
-        assertThat(mvhMetadata).isNotNull
-        mvhMetadata.modelProjectConsent =
-            ModelProjectConsent.builder().date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
-                .version("1").provisions(
-                    listOf(
-                        Provision.builder().type(ConsentProvision.PERMIT)
-                            .purpose(ModelProjectConsentPurpose.SEQUENCING)
-                            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))).build(),
-                        Provision.builder().type(ConsentProvision.PERMIT)
-                            .purpose(ModelProjectConsentPurpose.REIDENTIFICATION)
-                            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))).build(),
-                        Provision.builder().type(ConsentProvision.DENY)
-                            .purpose(ModelProjectConsentPurpose.CASE_IDENTIFICATION)
-                            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))).build()
-                    )
-                ).build()
-        val consent = ConsentProcessorTest.getDummyGenomDeConsent()
+    assertThat(mvhMetadata).isNotNull
+    mvhMetadata.modelProjectConsent =
+        ModelProjectConsent.builder()
+            .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
+            .version("1")
+            .provisions(
+                listOf(
+                    Provision.builder()
+                        .type(ConsentProvision.PERMIT)
+                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                        .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
+                        .build(),
+                    Provision.builder()
+                        .type(ConsentProvision.PERMIT)
+                        .purpose(ModelProjectConsentPurpose.REIDENTIFICATION)
+                        .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
+                        .build(),
+                    Provision.builder()
+                        .type(ConsentProvision.DENY)
+                        .purpose(ModelProjectConsentPurpose.CASE_IDENTIFICATION)
+                        .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
+                        .build(),
+                )
+            )
+            .build()
+    val consent = ConsentProcessorTest.getDummyGenomDeConsent()
 
-        mvhMetadata.researchConsents = mutableListOf()
-        mvhMetadata.researchConsents.add(mapOf(consent.id to consent as IBaseResource))
+    mvhMetadata.researchConsents = mutableListOf()
+    mvhMetadata.researchConsents.add(mapOf(consent.id to consent as IBaseResource))
 
-        val mtbFile = Mtb.builder().metadata(mvhMetadata).build()
+    val mtbFile = Mtb.builder().metadata(mvhMetadata).build()
 
-        val transformed = service.transform(mtbFile)
-        assertThat(transformed.metadata.modelProjectConsent.date).isNotNull
-
-    }
-
+    val transformed = service.transform(mtbFile)
+    assertThat(transformed.metadata.modelProjectConsent.date).isNotNull
+  }
 }

@@ -50,127 +50,136 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
 @ContextConfiguration(
-    classes = [
-        AppConfiguration::class,
-        AppSecurityConfiguration::class,
-        KafkaAutoConfiguration::class,
-        AppKafkaConfiguration::class,
-        AppRestConfiguration::class,
-        ConsentEvaluator::class
-    ]
+    classes =
+        [
+            AppConfiguration::class,
+            AppSecurityConfiguration::class,
+            KafkaAutoConfiguration::class,
+            AppKafkaConfiguration::class,
+            AppRestConfiguration::class,
+            ConsentEvaluator::class,
+        ],
 )
 @MockitoBean(types = [ObjectMapper::class])
 @TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=BUILDIN",
-    ]
+    properties =
+        [
+            "app.pseudonymize.generator=BUILDIN",
+        ],
 )
 class AppConfigurationTest {
-
     @Nested
-    @TestPropertySource(
-        properties = [
-            "app.rest.uri=http://localhost:9000"
-        ]
-    )
-    inner class AppConfigurationRestTest(private val context: ApplicationContext) {
-
+    @TestPropertySource(properties = ["app.rest.uri=http://localhost:9000"])
+    inner class AppConfigurationRestTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
             assertThat(context.getBean(RestMtbFileSender::class.java)).isNotNull
-            assertThrows<NoSuchBeanDefinitionException> { context.getBean(KafkaMtbFileSender::class.java) }
+            assertThrows<NoSuchBeanDefinitionException> {
+                context.getBean(KafkaMtbFileSender::class.java)
+            }
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.kafka.servers=localhost:9092",
-            "app.kafka.output-topic=test",
-            "app.kafka.output-response-topic=test-response",
-            "app.kafka.group-id=test"
-        ]
+        properties =
+            [
+                "app.kafka.servers=localhost:9092",
+                "app.kafka.output-topic=test",
+                "app.kafka.output-response-topic=test-response",
+                "app.kafka.group-id=test",
+            ],
     )
     @MockitoBean(types = [RequestRepository::class])
-    inner class AppConfigurationKafkaTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationKafkaTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldUseKafkaMtbFileSenderNotRestMtbFileSender() {
             assertThrows<NoSuchBeanDefinitionException> { context.getBean(RestMtbFileSender::class.java) }
             assertThat(context.getBean(KafkaMtbFileSender::class.java)).isNotNull
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.rest.uri=http://localhost:9000",
-            "app.kafka.servers=localhost:9092",
-            "app.kafka.output-topic=test",
-            "app.kafka.output-response-topic=test-response",
-            "app.kafka.group-id=test"
-        ]
+        properties =
+            [
+                "app.rest.uri=http://localhost:9000",
+                "app.kafka.servers=localhost:9092",
+                "app.kafka.output-topic=test",
+                "app.kafka.output-response-topic=test-response",
+                "app.kafka.group-id=test",
+            ],
     )
-    inner class AppConfigurationRestInPrecedenceTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationRestInPrecedenceTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
             assertThat(context.getBean(RestMtbFileSender::class.java)).isNotNull
-            assertThrows<NoSuchBeanDefinitionException> { context.getBean(KafkaMtbFileSender::class.java) }
+            assertThrows<NoSuchBeanDefinitionException> {
+                context.getBean(KafkaMtbFileSender::class.java)
+            }
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.kafka.servers=localhost:9092",
-            "app.kafka.output-topic=test",
-            "app.kafka.output-response-topic=test-response",
-            "app.kafka.group-id=test"
-        ]
+        properties =
+            [
+                "app.kafka.servers=localhost:9092",
+                "app.kafka.output-topic=test",
+                "app.kafka.output-response-topic=test-response",
+                "app.kafka.group-id=test",
+            ],
     )
-    inner class AppConfigurationWithoutKafkaInputTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationWithoutKafkaInputTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldNotUseKafkaInputListener() {
-            assertThrows<NoSuchBeanDefinitionException> { context.getBean(KafkaInputListener::class.java) }
+            assertThrows<NoSuchBeanDefinitionException> {
+                context.getBean(KafkaInputListener::class.java)
+            }
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.kafka.servers=localhost:9092",
-            "app.kafka.input-topic=test_input",
-            "app.kafka.output-topic=test",
-            "app.kafka.output-response-topic=test-response",
-            "app.kafka.group-id=test"
-        ]
+        properties =
+            [
+                "app.kafka.servers=localhost:9092",
+                "app.kafka.input-topic=test_input",
+                "app.kafka.output-topic=test",
+                "app.kafka.output-response-topic=test-response",
+                "app.kafka.group-id=test",
+            ],
     )
     @MockitoBean(types = [RequestProcessor::class])
-    inner class AppConfigurationUsingKafkaInputTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationUsingKafkaInputTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldUseKafkaInputListener() {
             assertThat(context.getBean(KafkaInputListener::class.java)).isNotNull
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.transformations[0].path=consent.status",
-            "app.transformations[0].from=rejected",
-            "app.transformations[0].to=accept",
-        ]
+        properties =
+            [
+                "app.transformations[0].path=consent.status",
+                "app.transformations[0].from=rejected",
+                "app.transformations[0].to=accept",
+            ],
     )
-    inner class AppConfigurationTransformationTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationTransformationTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldRecognizeTransformations() {
             val appConfigProperties = context.getBean(AppConfigProperties::class.java)
@@ -178,109 +187,87 @@ class AppConfigurationTest {
             assertThat(appConfigProperties).isNotNull
             assertThat(appConfigProperties.transformations).hasSize(1)
         }
-
     }
 
     @Nested
     inner class AppConfigurationPseudonymizeTest {
-
         @Nested
-        @TestPropertySource(
-            properties = [
-                "app.pseudonymize.generator=buildin"
-            ]
-        )
-        inner class AppConfigurationPseudonymizeGeneratorBuildinTest(private val context: ApplicationContext) {
-
+        @TestPropertySource(properties = ["app.pseudonymize.generator=buildin"])
+        inner class AppConfigurationPseudonymizeGeneratorBuildinTest(
+            private val context: ApplicationContext,
+        ) {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean(AnonymizingGenerator::class.java)).isNotNull
             }
-
         }
 
         @Nested
         @TestPropertySource(
-            properties = [
-                "app.pseudonymize.generator=gpas",
-                "app.pseudonymize.gpas.uri=http://localhost/"
-            ]
+            properties =
+                ["app.pseudonymize.generator=gpas", "app.pseudonymize.gpas.uri=http://localhost/"],
         )
-        inner class AppConfigurationPseudonymizeGeneratorGpasTest(private val context: ApplicationContext) {
-
+        inner class AppConfigurationPseudonymizeGeneratorGpasTest(
+            private val context: ApplicationContext,
+        ) {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
             }
-
         }
 
         @Nested
         @TestPropertySource(
-            properties = [
-                "app.pseudonymize.generator=gpas",
-                "app.pseudonymize.gpas.soap-endpoint=http://localhost/"
-            ]
+            properties =
+                [
+                    "app.pseudonymize.generator=gpas",
+                    "app.pseudonymize.gpas.soap-endpoint=http://localhost/",
+                ],
         )
-        inner class AppConfigurationPseudonymizeGeneratorGpasSoapTest(private val context: ApplicationContext) {
-
+        inner class AppConfigurationPseudonymizeGeneratorGpasSoapTest(
+            private val context: ApplicationContext,
+        ) {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean(GpasSoapPseudonymGenerator::class.java)).isNotNull
             }
-
         }
 
         @Nested
-        @TestPropertySource(
-            properties = [
-                "app.security.enable-tokens=true"
-            ]
-        )
+        @TestPropertySource(properties = ["app.security.enable-tokens=true"])
         @MockitoBean(
-            types = [
-                InMemoryUserDetailsManager::class,
-                PasswordEncoder::class,
-                TokenRepository::class
-            ]
+            types = [InMemoryUserDetailsManager::class, PasswordEncoder::class, TokenRepository::class],
         )
-        inner class AppConfigurationTokenEnabledTest(private val context: ApplicationContext) {
-
+        inner class AppConfigurationTokenEnabledTest(
+            private val context: ApplicationContext,
+        ) {
             @Test
             fun checkTokenService() {
                 assertThat(context.getBean(TokenService::class.java)).isNotNull
             }
-
         }
 
         @Nested
         @MockitoBean(
-            types = [
-                InMemoryUserDetailsManager::class,
-                PasswordEncoder::class,
-                TokenRepository::class
-            ]
+            types = [InMemoryUserDetailsManager::class, PasswordEncoder::class, TokenRepository::class],
         )
-        inner class AppConfigurationTokenDisabledTest(private val context: ApplicationContext) {
-
+        inner class AppConfigurationTokenDisabledTest(
+            private val context: ApplicationContext,
+        ) {
             @Test
             fun checkTokenService() {
                 assertThrows<NoSuchBeanDefinitionException> { context.getBean(TokenService::class.java) }
             }
-
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.rest.uri=http://localhost:9000",
-            "app.max-retry-attempts=5"
-        ]
+        properties = ["app.rest.uri=http://localhost:9000", "app.max-retry-attempts=5"],
     )
-    inner class AppConfigurationRetryTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationRetryTest(
+        private val context: ApplicationContext,
+    ) {
         private val maxRetryAttempts = 5
 
         @Test
@@ -295,33 +282,32 @@ class AppConfigurationTest {
                 }
             }
         }
-
     }
 
     @Nested
     @TestPropertySource(
-        properties = [
-            "app.consent.service=GICS",
-            "app.consent.gics.uri=http://localhost:9000",
-        ]
+        properties =
+            [
+                "app.consent.service=GICS",
+                "app.consent.gics.uri=http://localhost:9000",
+            ],
     )
-    inner class AppConfigurationConsentGicsTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationConsentGicsTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldUseConfiguredGenerator() {
             assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
         }
-
     }
 
     @Nested
-    inner class AppConfigurationConsentBuildinTest(private val context: ApplicationContext) {
-
+    inner class AppConfigurationConsentBuildinTest(
+        private val context: ApplicationContext,
+    ) {
         @Test
         fun shouldUseConfiguredGenerator() {
             assertThat(context.getBean(MtbFileConsentService::class.java)).isNotNull
         }
-
     }
-
 }

@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.*
+import java.util.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
@@ -36,267 +37,241 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
-import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class KafkaInputListenerTest {
 
-    private lateinit var requestProcessor: RequestProcessor
-    private lateinit var consentEvaluator: ConsentEvaluator
-    private lateinit var objectMapper: ObjectMapper
+  private lateinit var requestProcessor: RequestProcessor
+  private lateinit var consentEvaluator: ConsentEvaluator
+  private lateinit var objectMapper: ObjectMapper
 
-    private lateinit var kafkaInputListener: KafkaInputListener
+  private lateinit var kafkaInputListener: KafkaInputListener
 
-    @BeforeEach
-    fun setup(
-        @Mock requestProcessor: RequestProcessor,
-        @Mock consentEvaluator: ConsentEvaluator,
-    ) {
-        this.requestProcessor = requestProcessor
-        this.consentEvaluator = consentEvaluator
-        this.objectMapper = ObjectMapper()
+  @BeforeEach
+  fun setup(
+      @Mock requestProcessor: RequestProcessor,
+      @Mock consentEvaluator: ConsentEvaluator,
+  ) {
+    this.requestProcessor = requestProcessor
+    this.consentEvaluator = consentEvaluator
+    this.objectMapper = ObjectMapper()
 
-        this.kafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
-    }
+    this.kafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
+  }
 
-    @Test
-    fun shouldProcessMtbFileRequest() {
-        whenever(consentEvaluator.check(any())).thenReturn(
-            ConsentEvaluation(
-                TtpConsentStatus.BROAD_CONSENT_GIVEN,
-                true
-            )
-        )
+  @Test
+  fun shouldProcessMtbFileRequest() {
+    whenever(consentEvaluator.check(any()))
+        .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true))
 
-        val mtbFile = Mtb.builder()
+    val mtbFile =
+        Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
-                MvhMetadata
-                    .builder()
+                MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent
-                            .builder()
+                        ModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder().type(ConsentProvision.PERMIT)
-                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                    Provision.builder()
+                                        .type(ConsentProvision.PERMIT)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
                                 )
-                            ).build()
+                            )
+                            .build()
                     )
                     .build()
             )
             .build()
 
-        kafkaInputListener.onMessage(
-            ConsumerRecord(
-                "testtopic",
-                0,
-                0,
-                "",
-                this.objectMapper.writeValueAsString(mtbFile)
-            )
-        )
+    kafkaInputListener.onMessage(
+        ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile))
+    )
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
-    }
+    verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+  }
 
-    @Test
-    fun shouldProcessDeleteRequest() {
-        whenever(consentEvaluator.check(any())).thenReturn(
-            ConsentEvaluation(
-                TtpConsentStatus.BROAD_CONSENT_GIVEN,
-                false
-            )
-        )
+  @Test
+  fun shouldProcessDeleteRequest() {
+    whenever(consentEvaluator.check(any()))
+        .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, false))
 
-        val mtbFile = Mtb.builder()
+    val mtbFile =
+        Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
-                MvhMetadata
-                    .builder()
+                MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent
-                            .builder()
+                        ModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder().type(ConsentProvision.DENY)
-                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                    Provision.builder()
+                                        .type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
                                 )
-                            ).build()
+                            )
+                            .build()
                     )
                     .build()
             )
             .build()
 
-        kafkaInputListener.onMessage(
-            ConsumerRecord(
-                "testtopic",
-                0,
-                0,
-                "",
-                this.objectMapper.writeValueAsString(mtbFile)
-            )
-        )
+    kafkaInputListener.onMessage(
+        ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile))
+    )
 
-        verify(requestProcessor, times(1)).processDeletion(
-            anyValueClass(),
-            eq(TtpConsentStatus.UNKNOWN_CHECK_FILE)
-        )
-    }
+    verify(requestProcessor, times(1))
+        .processDeletion(anyValueClass(), eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
+  }
 
-    @Test
-    fun shouldProcessMtbFileRequestWithExistingRequestId() {
-        whenever(consentEvaluator.check(any())).thenReturn(
-            ConsentEvaluation(
-                TtpConsentStatus.BROAD_CONSENT_GIVEN,
-                true
-            )
-        )
+  @Test
+  fun shouldProcessMtbFileRequestWithExistingRequestId() {
+    whenever(consentEvaluator.check(any()))
+        .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true))
 
-        val mtbFile = Mtb.builder()
+    val mtbFile =
+        Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
-                MvhMetadata
-                    .builder()
+                MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent
-                            .builder()
+                        ModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder().type(ConsentProvision.PERMIT)
-                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                    Provision.builder()
+                                        .type(ConsentProvision.PERMIT)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
                                 )
-                            ).build()
+                            )
+                            .build()
                     )
                     .build()
             )
             .build()
 
-        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
-        kafkaInputListener.onMessage(
-            ConsumerRecord(
-                "testtopic",
-                0,
-                0,
-                -1L,
-                TimestampType.NO_TIMESTAMP_TYPE,
-                -1,
-                -1,
-                "",
-                this.objectMapper.writeValueAsString(mtbFile),
-                headers,
-                Optional.empty()
-            )
+    val headers =
+        RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
+    kafkaInputListener.onMessage(
+        ConsumerRecord(
+            "testtopic",
+            0,
+            0,
+            -1L,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            -1,
+            -1,
+            "",
+            this.objectMapper.writeValueAsString(mtbFile),
+            headers,
+            Optional.empty(),
         )
+    )
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>(), anyValueClass())
-    }
+    verify(requestProcessor, times(1)).processMtbFile(any<Mtb>(), anyValueClass())
+  }
 
-    @Test
-    fun shouldProcessDeleteRequestWithExistingRequestId() {
-        whenever(consentEvaluator.check(any())).thenReturn(
-            ConsentEvaluation(
-                TtpConsentStatus.BROAD_CONSENT_GIVEN,
-                false
-            )
-        )
+  @Test
+  fun shouldProcessDeleteRequestWithExistingRequestId() {
+    whenever(consentEvaluator.check(any()))
+        .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, false))
 
-        val mtbFile = Mtb.builder()
+    val mtbFile =
+        Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
-                MvhMetadata
-                    .builder()
+                MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent
-                            .builder()
+                        ModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder().type(ConsentProvision.DENY)
-                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                    Provision.builder()
+                                        .type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
                                 )
-                            ).build()
+                            )
+                            .build()
                     )
                     .build()
             )
             .build()
 
-        val headers = RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
-        kafkaInputListener.onMessage(
-            ConsumerRecord(
-                "testtopic",
-                0,
-                0,
-                -1L,
-                TimestampType.NO_TIMESTAMP_TYPE,
-                -1,
-                -1,
-                "",
-                this.objectMapper.writeValueAsString(mtbFile),
-                headers,
-                Optional.empty()
-            )
+    val headers =
+        RecordHeaders(listOf(RecordHeader("requestId", UUID.randomUUID().toString().toByteArray())))
+    kafkaInputListener.onMessage(
+        ConsumerRecord(
+            "testtopic",
+            0,
+            0,
+            -1L,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            -1,
+            -1,
+            "",
+            this.objectMapper.writeValueAsString(mtbFile),
+            headers,
+            Optional.empty(),
         )
-        verify(requestProcessor, times(1)).processDeletion(
-            anyValueClass(), anyValueClass(), eq(
-                TtpConsentStatus.UNKNOWN_CHECK_FILE
-            )
-        )
-    }
+    )
+    verify(requestProcessor, times(1))
+        .processDeletion(anyValueClass(), anyValueClass(), eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
+  }
 
-    @Test
-    fun shouldProcessDnpmV2Request() {
-        whenever(consentEvaluator.check(any())).thenReturn(
-            ConsentEvaluation(
-                TtpConsentStatus.BROAD_CONSENT_GIVEN,
-                false
-            )
-        )
+  @Test
+  fun shouldProcessDnpmV2Request() {
+    whenever(consentEvaluator.check(any()))
+        .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, false))
 
-        val mtbFile = Mtb.builder()
+    val mtbFile =
+        Mtb.builder()
             .patient(Patient.builder().id("DUMMY_12345678").build())
             .metadata(
-                MvhMetadata
-                    .builder()
+                MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent
-                            .builder()
+                        ModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder().type(ConsentProvision.DENY)
-                                        .purpose(ModelProjectConsentPurpose.SEQUENCING).build()
+                                    Provision.builder()
+                                        .type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
                                 )
-                            ).build()
+                            )
+                            .build()
                     )
                     .build()
             )
             .build()
 
-        val headers = RecordHeaders(
+    val headers =
+        RecordHeaders(
             listOf(
                 RecordHeader("requestId", UUID.randomUUID().toString().toByteArray()),
-                RecordHeader("contentType", CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+                RecordHeader(
+                    "contentType",
+                    CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray(),
+                ),
             )
         )
-        kafkaInputListener.onMessage(
-            ConsumerRecord(
-                "testtopic",
-                0,
-                0,
-                -1L,
-                TimestampType.NO_TIMESTAMP_TYPE,
-                -1,
-                -1,
-                "",
-                this.objectMapper.writeValueAsString(mtbFile),
-                headers,
-                Optional.empty()
-            )
+    kafkaInputListener.onMessage(
+        ConsumerRecord(
+            "testtopic",
+            0,
+            0,
+            -1L,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            -1,
+            -1,
+            "",
+            this.objectMapper.writeValueAsString(mtbFile),
+            headers,
+            Optional.empty(),
         )
-        verify(requestProcessor, times(1)).processDeletion(
-            anyValueClass(), anyValueClass(), eq(
-                TtpConsentStatus.UNKNOWN_CHECK_FILE
-            )
-        )
-    }
-
+    )
+    verify(requestProcessor, times(1))
+        .processDeletion(anyValueClass(), anyValueClass(), eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
+  }
 }

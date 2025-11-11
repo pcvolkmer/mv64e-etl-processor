@@ -28,7 +28,7 @@ data class AppConfigProperties(
     var transformations: List<TransformationProperties> = listOf(),
     var maxRetryAttempts: Int = 3,
     var duplicationDetection: Boolean = true,
-    var genomDeTestSubmission: Boolean = false
+    var genomDeTestSubmission: Boolean = false,
 ) {
     companion object {
         const val NAME = "app"
@@ -49,8 +49,7 @@ data class PseudonymizeConfigProperties(
 data class GPasConfigProperties(
     val uri: String?,
     val soapEndpoint: String?,
-    @get:DeprecatedConfigurationProperty(since = "0.12")
-    val pidDomain: String?,
+    @get:DeprecatedConfigurationProperty(since = "0.12") val pidDomain: String?,
     val patientDomain: String = pidDomain ?: "etl-processor",
     val genomDeTanDomain: String = "ccdn",
     val username: String?,
@@ -63,7 +62,7 @@ data class GPasConfigProperties(
 
 @ConfigurationProperties(ConsentConfigProperties.NAME)
 data class ConsentConfigProperties(
-    var service: ConsentService = ConsentService.NONE
+    var service: ConsentService = ConsentService.NONE,
 ) {
     companion object {
         const val NAME = "app.consent"
@@ -72,60 +71,33 @@ data class ConsentConfigProperties(
 
 @ConfigurationProperties(GIcsConfigProperties.NAME)
 data class GIcsConfigProperties(
-    /**
-     * Base URL to gICS System
-     *
-     */
+    /** Base URL to gICS System */
     val uri: String?,
     val username: String? = null,
     val password: String? = null,
-
     /**
      * gICS specific system
-     * **/
+     * *
+     */
     val personIdentifierSystem: String =
         "https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID",
-
-    /**
-     * Domain of broad consent resources
-     **/
+    /** Domain of broad consent resources */
     val broadConsentDomainName: String = "MII",
-
-    /**
-     * Domain of Modelvorhaben 64e consent resources
-     **/
+    /** Domain of Modelvorhaben 64e consent resources */
     val genomDeConsentDomainName: String = "GenomDE_MV",
-
-    /**
-     * Value to expect in case of positiv consent
-     */
+    /** Value to expect in case of positiv consent */
     val broadConsentPolicyCode: String = "2.16.840.1.113883.3.1937.777.24.5.3.6",
-
-    /**
-     * Consent Policy which should be used for consent check
-     */
+    /** Consent Policy which should be used for consent check */
     val broadConsentPolicySystem: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3",
-
-    /**
-     * Consent Policy uri for MII Broad Consent Version
-     */
+    /** Consent Policy uri for MII Broad Consent Version */
     val broadConsentPolicyUri: String = "urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790",
-
-    /**
-     * Value to expect in case of positiv consent
-     */
+    /** Value to expect in case of positiv consent */
     val genomeDePolicyCode: String = "sequencing",
-
-    /**
-     * Consent Policy which should be used for consent check
-     */
-    val genomeDePolicySystem: String = "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
-
-    /**
-     * Consent version (fixed version)
-     *
-     */
-    val genomeDeConsentVersion: String = "2.0"
+    /** Consent Policy which should be used for consent check */
+    val genomeDePolicySystem: String =
+        "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+    /** Consent version (fixed version) */
+    val genomeDeConsentVersion: String = "2.0",
 ) {
     companion object {
         const val NAME = "app.consent.gics"
@@ -136,7 +108,7 @@ data class GIcsConfigProperties(
 data class RestTargetProperties(
     val uri: String?,
     val username: String?,
-    val password: String?
+    val password: String?,
 ) {
     companion object {
         const val NAME = "app.rest"
@@ -149,7 +121,7 @@ data class KafkaProperties(
     val outputTopic: String = "etl-processor",
     val outputResponseTopic: String = "${outputTopic}_response",
     val groupId: String = "${outputTopic}_group",
-    val servers: String = ""
+    val servers: String = "",
 ) {
     companion object {
         const val NAME = "app.kafka"
@@ -162,7 +134,7 @@ data class SecurityConfigProperties(
     val adminPassword: String?,
     val enableTokens: Boolean = false,
     val enableOidc: Boolean = false,
-    val defaultNewUserRole: Role = Role.USER
+    val defaultNewUserRole: Role = Role.USER,
 ) {
     companion object {
         const val NAME = "app.security"
@@ -171,16 +143,16 @@ data class SecurityConfigProperties(
 
 enum class PseudonymGenerator {
     BUILDIN,
-    GPAS
+    GPAS,
 }
 
 enum class ConsentService {
     NONE,
-    GICS
+    GICS,
 }
 
 data class TransformationProperties(
     val path: String,
     val from: String,
-    val to: String
+    val to: String,
 )

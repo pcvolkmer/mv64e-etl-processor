@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.monitoring
 
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.output.MtbFileSender
+import java.time.Instant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -32,7 +33,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.junit.jupiter.Testcontainers
-import java.time.Instant
 
 @Testcontainers
 @ExtendWith(SpringExtension::class)
@@ -41,35 +41,30 @@ import java.time.Instant
 @Transactional
 @MockitoBean(types = [MtbFileSender::class])
 @TestPropertySource(
-    properties = [
-        "app.pseudonymize.generator=buildin",
-        "app.rest.uri=http://example.com"
-    ]
+    properties = ["app.pseudonymize.generator=buildin", "app.rest.uri=http://example.com"]
 )
 class RequestRepositoryTest : AbstractTestcontainerTest() {
 
-    private lateinit var requestRepository: RequestRepository
+  private lateinit var requestRepository: RequestRepository
 
-    @BeforeEach
-    fun setUp(
-        @Autowired requestRepository: RequestRepository
-    ) {
-        this.requestRepository = requestRepository
-    }
+  @BeforeEach
+  fun setUp(@Autowired requestRepository: RequestRepository) {
+    this.requestRepository = requestRepository
+  }
 
-    @Test
-    fun shouldSaveRequest() {
-        val request = Request(
+  @Test
+  fun shouldSaveRequest() {
+    val request =
+        Request(
             randomRequestId(),
             PatientPseudonym("TEST_12345678901"),
             PatientId("P1"),
             Fingerprint("0123456789abcdef1"),
             RequestType.MTB_FILE,
             RequestStatus.WARNING,
-            Instant.parse("2023-07-07T00:00:00Z")
+            Instant.parse("2023-07-07T00:00:00Z"),
         )
 
-        requestRepository.save(request)
-    }
-
+    requestRepository.save(request)
+  }
 }

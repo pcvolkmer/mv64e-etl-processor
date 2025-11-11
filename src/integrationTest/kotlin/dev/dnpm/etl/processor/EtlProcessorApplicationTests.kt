@@ -48,98 +48,95 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @SpringBootTest
 @MockitoBean(types = [MtbFileSender::class])
 @TestPropertySource(
-    properties = [
-        "app.rest.uri=http://example.com",
-        "app.pseudonymize.generator=buildin",
-        "app.consent.service=none"
-    ]
+    properties =
+        [
+            "app.rest.uri=http://example.com",
+            "app.pseudonymize.generator=buildin",
+            "app.consent.service=none",
+        ]
 )
 class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
 
+  @Test
+  fun contextLoadsIfMtbFileSenderConfigured(@Autowired context: ApplicationContext) {
+    // Simply check bean configuration
+    assertThat(context).isNotNull
+  }
+
+  @Nested
+  @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+  @AutoConfigureMockMvc
+  @TestPropertySource(
+      properties =
+          [
+              "app.pseudonymize.generator=buildin",
+              "app.consent.service=none",
+              "app.transformations[0].path=diagnoses[*].code.version",
+              "app.transformations[0].from=2013",
+              "app.transformations[0].to=2014",
+          ]
+  )
+  inner class TransformationTest {
+
+    @MockitoBean private lateinit var mtbFileSender: MtbFileSender
+
+    @Autowired private lateinit var mockMvc: MockMvc
+
+    @Autowired private lateinit var objectMapper: ObjectMapper
+
+    @BeforeEach
+    fun setup(@Autowired requestRepository: RequestRepository) {
+      requestRepository.deleteAll()
+    }
+
     @Test
-    fun contextLoadsIfMtbFileSenderConfigured(@Autowired context: ApplicationContext) {
-        // Simply check bean configuration
-        assertThat(context).isNotNull
+    fun mtbFileIsTransformed() {
+      doAnswer { MtbFileSender.Response(RequestStatus.SUCCESS) }
+          .whenever(mtbFileSender)
+          .send(any<DnpmV2MtbFileRequest>())
+
+      val mtbFile =
+          Mtb.builder()
+              .patient(Patient.builder().id("TEST_12345678").build())
+              .metadata(
+                  MvhMetadata.builder()
+                      .modelProjectConsent(
+                          ModelProjectConsent.builder()
+                              .provisions(
+                                  listOf(
+                                      Provision.builder()
+                                          .type(ConsentProvision.PERMIT)
+                                          .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                          .build()
+                                  )
+                              )
+                              .build()
+                      )
+                      .build()
+              )
+              .diagnoses(
+                  listOf(
+                      MtbDiagnosis.builder()
+                          .id("1234")
+                          .patient(Reference.builder().id("TEST_12345678").build())
+                          .code(Coding.builder().code("F79.9").version("2013").build())
+                          .build(),
+                  )
+              )
+              .build()
+
+      mockMvc
+          .post("/mtbfile") {
+            content = objectMapper.writeValueAsString(mtbFile)
+            contentType = MediaType.APPLICATION_JSON
+          }
+          .andExpect { status { isAccepted() } }
+
+      val captor = argumentCaptor<DnpmV2MtbFileRequest>()
+      verify(mtbFileSender).send(captor.capture())
+      assertThat(captor.firstValue.content.diagnoses).hasSize(1).allMatch { diagnosis ->
+        diagnosis.code.version == "2014"
+      }
     }
-
-    @Nested
-    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-    @AutoConfigureMockMvc
-    @TestPropertySource(
-        properties = [
-            "app.pseudonymize.generator=buildin",
-            "app.consent.service=none",
-            "app.transformations[0].path=diagnoses[*].code.version",
-            "app.transformations[0].from=2013",
-            "app.transformations[0].to=2014",
-        ]
-    )
-    inner class TransformationTest {
-
-        @MockitoBean
-        private lateinit var mtbFileSender: MtbFileSender
-
-        @Autowired
-        private lateinit var mockMvc: MockMvc
-
-        @Autowired
-        private lateinit var objectMapper: ObjectMapper
-
-        @BeforeEach
-        fun setup(@Autowired requestRepository: RequestRepository) {
-            requestRepository.deleteAll()
-        }
-
-        @Test
-        fun mtbFileIsTransformed() {
-            doAnswer {
-                MtbFileSender.Response(RequestStatus.SUCCESS)
-            }.whenever(mtbFileSender).send(any<DnpmV2MtbFileRequest>())
-
-            val mtbFile = Mtb.builder()
-                .patient(
-                    Patient.builder()
-                        .id("TEST_12345678")
-                        .build()
-                )
-                .metadata(
-                    MvhMetadata
-                        .builder()
-                        .modelProjectConsent(
-                            ModelProjectConsent
-                                .builder()
-                                .provisions(
-                                    listOf(Provision.builder().type(ConsentProvision.PERMIT).purpose(ModelProjectConsentPurpose.SEQUENCING).build())
-                                ).build()
-                        )
-                        .build()
-                )
-                .diagnoses(
-                    listOf(
-                        MtbDiagnosis.builder()
-                            .id("1234")
-                            .patient(Reference.builder().id("TEST_12345678").build())
-                            .code(Coding.builder().code("F79.9").version("2013").build())
-                            .build(),
-                    )
-                )
-                .build()
-
-            mockMvc.post("/mtbfile") {
-                content = objectMapper.writeValueAsString(mtbFile)
-                contentType = MediaType.APPLICATION_JSON
-            }.andExpect {
-                status {
-                    isAccepted()
-                }
-            }
-
-            val captor = argumentCaptor<DnpmV2MtbFileRequest>()
-            verify(mtbFileSender).send(captor.capture())
-            assertThat(captor.firstValue.content.diagnoses).hasSize(1).allMatch { diagnosis ->
-                diagnosis.code.version == "2014"
-            }
-        }
-    }
-
+  }
 }

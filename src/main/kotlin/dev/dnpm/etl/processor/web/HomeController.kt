@@ -37,13 +37,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 @RequestMapping(path = ["/"])
 class HomeController(
     private val requestService: RequestService,
-    private val reportService: ReportService
+    private val reportService: ReportService,
 ) {
-
     @GetMapping
     fun index(
-        @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
-        model: Model
+        @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC)
+        pageable: Pageable,
+        model: Model,
     ): String {
         val requests = requestService.findAll(pageable)
         model.addAttribute("requests", requests)
@@ -54,8 +54,9 @@ class HomeController(
     @GetMapping(path = ["patient/{patientPseudonym}"])
     fun byPatient(
         @PathVariable patientPseudonym: PatientPseudonym,
-        @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC) pageable: Pageable,
-        model: Model
+        @PageableDefault(page = 0, size = 20, sort = ["processedAt"], direction = Sort.Direction.DESC)
+        pageable: Pageable,
+        model: Model,
     ): String {
         val requests = requestService.findRequestByPatientId(patientPseudonym, pageable)
         model.addAttribute("patientPseudonym", patientPseudonym.value)
@@ -65,12 +66,14 @@ class HomeController(
     }
 
     @GetMapping(path = ["/report/{id}"])
-    fun report(@PathVariable id: RequestId, model: Model): String {
+    fun report(
+        @PathVariable id: RequestId,
+        model: Model,
+    ): String {
         val request = requestService.findByUuid(id).orElse(null) ?: throw NotFoundException()
         model.addAttribute("request", request)
         model.addAttribute("issues", reportService.deserialize(request.report?.dataQualityReport))
 
         return "report"
     }
-
 }

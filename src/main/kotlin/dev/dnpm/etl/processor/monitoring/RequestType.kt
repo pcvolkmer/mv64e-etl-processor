@@ -19,7 +19,9 @@
 
 package dev.dnpm.etl.processor.monitoring
 
-enum class RequestType(val value: String) {
+enum class RequestType(
+    val value: String,
+) {
     MTB_FILE("mtb_file"),
     DELETE("delete"),
 }

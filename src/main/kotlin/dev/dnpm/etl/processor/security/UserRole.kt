@@ -20,26 +20,21 @@
 
 package dev.dnpm.etl.processor.security
 
+import java.util.*
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
-import java.util.*
 
 @Table("user_role")
-data class UserRole(
-    @Id val id: Long? = null,
-    val username: String,
-    var role: Role = Role.GUEST
-)
+data class UserRole(@Id val id: Long? = null, val username: String, var role: Role = Role.GUEST)
 
 enum class Role(val value: String) {
-    GUEST("guest"),
-    USER("user"),
-    ADMIN("admin")
+  GUEST("guest"),
+  USER("user"),
+  ADMIN("admin"),
 }
 
 interface UserRoleRepository : CrudRepository<UserRole, Long> {
 
-    fun findByUsername(username: String): Optional<UserRole>
-
+  fun findByUsername(username: String): Optional<UserRole>
 }

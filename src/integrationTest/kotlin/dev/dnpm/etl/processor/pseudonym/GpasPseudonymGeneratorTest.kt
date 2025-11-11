@@ -41,7 +41,6 @@ import java.io.IOException
 import java.net.URI
 
 class GpasPseudonymGeneratorTest {
-
     private lateinit var mockRestServiceServer: MockRestServiceServer
     private lateinit var generator: GpasPseudonymGenerator
     private lateinit var restTemplate: RestTemplate
@@ -50,14 +49,8 @@ class GpasPseudonymGeneratorTest {
     @BeforeEach
     fun setup() {
         val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
-        val gPasConfigProperties = GPasConfigProperties(
-            CONFIGURED_URI,
-            null,
-            null,
-            "test", "test2",
-            null,
-            null
-        )
+        val gPasConfigProperties =
+            GPasConfigProperties(CONFIGURED_URI, null, null, "test", "test2", null, null)
 
         this.restTemplate = RestTemplate()
         this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
@@ -71,13 +64,8 @@ class GpasPseudonymGeneratorTest {
             .expect(method(HttpMethod.POST))
             .andExpect(requestTo(EXPECTED_URI))
             .andRespond {
-                withStatus(HttpStatus.OK).body(
-                    getDummyResponseBody(
-                        "1234",
-                        "test",
-                        "test1234ABCDEF567890"
-                    )
-                )
+                withStatus(HttpStatus.OK)
+                    .body(getDummyResponseBody("1234", "test", "test1234ABCDEF567890"))
                     .createResponse(it)
             }
 
@@ -89,9 +77,7 @@ class GpasPseudonymGeneratorTest {
         this.mockRestServiceServer
             .expect(method(HttpMethod.POST))
             .andExpect(requestTo(EXPECTED_URI))
-            .andRespond {
-                withException(IOException("Simulated IO error")).createResponse(it)
-            }
+            .andRespond { withException(IOException("Simulated IO error")).createResponse(it) }
 
         assertThrows<PseudonymRequestFailed> { this.generator.generate("ID1234") }
     }
@@ -105,52 +91,56 @@ class GpasPseudonymGeneratorTest {
                 withStatus(HttpStatus.FOUND)
                     .header(
                         HttpHeaders.LOCATION,
-                        $$"https://localhost/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate"
-                    )
-                    .createResponse(it)
+                        $$"https://localhost/ttp-fhir/fhir/gpas/$pseudonymizeAllowCreate",
+                    ).createResponse(it)
             }
 
         assertThrows<PseudonymRequestFailed> { this.generator.generate("ID1234") }
     }
 
     companion object {
-
         const val CONFIGURED_URI = "https://localhost/ttp-fhir/fhir/gpas"
 
-        val EXPECTED_URI = URIBuilder(URI.create(CONFIGURED_URI)).appendPath($$"$pseudonymizeAllowCreate")
-            .build()!!
+        val EXPECTED_URI =
+            URIBuilder(URI.create(CONFIGURED_URI)).appendPath($$"$pseudonymizeAllowCreate").build()!!
 
-        fun getDummyResponseBody(original: String, target: String, pseudonym: String) = """{
-          "resourceType": "Parameters",
-          "parameter": [
+        fun getDummyResponseBody(
+            original: String,
+            target: String,
+            pseudonym: String,
+        ) = """
             {
-              "name": "pseudonym",
-              "part": [
-                {
-                  "name": "original",
-                  "valueIdentifier": {
-                    "system": "https://ths-greifswald.de/gpas",
-                    "value": "$original"
-                  }
-                },
-                {
-                  "name": "target",
-                  "valueIdentifier": {
-                    "system": "https://ths-greifswald.de/gpas",
-                    "value": "$target"
-                  }
-                },
+              "resourceType": "Parameters",
+              "parameter": [
                 {
                   "name": "pseudonym",
-                  "valueIdentifier": {
-                    "system": "https://ths-greifswald.de/gpas",
-                    "value": "$pseudonym"
-                  }
+                  "part": [
+                    {
+                      "name": "original",
+                      "valueIdentifier": {
+                        "system": "https://ths-greifswald.de/gpas",
+                        "value": "$original"
+                      }
+                    },
+                    {
+                      "name": "target",
+                      "valueIdentifier": {
+                        "system": "https://ths-greifswald.de/gpas",
+                        "value": "$target"
+                      }
+                    },
+                    {
+                      "name": "pseudonym",
+                      "valueIdentifier": {
+                        "system": "https://ths-greifswald.de/gpas",
+                        "value": "$pseudonym"
+                      }
+                    }
+                  ]
                 }
               ]
             }
-          ]
-        }""".trimIndent()
-
+            
+            """.trimIndent()
     }
 }

@@ -27,11 +27,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 
 @ControllerAdvice
 class ApplicationControllerAdvice {
-
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFoundException(e: NotFoundException): String {
-        return "errors/404"
-    }
-
+    fun handleNotFoundException(e: NotFoundException): String = "errors/404"
 }

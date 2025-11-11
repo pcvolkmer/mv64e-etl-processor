@@ -22,10 +22,8 @@ import reactor.test.StepVerifier
 
 @ExtendWith(MockitoExtension::class)
 class ConnectionCheckServiceTest {
-
     @Nested
     inner class RestConnectionCheckServiceTest {
-
         lateinit var mockRestServiceServer: MockRestServiceServer
         lateinit var service: RestConnectionCheckService
         lateinit var sink: Sinks.Many<ConnectionCheckResult>
@@ -33,11 +31,12 @@ class ConnectionCheckServiceTest {
         @BeforeEach
         fun setUp() {
             val restTemplate = RestTemplate()
-            val restTargetProperties = RestTargetProperties(
-                "http://localhost/api",
-                "user",
-                "password",
-            )
+            val restTargetProperties =
+                RestTargetProperties(
+                    "http://localhost/api",
+                    "user",
+                    "password",
+                )
             this.sink = Sinks.many().multicast().onBackpressureBuffer()
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
@@ -65,12 +64,12 @@ class ConnectionCheckServiceTest {
                     withSuccess("OK", MediaType.APPLICATION_JSON),
                 )
 
-            val verifier = StepVerifier.create(sink.asFlux())
-                .assertNext {
-                    assertThat(it.available).isTrue()
-                }
-                .expectComplete()
-                .verifyLater()
+            val verifier =
+                StepVerifier
+                    .create(sink.asFlux())
+                    .assertNext { assertThat(it.available).isTrue() }
+                    .expectComplete()
+                    .verifyLater()
 
             this.service.check()
 
@@ -81,18 +80,14 @@ class ConnectionCheckServiceTest {
 
         @Test
         fun shouldEmitUnavailable() {
-            this.mockRestServiceServer
-                .expect(method(HttpMethod.GET))
-                .andRespond(
-                    withServerError()
-                )
+            this.mockRestServiceServer.expect(method(HttpMethod.GET)).andRespond(withServerError())
 
-            val verifier = StepVerifier.create(sink.asFlux())
-                .assertNext {
-                    assertThat(it.available).isFalse()
-                }
-                .expectComplete()
-                .verifyLater()
+            val verifier =
+                StepVerifier
+                    .create(sink.asFlux())
+                    .assertNext { assertThat(it.available).isFalse() }
+                    .expectComplete()
+                    .verifyLater()
 
             this.service.check()
 
@@ -104,7 +99,6 @@ class ConnectionCheckServiceTest {
 
     @Nested
     inner class GPasConnectionCheckServiceTest {
-
         lateinit var mockRestServiceServer: MockRestServiceServer
         lateinit var service: GPasConnectionCheckService
         lateinit var sink: Sinks.Many<ConnectionCheckResult>
@@ -112,15 +106,16 @@ class ConnectionCheckServiceTest {
         @BeforeEach
         fun setUp() {
             val restTemplate = RestTemplate()
-            val gpasTargetProperties = GPasConfigProperties(
-                "http://localhost/gpas",
-                null,
-                null,
-                "patientDomain",
-                "genomDeTanDomain",
-                "username",
-                "password",
-            )
+            val gpasTargetProperties =
+                GPasConfigProperties(
+                    "http://localhost/gpas",
+                    null,
+                    null,
+                    "patientDomain",
+                    "genomDeTanDomain",
+                    "username",
+                    "password",
+                )
             this.sink = Sinks.many().multicast().onBackpressureBuffer()
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
@@ -149,12 +144,12 @@ class ConnectionCheckServiceTest {
                     withSuccess("OK", MediaType.APPLICATION_JSON),
                 )
 
-            val verifier = StepVerifier.create(sink.asFlux())
-                .assertNext {
-                    assertThat(it.available).isTrue()
-                }
-                .expectComplete()
-                .verifyLater()
+            val verifier =
+                StepVerifier
+                    .create(sink.asFlux())
+                    .assertNext { assertThat(it.available).isTrue() }
+                    .expectComplete()
+                    .verifyLater()
 
             this.service.check()
 
@@ -165,18 +160,14 @@ class ConnectionCheckServiceTest {
 
         @Test
         fun shouldEmitUnavailable() {
-            this.mockRestServiceServer
-                .expect(method(HttpMethod.GET))
-                .andRespond(
-                    withServerError()
-                )
+            this.mockRestServiceServer.expect(method(HttpMethod.GET)).andRespond(withServerError())
 
-            val verifier = StepVerifier.create(sink.asFlux())
-                .assertNext {
-                    assertThat(it.available).isFalse()
-                }
-                .expectComplete()
-                .verifyLater()
+            val verifier =
+                StepVerifier
+                    .create(sink.asFlux())
+                    .assertNext { assertThat(it.available).isFalse() }
+                    .expectComplete()
+                    .verifyLater()
 
             this.service.check()
 
@@ -188,7 +179,6 @@ class ConnectionCheckServiceTest {
 
     @Nested
     inner class GIcsConnectionCheckServiceTest {
-
         lateinit var mockRestServiceServer: MockRestServiceServer
         lateinit var service: GIcsConnectionCheckService
         lateinit var sink: Sinks.Many<ConnectionCheckResult>
@@ -197,11 +187,12 @@ class ConnectionCheckServiceTest {
         fun setUp() {
             val restTemplate = RestTemplate()
 
-            val gicsTargetProperties = GIcsConfigProperties(
-                "http://localhost/gics",
-                "username",
-                "password",
-            )
+            val gicsTargetProperties =
+                GIcsConfigProperties(
+                    "http://localhost/gics",
+                    "username",
+                    "password",
+                )
             this.sink = Sinks.many().multicast().onBackpressureBuffer()
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
@@ -220,7 +211,6 @@ class ConnectionCheckServiceTest {
             this.service.check()
 
             this.mockRestServiceServer.verify()
-
         }
 
         @Test
@@ -231,12 +221,12 @@ class ConnectionCheckServiceTest {
                     withSuccess("OK", MediaType.APPLICATION_JSON),
                 )
 
-            val verifier = StepVerifier.create(sink.asFlux())
-                .assertNext {
-                    assertThat(it.available).isTrue()
-                }
-                .expectComplete()
-                .verifyLater()
+            val verifier =
+                StepVerifier
+                    .create(sink.asFlux())
+                    .assertNext { assertThat(it.available).isTrue() }
+                    .expectComplete()
+                    .verifyLater()
 
             this.service.check()
 
@@ -247,18 +237,14 @@ class ConnectionCheckServiceTest {
 
         @Test
         fun shouldEmitUnavailable() {
-            this.mockRestServiceServer
-                .expect(method(HttpMethod.GET))
-                .andRespond(
-                    withServerError()
-                )
+            this.mockRestServiceServer.expect(method(HttpMethod.GET)).andRespond(withServerError())
 
-            val verifier = StepVerifier.create(sink.asFlux())
-                .assertNext {
-                    assertThat(it.available).isFalse()
-                }
-                .expectComplete()
-                .verifyLater()
+            val verifier =
+                StepVerifier
+                    .create(sink.asFlux())
+                    .assertNext { assertThat(it.available).isFalse() }
+                    .expectComplete()
+                    .verifyLater()
 
             this.service.check()
 
@@ -267,5 +253,4 @@ class ConnectionCheckServiceTest {
             verifier.verify()
         }
     }
-
 }
