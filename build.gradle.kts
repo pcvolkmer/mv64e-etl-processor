@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "dev.dnpm"
-version = "0.12.0"
+version = "0.12.1"
 
 var versions = mapOf(
     "mtb-dto" to "0.1.0-SNAPSHOT",
