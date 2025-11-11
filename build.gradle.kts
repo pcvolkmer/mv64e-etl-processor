@@ -12,13 +12,13 @@ plugins {
     id("com.diffplug.spotless") version "8.0.0"
     id("net.ltgt.errorprone") version "4.3.0"
     id("net.ltgt.nullaway") version "2.3.0"
-    kotlin("jvm") version "2.2.10"
-    kotlin("plugin.spring") version "2.2.10"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.spring") version "2.2.21"
     jacoco
 }
 
 group = "dev.dnpm"
-version = "0.12.0-SNAPSHOT"
+version = "0.13.0-SNAPSHOT"
 
 var versions = mapOf(
     "mtb-dto" to "0.1.0-SNAPSHOT",
