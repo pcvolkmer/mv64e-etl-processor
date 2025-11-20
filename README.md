@@ -170,7 +170,7 @@ Modelvorhaben §64e.
   `https://ths-greifswald.de/fhir/gics/identifiers/Patienten-ID` angenommen
 * `APP_CONSENT_GICS_BROADCONSENTDOMAINNAME`: Domäne in der gIcs Broad Consent Einwilligungen
   verwaltet. Falls Wert leer, wird `MII` angenommen.
-* `APP_CONSENT_GICS_GNOMDECONSENTDOMAINNAME`: Domäne in der gIcs GenomDE Modelvorhaben §64e
+* `APP_CONSENT_GICS_GENOMDECONSENTDOMAINNAME`: Domäne in der gIcs GenomDE Modelvorhaben §64e
   Einwilligungen verwaltet. Falls Wert leer, wird `GenomDE_MV` angenommen.
 * `APP_CONSENT_GICS_POLICYCODE`: Die entscheidende Objekt-ID der zu prüfenden Einwilligung-Regel.
   Falls leer wird `2.16.840.1.113883.3.1937.777.24.5.3.6` angenommen.
