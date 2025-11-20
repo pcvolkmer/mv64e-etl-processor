@@ -81,7 +81,7 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
   this.systemicTherapies?.forEach { it.history?.forEach { it.patient?.id = patientPseudonym } }
   this.followUps?.forEach { it.patient?.id = patientPseudonym }
 
-  this.msiFindings?.forEach { it -> it.patient.id = patientPseudonym }
+  this.msiFindings?.forEach { it -> it.patient?.id = patientPseudonym }
 
   this.metadata?.researchConsents?.forEach { it ->
     val entry = it ?: return@forEach
