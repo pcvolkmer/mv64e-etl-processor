@@ -250,4 +250,45 @@ class ExtensionsTest {
         .isEqualTo(mtbFile.guidelineProcedures.first().reason.id)
     assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.specimens.first().diagnosis.id)
   }
+
+    @Test
+    fun shouldNotThrowAnyExceptionOnMissingMsiId(
+        @Mock pseudonymizeService: PseudonymizeService
+    ) {
+
+        doAnswer {
+            it.arguments[0]
+            "PSEUDO-ID"
+        }
+            .whenever(pseudonymizeService)
+            .patientPseudonym(anyValueClass())
+
+        doAnswer { "TESTDOMAIN" }.whenever(pseudonymizeService).prefix()
+
+        val mtbFile =
+            Mtb().apply {
+                this.patient =
+                    Patient().apply {
+                        this.id = "PID"
+                        this.birthDate = Date.from(Instant.now())
+                        this.gender = GenderCoding().apply { this.code = GenderCodingCode.MALE }
+                    }
+                this.msiFindings = listOf(
+                    null,
+                    Msi.builder().id("1").build(),
+                    Msi.builder(). build(),
+                    Msi.builder().specimen(null).build(),
+                    Msi.builder().specimen(Reference.builder().build()).build()
+                )
+            }
+
+        mtbFile.pseudonymizeWith(pseudonymizeService)
+        mtbFile.anonymizeContentWith(pseudonymizeService)
+
+        assertThat( mtbFile.msiFindings ).isNotNull
+        assertThat(mtbFile.msiFindings[1]).satisfiesAnyOf(
+            { assertThat(it.id).isNull() },
+            { assertThat(it.id).isEqualTo("TESTDOMAIN44e20a53bbbf9f3ae39626d05df7014dcd77d6098")}
+        )
+    }
 }
