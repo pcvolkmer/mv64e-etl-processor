@@ -21,7 +21,7 @@ group = "dev.dnpm"
 version = "0.13.0-SNAPSHOT"
 
 var versions = mapOf(
-    "mtb-dto" to "0.1.0-SNAPSHOT",
+    "mtb-dto" to "0.1.0",
     "hapi-fhir" to "8.4.0",
     "apache-cxf" to "4.1.3",
     "mockito-kotlin" to "6.1.0",
