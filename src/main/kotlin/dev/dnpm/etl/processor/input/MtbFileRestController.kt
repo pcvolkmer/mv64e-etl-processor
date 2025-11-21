@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping(path = ["mtbfile", "mtb"])
+@RequestMapping(path = ["mtbfile", "mtb", "api/mtbfile", "api/mtb"])
 class MtbFileRestController(
     private val requestProcessor: RequestProcessor,
     private val consentEvaluator: ConsentEvaluator,
@@ -44,8 +44,12 @@ class MtbFileRestController(
   }
 
   @PostMapping(
+      path = ["", "etl/patient-record"],
       consumes =
-          [MediaType.APPLICATION_JSON_VALUE, CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE]
+          [
+              MediaType.APPLICATION_JSON_VALUE,
+              CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE,
+          ],
   )
   fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
     val consentEvaluation = consentEvaluator.check(mtbFile)
@@ -60,7 +64,9 @@ class MtbFileRestController(
     return ResponseEntity.accepted().build()
   }
 
-  @DeleteMapping(path = ["{patientId}"])
+  @DeleteMapping(
+      path = ["{patientId}", "etl/patient-record/{patientId}", "etl/patient/{patientId}"]
+  )
   fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
     logger.debug("Accepted patient ID to process deletion")
     requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
