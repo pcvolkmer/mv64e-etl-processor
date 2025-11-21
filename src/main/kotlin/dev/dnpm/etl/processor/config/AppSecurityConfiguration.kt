@@ -89,6 +89,8 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
     http {
       authorizeHttpRequests {
         authorize("/configs/**", hasRole("ADMIN"))
+        authorize("/api/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
+        authorize("/api/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
         authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
         authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
         authorize("/report/**", hasAnyRole("ADMIN", "USER"))
@@ -154,6 +156,8 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
     http {
       authorizeHttpRequests {
         authorize("/configs/**", hasRole("ADMIN"))
+        authorize("/api/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
+        authorize("/api/mtb/**", hasAnyRole("MTBFILE", "ADMIN"))
         authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
         authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN"))
         authorize("/report/**", hasRole("ADMIN"))

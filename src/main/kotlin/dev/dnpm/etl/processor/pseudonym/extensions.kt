@@ -37,13 +37,21 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
 
   this.episodesOfCare?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.carePlans?.filterNotNull()?.forEach { carePlan ->
-      carePlan.patient.id = patientPseudonym
-      carePlan.rebiopsyRequests?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      carePlan.histologyReevaluationRequests?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      carePlan.medicationRecommendations?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      carePlan.studyEnrollmentRecommendations?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      carePlan.procedureRecommendations?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      carePlan.geneticCounselingRecommendation?.patient?.id = patientPseudonym
+    carePlan.patient.id = patientPseudonym
+    carePlan.rebiopsyRequests?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+    carePlan.histologyReevaluationRequests?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
+    carePlan.medicationRecommendations?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
+    carePlan.studyEnrollmentRecommendations?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
+    carePlan.procedureRecommendations?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
+    carePlan.geneticCounselingRecommendation?.patient?.id = patientPseudonym
   }
   this.diagnoses?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.guidelineTherapies?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
@@ -58,26 +66,34 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     it.results.tumorCellContent?.patient?.id = patientPseudonym
   }
   this.ngsReports?.filterNotNull()?.forEach { ngsReport ->
-      ngsReport.patient?.id = patientPseudonym
-      ngsReport.results?.simpleVariants?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      ngsReport.results?.copyNumberVariants?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      ngsReport.results?.dnaFusions?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      ngsReport.results?.rnaFusions?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      ngsReport.results?.tumorCellContent?.patient?.id = patientPseudonym
-      ngsReport.results?.brcaness?.patient?.id = patientPseudonym
-      ngsReport.results?.tmb?.patient?.id = patientPseudonym
-      ngsReport.results?.hrdScore?.patient?.id = patientPseudonym
+    ngsReport.patient?.id = patientPseudonym
+    ngsReport.results?.simpleVariants?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
+    ngsReport.results?.copyNumberVariants?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
+    ngsReport.results?.dnaFusions?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+    ngsReport.results?.rnaFusions?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+    ngsReport.results?.tumorCellContent?.patient?.id = patientPseudonym
+    ngsReport.results?.brcaness?.patient?.id = patientPseudonym
+    ngsReport.results?.tmb?.patient?.id = patientPseudonym
+    ngsReport.results?.hrdScore?.patient?.id = patientPseudonym
   }
   this.ihcReports?.filterNotNull()?.forEach { ihcReports ->
-      ihcReports.patient?.id = patientPseudonym
-      ihcReports.results?.msiMmr?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-      ihcReports.results?.proteinExpression?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+    ihcReports.patient?.id = patientPseudonym
+    ihcReports.results?.msiMmr?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+    ihcReports.results?.proteinExpression?.filterNotNull()?.forEach {
+      it.patient?.id = patientPseudonym
+    }
   }
   this.responses?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.specimens?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.priorDiagnosticReports?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.performanceStatus?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-  this.systemicTherapies?.filterNotNull()?.forEach { systemicTherapy ->  systemicTherapy.history?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym } }
+  this.systemicTherapies?.filterNotNull()?.forEach { systemicTherapy ->
+    systemicTherapy.history?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+  }
   this.followUps?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
 
   this.msiFindings?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
@@ -86,8 +102,8 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
     if (researchConsent.contains("patient")) {
       // here we expect only a patient reference any other data like display
       // need to be removed, since may contain unsecure data
-        researchConsent.remove("patient")
-        researchConsent["patient"] = mapOf("reference" to "Patient/$patientPseudonym")
+      researchConsent.remove("patient")
+      researchConsent["patient"] = mapOf("reference" to "Patient/$patientPseudonym")
     }
   }
 }
@@ -108,8 +124,8 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
   }
 
   this.episodesOfCare?.filterNotNull()?.forEach { episodeOfCare ->
-      episodeOfCare.apply { id = id?.let(::anonymize) }
-      episodeOfCare.diagnoses?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
+    episodeOfCare.apply { id = id?.let(::anonymize) }
+    episodeOfCare.diagnoses?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
   }
 
   this.carePlans?.onEach { carePlan ->
@@ -118,127 +134,147 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
 
       this.geneticCounselingRecommendation?.apply { this.id = this.id?.let(::anonymize) }
       this.rebiopsyRequests?.filterNotNull()?.forEach { rebiopsyRequest ->
-          rebiopsyRequest.id = rebiopsyRequest.id?.let(::anonymize)
-          rebiopsyRequest.tumorEntity?.id = rebiopsyRequest.tumorEntity?.id?.let(::anonymize)
+        rebiopsyRequest.id = rebiopsyRequest.id?.let(::anonymize)
+        rebiopsyRequest.tumorEntity?.id = rebiopsyRequest.tumorEntity?.id?.let(::anonymize)
       }
       this.histologyReevaluationRequests?.filterNotNull()?.forEach { histologyReevaluationRequest ->
-          histologyReevaluationRequest.id = histologyReevaluationRequest.id?.let(::anonymize)
-          histologyReevaluationRequest.specimen?.id = histologyReevaluationRequest.specimen?.id?.let(::anonymize)
+        histologyReevaluationRequest.id = histologyReevaluationRequest.id?.let(::anonymize)
+        histologyReevaluationRequest.specimen?.id =
+            histologyReevaluationRequest.specimen?.id?.let(::anonymize)
       }
 
       this.medicationRecommendations?.filterNotNull()?.forEach { medicationRecommendations ->
-          medicationRecommendations.id = medicationRecommendations.id?.let(::anonymize)
-          medicationRecommendations.supportingVariants?.filterNotNull()?.forEach { it.variant?.id = it.variant?.id?.let(::anonymize) }
-          medicationRecommendations.reason?.id = medicationRecommendations.reason?.id?.let(::anonymize)
+        medicationRecommendations.id = medicationRecommendations.id?.let(::anonymize)
+        medicationRecommendations.supportingVariants?.filterNotNull()?.forEach {
+          it.variant?.id = it.variant?.id?.let(::anonymize)
+        }
+        medicationRecommendations.reason?.id =
+            medicationRecommendations.reason?.id?.let(::anonymize)
       }
       this.reason?.id = this.reason?.id?.let(::anonymize)
-      this.studyEnrollmentRecommendations?.filterNotNull()?.forEach { studyEnrollmentRecommendation ->
-          studyEnrollmentRecommendation.reason?.id = studyEnrollmentRecommendation.reason?.id?.let(::anonymize)
+      this.studyEnrollmentRecommendations?.filterNotNull()?.forEach { studyEnrollmentRecommendation
+        ->
+        studyEnrollmentRecommendation.reason?.id =
+            studyEnrollmentRecommendation.reason?.id?.let(::anonymize)
       }
       this.procedureRecommendations?.filterNotNull()?.forEach { procedureRecommendation ->
-          procedureRecommendation.id = procedureRecommendation.id?.let(::anonymize)
-          procedureRecommendation.supportingVariants?.filterNotNull()?.forEach { it.variant?.id = it.variant?.id?.let(::anonymize) }
-          procedureRecommendation.reason?.id = procedureRecommendation.reason?.id?.let(::anonymize)
+        procedureRecommendation.id = procedureRecommendation.id?.let(::anonymize)
+        procedureRecommendation.supportingVariants?.filterNotNull()?.forEach {
+          it.variant?.id = it.variant?.id?.let(::anonymize)
+        }
+        procedureRecommendation.reason?.id = procedureRecommendation.reason?.id?.let(::anonymize)
       }
-      this.studyEnrollmentRecommendations?.filterNotNull()?.forEach { studyEnrollmentRecommendation ->
-          studyEnrollmentRecommendation.id = studyEnrollmentRecommendation.id?.let(::anonymize)
-          studyEnrollmentRecommendation.supportingVariants.forEach { it.variant?.id = it?.variant?.id?.let(::anonymize) }
+      this.studyEnrollmentRecommendations?.filterNotNull()?.forEach { studyEnrollmentRecommendation
+        ->
+        studyEnrollmentRecommendation.id = studyEnrollmentRecommendation.id?.let(::anonymize)
+        studyEnrollmentRecommendation.supportingVariants.forEach {
+          it.variant?.id = it?.variant?.id?.let(::anonymize)
+        }
       }
     }
   }
 
   this.responses?.filterNotNull()?.forEach { response ->
-      response.id = response.id?.let(::anonymize)
-      response.therapy?.id = response.therapy?.id?.let(::anonymize)
+    response.id = response.id?.let(::anonymize)
+    response.therapy?.id = response.therapy?.id?.let(::anonymize)
   }
 
   this.diagnoses?.filterNotNull()?.forEach { diagnose ->
-      diagnose.id = diagnose.id?.let(::anonymize)
-      diagnose.histology?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
+    diagnose.id = diagnose.id?.let(::anonymize)
+    diagnose.histology?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
   }
 
   this.ngsReports?.filterNotNull()?.forEach { ngsReport ->
-      ngsReport.id = ngsReport.id?.let(::anonymize)
-      ngsReport.results?.tumorCellContent?.id = ngsReport.results.tumorCellContent?.id?.let(::anonymize)
-      ngsReport.results?.tumorCellContent?.specimen?.id =
-          ngsReport.results?.tumorCellContent?.specimen?.id?.let(::anonymize)
-      ngsReport.results?.rnaFusions?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
-      ngsReport.results?.simpleVariants?.filterNotNull()?.forEach {
+    ngsReport.id = ngsReport.id?.let(::anonymize)
+    ngsReport.results?.tumorCellContent?.id =
+        ngsReport.results.tumorCellContent?.id?.let(::anonymize)
+    ngsReport.results?.tumorCellContent?.specimen?.id =
+        ngsReport.results?.tumorCellContent?.specimen?.id?.let(::anonymize)
+    ngsReport.results?.rnaFusions?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
+    ngsReport.results?.simpleVariants?.filterNotNull()?.forEach {
       it.id = it.id?.let(::anonymize)
       it.transcriptId?.value = it.transcriptId?.value?.let(::anonymize)
     }
-      ngsReport.results?.tmb?.id = ngsReport.results?.tmb?.id?.let(::anonymize)
-      ngsReport.results?.tmb?.specimen?.id = ngsReport.results?.tmb?.specimen?.id?.let(::anonymize)
+    ngsReport.results?.tmb?.id = ngsReport.results?.tmb?.id?.let(::anonymize)
+    ngsReport.results?.tmb?.specimen?.id = ngsReport.results?.tmb?.specimen?.id?.let(::anonymize)
 
-      ngsReport.results?.brcaness?.id = ngsReport.results?.brcaness?.id?.let(::anonymize)
-      ngsReport.results?.brcaness?.specimen?.id = ngsReport.results?.brcaness?.specimen?.id?.let(::anonymize)
-      ngsReport.results?.copyNumberVariants?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
-      ngsReport.results?.hrdScore?.id = ngsReport.results?.hrdScore?.id?.let(::anonymize)
-      ngsReport.results?.hrdScore?.specimen?.id = ngsReport.results?.hrdScore?.specimen?.id?.let(::anonymize)
-      ngsReport.results?.rnaSeqs?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
-      ngsReport.results?.dnaFusions?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
-      ngsReport.specimen?.id = ngsReport.specimen?.id?.let(::anonymize)
+    ngsReport.results?.brcaness?.id = ngsReport.results?.brcaness?.id?.let(::anonymize)
+    ngsReport.results?.brcaness?.specimen?.id =
+        ngsReport.results?.brcaness?.specimen?.id?.let(::anonymize)
+    ngsReport.results?.copyNumberVariants?.filterNotNull()?.forEach {
+      it.id = it.id?.let(::anonymize)
+    }
+    ngsReport.results?.hrdScore?.id = ngsReport.results?.hrdScore?.id?.let(::anonymize)
+    ngsReport.results?.hrdScore?.specimen?.id =
+        ngsReport.results?.hrdScore?.specimen?.id?.let(::anonymize)
+    ngsReport.results?.rnaSeqs?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
+    ngsReport.results?.dnaFusions?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
+    ngsReport.specimen?.id = ngsReport.specimen?.id?.let(::anonymize)
   }
 
   this.histologyReports?.filterNotNull()?.forEach { histologyReport ->
-      histologyReport.id = histologyReport.id?.let(::anonymize)
-      histologyReport.results?.tumorCellContent?.id = histologyReport.results?.tumorCellContent?.id?.let(::anonymize)
-      histologyReport.results?.tumorCellContent?.specimen?.id =
-          histologyReport.results?.tumorCellContent?.specimen?.id?.let(::anonymize)
+    histologyReport.id = histologyReport.id?.let(::anonymize)
+    histologyReport.results?.tumorCellContent?.id =
+        histologyReport.results?.tumorCellContent?.id?.let(::anonymize)
+    histologyReport.results?.tumorCellContent?.specimen?.id =
+        histologyReport.results?.tumorCellContent?.specimen?.id?.let(::anonymize)
 
-      histologyReport.results?.tumorMorphology?.id = histologyReport.results?.tumorMorphology?.id?.let(::anonymize)
-      histologyReport.results?.tumorMorphology?.specimen?.id =
-          histologyReport.results?.tumorMorphology?.specimen?.id?.let(::anonymize)
-      histologyReport.specimen?.id = histologyReport.specimen?.id?.let(::anonymize)
+    histologyReport.results?.tumorMorphology?.id =
+        histologyReport.results?.tumorMorphology?.id?.let(::anonymize)
+    histologyReport.results?.tumorMorphology?.specimen?.id =
+        histologyReport.results?.tumorMorphology?.specimen?.id?.let(::anonymize)
+    histologyReport.specimen?.id = histologyReport.specimen?.id?.let(::anonymize)
   }
   this.claimResponses?.filterNotNull()?.forEach { claimResponse ->
-      claimResponse.id = claimResponse.id?.let(::anonymize)
-      claimResponse.claim?.id = claimResponse.claim?.id?.let(::anonymize)
+    claimResponse.id = claimResponse.id?.let(::anonymize)
+    claimResponse.claim?.id = claimResponse.claim?.id?.let(::anonymize)
   }
   this.claims?.filterNotNull()?.forEach { claim ->
-      claim.id = claim.id?.let(::anonymize)
-      claim.recommendation?.id = claim.recommendation?.id?.let(::anonymize)
+    claim.id = claim.id?.let(::anonymize)
+    claim.recommendation?.id = claim.recommendation?.id?.let(::anonymize)
   }
   this.familyMemberHistories?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
   this.guidelineProcedures?.filterNotNull()?.forEach { guidelineProcedure ->
-      guidelineProcedure.id = guidelineProcedure.id?.let(::anonymize)
-      guidelineProcedure.reason?.id = guidelineProcedure.reason?.id?.let(::anonymize)
-      guidelineProcedure.basedOn?.id = guidelineProcedure.basedOn?.id?.let(::anonymize)
+    guidelineProcedure.id = guidelineProcedure.id?.let(::anonymize)
+    guidelineProcedure.reason?.id = guidelineProcedure.reason?.id?.let(::anonymize)
+    guidelineProcedure.basedOn?.id = guidelineProcedure.basedOn?.id?.let(::anonymize)
   }
 
   this.guidelineTherapies?.filterNotNull()?.forEach { guidelineTherapy ->
-      guidelineTherapy.id = guidelineTherapy.id?.let(::anonymize)
-      guidelineTherapy.reason?.id = guidelineTherapy.reason?.id?.let(::anonymize)
-      guidelineTherapy.basedOn?.id = guidelineTherapy.basedOn?.id?.let(::anonymize)
+    guidelineTherapy.id = guidelineTherapy.id?.let(::anonymize)
+    guidelineTherapy.reason?.id = guidelineTherapy.reason?.id?.let(::anonymize)
+    guidelineTherapy.basedOn?.id = guidelineTherapy.basedOn?.id?.let(::anonymize)
   }
   this.ihcReports?.filterNotNull()?.forEach { ihcReport ->
-      ihcReport.id = ihcReport.id?.let(::anonymize)
-      ihcReport.specimen?.id = ihcReport.specimen?.id?.let(::anonymize)
-      ihcReport.results?.proteinExpression?.filterNotNull()?.forEach { it.id = it.id.let(::anonymize) }
+    ihcReport.id = ihcReport.id?.let(::anonymize)
+    ihcReport.specimen?.id = ihcReport.specimen?.id?.let(::anonymize)
+    ihcReport.results?.proteinExpression?.filterNotNull()?.forEach {
+      it.id = it.id.let(::anonymize)
+    }
   }
 
   this.msiFindings?.filterNotNull()?.forEach { msiFinding ->
-      msiFinding.id = msiFinding.id?.let(::anonymize)
-      msiFinding.specimen?.id = msiFinding.specimen?.id?.let(::anonymize)
+    msiFinding.id = msiFinding.id?.let(::anonymize)
+    msiFinding.specimen?.id = msiFinding.specimen?.id?.let(::anonymize)
   }
 
   this.performanceStatus?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
 
   this.priorDiagnosticReports?.filterNotNull()?.forEach { priorDiagnosticReport ->
-      priorDiagnosticReport.id = priorDiagnosticReport.id?.let(::anonymize)
-      priorDiagnosticReport.specimen?.id = priorDiagnosticReport.specimen?.id?.let(::anonymize)
+    priorDiagnosticReport.id = priorDiagnosticReport.id?.let(::anonymize)
+    priorDiagnosticReport.specimen?.id = priorDiagnosticReport.specimen?.id?.let(::anonymize)
   }
 
   this.specimens?.filterNotNull()?.forEach { specimen ->
-      specimen.id = specimen.id?.let(::anonymize)
-      specimen.diagnosis?.id = specimen.diagnosis?.id?.let(::anonymize)
+    specimen.id = specimen.id?.let(::anonymize)
+    specimen.diagnosis?.id = specimen.diagnosis?.id?.let(::anonymize)
   }
 
   this.systemicTherapies?.filterNotNull()?.forEach { systemicTherapy ->
-      systemicTherapy.history?.filterNotNull()?.forEach { history ->
-          history.id = history.id?.let(::anonymize)
-          history.reason?.id = history.reason?.id?.let(::anonymize)
-          history.basedOn?.id = history.basedOn?.id?.let(::anonymize)
+    systemicTherapy.history?.filterNotNull()?.forEach { history ->
+      history.id = history.id?.let(::anonymize)
+      history.reason?.id = history.reason?.id?.let(::anonymize)
+      history.basedOn?.id = history.basedOn?.id?.let(::anonymize)
     }
   }
 }
