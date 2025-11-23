@@ -7,7 +7,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     war
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
     id("net.ltgt.errorprone") version "4.3.0"
@@ -121,8 +121,6 @@ dependencies {
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
-    // Fix for CVE-2024-25710
-    integrationTestImplementation("org.apache.commons:commons-compress:1.27.1")
 
     errorprone("com.google.errorprone:error_prone_core:2.43.0")
     errorprone("com.uber.nullaway:nullaway:0.12.11")
