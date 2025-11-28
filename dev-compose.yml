@@ -117,21 +117,21 @@ services:
 #      KAFKA_SSL_CLIENT_AUTH: none
       ###
 
-  ## Use AKHQ as Kafka web frontend
-  akhq:
-    image: tchiotludo/akhq:0.25.0
-    environment:
-      AKHQ_CONFIGURATION: |
-        akhq:
-          connections:
-            docker-kafka-server:
-              properties:
-                bootstrap.servers: "kafka:9092"
-              connect:
-                - name: "kafka-connect"
-                  url: "http://kafka-connect:8083"
-    ports:
-      - "8084:8080"
+  ## Optional AKHQ as Kafka web frontend
+#  akhq:
+#    image: tchiotludo/akhq
+#    environment:
+#      AKHQ_CONFIGURATION: |
+#        akhq:
+#          connections:
+#            docker-kafka-server:
+#              properties:
+#                bootstrap.servers: "kafka:9092"
+#              connect:
+#                - name: "kafka-connect"
+#                  url: "http://kafka-connect:8083"
+#    ports:
+#      - "8084:8080"
 
 
 ## For use with MariaDB
