@@ -11,6 +11,11 @@
         {
           "type": "generic",
           "path": "build.gradle.kts"
+        },
+        {
+          "type": "generic",
+          "path": "src/main/resources/templates/fragments.html",
+          "xpath": "//span[@class=\"footer_version\"]"
         }
       ]
     }
