@@ -24,55 +24,64 @@
 
 * {
     font-family: sans-serif;
+    box-sizing: border-box;
 }
 
 html {
-    background: linear-gradient(-5deg, var(--bg-blue-op), transparent 10em);
-    min-height: 100vh;
+    background:
+            linear-gradient(transparent 30rem, white 50rem),
+            linear-gradient(-135deg, transparent 20vw, #004d6e10 25vw, transparent 30vw),
+            linear-gradient(-135deg, transparent 30vw, #706f6f10 35vw, transparent 40vw),
+            linear-gradient(-135deg, transparent 40vw, #f59e0010 45vw, transparent 50vw);
     overflow-y: scroll;
 }
 
 body {
-    margin: 0 0 5em 0;
+    margin: 0;
     font-size: .8rem;
     color: var(--text);
-
-    min-height: 100vh;
-
-    background: url(bg.jpeg) no-repeat;
     background-size: contain;
 }
 
-nav {
-    margin: 0 auto;
-    padding: 1em 0;
-
-    line-height: 1.5rem;
-    max-width: 1140px;
-
+div.headline {
+    position: fixed;
+    display: block;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 5rem;
+    align-content: center;
+    background: white;
     border-bottom: 1px solid var(--table-border);
 }
 
+nav {
+    display: flex;
+    margin: 0 auto;
+    line-height: 1.5rem;
+    max-width: 1140px;
+}
+
 nav a.nav-home {
-    float: left;
+    margin: auto 0;
 
     color: var(--text);
-    line-height: 1.5em;
+    line-height: 1.5rem;
     text-decoration: none;
 
-    font-size: 2em;
+    font-size: 2rem;
     font-weight: bold;
 }
 
 nav a.nav-home > img {
-    width: 1.5em;
+    width: 1.5rem;
     vertical-align: middle;
 }
 
 nav > ul {
+    display: block;
     margin: 0 0 0 auto;
     padding: 0;
-
     width: max-content;
 }
 
@@ -82,16 +91,16 @@ nav > ul > li {
 }
 
 nav > ul > li.login {
-    margin: 0 0 0 1em;
-    padding: 0 0 0 2em;
+    margin: 0 0 0 1rem;
+    padding: 0 0 0 2rem;
     border-left: 1px solid var(--table-border);
-    line-height: 3.5em;
+    line-height: 3.5rem;
 }
 
 nav > ul > li.login a {
     text-decoration: none;
     text-transform: none;
-    padding: 1em;
+    padding: 1rem;
 }
 
 nav .login .user-name {
@@ -100,14 +109,14 @@ nav .login .user-name {
 
 nav > ul > li.login > span {
     display: inline-block;
-    margin: 0 .5em;
+    margin: 0 .5rem;
 }
 
 nav > ul > li.login .user-icon {
     flex-direction: column;
     display: inline flex;
     vertical-align: middle;
-    inline-size: 4em;
+    inline-size: 4rem;
 }
 
 nav > ul > li.login .user-icon img {
@@ -119,7 +128,7 @@ nav > ul > li.login .user-icon img {
 nav > ul > li.login .user-icon span {
     padding: 0 .6em;
     color: white;
-    font-size: .8em;
+    font-size: .8rem;
     font-weight: bold;
     border-radius: 4px;
     line-height: normal;
@@ -184,13 +193,57 @@ a {
     text-align: center;
 }
 
+.container {
+    margin: auto;
+}
+
 main {
-    margin: 0 auto;
+    margin: 6rem auto 0;
+    min-height: calc(100dvh - 10rem);
+}
+
+main, .container {
     max-width: 1140px;
 }
 
+footer {
+    width: 100%;
+    height: 4rem;
+    position: relative;
+    align-content: center;
+    display: flex;
+    bottom: 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--table-border);
+    background: var(--bg-blue);
+    color: white;
+}
+
+footer > .container > div {
+    margin: 0 auto;
+    max-width: 1140px;
+    display: inline-block;
+}
+
+footer > .container > div,
+footer > .container > div:after {
+    content: "-";
+    padding-left: 1rem;
+}
+
+footer > .container > div:last-child,
+footer > .container > div:last-child:after {
+    content: "";
+}
+
+footer svg {
+    height: 1.4rem;
+    color: white;
+    vertical-align: text-bottom;
+}
+
 section {
-    margin: 3em 0;
+    margin: 3rem 0;
 }
 
 form {
@@ -236,19 +289,19 @@ form.samplecode-input input:focus-visible {
 
 .login-form {
     width: fit-content;
-    margin: 3em auto;
-    padding: 2em 5em;
+    margin: 3rem auto;
+    padding: 2em 5rem;
 
     border: 1px solid var(--table-border);
-    border-radius: .5em;
+    border-radius: .5rem;
     background: white;
 }
 
 .login-form form {
-    width: 20em;
+    width: 20rem;
     margin: 0 auto;
     display: grid;
-    grid-gap: .5em;
+    grid-gap: .5rem;
 
     border: none;
     background: none;
@@ -256,7 +309,7 @@ form.samplecode-input input:focus-visible {
 
 .login-form img {
     margin: 0 auto;
-    width: 4em;
+    width: 4rem;
     display: block;
 }
 
@@ -277,7 +330,7 @@ form.samplecode-input input:focus-visible {
 
 .login-form form *,
 .token-form form * {
-    padding: 0.5em;
+    padding: 0.5rem;
     border: 1px solid var(--table-border);
     border-radius: 3px;
 }
@@ -292,14 +345,14 @@ form.samplecode-input input:focus-visible {
 .login-form button,
 .login-form a.btn,
 .token-form button {
-    margin: 1em 0;
+    margin: 1rem 0;
     background: var(--bg-blue);
     color: white;
     border: none;
 }
 
 .userrole-form form select {
-    padding: 0.5em;
+    padding: 0.5rem;
     border: none;
     border-radius: 3px;
     line-height: 1.2rem;
@@ -307,18 +360,18 @@ form.samplecode-input input:focus-visible {
 }
 
 .border {
-    padding: 1.5em;
+    padding: 1.5rem;
     border: 1px solid var(--table-border);
-    border-radius: .5em;
+    border-radius: .5rem;
     background: white;
 }
 
 table, .chart {
     border: 1px solid var(--table-border);
-    padding: 1.5em;
+    padding: 1.5rem;
 
     border-spacing: 0;
-    border-radius: .5em;
+    border-radius: .5rem;
 
     background: white;
 }
@@ -329,7 +382,7 @@ table {
 }
 
 table.config-table td:first-child {
-    width: 24em;
+    width: 24rem;
     min-width: fit-content;
 }
 
@@ -344,16 +397,16 @@ table.config-table td > button:last-of-type {
 }
 
 .page-control {
-    border-radius: .5em;
-    padding: 1em 2em;
+    border-radius: .5rem;
+    padding: 1rem 2rem;
     text-align: center;
 
     line-height: 1.75em;
 }
 
 .page-control a {
-    padding: 0 .25em;
-    font-size: 1.75em;
+    padding: 0 .25rem;
+    font-size: 1.75rem;
     color: var(--bg-gray);
     text-decoration: none;
 }
@@ -363,7 +416,7 @@ table.config-table td > button:last-of-type {
 }
 
 .page-control span {
-    padding: 0 .5em;
+    padding: 0 .5rem;
     vertical-align: text-bottom;
 }
 
@@ -386,7 +439,7 @@ table.samples {
 th, td {
     padding: 0.4rem .2rem;
 
-    line-height: 2em;
+    line-height: 2rem;
 
     text-align: left;
     white-space: nowrap;
@@ -412,7 +465,7 @@ td > small {
 }
 
 td.patient-id {
-    width: 32em;
+    width: 32rem;
     text-overflow: ellipsis;
     overflow: hidden;
     display: block;
@@ -424,37 +477,37 @@ td.bg-yellow, th.bg-yellow,
 td.bg-red, th.bg-red,
 td.bg-gray, th.bg-gray
 {
-    width: 8em;
+    width: 8rem;
 }
 
 td.bg-blue > small, th.bg-blue > small {
     background: var(--bg-blue);
     color: white;
-    border-radius: 0.4em;
+    border-radius: 0.4rem;
 }
 
 td.bg-green > small, th.bg-green > small {
     background: var(--bg-green);
     color: white;
-    border-radius: 0.4em;
+    border-radius: 0.4rem;
 }
 
 td.bg-yellow > small, th.bg-yellow > small {
     background: var(--bg-yellow);
     color: white;
-    border-radius: 0.4em;
+    border-radius: 0.4rem;
 }
 
 td.bg-red > small, th.bg-red > small {
     background: var(--bg-red);
     color: white;
-    border-radius: 0.4em;
+    border-radius: 0.4rem;
 }
 
 td.bg-gray > small, th.bg-gray > small {
     background: var(--bg-gray);
     color: white;
-    border-radius: 0.4em;
+    border-radius: 0.4rem;
 }
 
 .bg-path {
@@ -575,8 +628,8 @@ input.inline:focus-visible {
     display: grid;
     grid-gap: 1em;
     grid-template:
-            "a b" 28em
-            "c c" 28em / 1fr 1fr;
+            "a b" 28rem
+            "c c" 28rem / 1fr 1fr;
 }
 
 .charts > .grid-left {
@@ -593,7 +646,7 @@ input.inline:focus-visible {
 
 .connection-display {
     display: grid;
-    grid-template-columns: 10em 16em 10em;
+    grid-template-columns: 10rem 16rem 10rem;
     place-items: center;
     width: fit-content;
     margin: 1em auto;
@@ -616,8 +669,8 @@ input.inline:focus-visible {
 }
 
 .notification {
-    margin: 1em;
-    padding: .5em;
+    margin: 1rem;
+    padding: .5rem;
     border-radius: 3px;
     text-align: center;
 }
@@ -639,7 +692,7 @@ input.inline:focus-visible {
 }
 
 .tab {
-    padding: 1em;
+    padding: 1rem;
     border: none;
     border-radius: 3px 3px 0 0;
     cursor: pointer;
@@ -656,9 +709,9 @@ input.inline:focus-visible {
 
 .tabcontent {
     border: 2px solid var(--bg-gray);
-    border-radius: 0 .5em .5em .5em;
+    border-radius: 0 .5rem .5rem .5rem;
     display: none;
-    padding: 1em;
+    padding: 1rem;
     background: white;
 }
 
@@ -669,33 +722,33 @@ input.inline:focus-visible {
 a.reload {
     display: none;
     position: absolute;
-    height: 1.2em;
-    width: 1.2em;
+    height: 1.2rem;
+    width: 1.2rem;
     background: var(--bg-red);
     border-radius: 50%;
 
     color: white;
     text-decoration: none;
-    font-size: .6em;
+    font-size: .6rem;
     align-content: center;
     justify-content: center;
 }
 
 .new-token {
-    padding: 1em;
+    padding: 1rem;
     background: var(--bg-green-op);
 }
 
 .new-token > pre {
     margin: 0;
     border: 1px solid var(--bg-green);
-    padding: .5em;
+    padding: .5rem;
     width: max-content;
     display: inline-block;
 }
 
 .no-token {
-    padding: 1em;
+    padding: 1rem;
     background: var(--bg-red-op);
 }
 
