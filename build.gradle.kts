@@ -64,9 +64,6 @@ configurations {
 
 repositories {
     maven {
-        url = uri("https://git.dnpm.dev/api/packages/public-snapshots/maven")
-    }
-    maven {
         url = uri("https://git.dnpm.dev/api/packages/public/maven")
     }
     mavenCentral()
