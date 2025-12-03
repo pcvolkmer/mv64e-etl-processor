@@ -1,7 +1,5 @@
 package dev.dnpm.etl.processor.consent;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import java.net.URI;
@@ -15,7 +13,6 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +28,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @since 0.11
  */
-public class GicsConsentService implements IConsentService {
-
-  private final Logger log = LoggerFactory.getLogger(GicsConsentService.class);
+public class GicsConsentService extends AbstractConsentService {
 
   public static final String IS_CONSENTED_ENDPOINT = "/$isConsented";
   public static final String IS_POLICY_STATES_FOR_PERSON_ENDPOINT =
@@ -43,7 +38,6 @@ public class GicsConsentService implements IConsentService {
 
   private final RetryTemplate retryTemplate;
   private final RestTemplate restTemplate;
-  private final FhirContext fhirContext;
   private final GIcsConfigProperties gIcsConfigProperties;
 
   public GicsConsentService(
@@ -51,9 +45,10 @@ public class GicsConsentService implements IConsentService {
       RetryTemplate retryTemplate,
       RestTemplate restTemplate,
       AppFhirConfig appFhirConfig) {
+    super(appFhirConfig.fhirContext(), LoggerFactory.getLogger(GicsConsentService.class));
+
     this.retryTemplate = retryTemplate;
     this.restTemplate = restTemplate;
-    this.fhirContext = appFhirConfig.fhirContext();
     this.gIcsConfigProperties = gIcsConfigProperties;
     log.info("GicsConsentService initialized...");
   }
@@ -270,37 +265,6 @@ public class GicsConsentService implements IConsentService {
             .setResource(nestedConfigParameters));
 
     return requestParameter;
-  }
-
-  private TtpConsentStatus evaluateConsentResponse(@Nullable String consentStatusResponse) {
-    if (consentStatusResponse == null) {
-      return TtpConsentStatus.FAILED_TO_ASK;
-    }
-    try {
-      var response = fhirContext.newJsonParser().parseResource(consentStatusResponse);
-
-      if (response instanceof Parameters responseParameters) {
-
-        var responseValue = responseParameters.getParameter("consented").getValue();
-        var isConsented = responseValue.castToBoolean(responseValue);
-        if (!isConsented.hasValue()) {
-          return TtpConsentStatus.FAILED_TO_ASK;
-        }
-        if (isConsented.booleanValue()) {
-          return TtpConsentStatus.BROAD_CONSENT_GIVEN;
-        } else {
-          return TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED;
-        }
-      } else if (response instanceof OperationOutcome outcome) {
-        log.error(
-            "failed to get consent status from ttp. probably configuration error. "
-                + "outcome: '{}'",
-            fhirContext.newJsonParser().encodeToString(outcome));
-      }
-    } catch (DataFormatException dfe) {
-      log.error("failed to parse response to FHIR R4 resource.", dfe);
-    }
-    return TtpConsentStatus.FAILED_TO_ASK;
   }
 
   @Override

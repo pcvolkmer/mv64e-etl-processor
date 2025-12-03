@@ -161,8 +161,10 @@ Modelvorhaben §64e.
 
 ##### Konfiguration
 
-* `APP_CONSENT_SERVICE`: Muss Wert `GICS` gesetzt sein um die Abfragen zu aktivieren. Der Wert
-  `NONE` deaktiviert die Abfrage in gICS.
+* `APP_CONSENT_SERVICE`: Folgende Werte sind möglich:
+  * Der Wert `GICS` aktiviert die Standard-Abfrage bei gICS
+  * Der Wert `GICS_GET_BC` aktiviert die **experimentelle** Abfrage per HTTP-GET Request **nur** für Broad-Consent.
+  * Der Wert `NONE` deaktiviert die Abfrage in gICS.
 * `APP_CONSENT_GICS_URI`: URI der gICS-Instanz (z.B. `http://localhost:8090/ttp-fhir/fhir/gics`)
 * `APP_CONSENT_GICS_USERNAME`: gIcs Basic-Auth Benutzername
 * `APP_CONSENT_GICS_PASSWORD`: gIcs Basic-Auth Passwort
@@ -178,6 +180,9 @@ Modelvorhaben §64e.
   `urn:oid:2.16.840.1.113883.3.1937.777.24.5.3` angenommen.
 * `APP_CONSENT_GICS_POLICYURI`: Die Version der Einwilligung. Falls leer wird Version 1.6d
   (`urn:oid:2.16.840.1.113883.3.1937.777.24.2.1790`) angenommen.
+
+Die **experimentelle* Abfrage über `GICS_GET_BC` setzt voraus, dass bereits ein MV-Consent im eingehenden Datensatz
+vorhanden ist und ergänzt nur den Broad-Consent.
 
 ### Anmeldung mit einem Passwort
 
