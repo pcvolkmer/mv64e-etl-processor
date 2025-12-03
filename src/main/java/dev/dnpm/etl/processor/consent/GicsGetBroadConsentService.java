@@ -1,8 +1,10 @@
 package dev.dnpm.etl.processor.consent;
 
-import ca.uhn.fhir.context.FhirContext;
+import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
+import java.net.URISyntaxException;
 import java.util.Date;
+import org.apache.hc.core5.net.URIBuilder;
 import org.hl7.fhir.r4.model.Bundle;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -14,7 +16,6 @@ import org.springframework.retry.TerminatedRetryException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Service to request Broad Consent only from remote gICS installation using REST/HTTP GET request
@@ -27,19 +28,17 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
   private final RetryTemplate retryTemplate;
   private final RestTemplate restTemplate;
   private final GIcsConfigProperties gIcsConfigProperties;
-  private final FhirContext fhirContext;
 
   public GicsGetBroadConsentService(
       GIcsConfigProperties gIcsConfigProperties,
       RetryTemplate retryTemplate,
       RestTemplate restTemplate,
-      FhirContext fhirContext) {
-    super(fhirContext, LoggerFactory.getLogger(GicsGetBroadConsentService.class));
+      AppFhirConfig appFhirConfig) {
+    super(appFhirConfig.fhirContext(), LoggerFactory.getLogger(GicsGetBroadConsentService.class));
 
     this.retryTemplate = retryTemplate;
     this.restTemplate = restTemplate;
     this.gIcsConfigProperties = gIcsConfigProperties;
-    this.fhirContext = fhirContext;
 
     if (null == this.gIcsConfigProperties.getUri()) {
       throw new IllegalStateException("Missing gICS URI configuration");
@@ -78,27 +77,27 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
             .formatted(
                 this.gIcsConfigProperties.getPersonIdentifierSystem(), personIdentifierValue);
 
-    final var uri =
-        UriComponentsBuilder.fromUriString(gIcsConfigProperties.getUri())
-            .pathSegment("Consent")
-            .queryParam("domain:identifier", consentDomain)
-            .queryParam(
-                "category", "http://fhir.de/ConsentManagement/CodeSystem/ResultType|consent-status")
-            .queryParam("patient.identifier", patientIdentifierQueryValue)
-            .build()
-            .toUri();
-
-    final var requestHeaders = new HttpHeaders();
-
-    if (null != gIcsConfigProperties.getUsername()
-        && null != gIcsConfigProperties.getPassword()
-        && !gIcsConfigProperties.getUsername().isBlank()
-        && !gIcsConfigProperties.getPassword().isBlank()) {
-      requestHeaders.setBasicAuth(
-          gIcsConfigProperties.getUsername(), gIcsConfigProperties.getPassword());
-    }
-
     try {
+      final var uri =
+          new URIBuilder(gIcsConfigProperties.getUri())
+              .appendPathSegments("Consent")
+              .addParameter("domain:identifier", consentDomain)
+              .addParameter(
+                  "category",
+                  "http://fhir.de/ConsentManagement/CodeSystem/ResultType|consent-status")
+              .addParameter("patient.identifier", patientIdentifierQueryValue)
+              .build();
+
+      final var requestHeaders = new HttpHeaders();
+
+      if (null != gIcsConfigProperties.getUsername()
+          && null != gIcsConfigProperties.getPassword()
+          && !gIcsConfigProperties.getUsername().isBlank()
+          && !gIcsConfigProperties.getPassword().isBlank()) {
+        requestHeaders.setBasicAuth(
+            gIcsConfigProperties.getUsername(), gIcsConfigProperties.getPassword());
+      }
+
       final var response =
           this.retryTemplate.execute(
               retryContext ->
@@ -124,6 +123,10 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
           String.format(
               "Get consents status process has been terminated. termination reason: '%s",
               terminatedRetryException.getMessage());
+      log.error(msg);
+      return null;
+    } catch (URISyntaxException e) {
+      var msg = String.format("Invalid URI for consents status request: '%s", e.getMessage());
       log.error(msg);
       return null;
     }
