@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.4](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.3...v0.12.4) (2025-12-03)
+
+
+### Features
+
+* simple HTTP GET based consent fetch ([#208](https://github.com/pcvolkmer/mv64e-etl-processor/issues/208)) ([b56b8c1](https://github.com/pcvolkmer/mv64e-etl-processor/commit/b56b8c1b6cc9a3e8bcd19adde2b832af15d3a526))
+
 ## [0.12.3](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.2...v0.12.3) (2025-12-01)
 
 
