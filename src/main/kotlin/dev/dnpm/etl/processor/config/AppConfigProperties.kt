@@ -149,6 +149,7 @@ enum class PseudonymGenerator {
 enum class ConsentService {
     NONE,
     GICS,
+    GICS_GET_BC,
 }
 
 data class TransformationProperties(

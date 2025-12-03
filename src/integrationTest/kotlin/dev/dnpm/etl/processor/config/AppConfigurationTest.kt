@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.GicsGetBroadConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
@@ -298,6 +299,23 @@ class AppConfigurationTest {
         @Test
         fun shouldUseConfiguredGenerator() {
             assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
+        }
+    }
+
+    @Nested
+    @TestPropertySource(
+        properties =
+            [
+                "app.consent.service=GICS_GET_BC",
+                "app.consent.gics.uri=http://localhost:9000",
+            ],
+    )
+    inner class AppConfigurationConsentGicsGetBcTest(
+        private val context: ApplicationContext,
+    ) {
+        @Test
+        fun shouldUseConfiguredGenerator() {
+            assertThat(context.getBean(GicsGetBroadConsentService::class.java)).isNotNull
         }
     }
 

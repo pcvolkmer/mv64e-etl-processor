@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.GicsGetBroadConsentService
 import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.monitoring.*
@@ -34,6 +35,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -43,6 +45,7 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ConfigurationCondition
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
+import org.springframework.data.relational.core.sql.NestedCondition
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
 import org.springframework.retry.RetryListener
@@ -255,6 +258,17 @@ class AppConfiguration {
     return GicsConsentService(gIcsConfigProperties, retryTemplate, restTemplate, appFhirConfig)
   }
 
+    @Conditional(GicsGetBroadConsentEnabledCondition::class)
+    @Bean
+    fun gicsGetBroadConsentService(
+        gIcsConfigProperties: GIcsConfigProperties,
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+        appFhirConfig: AppFhirConfig,
+    ): IConsentService {
+        return GicsGetBroadConsentService(gIcsConfigProperties, retryTemplate, restTemplate, appFhirConfig)
+    }
+
   @Conditional(GicsEnabledCondition::class)
   @Bean
   fun consentProcessor(
@@ -302,4 +316,14 @@ class GicsEnabledCondition :
   class OnGicsServiceSelected {
     // Just for Condition
   }
+}
+
+class GicsGetBroadConsentEnabledCondition :
+    AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
+
+    @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics_get_bc")
+    @ConditionalOnProperty(name = ["app.consent.gics.uri"])
+    class OnGicsGetBroadConsentServiceSelected {
+        // Just for Condition
+    }
 }
