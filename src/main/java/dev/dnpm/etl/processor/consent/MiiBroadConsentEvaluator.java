@@ -39,7 +39,7 @@ public class MiiBroadConsentEvaluator {
   private static final Logger log = LoggerFactory.getLogger(MiiBroadConsentEvaluator.class);
 
   private MiiBroadConsentEvaluator() {
-      // No content
+    // No content
   }
 
   /**
