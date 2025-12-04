@@ -131,4 +131,9 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
       return null;
     }
   }
+
+  @Override
+  protected TtpConsentStatus evaluateConsentResponse(@Nullable String consentStatusResponse) {
+    return MiiBroadConsentEvaluator.evaluate(this.fhirContext, consentStatusResponse);
+  }
 }
