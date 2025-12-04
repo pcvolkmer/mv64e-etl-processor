@@ -1,7 +1,26 @@
+/*
+ * This file is part of ETL-Processor
+ *
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2025  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dev.dnpm.etl.processor.consent;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Consent;
 import org.jspecify.annotations.NullMarked;
@@ -18,6 +37,10 @@ import org.slf4j.LoggerFactory;
 public class MiiBroadConsentEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(MiiBroadConsentEvaluator.class);
+
+  private MiiBroadConsentEvaluator() {
+      // No content
+  }
 
   /**
    * Evaluates MII Broad Consent
@@ -70,8 +93,8 @@ public class MiiBroadConsentEvaluator {
         }
         return TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED;
       }
-    } catch (DataFormatException dfe) {
-      log.error("failed to parse response to FHIR R4 resource.", dfe);
+    } catch (Exception e) {
+      log.error("failed to parse and analyze response as MII Broad Consent.", e);
     }
     return TtpConsentStatus.FAILED_TO_ASK;
   }
