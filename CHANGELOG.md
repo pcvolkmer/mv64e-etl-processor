@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.5](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.4...v0.12.5) (2025-12-04)
+
+
+### Features
+
+* check MII broad consent ([#213](https://github.com/pcvolkmer/mv64e-etl-processor/issues/213)) ([0c14eef](https://github.com/pcvolkmer/mv64e-etl-processor/commit/0c14eefe6eb2e3b7567ce06b3118b54e1618058b))
+
 ## [0.12.4](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.3...v0.12.4) (2025-12-03)
 
 
