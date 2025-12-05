@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2025  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -28,6 +29,7 @@ import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
@@ -51,7 +53,7 @@ abstract class RestMtbFileSender(
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(request.content, headers)
-                val response = restTemplate.postForEntity(sendUrl(), entityReq, String::class.java)
+                val response = restTemplate.exchange(sendUrl(), HttpMethod.POST, entityReq, String::class.java)
                 if (!response.statusCode.is2xxSuccessful) {
                     logger.warn("Error sending to remote system: {}", response.body)
                     return@execute MtbFileSender.Response(
