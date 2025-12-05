@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2025  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -31,21 +32,20 @@ import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.AllNestedConditions
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ConfigurationCondition
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
-import org.springframework.data.relational.core.sql.NestedCondition
+import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
 import org.springframework.retry.RetryListener
@@ -58,6 +58,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 @Configuration
 @EnableConfigurationProperties(
@@ -75,9 +77,22 @@ class AppConfiguration {
 
   private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)
 
+    fun stringHttpMessageConverter(): StringHttpMessageConverter {
+        return StringHttpMessageConverter()
+    }
+
+    @Bean
+  fun mappingJacksonHttpMessageConverter(objectMapper: ObjectMapper): MappingJackson2HttpMessageConverter {
+    val converter = MappingJackson2HttpMessageConverter()
+    converter.setObjectMapper(objectMapper)
+    return converter
+  }
+
   @Bean
-  fun restTemplate(): RestTemplate {
-    return RestTemplate()
+  fun restTemplate(objectMapper: ObjectMapper): RestTemplate {
+    return RestTemplateBuilder()
+        .messageConverters(stringHttpMessageConverter(), mappingJacksonHttpMessageConverter(objectMapper))
+        .build()
   }
 
   @Bean
