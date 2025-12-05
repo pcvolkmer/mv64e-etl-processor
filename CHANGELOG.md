@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.6](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.5...v0.12.6) (2025-12-05)
+
+
+### Bug Fixes
+
+* do not serialize null values ([#216](https://github.com/pcvolkmer/mv64e-etl-processor/issues/216)) ([05fe7c2](https://github.com/pcvolkmer/mv64e-etl-processor/commit/05fe7c2091cf7ca45c2cfcec8ec506c43417f3e6))
+
 ## [0.12.5](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.4...v0.12.5) (2025-12-04)
 
 
