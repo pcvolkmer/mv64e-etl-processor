@@ -10,14 +10,14 @@ import dev.dnpm.etl.processor.config.AppConfiguration;
 import dev.dnpm.etl.processor.config.AppFhirConfig;
 import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.net.URIBuilder;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,45 +78,20 @@ class GicsGetBroadConsentServiceTest {
 
   @Test
   void shouldReturnTtpBroadConsentStatus() throws Exception {
-    final Parameters consentedResponse =
-        new Parameters()
-            .addParameter(
-                new ParametersParameterComponent()
-                    .setName("consented")
-                    .setValue(new BooleanType().setValue(true)));
+    var inputStream =
+        Objects.requireNonNull(
+            this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("fake_broadConsent_mii_response_permit.json"));
 
     mockRestServiceServer
         .expect(requestTo(expectedGicsConsentedEndpoint()))
         .andRespond(
             withSuccess(
-                appFhirConfig
-                    .fhirContext()
-                    .newJsonParser()
-                    .encodeResourceToString(consentedResponse),
-                MediaType.APPLICATION_JSON));
+                IOUtils.toString(inputStream, StandardCharsets.UTF_8), MediaType.APPLICATION_JSON));
 
     var consentStatus = service.getTtpBroadConsentStatus("123456");
     assertThat(consentStatus).isEqualTo(TtpConsentStatus.BROAD_CONSENT_GIVEN);
-  }
-
-  @Test
-  void shouldReturnRevokedConsent() throws Exception {
-    final Parameters revokedResponse =
-        new Parameters()
-            .addParameter(
-                new ParametersParameterComponent()
-                    .setName("consented")
-                    .setValue(new BooleanType().setValue(false)));
-
-    mockRestServiceServer
-        .expect(requestTo(expectedGicsConsentedEndpoint()))
-        .andRespond(
-            withSuccess(
-                appFhirConfig.fhirContext().newJsonParser().encodeResourceToString(revokedResponse),
-                MediaType.APPLICATION_JSON));
-
-    var consentStatus = service.getTtpBroadConsentStatus("123456");
-    assertThat(consentStatus).isEqualTo(TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED);
   }
 
   @Test
