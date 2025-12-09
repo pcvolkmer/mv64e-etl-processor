@@ -53,6 +53,17 @@ aktiviert. Alle Datensätze mit erteilter Teilnahme am Modelvorhaben werden mit 
 
 `APP_GENOM_DE_TEST_SUBMISSION` -> `true` | `false` (falls fehlt, wird `false` angenommen)
 
+**ACHTUNG**: Diese Einstellung funktioniert nur, wenn, wie in Marburg, eine vollständige Consent-Abfrage über gICS für
+MV-Consent und Broad Consent erfolgt.
+
+Soll eine Testsubmission ohne diese Anbindung durchgeführt werden, kann eine Transformation als Work-Around umgesetzt werden:
+
+```
+APP_TRANSFORMATION_0_PATH: "metadata.type"
+APP_TRANSFORMATION_0_FROM: "initial"
+APP_TRANSFORMATION_0_TO: "test"
+```
+
 ### Datenübermittlung über HTTP/REST
 
 Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung direkt an DNPM:DIP
