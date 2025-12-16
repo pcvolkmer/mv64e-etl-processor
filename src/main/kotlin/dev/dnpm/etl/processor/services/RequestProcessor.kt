@@ -66,8 +66,6 @@ class RequestProcessor(
   }
 
   fun processMtbFile(mtbFile: Mtb, requestId: RequestId) {
-    val pid = PatientId(extractPatientIdentifier(mtbFile))
-
     val isConsentOk =
         consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) ||
             consentProcessor == null
@@ -78,7 +76,7 @@ class RequestProcessor(
       mtbFile pseudonymizeWith pseudonymizeService
       mtbFile anonymizeContentWith pseudonymizeService
       val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
-      saveAndSend(request, pid)
+      saveAndSend(request)
     } else {
       logger.warn("consent check failed file will not be processed further!")
       applicationEventPublisher.publishEvent(
@@ -95,12 +93,12 @@ class RequestProcessor(
     return isModelProjectConsented
   }
 
-  private fun <T> saveAndSend(request: MtbFileRequest<T>, pid: PatientId) {
+  private fun <T> saveAndSend(request: MtbFileRequest<T>) {
     requestService.save(
         Request(
             request.requestId,
             request.patientPseudonym(),
-            pid,
+            emptyPatientId(),
             fingerprint(request),
             RequestType.MTB_FILE,
             RequestStatus.UNKNOWN,
@@ -178,7 +176,7 @@ class RequestProcessor(
           Request(
               requestId,
               patientPseudonym,
-              patientId,
+              emptyPatientId(),
               fingerprint(patientPseudonym.value),
               RequestType.DELETE,
               requestStatus,
@@ -229,5 +227,3 @@ class RequestProcessor(
     )
   }
 }
-
-private fun extractPatientIdentifier(mtbFile: Mtb): String = mtbFile.patient.id

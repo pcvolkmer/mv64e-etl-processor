@@ -42,6 +42,8 @@ fun randomRequestId() = RequestId(UUID.randomUUID().toString())
 
 @JvmInline value class PatientId(val value: String)
 
+fun emptyPatientId() = PatientId("")
+
 @JvmInline value class PatientPseudonym(val value: String)
 
 fun emptyPatientPseudonym() = PatientPseudonym("")
