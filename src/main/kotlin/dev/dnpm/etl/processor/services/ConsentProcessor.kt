@@ -114,10 +114,10 @@ class ConsentProcessor(
         // we need another step to back to string, before we convert to object map
         val asJsonString = fhirContext.newJsonParser().encodeResourceToString(resource)
         try {
-          val mapOfJson: HashMap<String?, Any?>? =
-              objectMapper.readValue<HashMap<String?, Any?>?>(
+          val mapOfJson: MvhMetadata.ResearchConsent? =
+              objectMapper.readValue<MvhMetadata.ResearchConsent?>(
                   asJsonString,
-                  object : TypeReference<HashMap<String?, Any?>?>() {},
+                  object : TypeReference<MvhMetadata.ResearchConsent?>() {},
               )
           mtbFile.metadata.researchConsents.add(mapOfJson)
         } catch (e: JsonProcessingException) {
