@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.6...v0.13.0) (2025-12-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* update dto lib to version 0.2.0 ([#226](https://github.com/pcvolkmer/mv64e-etl-processor/issues/226))
+
+### deps
+
+* update dto lib to version 0.2.0 ([#226](https://github.com/pcvolkmer/mv64e-etl-processor/issues/226)) ([6cfb847](https://github.com/pcvolkmer/mv64e-etl-processor/commit/6cfb84770832a3e6cfb209c783a9fda52c5c9141))
+
+
+### Bug Fixes
+
+* do not save PID in test mode ([#228](https://github.com/pcvolkmer/mv64e-etl-processor/issues/228)) ([8e824ea](https://github.com/pcvolkmer/mv64e-etl-processor/commit/8e824ea9f6c6708d7d8af330455347b42aeae057))
+
 ## [0.12.6](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.5...v0.12.6) (2025-12-05)
 
 
