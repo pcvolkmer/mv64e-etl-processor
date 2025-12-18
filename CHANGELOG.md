@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.13.0...v0.13.1) (2025-12-18)
+
+
+### Bug Fixes
+
+* handle null values in supporting variants ([#230](https://github.com/pcvolkmer/mv64e-etl-processor/issues/230)) ([deee482](https://github.com/pcvolkmer/mv64e-etl-processor/commit/deee48279c8635d6ec3749130ae70ec3feff449c))
+
 ## [0.13.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.12.6...v0.13.0) (2025-12-16)
 
 
