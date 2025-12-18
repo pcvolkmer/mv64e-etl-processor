@@ -167,7 +167,7 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
       this.studyEnrollmentRecommendations?.filterNotNull()?.forEach { studyEnrollmentRecommendation
         ->
         studyEnrollmentRecommendation.id = studyEnrollmentRecommendation.id?.let(::anonymize)
-        studyEnrollmentRecommendation.supportingVariants.forEach {
+        studyEnrollmentRecommendation.supportingVariants?.forEach {
           it.variant?.id = it?.variant?.id?.let(::anonymize)
         }
       }
