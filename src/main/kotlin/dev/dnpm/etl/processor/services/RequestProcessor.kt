@@ -96,7 +96,7 @@ class RequestProcessor(
   }
 
   private fun <T> saveAndSend(request: MtbFileRequest<T>) {
-    val submissionType: SubmissionType = when (request) {
+    var submissionType: SubmissionType = when (request) {
         is DnpmV2MtbFileRequest -> {
             when (request.content.metadata?.type) {
                 MvhSubmissionType.TEST -> SubmissionType.TEST
@@ -129,16 +129,18 @@ class RequestProcessor(
         return
     }
 
-      if (
-          appConfigProperties.postInitialSubmissionBlock
-          && hasSuccessfullInitialSubmission(request.patientPseudonym())
-          && !hasUnacceptedInitialSubmission(request.patientPseudonym())
-      ) {
-          // Use "addition" after "intial" with "Meldebestaetigung"
-          request.content.metadata?.let {
-              it.type = MvhSubmissionType.ADDITION
-          }
+    if (
+      appConfigProperties.postInitialSubmissionBlock
+      && hasSuccessfullInitialSubmission(request.patientPseudonym())
+      && !hasUnacceptedInitialSubmission(request.patientPseudonym())
+    ) {
+      // Use "addition" after "intial" with "Meldebestaetigung"
+      request.content.metadata?.let {
+          logger.warn("Override submission type using 'addition' after first initial submission!")
+          it.type = MvhSubmissionType.ADDITION
+          submissionType = SubmissionType.ADDITION
       }
+    }
 
     requestService.save(
         Request(

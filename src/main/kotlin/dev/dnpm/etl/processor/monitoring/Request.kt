@@ -45,7 +45,7 @@ data class Request(
     var status: RequestStatus,
     var processedAt: Instant = Instant.now(),
     @Embedded.Nullable var report: Report? = null,
-    @Column("submission_accepted") val submissionAccepted: Boolean = false,
+    @Column("submission_accepted") var submissionAccepted: Boolean = false,
 ) {
   constructor(
       uuid: RequestId,

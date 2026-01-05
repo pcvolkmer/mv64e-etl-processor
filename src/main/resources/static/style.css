@@ -360,7 +360,7 @@ form.samplecode-input input:focus-visible {
 }
 
 .border {
-    padding: 1.5rem;
+    padding: 1rem;
     border: 1px solid var(--table-border);
     border-radius: .5rem;
     background: white;
@@ -468,10 +468,9 @@ td > small {
 }
 
 td.patient-id {
-    width: 32rem;
+    min-width: 20rem;
     text-overflow: ellipsis;
     overflow: hidden;
-    display: block;
 }
 
 td.bg-blue, th.bg-blue,
@@ -571,6 +570,11 @@ td.clipboard.clipped {
 
 .btn.btn-red {
     background: var(--bg-red);
+    color: white;
+}
+
+.btn.btn-green {
+    background: var(--bg-green);
     color: white;
 }
 

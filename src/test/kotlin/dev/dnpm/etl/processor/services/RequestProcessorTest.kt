@@ -458,7 +458,7 @@ class RequestProcessorTest {
                 SubmissionType.INITIAL,
                 RequestStatus.BLOCKED_INITIAL,
                 Instant.parse("2026-01-05T10:00:00Z"),
-                submissionAccepted = true
+                submissionAccepted = false
             )
         )
 
