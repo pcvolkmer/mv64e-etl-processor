@@ -382,7 +382,7 @@ table {
 }
 
 table.config-table td:first-child {
-    width: 24rem;
+    width: 26rem;
     min-width: fit-content;
 }
 
@@ -451,8 +451,11 @@ th {
 }
 
 td {
-    font-family: monospace;
     border-bottom: 1px solid var(--bg-gray-op);
+}
+
+td, td > a {
+    font-family: monospace;
 }
 
 tr:last-of-type > td {
