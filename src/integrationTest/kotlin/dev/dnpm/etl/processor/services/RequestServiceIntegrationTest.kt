@@ -24,6 +24,7 @@ import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.output.MtbFileSender
 import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
@@ -75,6 +76,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
@@ -85,6 +87,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 PatientId("P2"),
                 Fingerprint("0123456789abcdef2"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.WARNING,
                 Instant.parse("2023-08-08T00:00:00Z"),
             ),
@@ -95,6 +98,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 PatientId("P2"),
                 Fingerprint("0123456789abcdee1"),
                 RequestType.DELETE,
+                SubmissionType.TEST,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-08-08T02:00:00Z"),
             ),
