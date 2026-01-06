@@ -96,49 +96,50 @@ class RequestProcessor(
   }
 
   private fun <T> saveAndSend(request: MtbFileRequest<T>) {
-    var submissionType: SubmissionType = when (request) {
-        is DnpmV2MtbFileRequest -> {
+    var submissionType: SubmissionType =
+        when (request) {
+          is DnpmV2MtbFileRequest -> {
             when (request.content.metadata?.type) {
-                MvhSubmissionType.TEST -> SubmissionType.TEST
-                MvhSubmissionType.INITIAL -> SubmissionType.INITIAL
-                MvhSubmissionType.ADDITION -> SubmissionType.ADDITION
-                MvhSubmissionType.CORRECTION -> SubmissionType.CORRECTION
-                MvhSubmissionType.FOLLOWUP -> SubmissionType.FOLLOWUP
-                else -> SubmissionType.UNKNOWN
+              MvhSubmissionType.TEST -> SubmissionType.TEST
+              MvhSubmissionType.INITIAL -> SubmissionType.INITIAL
+              MvhSubmissionType.ADDITION -> SubmissionType.ADDITION
+              MvhSubmissionType.CORRECTION -> SubmissionType.CORRECTION
+              MvhSubmissionType.FOLLOWUP -> SubmissionType.FOLLOWUP
+              else -> SubmissionType.UNKNOWN
             }
+          }
         }
+
+    if (
+        appConfigProperties.postInitialSubmissionBlock &&
+            hasSuccessfullInitialSubmission(request.patientPseudonym()) &&
+            hasUnacceptedInitialSubmission(request.patientPseudonym())
+    ) {
+      requestService.save(
+          Request(
+              request.requestId,
+              request.patientPseudonym(),
+              emptyPatientId(),
+              fingerprint(request),
+              RequestType.MTB_FILE,
+              submissionType,
+              RequestStatus.BLOCKED_INITIAL,
+          )
+      )
+      // Exit - no further processing
+      return
     }
 
     if (
-        appConfigProperties.postInitialSubmissionBlock
-            && hasSuccessfullInitialSubmission(request.patientPseudonym())
-            && hasUnacceptedInitialSubmission(request.patientPseudonym())
-        ) {
-        requestService.save(
-            Request(
-                request.requestId,
-                request.patientPseudonym(),
-                emptyPatientId(),
-                fingerprint(request),
-                RequestType.MTB_FILE,
-                submissionType,
-                RequestStatus.BLOCKED_INITIAL,
-            )
-        )
-        // Exit - no further processing
-        return
-    }
-
-    if (
-      appConfigProperties.postInitialSubmissionBlock
-      && hasSuccessfullInitialSubmission(request.patientPseudonym())
-      && !hasUnacceptedInitialSubmission(request.patientPseudonym())
+        appConfigProperties.postInitialSubmissionBlock &&
+            hasSuccessfullInitialSubmission(request.patientPseudonym()) &&
+            !hasUnacceptedInitialSubmission(request.patientPseudonym())
     ) {
       // Use "addition" after "intial" with "Meldebestaetigung"
       request.content.metadata?.let {
-          logger.warn("Override submission type using 'addition' after first initial submission!")
-          it.type = MvhSubmissionType.ADDITION
-          submissionType = SubmissionType.ADDITION
+        logger.warn("Override submission type using 'addition' after first initial submission!")
+        it.type = MvhSubmissionType.ADDITION
+        submissionType = SubmissionType.ADDITION
       }
     }
 
@@ -177,18 +178,19 @@ class RequestProcessor(
     )
   }
 
-    private fun hasSuccessfullInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
-        return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
-            it.submissionType == SubmissionType.INITIAL
-                    && (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING)
-        }
+  private fun hasSuccessfullInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
+    return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
+      it.submissionType == SubmissionType.INITIAL &&
+          (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING)
     }
+  }
 
-    private fun hasUnacceptedInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
-        return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
-            it.submissionType == SubmissionType.INITIAL && !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
-        }
+  private fun hasUnacceptedInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
+    return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
+      it.submissionType == SubmissionType.INITIAL &&
+          !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
     }
+  }
 
   private fun <T> isDuplication(pseudonymizedMtbFileRequest: MtbFileRequest<T>): Boolean {
     val patientPseudonym =
@@ -283,11 +285,8 @@ class RequestProcessor(
   }
 
   private fun fingerprint(s: String): Fingerprint {
-    return Fingerprint(
-        Base32()
-            .encodeAsString(DigestUtils.sha256(s))
-            .replace("=", "")
-            .lowercase()
-    )
+    return Fingerprint(Base32().encodeAsString(DigestUtils.sha256(s))
+        .replace("=", "")
+        .lowercase())
   }
 }

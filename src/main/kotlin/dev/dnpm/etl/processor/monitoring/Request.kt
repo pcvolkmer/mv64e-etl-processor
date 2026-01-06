@@ -55,7 +55,17 @@ data class Request(
       type: RequestType,
       submissionType: SubmissionType,
       status: RequestStatus,
-  ) : this(null, uuid, patientPseudonym, pid, fingerprint, type, submissionType, status, Instant.now())
+  ) : this(
+      null,
+      uuid,
+      patientPseudonym,
+      pid,
+      fingerprint,
+      type,
+      submissionType,
+      status,
+      Instant.now(),
+  )
 
   constructor(
       uuid: RequestId,
@@ -66,7 +76,17 @@ data class Request(
       submissionType: SubmissionType,
       status: RequestStatus,
       processedAt: Instant,
-  ) : this(null, uuid, patientPseudonym, pid, fingerprint, type, submissionType, status, processedAt)
+  ) : this(
+      null,
+      uuid,
+      patientPseudonym,
+      pid,
+      fingerprint,
+      type,
+      submissionType,
+      status,
+      processedAt,
+  )
 
   fun isPendingUnknown(): Boolean {
     return this.status == RequestStatus.UNKNOWN &&

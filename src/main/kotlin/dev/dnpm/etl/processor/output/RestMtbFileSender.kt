@@ -53,7 +53,8 @@ abstract class RestMtbFileSender(
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(request.content, headers)
-                val response = restTemplate.exchange(sendUrl(), HttpMethod.POST, entityReq, String::class.java)
+                val response =
+                    restTemplate.exchange(sendUrl(), HttpMethod.POST, entityReq, String::class.java)
                 if (!response.statusCode.is2xxSuccessful) {
                     logger.warn("Error sending to remote system: {}", response.body)
                     return@execute MtbFileSender.Response(

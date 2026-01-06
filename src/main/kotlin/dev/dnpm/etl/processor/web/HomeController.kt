@@ -22,8 +22,8 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.NotFoundException
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.services.RequestService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
@@ -42,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 class HomeController(
     private val requestService: RequestService,
     private val reportService: ReportService,
+    private val appConfigProperties: AppConfigProperties,
 ) {
     @GetMapping
     fun index(
@@ -51,7 +51,7 @@ class HomeController(
     ): String {
         val requests = requestService.findAll(pageable)
         model.addAttribute("requests", requests)
-
+        model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
         return "index"
     }
 
@@ -82,7 +82,7 @@ class HomeController(
     }
 
     @PutMapping(path = ["/submission/{id}/accepted"])
-    fun acceptReport(
+    fun acceptSubmission(
         @PathVariable id: RequestId,
         model: Model,
     ): String {
@@ -96,7 +96,7 @@ class HomeController(
     }
 
     @DeleteMapping(path = ["/submission/{id}/accepted"])
-    fun unacceptReport(
+    fun unacceptSubmission(
         @PathVariable id: RequestId,
         model: Model,
     ): String {

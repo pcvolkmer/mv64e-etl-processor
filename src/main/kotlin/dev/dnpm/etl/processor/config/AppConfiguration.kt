@@ -32,6 +32,8 @@ import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
@@ -58,8 +60,6 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
 
 @Configuration
 @EnableConfigurationProperties(
@@ -77,12 +77,14 @@ class AppConfiguration {
 
   private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)
 
-    fun stringHttpMessageConverter(): StringHttpMessageConverter {
-        return StringHttpMessageConverter()
-    }
+  fun stringHttpMessageConverter(): StringHttpMessageConverter {
+    return StringHttpMessageConverter()
+  }
 
-    @Bean
-  fun mappingJacksonHttpMessageConverter(objectMapper: ObjectMapper): MappingJackson2HttpMessageConverter {
+  @Bean
+  fun mappingJacksonHttpMessageConverter(
+      objectMapper: ObjectMapper
+  ): MappingJackson2HttpMessageConverter {
     val converter = MappingJackson2HttpMessageConverter()
     converter.setObjectMapper(objectMapper)
     return converter
@@ -91,7 +93,10 @@ class AppConfiguration {
   @Bean
   fun restTemplate(objectMapper: ObjectMapper): RestTemplate {
     return RestTemplateBuilder()
-        .messageConverters(stringHttpMessageConverter(), mappingJacksonHttpMessageConverter(objectMapper))
+        .messageConverters(
+            stringHttpMessageConverter(),
+            mappingJacksonHttpMessageConverter(objectMapper),
+        )
         .build()
   }
 
@@ -273,16 +278,21 @@ class AppConfiguration {
     return GicsConsentService(gIcsConfigProperties, retryTemplate, restTemplate, appFhirConfig)
   }
 
-    @Conditional(GicsGetBroadConsentEnabledCondition::class)
-    @Bean
-    fun gicsGetBroadConsentService(
-        gIcsConfigProperties: GIcsConfigProperties,
-        retryTemplate: RetryTemplate,
-        restTemplate: RestTemplate,
-        appFhirConfig: AppFhirConfig,
-    ): IConsentService {
-        return GicsGetBroadConsentService(gIcsConfigProperties, retryTemplate, restTemplate, appFhirConfig)
-    }
+  @Conditional(GicsGetBroadConsentEnabledCondition::class)
+  @Bean
+  fun gicsGetBroadConsentService(
+      gIcsConfigProperties: GIcsConfigProperties,
+      retryTemplate: RetryTemplate,
+      restTemplate: RestTemplate,
+      appFhirConfig: AppFhirConfig,
+  ): IConsentService {
+    return GicsGetBroadConsentService(
+        gIcsConfigProperties,
+        retryTemplate,
+        restTemplate,
+        appFhirConfig,
+    )
+  }
 
   @Conditional(GicsEnabledCondition::class)
   @Bean
@@ -336,9 +346,9 @@ class GicsEnabledCondition :
 class GicsGetBroadConsentEnabledCondition :
     AnyNestedCondition(ConfigurationCondition.ConfigurationPhase.REGISTER_BEAN) {
 
-    @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics_get_bc")
-    @ConditionalOnProperty(name = ["app.consent.gics.uri"])
-    class OnGicsGetBroadConsentServiceSelected {
-        // Just for Condition
-    }
+  @ConditionalOnProperty(name = ["app.consent.service"], havingValue = "gics_get_bc")
+  @ConditionalOnProperty(name = ["app.consent.gics.uri"])
+  class OnGicsGetBroadConsentServiceSelected {
+    // Just for Condition
+  }
 }

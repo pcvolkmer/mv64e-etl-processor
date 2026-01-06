@@ -42,7 +42,7 @@
                     <tr>
                         <th>Status</th>
                         <th>Typ</th>
-                        <th sec:authorize="hasRole('USER') or hasRole('ADMIN')">Aktion</th>
+                        <th sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}">Aktion</th>
                         <th>ID</th>
                         <th>Datum</th>
                         <th>Patienten-ID</th>
@@ -64,12 +64,11 @@
                                 <th:block th:if="${request.submissionType.value != 'unknown'}">([[ ${request.submissionType} ]])</th:block>
                             </small>
                         </td>
-                        <td th:insert="~{fragments :: accept-initial}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                        <td th:insert="~{fragments :: accept-initial}" sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}"></td>
                         <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
                         <td th:if="${request.report}">
                             <a th:href="@{/report/{id}(id=${request.uuid})}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">[[ ${request.uuid} ]]</a>
                             <th:block sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">[[ ${request.uuid} ]]</th:block>
-                        </td>
                         </td>
                         <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
                         <td class="patient-id" th:if="${patientPseudonym != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
