@@ -24,11 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.pcvolkmer.mv64e.mtb.*
+import java.time.Instant
+import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.util.*
 
 class TransformationServiceTest {
 
@@ -149,7 +149,12 @@ class TransformationServiceTest {
             )
             .build()
     val consent = ConsentProcessorTest.getDummyGenomDeConsent()
-    val jsonNode = ObjectMapper().readValue(FhirContext.forR4().newJsonParser().encodeToString(consent), ObjectNode::class.java)
+    val jsonNode =
+        ObjectMapper()
+            .readValue(
+                FhirContext.forR4().newJsonParser().encodeToString(consent),
+                ObjectNode::class.java,
+            )
 
     mvhMetadata.researchConsents = mutableListOf()
     mvhMetadata.researchConsents.add(MvhMetadata.ResearchConsent.from(jsonNode))

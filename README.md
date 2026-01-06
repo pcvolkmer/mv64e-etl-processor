@@ -45,6 +45,17 @@ Zu diesem Zweck muss in gPas eine **Multi-Pseudonym-Domäne** konfiguriert werde
 **WICHTIG:** Deaktivierte Pseudonymisierung ist nur für Tests nutzbar. Vorgangsummern sind zufällig
 und werden anschließend verworfen.
 
+#### Blockieren weiterer initialer Submissions
+
+Diese Anwendung blockiert weitere initiale Submissions nach der ersten erfolgreichen Übertragung in DNPM:DIP.
+Sobald für einen Patienten eine Übertragung ohne Issues oder mit maximal Warnungen erfolgte und damit von
+DNPM:DIP akzeptiert wurde, werden weitere Meldungen solange verworfen, bis ein Administrator den Patienten 
+wieder freigegeben hat.
+
+**ACHTUNG**: Diese Funktionalität ist in Version 0.12.x noch nicht standardmäßig aktiviert und muss erst aktiviert werden.
+
+`APP_POST_INITIAL_SUBMISSION_BLOCK` -> `true` | `false` (falls fehlt, wird `false` angenommen)
+
 #### Test Betriebsbereitschaft
 Um die voll Betriebsbereitschaft herzustellen, muss eine erfolgreiche Übertragung mit dem
 Submission-Typ *Test* erfolgt sein. Über die Umgebungsvariable wird dieser Übertragungsmodus

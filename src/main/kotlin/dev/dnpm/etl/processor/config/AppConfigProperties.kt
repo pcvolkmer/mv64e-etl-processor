@@ -29,6 +29,7 @@ data class AppConfigProperties(
     var maxRetryAttempts: Int = 3,
     var duplicationDetection: Boolean = true,
     var genomDeTestSubmission: Boolean = false,
+    var postInitialSubmissionBlock: Boolean = false,
 ) {
     companion object {
         const val NAME = "app"

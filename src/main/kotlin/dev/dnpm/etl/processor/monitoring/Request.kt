@@ -41,9 +41,11 @@ data class Request(
     val pid: PatientId,
     @Column("fingerprint") val fingerprint: Fingerprint,
     val type: RequestType,
+    @Column("submission_type") val submissionType: SubmissionType,
     var status: RequestStatus,
     var processedAt: Instant = Instant.now(),
     @Embedded.Nullable var report: Report? = null,
+    @Column("submission_accepted") var submissionAccepted: Boolean = false,
 ) {
   constructor(
       uuid: RequestId,
@@ -51,8 +53,19 @@ data class Request(
       pid: PatientId,
       fingerprint: Fingerprint,
       type: RequestType,
+      submissionType: SubmissionType,
       status: RequestStatus,
-  ) : this(null, uuid, patientPseudonym, pid, fingerprint, type, status, Instant.now())
+  ) : this(
+      null,
+      uuid,
+      patientPseudonym,
+      pid,
+      fingerprint,
+      type,
+      submissionType,
+      status,
+      Instant.now(),
+  )
 
   constructor(
       uuid: RequestId,
@@ -60,9 +73,20 @@ data class Request(
       pid: PatientId,
       fingerprint: Fingerprint,
       type: RequestType,
+      submissionType: SubmissionType,
       status: RequestStatus,
       processedAt: Instant,
-  ) : this(null, uuid, patientPseudonym, pid, fingerprint, type, status, processedAt)
+  ) : this(
+      null,
+      uuid,
+      patientPseudonym,
+      pid,
+      fingerprint,
+      type,
+      submissionType,
+      status,
+      processedAt,
+  )
 
   fun isPendingUnknown(): Boolean {
     return this.status == RequestStatus.UNKNOWN &&

@@ -24,6 +24,7 @@ import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -51,6 +52,7 @@ class RequestServiceTest {
               PatientId("PX"),
               Fingerprint("dummy"),
               RequestType.MTB_FILE,
+              SubmissionType.TEST,
               RequestStatus.SUCCESS,
               Instant.parse("2023-08-08T02:00:00Z"),
           )
@@ -72,6 +74,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T00:00:00Z"),
             ),
@@ -82,6 +85,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdefd"),
                 RequestType.DELETE,
+                SubmissionType.TEST,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
@@ -92,6 +96,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.UNKNOWN,
                 Instant.parse("2023-08-11T00:00:00Z"),
             ),
@@ -113,6 +118,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T00:00:00Z"),
             ),
@@ -123,6 +129,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.WARNING,
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
@@ -133,6 +140,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.UNKNOWN,
                 Instant.parse("2023-08-11T00:00:00Z"),
             ),
@@ -154,6 +162,7 @@ class RequestServiceTest {
                 PatientId("P1"),
                 Fingerprint("0123456789abcdef1"),
                 RequestType.DELETE,
+                SubmissionType.TEST,
                 RequestStatus.SUCCESS,
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
@@ -164,6 +173,7 @@ class RequestServiceTest {
                 PatientId("P2"),
                 Fingerprint("0123456789abcdef2"),
                 RequestType.MTB_FILE,
+                SubmissionType.TEST,
                 RequestStatus.WARNING,
                 Instant.parse("2023-08-08T00:00:00Z"),
             ),
@@ -200,6 +210,7 @@ class RequestServiceTest {
             PatientId("P1"),
             Fingerprint("0123456789abcdef1"),
             RequestType.DELETE,
+            SubmissionType.TEST,
             RequestStatus.SUCCESS,
             Instant.parse("2023-07-07T02:00:00Z"),
         )

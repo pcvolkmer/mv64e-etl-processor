@@ -61,6 +61,7 @@ class RequestRepositoryTest : AbstractTestcontainerTest() {
             PatientId("P1"),
             Fingerprint("0123456789abcdef1"),
             RequestType.MTB_FILE,
+            SubmissionType.TEST,
             RequestStatus.WARNING,
             Instant.parse("2023-07-07T00:00:00Z"),
         )

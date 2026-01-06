@@ -23,6 +23,7 @@ import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import java.time.Instant
 import java.util.*
 import org.assertj.core.api.Assertions.assertThat
@@ -52,6 +53,7 @@ class ResponseProcessorTest {
           PatientId("1"),
           Fingerprint("dummyfingerprint"),
           RequestType.MTB_FILE,
+          SubmissionType.TEST,
           RequestStatus.UNKNOWN,
       )
 

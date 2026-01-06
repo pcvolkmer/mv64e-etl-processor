@@ -94,6 +94,7 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
         authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
         authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
         authorize("/report/**", hasAnyRole("ADMIN", "USER"))
+        authorize("/submission/**", hasAnyRole("ADMIN", "USER"))
         authorize("*.css", permitAll)
         authorize("*.ico", permitAll)
         authorize("*.jpeg", permitAll)
@@ -161,6 +162,7 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
         authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
         authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN"))
         authorize("/report/**", hasRole("ADMIN"))
+        authorize("/submission/**", hasAnyRole("ADMIN"))
         authorize(anyRequest, permitAll)
       }
       httpBasic { realmName = "ETL-Processor" }

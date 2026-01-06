@@ -28,6 +28,7 @@ import dev.dnpm.etl.processor.monitoring.CountedState
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.randomRequestId
 import dev.dnpm.etl.processor.services.RequestService
 import org.hamcrest.Matchers.equalTo
@@ -185,6 +186,7 @@ class StatisticsRestControllerTest {
                         PatientId("P1"),
                         Fingerprint("0123456789abcdef1"),
                         RequestType.MTB_FILE,
+                        SubmissionType.TEST,
                         RequestStatus.SUCCESS,
                         Instant
                             .now()
@@ -200,6 +202,7 @@ class StatisticsRestControllerTest {
                         PatientId("P2"),
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
+                        SubmissionType.TEST,
                         RequestStatus.WARNING,
                         Instant
                             .now()
@@ -215,6 +218,7 @@ class StatisticsRestControllerTest {
                         PatientId("P2"),
                         Fingerprint("0123456789abcdee1"),
                         RequestType.DELETE,
+                        SubmissionType.TEST,
                         RequestStatus.ERROR,
                         Instant
                             .now()
@@ -230,6 +234,7 @@ class StatisticsRestControllerTest {
                         PatientId("P2"),
                         Fingerprint("0123456789abcdef2"),
                         RequestType.MTB_FILE,
+                        SubmissionType.TEST,
                         RequestStatus.DUPLICATION,
                         Instant
                             .now()
@@ -245,6 +250,7 @@ class StatisticsRestControllerTest {
                         PatientId("P2"),
                         Fingerprint("0123456789abcdef2"),
                         RequestType.DELETE,
+                        SubmissionType.TEST,
                         RequestStatus.UNKNOWN,
                         Instant
                             .now()

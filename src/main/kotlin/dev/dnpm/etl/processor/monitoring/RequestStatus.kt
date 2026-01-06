@@ -28,4 +28,5 @@ enum class RequestStatus(
     UNKNOWN("unknown"),
     DUPLICATION("duplication"),
     NO_CONSENT("no-consent"),
+    BLOCKED_INITIAL("blocked-initial"),
 }

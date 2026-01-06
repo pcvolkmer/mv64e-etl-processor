@@ -42,6 +42,7 @@
                     <tr>
                         <th>Status</th>
                         <th>Typ</th>
+                        <th sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}">Aktion</th>
                         <th>ID</th>
                         <th>Datum</th>
                         <th>Patienten-ID</th>
@@ -56,7 +57,14 @@
                         <td th:if="${request.status.value == 'unknown' and request.isPendingUnknown()}" class="bg-yellow"><small>⏰ [[ ${request.status} ]] ⏰</small></td>
                         <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
                         <td th:if="${request.status.value == 'no-consent'}" class="bg-blue"><small>[[ ${request.status} ]]</small></td>
-                        <td th:style="${request.type.value == 'delete'} ? 'color: red;'"><small>[[ ${request.type} ]]</small></td>
+                        <td th:if="${request.status.value == 'blocked-initial'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
+                        <td th:style="${request.type.value == 'delete'} ? 'color: red;'">
+                            <small>
+                                [[ ${request.type} ]]
+                                <th:block th:if="${request.submissionType.value != 'unknown'}">([[ ${request.submissionType} ]])</th:block>
+                            </small>
+                        </td>
+                        <td th:insert="~{fragments :: accept-initial}" sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}"></td>
                         <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
                         <td th:if="${request.report}">
                             <a th:href="@{/report/{id}(id=${request.uuid})}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">[[ ${request.uuid} ]]</a>
@@ -78,6 +86,7 @@
     </main>
     <footer th:replace="~{fragments.html :: footer}"></footer>
     <script th:src="@{/scripts.js}"></script>
+    <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
     <script>
         window.addEventListener('load', () => {
             let keyBindings = {

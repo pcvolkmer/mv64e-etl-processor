@@ -27,6 +27,7 @@ import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileRequest
@@ -38,6 +39,7 @@ import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
 import dev.pcvolkmer.mv64e.mtb.ConsentProvision
 import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import java.time.Instant
 import java.util.*
 import org.apache.commons.codec.binary.Base32
@@ -94,6 +96,53 @@ class RequestProcessor(
   }
 
   private fun <T> saveAndSend(request: MtbFileRequest<T>) {
+    var submissionType: SubmissionType =
+        when (request) {
+          is DnpmV2MtbFileRequest -> {
+            when (request.content.metadata?.type) {
+              MvhSubmissionType.TEST -> SubmissionType.TEST
+              MvhSubmissionType.INITIAL -> SubmissionType.INITIAL
+              MvhSubmissionType.ADDITION -> SubmissionType.ADDITION
+              MvhSubmissionType.CORRECTION -> SubmissionType.CORRECTION
+              MvhSubmissionType.FOLLOWUP -> SubmissionType.FOLLOWUP
+              else -> SubmissionType.UNKNOWN
+            }
+          }
+        }
+
+    if (
+        appConfigProperties.postInitialSubmissionBlock &&
+            hasSuccessfullInitialSubmission(request.patientPseudonym()) &&
+            hasUnacceptedInitialSubmission(request.patientPseudonym())
+    ) {
+      requestService.save(
+          Request(
+              request.requestId,
+              request.patientPseudonym(),
+              emptyPatientId(),
+              fingerprint(request),
+              RequestType.MTB_FILE,
+              submissionType,
+              RequestStatus.BLOCKED_INITIAL,
+          )
+      )
+      // Exit - no further processing
+      return
+    }
+
+    if (
+        appConfigProperties.postInitialSubmissionBlock &&
+            hasSuccessfullInitialSubmission(request.patientPseudonym()) &&
+            !hasUnacceptedInitialSubmission(request.patientPseudonym())
+    ) {
+      // Use "addition" after "intial" with "Meldebestaetigung"
+      request.content.metadata?.let {
+        logger.warn("Override submission type using 'addition' after first initial submission!")
+        it.type = MvhSubmissionType.ADDITION
+        submissionType = SubmissionType.ADDITION
+      }
+    }
+
     requestService.save(
         Request(
             request.requestId,
@@ -101,6 +150,7 @@ class RequestProcessor(
             emptyPatientId(),
             fingerprint(request),
             RequestType.MTB_FILE,
+            submissionType,
             RequestStatus.UNKNOWN,
         )
     )
@@ -126,6 +176,20 @@ class RequestProcessor(
             },
         )
     )
+  }
+
+  private fun hasSuccessfullInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
+    return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
+      it.submissionType == SubmissionType.INITIAL &&
+          (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING)
+    }
+  }
+
+  private fun hasUnacceptedInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
+    return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
+      it.submissionType == SubmissionType.INITIAL &&
+          !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
+    }
   }
 
   private fun <T> isDuplication(pseudonymizedMtbFileRequest: MtbFileRequest<T>): Boolean {
@@ -179,6 +243,7 @@ class RequestProcessor(
               emptyPatientId(),
               fingerprint(patientPseudonym.value),
               RequestType.DELETE,
+              SubmissionType.UNKNOWN,
               requestStatus,
           )
       )
@@ -206,6 +271,7 @@ class RequestProcessor(
               fingerprint = Fingerprint.empty(),
               status = RequestStatus.ERROR,
               type = RequestType.DELETE,
+              submissionType = SubmissionType.UNKNOWN,
               report = Report("Fehler bei der Pseudonymisierung"),
           )
       )
@@ -219,11 +285,8 @@ class RequestProcessor(
   }
 
   private fun fingerprint(s: String): Fingerprint {
-    return Fingerprint(
-        Base32()
-            .encodeAsString(DigestUtils.sha256(s))
-            .replace("=", "")
-            .lowercase()
-    )
+    return Fingerprint(Base32().encodeAsString(DigestUtils.sha256(s))
+        .replace("=", "")
+        .lowercase())
   }
 }

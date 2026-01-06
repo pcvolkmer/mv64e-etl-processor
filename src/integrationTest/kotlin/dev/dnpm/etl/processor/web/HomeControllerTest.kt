@@ -26,6 +26,7 @@ import dev.dnpm.etl.processor.monitoring.Report
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.services.RequestService
 import java.io.IOException
 import java.time.Instant
@@ -113,6 +114,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("ashdkasdh"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.SUCCESS,
                       ),
                       Request(
@@ -122,6 +124,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("asdasdasd"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.ERROR,
                       ),
                   )
@@ -148,6 +151,7 @@ class HomeControllerTest {
                       PatientId("PATIENT1"),
                       Fingerprint("ashdkasdh"),
                       RequestType.MTB_FILE,
+                      SubmissionType.TEST,
                       RequestStatus.SUCCESS,
                       Instant.now(),
                       Report("Test"),
@@ -174,6 +178,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("ashdkasdh"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.SUCCESS,
                       ),
                       Request(
@@ -183,6 +188,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("asdasdasd"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.ERROR,
                       ),
                   )
@@ -208,6 +214,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("ashdkasdh"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.SUCCESS,
                       ),
                       Request(
@@ -217,6 +224,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("asdasdasd"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.ERROR,
                       ),
                   )
@@ -286,6 +294,7 @@ class HomeControllerTest {
                           PatientId("PATIENT1"),
                           Fingerprint("ashdkasdh"),
                           RequestType.MTB_FILE,
+                          SubmissionType.TEST,
                           RequestStatus.NO_CONSENT,
                       )
                   )

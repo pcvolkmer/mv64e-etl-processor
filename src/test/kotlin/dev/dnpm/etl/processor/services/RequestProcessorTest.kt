@@ -28,6 +28,7 @@ import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
+import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
@@ -39,6 +40,7 @@ import java.time.Instant
 import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -104,6 +106,7 @@ class RequestProcessorTest {
               PatientId("P1"),
               Fingerprint("6vkiti5bk6ikwifpajpt7cygmd3dvw54d6lwfhzlynb3pqtzferq"),
               RequestType.MTB_FILE,
+              SubmissionType.TEST,
               RequestStatus.SUCCESS,
               Instant.parse("2023-08-08T02:00:00Z"),
           )
@@ -159,6 +162,7 @@ class RequestProcessorTest {
               PatientId("P1"),
               Fingerprint("4gcjwtjjtcczybsljxepdfpkaeusvd7g3vogfqpmphyffyzfx7dq"),
               RequestType.MTB_FILE,
+              SubmissionType.TEST,
               RequestStatus.SUCCESS,
               Instant.parse("2023-08-08T02:00:00Z"),
           )
@@ -214,6 +218,7 @@ class RequestProcessorTest {
               PatientId("P1"),
               Fingerprint("different"),
               RequestType.MTB_FILE,
+              SubmissionType.TEST,
               RequestStatus.SUCCESS,
               Instant.parse("2023-08-08T02:00:00Z"),
           )
@@ -273,6 +278,7 @@ class RequestProcessorTest {
               PatientId("P1"),
               Fingerprint("different"),
               RequestType.MTB_FILE,
+              SubmissionType.TEST,
               RequestStatus.SUCCESS,
               Instant.parse("2023-08-08T02:00:00Z"),
           )
@@ -336,6 +342,102 @@ class RequestProcessorTest {
     verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
     assertThat(eventCaptor.firstValue).isNotNull
     assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.ERROR)
+  }
+
+  @Test
+  fun testShouldSendMtbFileAdditionIfInitialFileWasAccepted() {
+
+    // One successful and accepted and one blocked initial
+    val lastRequests =
+        listOf(
+            Request(
+                1L,
+                randomRequestId(),
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
+                Fingerprint("initial"),
+                RequestType.MTB_FILE,
+                SubmissionType.INITIAL,
+                RequestStatus.SUCCESS,
+                Instant.parse("2026-01-05T09:00:00Z"),
+                submissionAccepted = true,
+            ),
+            Request(
+                2L,
+                randomRequestId(),
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
+                Fingerprint("blocked_initial"),
+                RequestType.MTB_FILE,
+                SubmissionType.INITIAL,
+                RequestStatus.BLOCKED_INITIAL,
+                Instant.parse("2026-01-05T10:00:00Z"),
+                submissionAccepted = false,
+            ),
+        )
+
+    doAnswer { lastRequests }
+        .whenever(requestService)
+        .allRequestsByPatientPseudonym(anyValueClass())
+
+    doAnswer { false }
+        .whenever(requestService)
+        .isLastRequestWithKnownStatusDeletion(anyValueClass())
+
+    doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+        .whenever(sender)
+        .send(any<DnpmV2MtbFileRequest>())
+
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
+
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+    requestProcessor =
+        RequestProcessor(
+            pseudonymizeService,
+            transformationService,
+            sender,
+            requestService,
+            ObjectMapper(),
+            applicationEventPublisher,
+            AppConfigProperties(postInitialSubmissionBlock = true),
+            consentProcessor,
+        )
+
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
+            .metadata(MvhMetadata())
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
+                        .build()
+                )
+            )
+            .build()
+
+    this.requestProcessor.processMtbFile(mtbFile)
+
+    val requestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+    verify(sender, times(1)).send(requestCaptor.capture())
+    assertThat(requestCaptor.firstValue).isNotNull
+    assertThat(requestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
   }
 
   @Test
@@ -450,6 +552,136 @@ class RequestProcessorTest {
     verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
     assertThat(eventCaptor.firstValue).isNotNull
     assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+  }
+
+  @Nested
+  inner class WithInitialSubmissionBlock {
+
+    private lateinit var pseudonymizeService: PseudonymizeService
+    private lateinit var transformationService: TransformationService
+    private lateinit var sender: MtbFileSender
+    private lateinit var requestService: RequestService
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
+    private lateinit var appConfigProperties: AppConfigProperties
+    private lateinit var consentProcessor: ConsentProcessor
+    private lateinit var requestProcessor: RequestProcessor
+
+    @BeforeEach
+    fun setup(
+        @Mock pseudonymizeService: PseudonymizeService,
+        @Mock transformationService: TransformationService,
+        @Mock sender: RestMtbFileSender,
+        @Mock requestService: RequestService,
+        @Mock applicationEventPublisher: ApplicationEventPublisher,
+        @Mock consentProcessor: ConsentProcessor,
+    ) {
+      this.pseudonymizeService = pseudonymizeService
+      this.transformationService = transformationService
+      this.sender = sender
+      this.requestService = requestService
+      this.applicationEventPublisher = applicationEventPublisher
+      this.appConfigProperties = AppConfigProperties()
+      this.consentProcessor = consentProcessor
+
+      val objectMapper = ObjectMapper()
+
+      requestProcessor =
+          RequestProcessor(
+              pseudonymizeService,
+              transformationService,
+              sender,
+              requestService,
+              objectMapper,
+              applicationEventPublisher,
+              appConfigProperties,
+              consentProcessor,
+          )
+    }
+
+    @Test
+    fun testShouldNotSendMtbFileIfInitialFileWasSent() {
+
+      // One failed attempt and one successful but not accepted
+      val lastRequests =
+          listOf(
+              Request(
+                  1L,
+                  randomRequestId(),
+                  PatientPseudonym("TEST_12345678901"),
+                  PatientId("P1"),
+                  Fingerprint("initial"),
+                  RequestType.MTB_FILE,
+                  SubmissionType.INITIAL,
+                  RequestStatus.ERROR,
+                  Instant.parse("2026-01-05T09:00:00Z"),
+                  submissionAccepted = false,
+              ),
+              Request(
+                  2L,
+                  randomRequestId(),
+                  PatientPseudonym("TEST_12345678901"),
+                  PatientId("P1"),
+                  Fingerprint("blocked_initial"),
+                  RequestType.MTB_FILE,
+                  SubmissionType.INITIAL,
+                  RequestStatus.SUCCESS,
+                  Instant.parse("2026-01-05T10:00:00Z"),
+                  submissionAccepted = false,
+              ),
+          )
+
+      doAnswer { lastRequests }
+          .whenever(requestService)
+          .allRequestsByPatientPseudonym(anyValueClass())
+
+      doAnswer { it.arguments[0] as String }
+          .whenever(pseudonymizeService)
+          .patientPseudonym(anyValueClass())
+
+      doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+      whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+      requestProcessor =
+          RequestProcessor(
+              pseudonymizeService,
+              transformationService,
+              sender,
+              requestService,
+              ObjectMapper(),
+              applicationEventPublisher,
+              AppConfigProperties(postInitialSubmissionBlock = true),
+              consentProcessor,
+          )
+
+      val mtbFile =
+          Mtb.builder()
+              .patient(Patient.builder().id("123").build())
+              .episodesOfCare(
+                  listOf(
+                      MtbEpisodeOfCare.builder()
+                          .id("1")
+                          .patient(Reference.builder().id("123").build())
+                          .period(
+                              PeriodDate.builder()
+                                  .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                  .build()
+                          )
+                          .build()
+                  )
+              )
+              .build()
+
+      this.requestProcessor.processMtbFile(mtbFile)
+
+      val requestCaptor = argumentCaptor<Request>()
+      verify(requestService, times(1)).save(requestCaptor.capture())
+      assertThat(requestCaptor.firstValue).isNotNull
+      assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.BLOCKED_INITIAL)
+
+      verify(applicationEventPublisher, times(0)).publishEvent(any())
+      verify(sender, times(0)).send(any<DnpmV2MtbFileRequest>())
+    }
   }
 
   companion object {
