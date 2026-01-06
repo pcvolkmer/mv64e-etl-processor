@@ -728,17 +728,23 @@ input.inline:focus-visible {
 
 a.reload {
     display: none;
-    position: absolute;
-    height: 1.2rem;
-    width: 1.2rem;
-    background: var(--bg-red);
-    border-radius: 50%;
+    margin: 0;
+    vertical-align: top;
+    border-radius: 1.4rem;
+}
 
-    color: white;
-    text-decoration: none;
-    font-size: .6rem;
-    align-content: center;
-    justify-content: center;
+a.reload::before {
+    content: "⟳";
+    font-size: 1.2rem;
+    vertical-align: top;
+}
+
+a.reload span {
+    display: none;
+}
+
+a.reload:hover span {
+    display: inline;
 }
 
 .new-token {

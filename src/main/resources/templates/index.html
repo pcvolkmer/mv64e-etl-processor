@@ -9,7 +9,12 @@
     <div th:replace="~{fragments.html :: nav}"></div>
     <main>
 
-        <h1>Alle Anfragen<a id="reload-notify" class="reload" title="Neue Anfragen" th:href="@{/}">⟳</a></h1>
+        <h1>
+            Alle Anfragen
+            <a id="reload-notify" class="btn btn-red reload" title="Neue Anfragen laden" th:href="@{/}">
+                <span>Neue Anfragen laden</span>
+            </a>
+        </h1>
 
         <div>
             <h2 th:if="${patientPseudonym != null}">
@@ -108,7 +113,7 @@
         const eventSource = new EventSource('statistics/events');
         eventSource.addEventListener('newrequest', event => {
             console.log(event);
-            document.getElementById('reload-notify').style.display = 'inline-flex';
+            document.getElementById('reload-notify').style.display = 'inline';
         });
     </script>
 </body>
