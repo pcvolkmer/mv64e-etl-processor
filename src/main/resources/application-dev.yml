@@ -126,5 +126,4 @@ app:
 
 server:
   port: 8000
-
-
+  shutdown: immediate
