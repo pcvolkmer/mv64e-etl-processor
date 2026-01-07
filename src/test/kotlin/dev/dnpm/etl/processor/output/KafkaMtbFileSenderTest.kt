@@ -172,9 +172,36 @@ class KafkaMtbFileSenderTest {
       assertThat(captor.firstValue.headers().headers("requestId")).isNotNull
       assertThat(captor.firstValue.headers().headers("requestId")?.firstOrNull()?.value())
           .isEqualTo(TEST_REQUEST_ID.value.toByteArray())
+      assertThat(captor.firstValue.headers().headers("requestMethod")).isNotNull
+      assertThat(captor.firstValue.headers().headers("requestMethod")?.firstOrNull()?.value())
+          .isEqualTo("POST".toByteArray())
       assertThat(captor.firstValue.value()).isNotNull
       assertThat(captor.firstValue.value())
           .isEqualTo(objectMapper.writeValueAsString(dnmpV2kafkaRecordData(TEST_REQUEST_ID)))
+    }
+
+    @Test
+    fun shouldSendDeleteRequestWithCorrectKeyAndHeaderAndBody() {
+      doAnswer { completedFuture(SendResult<String, String>(null, null)) }
+          .whenever(kafkaTemplate)
+          .send(any<ProducerRecord<String, String>>())
+
+      kafkaMtbFileSender.send(DeleteRequest(TEST_REQUEST_ID, PatientPseudonym("PID")))
+
+      val captor = argumentCaptor<ProducerRecord<String, String>>()
+      verify(kafkaTemplate, times(1)).send(captor.capture())
+      assertThat(captor.firstValue.key()).isNotNull
+      assertThat(captor.firstValue.key()).isEqualTo("{\"pid\": \"PID\"}")
+      assertThat(captor.firstValue.headers().headers("contentType")).isNotNull
+      assertThat(captor.firstValue.headers().headers("contentType")?.firstOrNull()?.value())
+          .isEqualTo(CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray())
+      assertThat(captor.firstValue.headers().headers("requestId")).isNotNull
+      assertThat(captor.firstValue.headers().headers("requestId")?.firstOrNull()?.value())
+          .isEqualTo(TEST_REQUEST_ID.value.toByteArray())
+      assertThat(captor.firstValue.headers().headers("requestMethod")).isNotNull
+      assertThat(captor.firstValue.headers().headers("requestMethod")?.firstOrNull()?.value())
+          .isEqualTo("DELETE".toByteArray())
+      assertThat(captor.firstValue.value()).isNotNull
     }
 
     @ParameterizedTest

@@ -48,6 +48,7 @@ class KafkaMtbFileSender(
                         objectMapper.writeValueAsString(request.content),
                     )
                 record.headers().add("requestId", request.requestId.value.toByteArray())
+                record.headers().add("requestMethod", "POST".toByteArray())
                 when (request) {
                     is DnpmV2MtbFileRequest ->
                         record
@@ -86,6 +87,13 @@ class KafkaMtbFileSender(
                         ),
                     )
                 record.headers().add("requestId", request.requestId.value.toByteArray())
+                record.headers().add("requestMethod", "DELETE".toByteArray())
+                record
+                    .headers()
+                    .add(
+                        "contentType",
+                        CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray(),
+                    )
                 val result = kafkaTemplate.send(record)
                 if (result.get() != null) {
                     logger.debug("Sent deletion request via KafkaMtbFileSender")
