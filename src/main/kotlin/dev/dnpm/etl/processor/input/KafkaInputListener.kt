@@ -21,8 +21,10 @@ package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
+import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
+import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -69,6 +71,7 @@ class KafkaInputListener(
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
         val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
+        val patientId = PatientId(mtbFile.patient.id)
         val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
         val requestId =
             if (null != firstRequestIdHeader) {
@@ -76,12 +79,28 @@ class KafkaInputListener(
             } else {
                 RequestId("")
             }
+        val firstRequestMethodHeader = record.headers().headers("requestMethod")?.firstOrNull()
+        val requestMethod =
+            if (null != firstRequestMethodHeader) {
+                String(firstRequestMethodHeader.value())
+            } else {
+                ""
+            }
 
-        logger.debug("Accepted MTB File for processing")
-        if (requestId.isBlank()) {
-            requestProcessor.processMtbFile(mtbFile)
+        if (requestMethod == "DELETE") {
+            logger.debug("Accepted MTB File and process deletion")
+            if (requestId.isBlank()) {
+                requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+            } else {
+                requestProcessor.processDeletion(patientId, requestId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+            }
         } else {
-            requestProcessor.processMtbFile(mtbFile, requestId)
+            logger.debug("Accepted MTB File for processing")
+            if (requestId.isBlank()) {
+                requestProcessor.processMtbFile(mtbFile)
+            } else {
+                requestProcessor.processMtbFile(mtbFile, requestId)
+            }
         }
     }
 }

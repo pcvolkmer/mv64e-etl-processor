@@ -248,4 +248,60 @@ class KafkaInputListenerTest {
     )
     verify(requestProcessor, times(1)).processMtbFile(any<Mtb>(), anyValueClass())
   }
+
+  @Test
+  fun shouldProcessDnpmV2DeleteRequest() {
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("DUMMY_12345678").build())
+            .metadata(
+                MvhMetadata.builder()
+                    .modelProjectConsent(
+                        ModelProjectConsent.builder()
+                            .provisions(
+                                listOf(
+                                    Provision.builder()
+                                        .type(ConsentProvision.DENY)
+                                        .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                        .build()
+                                )
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+
+    val headers =
+        RecordHeaders(
+            listOf(
+                RecordHeader("requestId", UUID.randomUUID().toString().toByteArray()),
+                RecordHeader(
+                    "requestMethod",
+                    "DELETE".toByteArray(),
+                ),
+                RecordHeader(
+                    "contentType",
+                    CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray(),
+                ),
+            )
+        )
+    kafkaInputListener.onMessage(
+        ConsumerRecord(
+            "testtopic",
+            0,
+            0,
+            -1L,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            -1,
+            -1,
+            "",
+            this.objectMapper.writeValueAsString(mtbFile),
+            headers,
+            Optional.empty(),
+        )
+    )
+    verify(requestProcessor, times(1))
+        .processDeletion(anyValueClass(), anyValueClass(), any<TtpConsentStatus>())
+  }
 }
