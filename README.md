@@ -83,14 +83,13 @@ gesendet.
 Ein HTTP-Request kann, angenommen die Installation erfolgte auf dem Host `dnpm.example.com` an
 nachfolgende URLs gesendet werden:
 
-| HTTP-Request | URL                                     | Consent-Status im Datensatz | Bemerkung                                                                       |
-|--------------|-----------------------------------------|-----------------------------|---------------------------------------------------------------------------------|
-| `POST`       | `https://dnpm.example.com/mtb`          | `ACTIVE`                    | Die Anwendung verarbeitet den eingehenden Datensatz                             |
-| `POST`       | `https://dnpm.example.com/mtb`          | `REJECT`                    | Die Anwendung sendet einen Lösch-Request für die im Datensatz angegebene Pat-ID |
-| `DELETE`     | `https://dnpm.example.com/mtb/12345678` | -                           | Die Anwendung sendet einen Lösch-Request für Pat-ID `12345678`                  |
+| HTTP-Request | URL                                     | Bemerkung                                                      |
+|--------------|-----------------------------------------|----------------------------------------------------------------|
+| `POST`       | `https://dnpm.example.com/mtb`          | Die Anwendung verarbeitet den eingehenden Datensatz            |
+| `DELETE`     | `https://dnpm.example.com/mtb/12345678` | Die Anwendung sendet einen Lösch-Request für Pat-ID `12345678` |
 
 Anstelle des Pfads `/mtb` kann auch, wie in Version 0.9 und älter üblich, `/mtbfile` verwendet
-werden.
+werden. Siehe auch: https://github.com/pcvolkmer/mv64e-etl-processor/pull/196
 
 ### Datenübermittlung mit Apache Kafka
 
@@ -99,7 +98,7 @@ Anfragen werden, wenn nicht als Duplikat behandelt, nach der Pseudonymisierung a
 Eine Antwort wird dabei ebenfalls mithilfe von Apache Kafka übermittelt und nach der Entgegennahme
 verarbeitet.
 
-Siehe hierzu auch: https://github.com/CCC-MF/kafka-to-bwhc
+Siehe hierzu auch: https://github.com/pcvolkmer/mv64e-rest-to-kafka-gateway und https://github.com/pcvolkmer/mv64e-kafka-to-rest-gateway. 
 
 ## Konfiguration
 
@@ -177,9 +176,6 @@ Modelvorhaben §64e.
    DNPM Pseudonym ersetzt.
 3. Abfragen von Einwilligungen über gesonderte Pseudonyme anstatt des MTB-Identifiers fehlt in der
    ersten Implementierung.
-4. Bei Verarbeitung von MTB Version 1.x Inhalten ist eine positive Einwilligung für die
-   Weiterverarbeitung notwendig. Das Fehlen einer Einwilligung löst die Löschung des Patienten im
-   Brückenkopf aus.
 
 ##### Konfiguration
 
