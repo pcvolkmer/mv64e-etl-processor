@@ -52,15 +52,8 @@ class MtbFileRestController(
           ],
   )
   fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
-    val consentEvaluation = consentEvaluator.check(mtbFile)
-    if (consentEvaluation.hasConsent()) {
-      logger.debug("Accepted MTB File (DNPM V2) for processing")
-      requestProcessor.processMtbFile(mtbFile)
-    } else {
-      logger.debug("Accepted MTB File (DNPM V2) and process deletion")
-      val patientId = PatientId(mtbFile.patient.id)
-      requestProcessor.processDeletion(patientId, consentEvaluation.getStatus())
-    }
+    logger.debug("Accepted MTB File (DNPM V2) for processing")
+    requestProcessor.processMtbFile(mtbFile)
     return ResponseEntity.accepted().build()
   }
 
