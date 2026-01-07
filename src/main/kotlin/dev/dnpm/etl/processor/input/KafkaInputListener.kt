@@ -79,20 +79,27 @@ class KafkaInputListener(
             } else {
                 RequestId("")
             }
-
-        if (consentEvaluator.check(mtbFile).hasConsent()) {
-            logger.debug("Accepted MTB File for processing")
-            if (requestId.isBlank()) {
-                requestProcessor.processMtbFile(mtbFile)
+        val firstRequestMethodHeader = record.headers().headers("requestMethod")?.firstOrNull()
+        val requestMethod =
+            if (null != firstRequestMethodHeader) {
+                String(firstRequestMethodHeader.value())
             } else {
-                requestProcessor.processMtbFile(mtbFile, requestId)
+                ""
             }
-        } else {
+
+        if (requestMethod == "DELETE") {
             logger.debug("Accepted MTB File and process deletion")
             if (requestId.isBlank()) {
                 requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
             } else {
                 requestProcessor.processDeletion(patientId, requestId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+            }
+        } else {
+            logger.debug("Accepted MTB File for processing")
+            if (requestId.isBlank()) {
+                requestProcessor.processMtbFile(mtbFile)
+            } else {
+                requestProcessor.processMtbFile(mtbFile, requestId)
             }
         }
     }

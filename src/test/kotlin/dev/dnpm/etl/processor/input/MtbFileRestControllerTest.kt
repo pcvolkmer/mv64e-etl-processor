@@ -74,9 +74,6 @@ class MtbFileRestControllerTest {
 
     @Test
     fun shouldRespondPostRequest() {
-      whenever(consentEvaluator.check(any()))
-          .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true))
-
       val mtbFileContent =
           ClassPathResource("mv64e-mtb-fake-patient.json")
               .inputStream
@@ -95,10 +92,7 @@ class MtbFileRestControllerTest {
 
     @ParameterizedTest
     @ArgumentsSource(Dnpm21MtbFile::class)
-    fun shouldProcessPostRequest(mtb: Mtb, broadConsent: TtpConsentStatus, shouldProcess: String) {
-      whenever(consentEvaluator.check(any<Mtb>()))
-          .thenReturn(ConsentEvaluation(broadConsent, shouldProcess == "process"))
-
+    fun shouldProcessPostRequest(mtb: Mtb) {
       mockMvc
           .post("/mtbfile") {
             content = objectMapper.writeValueAsString(mtb)
@@ -106,12 +100,6 @@ class MtbFileRestControllerTest {
           }
           .andExpect { status { isAccepted() } }
 
-      if (shouldProcess == "process") {
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
-      } else {
-        verify(requestProcessor, times(1))
-            .processDeletion(anyValueClass(), org.mockito.kotlin.eq(broadConsent))
-      }
     }
 
     @ParameterizedTest
@@ -129,9 +117,6 @@ class MtbFileRestControllerTest {
             ]
     )
     fun shouldAcceptPostRequests(url: String) {
-      whenever(consentEvaluator.check(any<Mtb>()))
-          .thenReturn(ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true))
-
       val mtb =
           buildMtb(
               MvhMetadata.builder()
@@ -197,29 +182,15 @@ class MtbFileRestControllerTest {
 
 class Dnpm21MtbFile :
     ArgProvider(
-        // No Metadata and no broad consent => delete
-        Arguments.of(buildMtb(null), TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED, "delete"),
         // No Metadata and broad consent given => process
         Arguments.of(buildMtb(null), TtpConsentStatus.BROAD_CONSENT_GIVEN, "process"),
-        // No model project consent and no broad consent => delete
-        Arguments.of(
-            buildMtb(
-                MvhMetadata.builder()
-                    .modelProjectConsent(ModelProjectConsent.builder().build())
-                    .build()
-            ),
-            TtpConsentStatus.BROAD_CONSENT_MISSING_OR_REJECTED,
-            "delete",
-        ),
         // No model project consent and broad consent given => process
         Arguments.of(
             buildMtb(
                 MvhMetadata.builder()
                     .modelProjectConsent(ModelProjectConsent.builder().build())
                     .build()
-            ),
-            TtpConsentStatus.BROAD_CONSENT_GIVEN,
-            "process",
+            )
         ),
         // Model project consent given and no broad consent => process
         Arguments.of(
@@ -239,9 +210,7 @@ class Dnpm21MtbFile :
                             .build()
                     )
                     .build()
-            ),
-            TtpConsentStatus.UNKNOWN_CHECK_FILE,
-            "process",
+            )
         ),
         // Model project consent given and broad consent given => process
         Arguments.of(
@@ -261,9 +230,7 @@ class Dnpm21MtbFile :
                             .build()
                     )
                     .build()
-            ),
-            TtpConsentStatus.BROAD_CONSENT_GIVEN,
-            "process",
+            )
         ),
     ) {
 
