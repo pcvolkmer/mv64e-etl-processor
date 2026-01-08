@@ -79,6 +79,7 @@ class HomeControllerTest {
   fun setup(@Autowired mockMvc: MockMvc, @Autowired requestService: RequestService) {
     this.mockMvc = mockMvc
     this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
+    this.webClient.options.isJavaScriptEnabled = false
 
     whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())
   }
