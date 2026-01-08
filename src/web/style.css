@@ -573,6 +573,11 @@ td.clipboard.clipped {
     color: white;
 }
 
+.btn.btn-yellow {
+    background: var(--bg-yellow);
+    color: white;
+}
+
 .btn.btn-green {
     background: var(--bg-green);
     color: white;

@@ -25,11 +25,7 @@ var versions = mapOf(
     "hapi-fhir" to "8.4.0",
     "apache-cxf" to "4.1.3",
     "mockito-kotlin" to "6.1.0",
-    "archunit" to "1.4.1",
-    // Webjars
-    "webjars-locator" to "0.52",
-    "echarts" to "6.0.0",
-    "htmx.org" to "1.9.12"
+    "archunit" to "1.4.1"
 )
 
 java {
@@ -88,9 +84,6 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("com.jayway.jsonpath:json-path")
-    implementation("org.webjars:webjars-locator:${versions["webjars-locator"]}")
-    implementation("org.webjars.npm:echarts:${versions["echarts"]}")
-    implementation("org.webjars.npm:htmx.org:${versions["htmx.org"]}")
     implementation("org.jspecify:jspecify:1.0.0")
     // Fix for CVE-2025-48924
     implementation("org.apache.commons:commons-lang3:3.18.0")

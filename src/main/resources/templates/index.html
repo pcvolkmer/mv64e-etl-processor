@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ETL-Prozessor</title>
-    <link rel="stylesheet" th:href="@{/style.css}" />
+    <link rel="stylesheet" th:href="@{/main.css}"/>
 </head>
 <body>
     <div th:replace="~{fragments.html :: nav}"></div>
@@ -90,8 +90,7 @@
 
     </main>
     <footer th:replace="~{fragments.html :: footer}"></footer>
-    <script th:src="@{/scripts.js}"></script>
-    <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+    <script th:src="@{/main.js}"></script>
     <script>
         window.addEventListener('load', () => {
             let keyBindings = {
@@ -110,11 +109,13 @@
             };
         });
 
-        const eventSource = new EventSource('statistics/events');
-        eventSource.addEventListener('newrequest', event => {
-            console.log(event);
-            document.getElementById('reload-notify').style.display = 'inline';
-        });
+        window.onload = () => {
+            const eventSource = new EventSource('statistics/events');
+            eventSource.addEventListener('newrequest', event => {
+                console.log(event);
+                document.getElementById('reload-notify').style.display = 'inline';
+            });
+        }
     </script>
 </body>
 </html>

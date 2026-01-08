@@ -1,22 +1,58 @@
+import * as echarts from 'echarts/core';
+import { BarChart, PieChart } from 'echarts/charts';
+import { SVGRenderer } from 'echarts/renderers';
+import {
+    TitleComponent,
+    TooltipComponent,
+    DatasetComponent,
+    GridComponent
+} from 'echarts/components';
+
+echarts.use([
+    BarChart,
+    PieChart,
+    TitleComponent,
+    TooltipComponent,
+    DatasetComponent,
+    GridComponent,
+    SVGRenderer
+]);
+
+window.onload = () => {
+    drawPieChart('statistics/requeststates', 'piechart1', 'Statusverteilung aller Anfragen');
+    drawPieChart('statistics/requestpatientstates', 'piechart2', 'Statusverteilung nach Patient');
+    drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen der letzten 30 Tage');
+
+    drawPieChart('statistics/requeststates?delete=true', 'piechartdel1', 'Statusverteilung aller Anfragen');
+    drawPieChart('statistics/requestpatientstates?delete=true', 'piechartdel2', 'Statusverteilung nach Patient');
+    drawBarChart('statistics/requestslastmonth?delete=true', 'barchartdel', 'Anfragen der letzten 30 Tage');
+
+    const eventSource = new EventSource('statistics/events');
+    eventSource.addEventListener('requeststates', event => {
+        drawPieChart('statistics/requeststates', 'piechart1', 'Statusverteilung aller Anfragen', JSON.parse(event.data));
+    });
+    eventSource.addEventListener('requestpatientstates', event => {
+        drawPieChart('statistics/requestpatientstates', 'piechart2', 'Statusverteilung nach Patient', JSON.parse(event.data));
+    });
+    eventSource.addEventListener('requestslastmonth', event => {
+        drawBarChart('statistics/requestslastmonth', 'barchart', 'Anfragen des letzten Monats', JSON.parse(event.data));
+    });
+
+    eventSource.addEventListener('deleterequeststates', event => {
+        drawPieChart('statistics/requeststates?delete=true', 'piechartdel1', 'Statusverteilung aller Anfragen', JSON.parse(event.data));
+    });
+    eventSource.addEventListener('deleterequestpatientstates', event => {
+        drawPieChart('statistics/requestpatientstates?delete=true', 'piechartdel2', 'Statusverteilung nach Patient', JSON.parse(event.data));
+    });
+    eventSource.addEventListener('deleterequestslastmonth', event => {
+        drawBarChart('statistics/requestslastmonth?delete=true', 'barchartdel', 'Anfragen des letzten Monats', JSON.parse(event.data));
+    });
+}
+
 const dateFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
 const dateFormat = new Intl.DateTimeFormat('de-DE', dateFormatOptions);
 
-const dateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: 'numeric', second: 'numeric' };
-const dateTimeFormat = new Intl.DateTimeFormat('de-DE', dateTimeFormatOptions);
-
-const formatTimeElements = () => {
-    Array.from(document.getElementsByTagName('time')).forEach((timeTag) => {
-        let date = Date.parse(timeTag.getAttribute('datetime'));
-        if (! isNaN(date)) {
-            timeTag.innerText = dateTimeFormat.format(date);
-        }
-    });
-};
-
-window.addEventListener('load', formatTimeElements);
-window.addEventListener('htmx:afterRequest', formatTimeElements);
-
-function drawPieChart(url, elemId, title, data) {
+export function drawPieChart(url, elemId, title, data) {
     if (data) {
         update(elemId, data);
     } else {
@@ -30,7 +66,7 @@ function drawPieChart(url, elemId, title, data) {
 
     function update(elemId, data) {
         let chartDom = document.getElementById(elemId);
-        let chart = echarts.init(chartDom);
+        let chart = echarts.init(chartDom, null, {renderer: 'svg'});
 
         let option = {
             color: data.map(i => i.color),
@@ -58,7 +94,7 @@ function drawPieChart(url, elemId, title, data) {
 
     function draw(elemId, title, data) {
         let chartDom = document.getElementById(elemId);
-        let chart = echarts.init(chartDom);
+        let chart = echarts.init(chartDom, null, {renderer: 'svg'});
         let option= {
             title: {
                 text: title,
@@ -76,7 +112,7 @@ function drawPieChart(url, elemId, title, data) {
     }
 }
 
-function drawBarChart(url, elemId, title, data) {
+export function drawBarChart(url, elemId, title, data) {
     if (data) {
         update(elemId, data);
     } else {
@@ -90,7 +126,7 @@ function drawBarChart(url, elemId, title, data) {
 
     function update(elemId, data) {
         let chartDom = document.getElementById(elemId);
-        let chart = echarts.init(chartDom);
+        let chart = echarts.init(chartDom, null, {renderer: 'svg'});
 
         let option = {
             series: [
@@ -132,7 +168,7 @@ function drawBarChart(url, elemId, title, data) {
 
     function draw(elemId, title, data) {
         let chartDom = document.getElementById(elemId);
-        let chart = echarts.init(chartDom);
+        let chart = echarts.init(chartDom, null, {renderer: 'svg'});
         let option= {
             title: {
                 text: title,
