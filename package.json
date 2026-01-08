@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "dependencies": {
-    "htmx.org": "~1.9.12",
+    "htmx.org": "~2.0.8",
     "echarts": "~6.0.0"
   },
   "devDependencies": {
