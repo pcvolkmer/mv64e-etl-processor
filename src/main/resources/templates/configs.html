@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>ETL-Prozessor</title>
-    <link rel="stylesheet" th:href="@{/style.css}" />
+    <link rel="stylesheet" th:href="@{/main.css}"/>
 </head>
 <body>
     <div th:replace="~{fragments.html :: nav}"></div>
@@ -115,9 +115,7 @@
         </div>
     </main>
     <footer th:replace="~{fragments.html :: footer}"></footer>
-    <script th:src="@{/scripts.js}"></script>
-    <script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
-    <script th:src="@{/webjars/htmx.org/dist/ext/sse.js}"></script>
+    <script th:src="@{/main.js}"></script>
     <script>
         function selectTab(self, elem) {
             Array.from(document.getElementsByClassName('tab')).forEach(e => e.className = 'tab');
