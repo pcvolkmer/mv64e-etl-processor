@@ -36,17 +36,17 @@
         </nav>
     </div>
     <th:block th:fragment="accept-initial" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
-        <button class="btn" hx-swap="outerHTML" th:hx-delete="@{/submission/{requestId}/accepted(requestId=${request.uuid})}" th:if="${
+        <button class="btn btn-green" hx-swap="outerHTML" th:hx-delete="@{/submission/{requestId}/accepted(requestId=${request.uuid})}" th:if="${
         request.submissionType.value == 'initial'
         and (request.status.value == 'success' or request.status.value == 'warning')
-        and request.submissionAccepted == true}" title="Keine Meldebestätigung - blockieren">
-            🔒
-        </button>
-        <button class="btn" hx-swap="outerHTML" th:hx-put="@{/submission/{requestId}/accepted(requestId=${request.uuid})}" th:if="${
-        request.submissionType.value == 'initial'
-        and (request.status.value == 'success' or request.status.value == 'warning')
-        and request.submissionAccepted == false}" title="Meldebestätigung vorhanden - nicht weiter blockieren">
+        and request.submissionAccepted == true}" title="Doch keine Meldebestätigung - jetzt blockieren">
             🔓
+        </button>
+        <button class="btn btn-yellow" hx-swap="outerHTML" th:hx-put="@{/submission/{requestId}/accepted(requestId=${request.uuid})}" th:if="${
+        request.submissionType.value == 'initial'
+        and (request.status.value == 'success' or request.status.value == 'warning')
+        and request.submissionAccepted == false}" title="Meldebestätigung vorhanden - jetzt nicht weiter blockieren">
+            🔒
         </button>
     </th:block>
     <footer th:fragment="footer">
