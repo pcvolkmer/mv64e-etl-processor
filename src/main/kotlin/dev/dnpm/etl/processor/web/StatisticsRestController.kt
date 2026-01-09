@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,6 +20,8 @@
 
 package dev.dnpm.etl.processor.web
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.services.RequestService
@@ -43,6 +46,15 @@ class StatisticsRestController(
     private val statisticsUpdateProducer: Sinks.Many<Any>,
     private val requestService: RequestService,
 ) {
+    private fun statusColor(status: RequestStatus) =
+        when (status) {
+            RequestStatus.ERROR -> "#FF0000"
+            RequestStatus.WARNING -> "#FF8C00"
+            RequestStatus.SUCCESS -> "#008000"
+            RequestStatus.NO_CONSENT -> "#004A9D"
+            else -> "#708090"
+        }
+
     @GetMapping(path = ["requeststates"])
     fun requestStates(
         @RequestParam(required = false, defaultValue = "false") delete: Boolean,
@@ -56,14 +68,7 @@ class StatisticsRestController(
 
         return states
             .map {
-                val color =
-                    when (it.status) {
-                        RequestStatus.ERROR -> "red"
-                        RequestStatus.WARNING -> "darkorange"
-                        RequestStatus.SUCCESS -> "green"
-                        else -> "slategray"
-                    }
-                NameValue(it.status.toString(), it.count, color)
+                NameValue(it.status.toString(), it.count, statusColor(it.status))
             }.sortedByDescending { it.value }
     }
 
@@ -99,7 +104,9 @@ class StatisticsRestController(
                                 error = requestList[RequestStatus.ERROR] ?: 0,
                                 warning = requestList[RequestStatus.WARNING] ?: 0,
                                 success = requestList[RequestStatus.SUCCESS] ?: 0,
+                                noConsent = requestList[RequestStatus.NO_CONSENT] ?: 0,
                                 duplication = requestList[RequestStatus.DUPLICATION] ?: 0,
+                                blockedInitial = requestList[RequestStatus.BLOCKED_INITIAL] ?: 0,
                                 unknown = requestList[RequestStatus.UNKNOWN] ?: 0,
                             ),
                         ),
@@ -125,14 +132,7 @@ class StatisticsRestController(
             }
 
         return states.map {
-            val color =
-                when (it.status) {
-                    RequestStatus.ERROR -> "red"
-                    RequestStatus.WARNING -> "darkorange"
-                    RequestStatus.SUCCESS -> "green"
-                    else -> "slategray"
-                }
-            NameValue(it.status.toString(), it.count, color)
+            NameValue(it.status.toString(), it.count, statusColor(it.status))
         }
     }
 
@@ -199,10 +199,15 @@ data class DateNameValues(
     val nameValues: NameValues,
 )
 
+@JsonPropertyOrder(value = ["error", "warning", "success", "no_consent", "duplication", "blocked_initial", "unknown"])
 data class NameValues(
     val error: Int = 0,
     val warning: Int = 0,
     val success: Int = 0,
+    @field:JsonProperty("no_consent")
+    val noConsent: Int = 0,
     val duplication: Int = 0,
+    @field:JsonProperty("blocked_initial")
+    val blockedInitial: Int = 0,
     val unknown: Int = 0,
 )
