@@ -58,13 +58,13 @@ export function drawPieChart(url, elemId, title, data) {
     } else {
         fetch(url)
             .then(resp => resp.json())
-            .then(d => {
-                draw(elemId, title, d);
-                update(elemId, d);
+            .then(data => {
+                draw(elemId, title, data);
+                update(elemId, data);
             });
     }
 
-    function update(elemId, data) {
+    const update = (elemId, data) => {
         let chartDom = document.getElementById(elemId);
         let chart = echarts.init(chartDom, null, {renderer: 'svg'});
 
@@ -92,7 +92,7 @@ export function drawPieChart(url, elemId, title, data) {
         option && chart.setOption(option);
     }
 
-    function draw(elemId, title, data) {
+    const draw = (elemId, title, data) => {
         let chartDom = document.getElementById(elemId);
         let chart = echarts.init(chartDom, null, {renderer: 'svg'});
         let option= {
@@ -124,18 +124,12 @@ export function drawBarChart(url, elemId, title, data) {
             });
     }
 
-    function update(elemId, data) {
+    const update = (elemId, data) => {
         let chartDom = document.getElementById(elemId);
         let chart = echarts.init(chartDom, null, {renderer: 'svg'});
 
         let option = {
             series: [
-                {
-                    name: 'UNKNOWN',
-                    type: 'bar',
-                    stack: 'total',
-                    data: data.map(i => i.nameValues.unknown)
-                },
                 {
                     name: 'ERROR',
                     type: 'bar',
@@ -155,10 +149,28 @@ export function drawBarChart(url, elemId, title, data) {
                     data: data.map(i => i.nameValues.success)
                 },
                 {
+                    name: 'NO_CONSENT',
+                    type: 'bar',
+                    stack: 'total',
+                    data: data.map(i => i.nameValues.no_consent)
+                },
+                {
                     name: 'DUPLICATION',
                     type: 'bar',
                     stack: 'total',
                     data: data.map(i => i.nameValues.duplication)
+                },
+                {
+                    name: 'BLOCKED_INITIAL',
+                    type: 'bar',
+                    stack: 'total',
+                    data: data.map(i => i.nameValues.blocked_initial)
+                },
+                {
+                    name: 'UNKNOWN',
+                    type: 'bar',
+                    stack: 'total',
+                    data: data.map(i => i.nameValues.unknown)
                 }
             ]
         };
@@ -166,7 +178,7 @@ export function drawBarChart(url, elemId, title, data) {
         option && chart.setOption(option);
     }
 
-    function draw(elemId, title, data) {
+    const draw = (elemId, title, data) => {
         let chartDom = document.getElementById(elemId);
         let chart = echarts.init(chartDom, null, {renderer: 'svg'});
         let option= {
@@ -185,7 +197,15 @@ export function drawBarChart(url, elemId, title, data) {
             tooltip: {
                 trigger: 'item'
             },
-            color: ['slategray', 'red', 'darkorange', 'green', 'slategray'],
+            color: [
+                '#FF0000',
+                '#FF8C00',
+                '#008000',
+                '#004A9D',
+                '#708090',
+                '#708090',
+                '#708090'
+            ],
             animationDuration: 250,
             animationDurationUpdate: 250
         };

@@ -1,4 +1,4 @@
-import * as styles from './style.css';
+import './style.css';
 
 import 'htmx.org';
 
@@ -8,7 +8,7 @@ const dateTimeFormat = new Intl.DateTimeFormat('de-DE', dateTimeFormatOptions);
 const formatTimeElements = () => {
     Array.from(document.getElementsByTagName('time')).forEach((timeTag) => {
         let date = Date.parse(timeTag.getAttribute('datetime'));
-        if (! isNaN(date)) {
+        if (! Number.isNaN(date)) {
             timeTag.innerText = dateTimeFormat.format(date);
         }
     });
