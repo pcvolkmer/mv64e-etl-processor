@@ -553,11 +553,14 @@ Zur Nutzung von Apache Kafka muss dazu ein Eintrag im hosts-File vorgenommen wer
 IP-Adresse verweisen. Ohne diese Einstellung ist eine Nutzung von Apache Kafka außerhalb der
 Docker-Umgebung nicht möglich.
 
-Beim Start der Anwendung mit dem Profil `dev` wird die in `dev-compose.yml` definierte Umgebung beim
-Start der
-Anwendung mit gestartet:
+Zum Bereitstellen von JavaScript- und CSS-Bundles muss der Befehl `npm run build` ausgeführt werden.
+Ein kontinuierliches Neubauen bei Änderungen in CSS und JS-Dateien ist mit `npm run dev` möglich.
+Dies setzt eine NodeJS-Umgebung voraus.
 
-```
+Beim Start der Anwendung mit dem Profil `dev` wird die in `dev-compose.yml` definierte Umgebung beim
+Start der Anwendung mit gestartet:
+
+```bash
 SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
 ```
 
