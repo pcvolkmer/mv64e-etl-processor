@@ -5,8 +5,8 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 node_modules/
-**/*.css.map
-**/*.js.map
+**/static/*.css*
+**/static/*.js*
 
 bindings/ca-certificates/*.pem
 
