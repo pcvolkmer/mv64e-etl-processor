@@ -106,7 +106,8 @@ class ConfigControllerTest {
     this.requestProcessor = requestProcessor
     this.connectionCheckUpdateProducer = connectionCheckUpdateProducer
 
-    webClient.options.isThrowExceptionOnScriptError = false
+    this.webClient.options.isJavaScriptEnabled = false
+    this.webClient.options.isThrowExceptionOnScriptError = false
   }
 
   @Test
