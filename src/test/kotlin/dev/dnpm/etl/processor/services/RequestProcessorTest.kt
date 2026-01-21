@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.PatientPseudonym
+import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
@@ -470,6 +471,48 @@ class RequestProcessorTest {
     this.requestProcessor.processDeletion(
         TEST_PATIENT_ID,
         isConsented = TtpConsentStatus.UNKNOWN_CHECK_FILE,
+    )
+
+    val eventCaptor = argumentCaptor<ResponseEvent>()
+    verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+    assertThat(eventCaptor.firstValue).isNotNull
+    assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+  }
+
+    @Test
+  fun testShouldSendRequestWithoutConsent() {
+    doAnswer { "PSEUDONYM" }.whenever(pseudonymizeService).patientPseudonym(anyValueClass())
+
+    doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+        .whenever(sender)
+        .send(any<DnpmV2MtbFileRequest>())
+
+    doAnswer { it.arguments.first() }
+        .whenever(transformationService)
+        .transform(any<Mtb>())
+
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
+            .metadata(MvhMetadata())
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
+                        .build()
+                )
+            )
+            .build()
+
+    this.requestProcessor.processMtbFile(
+        mtbFile,
+        randomRequestId(),
     )
 
     val eventCaptor = argumentCaptor<ResponseEvent>()
