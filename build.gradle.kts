@@ -22,9 +22,9 @@ version = "0.13.1" // x-release-please-version
 
 var versions = mapOf(
     "mtb-dto" to "0.2.0",
-    "hapi-fhir" to "8.4.0",
-    "apache-cxf" to "4.1.3",
-    "mockito-kotlin" to "6.1.0",
+    "hapi-fhir" to "8.4.2",
+    "apache-cxf" to "4.1.4",
+    "mockito-kotlin" to "6.2.1",
     "archunit" to "1.4.1"
 )
 
