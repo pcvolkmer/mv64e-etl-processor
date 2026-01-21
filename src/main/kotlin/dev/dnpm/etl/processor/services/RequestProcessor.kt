@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,11 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
-import dev.dnpm.etl.processor.monitoring.Report
-import dev.dnpm.etl.processor.monitoring.Request
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.RequestType
-import dev.dnpm.etl.processor.monitoring.SubmissionType
+import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileRequest
@@ -36,18 +33,16 @@ import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
-import dev.pcvolkmer.mv64e.mtb.ConsentProvision
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
-import java.time.Instant
-import java.util.*
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.util.*
 
 @Service
 class RequestProcessor(
@@ -71,28 +66,16 @@ class RequestProcessor(
     val isConsentOk =
         consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) ||
             consentProcessor == null
-    if (isConsentOk) {
-      if (isGenomDeConsented(mtbFile)) {
-        mtbFile addGenomDeTan pseudonymizeService
-      }
-      mtbFile pseudonymizeWith pseudonymizeService
-      mtbFile anonymizeContentWith pseudonymizeService
-      val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
-      saveAndSend(request)
-    } else {
-      logger.warn("consent check failed file will not be processed further!")
-      applicationEventPublisher.publishEvent(
-          ResponseEvent(requestId, Instant.now(), RequestStatus.NO_CONSENT)
-      )
-    }
-  }
 
-  private fun isGenomDeConsented(mtbFile: Mtb): Boolean {
-    val isModelProjectConsented =
-        mtbFile.metadata?.modelProjectConsent?.provisions?.any { p ->
-          p.purpose == ModelProjectConsentPurpose.SEQUENCING && p.type == ConsentProvision.PERMIT
-        } == true
-    return isModelProjectConsented
+    if (!isConsentOk) {
+        logger.warn("consent check failed but will be sent to DNPM:DIP!")
+    }
+
+    mtbFile addGenomDeTan pseudonymizeService
+    mtbFile pseudonymizeWith pseudonymizeService
+    mtbFile anonymizeContentWith pseudonymizeService
+    val request = DnpmV2MtbFileRequest(requestId, transformationService.transform(mtbFile))
+    saveAndSend(request)
   }
 
   private fun <T> saveAndSend(request: MtbFileRequest<T>) {
