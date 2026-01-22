@@ -74,24 +74,28 @@ class ConsentProcessor(
     // fast exit - if patient has not been asked, we can skip and exit
     if (!broadConsentHasBeenAsked) return false
 
-    val genomeDeConsent =
-        consentService.getConsent(
-            personIdentifierValue,
-            requestDate,
-            ConsentDomain.MODELLVORHABEN_64E,
-        )
+    // GenomDE_MV-Consent only if domain name available else fallback to file check
+    val genomDeSequencingStatus = if (null != gIcsConfigProperties.genomDeConsentDomainName) {
+        val genomeDeConsent =
+            consentService.getConsent(
+                personIdentifierValue,
+                requestDate,
+                ConsentDomain.MODELLVORHABEN_64E,
+            )
 
-    addGenomeDbProvisions(mtbFile, genomeDeConsent)
+        addGenomeDbProvisions(mtbFile, genomeDeConsent)
 
-    if (genomeDeConsent.entry.isNotEmpty()) setGenomDeSubmissionType(mtbFile)
+        if (genomeDeConsent.entry.isNotEmpty()) setGenomDeSubmissionType(mtbFile)
+
+        getProvisionTypeByPolicyCode(genomeDeConsent, requestDate, ConsentDomain.MODELLVORHABEN_64E)
+    } else {
+        true
+    }
 
     embedBroadConsentResources(mtbFile, broadConsent)
 
     val broadConsentStatus =
         getProvisionTypeByPolicyCode(broadConsent, requestDate, ConsentDomain.BROAD_CONSENT)
-
-    val genomDeSequencingStatus =
-        getProvisionTypeByPolicyCode(genomeDeConsent, requestDate, ConsentDomain.MODELLVORHABEN_64E)
 
     if (Consent.ConsentProvisionType.NULL == broadConsentStatus) {
       // bc not asked

@@ -10,11 +10,6 @@ import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import dev.pcvolkmer.mv64e.mtb.Patient
-import java.io.IOException
-import java.io.InputStream
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.CodeableConcept
@@ -33,6 +28,11 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource
+import java.io.IOException
+import java.io.InputStream
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class ConsentProcessorTest {
@@ -49,7 +49,7 @@ class ConsentProcessorTest {
       @Mock gicsConsentService: GicsConsentService,
   ) {
 
-    this.gIcsConfigProperties = GIcsConfigProperties("https://gics.example.com")
+    this.gIcsConfigProperties = GIcsConfigProperties(uri = "https://gics.example.com", genomDeConsentDomainName = "GenomDE_MV")
     val jacksonConfig = JacksonConfig()
     this.objectMapper = jacksonConfig.objectMapper()
     this.fhirContext = JacksonConfig.fhirContext()
