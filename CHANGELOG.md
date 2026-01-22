@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.14.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.13.1...v0.14.0) (2026-01-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* allow missing GenomDE gICS domain name ([#244](https://github.com/pcvolkmer/mv64e-etl-processor/issues/244))
+* do not delete patient information if no consent is given ([#236](https://github.com/pcvolkmer/mv64e-etl-processor/issues/236))
+
+### Features
+
+* allow missing GenomDE gICS domain name ([#244](https://github.com/pcvolkmer/mv64e-etl-processor/issues/244)) ([2ba333c](https://github.com/pcvolkmer/mv64e-etl-processor/commit/2ba333c771c100ac463f9ca854185ed80c1ac7c4))
+* always send dataset without consent ([#243](https://github.com/pcvolkmer/mv64e-etl-processor/issues/243)) ([623eb1b](https://github.com/pcvolkmer/mv64e-etl-processor/commit/623eb1b250e03772f0311ea088de2a9a5885df2e))
+* block further initial submissions ([#232](https://github.com/pcvolkmer/mv64e-etl-processor/issues/232)) ([7be9144](https://github.com/pcvolkmer/mv64e-etl-processor/commit/7be91444a867774362eb5b57bdd246fb50189e7d))
+* do not delete patient information if no consent is given ([#236](https://github.com/pcvolkmer/mv64e-etl-processor/issues/236)) ([c23e9d7](https://github.com/pcvolkmer/mv64e-etl-processor/commit/c23e9d790e500d17f2f19252dcd7f3a13cd098e3))
+
+
+### Bug Fixes
+
+* possible sorting errors in bar chart ([#241](https://github.com/pcvolkmer/mv64e-etl-processor/issues/241)) ([8ed5b94](https://github.com/pcvolkmer/mv64e-etl-processor/commit/8ed5b944ad4ff0429da320b38642e8d552706444))
+* request reload notification and update button ([d4ef16c](https://github.com/pcvolkmer/mv64e-etl-processor/commit/d4ef16c115b8429637f933038254646a61dd81b1))
+
 ## [0.13.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.13.0...v0.13.1) (2025-12-18)
 
 
