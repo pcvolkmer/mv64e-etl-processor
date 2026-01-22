@@ -221,7 +221,7 @@ public class GicsConsentService extends AbstractConsentService {
     }
   }
 
-  @NonNull
+  @Nullable
   private String getConsentDomainName(ConsentDomain targetConsentDomain) {
     return switch (targetConsentDomain) {
       case BROAD_CONSENT -> gIcsConfigProperties.getBroadConsentDomainName();

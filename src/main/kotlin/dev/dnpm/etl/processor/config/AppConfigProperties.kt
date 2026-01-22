@@ -85,7 +85,7 @@ data class GIcsConfigProperties(
     /** Domain of broad consent resources */
     val broadConsentDomainName: String = "MII",
     /** Domain of Modelvorhaben 64e consent resources */
-    val genomDeConsentDomainName: String = "GenomDE_MV",
+    val genomDeConsentDomainName: String? = null,
     /** Value to expect in case of positiv consent */
     val broadConsentPolicyCode: String = "2.16.840.1.113883.3.1937.777.24.5.3.6",
     /** Consent Policy which should be used for consent check */
