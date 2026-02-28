@@ -50,12 +50,6 @@ configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
     }
-
-    all {
-        resolutionStrategy {
-            cacheChangingModulesFor(5, "minutes")
-        }
-    }
 }
 
 repositories {
