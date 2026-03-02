@@ -75,7 +75,6 @@ class ResponseProcessor(
                 }
 
                 else -> {
-                  logger.error("Cannot process response: Unknown response!")
                   return@ifPresentOrElse
                 }
               }
