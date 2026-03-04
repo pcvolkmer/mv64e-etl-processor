@@ -25,6 +25,6 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 
 open class ArgProvider(vararg val data: Arguments) : ArgumentsProvider {
-  override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> =
+  override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
       Stream.of(*data)
 }

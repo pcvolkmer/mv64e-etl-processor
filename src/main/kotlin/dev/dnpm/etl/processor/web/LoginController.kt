@@ -20,7 +20,7 @@
 package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.config.SecurityConfigProperties
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping

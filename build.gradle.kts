@@ -6,8 +6,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-    war
-    id("org.springframework.boot") version "3.5.11"
+    java
+    id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
     id("net.ltgt.errorprone") version "4.3.0"
@@ -22,10 +22,12 @@ version = "0.14.0" // x-release-please-version
 
 var versions = mapOf(
     "mtb-dto" to "0.2.0",
+    "spring-retry" to "2.0.12",
     "hapi-fhir" to "8.4.2",
     "apache-cxf" to "4.1.4",
     "mockito-kotlin" to "6.2.1",
-    "archunit" to "1.4.1"
+    "archunit" to "1.4.1",
+    "testcontainers" to "1.21.4"
 )
 
 java {
@@ -63,12 +65,14 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.retry:spring-retry:${versions["spring-retry"]}")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
@@ -93,15 +97,17 @@ dependencies {
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
 
-    integrationTestImplementation("org.testcontainers:junit-jupiter")
-    integrationTestImplementation("org.testcontainers:postgresql")
+    integrationTestImplementation("org.testcontainers:junit-jupiter:${versions["testcontainers"]}")
+    integrationTestImplementation("org.testcontainers:postgresql:${versions["testcontainers"]}")
     integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")

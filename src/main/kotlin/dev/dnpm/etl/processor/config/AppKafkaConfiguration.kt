@@ -70,7 +70,7 @@ class AppKafkaConfiguration {
         kafkaResponseProcessor: KafkaResponseProcessor,
     ): KafkaMessageListenerContainer<String, String> {
         val containerProperties = ContainerProperties(kafkaProperties.outputResponseTopic)
-        containerProperties.messageListener = kafkaResponseProcessor
+        containerProperties.setMessageListener(kafkaResponseProcessor)
         return KafkaMessageListenerContainer(consumerFactory, containerProperties)
     }
 
@@ -87,8 +87,11 @@ class AppKafkaConfiguration {
         kafkaProperties: KafkaProperties,
         kafkaInputListener: KafkaInputListener,
     ): KafkaMessageListenerContainer<String, String> {
+        if (null == kafkaProperties.inputTopic) {
+            throw IllegalArgumentException("Kafka input topic cannot be null")
+        }
         val containerProperties = ContainerProperties(kafkaProperties.inputTopic)
-        containerProperties.messageListener = kafkaInputListener
+        containerProperties.setMessageListener(kafkaInputListener)
         return KafkaMessageListenerContainer(consumerFactory, containerProperties)
     }
 
