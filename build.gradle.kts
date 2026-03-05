@@ -70,6 +70,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
