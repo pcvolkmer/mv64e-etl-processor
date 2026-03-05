@@ -81,7 +81,7 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("dev.pcvolkmer.mv64e:mtb-dto:${versions["mtb-dto"]}") { isChanging = true }
+    implementation("dev.pcvolkmer.mv64e:mtb-dto:${versions["mtb-dto"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${versions["hapi-fhir"]}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${versions["hapi-fhir"]}")
     implementation("org.apache.httpcomponents.client5:httpclient5")
