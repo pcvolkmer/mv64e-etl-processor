@@ -43,7 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -55,6 +55,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
+import org.springframework.web.context.WebApplicationContext
 
 @WebMvcTest(controllers = [HomeController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
@@ -76,9 +77,13 @@ class HomeControllerTest {
   private lateinit var webClient: WebClient
 
   @BeforeEach
-  fun setup(@Autowired mockMvc: MockMvc, @Autowired requestService: RequestService) {
+  fun setup(
+      @Autowired mockMvc: MockMvc,
+      @Autowired requestService: RequestService,
+      @Autowired webApplicationContext: WebApplicationContext,
+  ) {
     this.mockMvc = mockMvc
-    this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
+    this.webClient = MockMvcWebClientBuilder.webAppContextSetup(webApplicationContext).build()
     this.webClient.options.isJavaScriptEnabled = false
 
     whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())

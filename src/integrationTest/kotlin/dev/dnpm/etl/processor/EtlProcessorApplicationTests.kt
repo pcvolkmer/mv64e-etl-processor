@@ -32,10 +32,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.http.MediaType
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -69,6 +70,8 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
   @TestPropertySource(
       properties =
           [
+              "app.security.admin-user=admin",
+              "app.security.admin-password={noop}very-secret",
               "app.pseudonymize.generator=buildin",
               "app.consent.service=none",
               "app.transformations[0].path=diagnoses[*].code.version",
@@ -80,12 +83,17 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
 
     @MockitoBean private lateinit var mtbFileSender: MtbFileSender
 
-    @Autowired private lateinit var mockMvc: MockMvc
-
-    @Autowired private lateinit var objectMapper: ObjectMapper
+    private lateinit var mockMvc: MockMvc
+    private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
-    fun setup(@Autowired requestRepository: RequestRepository) {
+    fun setup(
+        @Autowired mockMvc: MockMvc,
+        @Autowired objectMapper: ObjectMapper,
+        @Autowired requestRepository: RequestRepository
+    ) {
+      this.mockMvc = mockMvc
+      this.objectMapper = objectMapper
       requestRepository.deleteAll()
     }
 
@@ -129,6 +137,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
           .post("/mtbfile") {
             content = objectMapper.writeValueAsString(mtbFile)
             contentType = MediaType.APPLICATION_JSON
+            with(user("admin").roles("ADMIN"))
           }
           .andExpect { status { isAccepted() } }
 

@@ -32,7 +32,6 @@ import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.security.UserRoleService
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.dnpm.etl.processor.services.TransformationService
-import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.htmlunit.WebClient
 import org.htmlunit.html.HtmlPage
@@ -47,7 +46,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.TEXT_EVENT_STREAM
@@ -65,6 +64,7 @@ import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
 import org.springframework.web.context.WebApplicationContext
 import reactor.core.publisher.Sinks
 import reactor.test.StepVerifier
+import java.time.Instant
 
 abstract class MockSink : Sinks.Many<Boolean>
 
@@ -73,7 +73,11 @@ abstract class MockSink : Sinks.Many<Boolean>
 @ContextConfiguration(
     classes = [ConfigController::class, AppConfiguration::class, AppSecurityConfiguration::class]
 )
-@TestPropertySource(properties = ["app.pseudonymize.generator=BUILDIN"])
+@TestPropertySource(properties = [
+    "app.security.admin-user=admin",
+    "app.security.admin-password={noop}very-secret",
+    "app.pseudonymize.generator=BUILDIN"
+])
 @MockitoBean(name = "configsUpdateProducer", types = [MockSink::class])
 @MockitoBean(
     types =
@@ -100,13 +104,15 @@ class ConfigControllerTest {
       @Autowired mockMvc: MockMvc,
       @Autowired requestProcessor: RequestProcessor,
       @Autowired connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
+      @Autowired webApplicationContext: WebApplicationContext,
   ) {
     this.mockMvc = mockMvc
-    this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
+    this.webClient = MockMvcWebClientBuilder.webAppContextSetup(webApplicationContext).build()
     this.requestProcessor = requestProcessor
     this.connectionCheckUpdateProducer = connectionCheckUpdateProducer
 
     this.webClient.options.isJavaScriptEnabled = false
+    this.webClient.options.isCssEnabled = false
     this.webClient.options.isThrowExceptionOnScriptError = false
   }
 
@@ -132,7 +138,7 @@ class ConfigControllerTest {
         }
         .andExpect {
           status { isFound() }
-          header { stringValues(HttpHeaders.LOCATION, "http://localhost/login") }
+          header { stringValues(HttpHeaders.LOCATION, "/login") }
         }
   }
 

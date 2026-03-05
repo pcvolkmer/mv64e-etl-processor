@@ -31,6 +31,8 @@ import java.util.*
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.ExecutionException
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.TopicPartition
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -77,7 +79,7 @@ class KafkaMtbFileSenderTest {
             if (null != testData.exception) {
               throw testData.exception
             }
-            completedFuture(SendResult<String, String>(null, null))
+            completedFuture(SendResult<String, String>(testProducerRecord(), testProducerRecordWithMetadata()))
           }
           .whenever(kafkaTemplate)
           .send(any<ProducerRecord<String, String>>())
@@ -98,7 +100,7 @@ class KafkaMtbFileSenderTest {
             if (null != testData.exception) {
               throw testData.exception
             }
-            completedFuture(SendResult<String, String>(null, null))
+            completedFuture(SendResult<String, String>(testProducerRecord(), testProducerRecordWithMetadata()))
           }
           .whenever(kafkaTemplate)
           .send(any<ProducerRecord<String, String>>())
@@ -145,7 +147,7 @@ class KafkaMtbFileSenderTest {
             if (null != testData.exception) {
               throw testData.exception
             }
-            completedFuture(SendResult<String, String>(null, null))
+            completedFuture(SendResult<String, String>(testProducerRecord(), testProducerRecordWithMetadata()))
           }
           .whenever(kafkaTemplate)
           .send(any<ProducerRecord<String, String>>())
@@ -156,7 +158,7 @@ class KafkaMtbFileSenderTest {
 
     @Test
     fun shouldSendMtbFileRequestWithCorrectKeyAndHeaderAndBody() {
-      doAnswer { completedFuture(SendResult<String, String>(null, null)) }
+      doAnswer { completedFuture(SendResult<String, String>(testProducerRecord(), testProducerRecordWithMetadata())) }
           .whenever(kafkaTemplate)
           .send(any<ProducerRecord<String, String>>())
 
@@ -182,7 +184,7 @@ class KafkaMtbFileSenderTest {
 
     @Test
     fun shouldSendDeleteRequestWithCorrectKeyAndHeaderAndBody() {
-      doAnswer { completedFuture(SendResult<String, String>(null, null)) }
+      doAnswer { completedFuture(SendResult<String, String>(testProducerRecord(), testProducerRecordWithMetadata())) }
           .whenever(kafkaTemplate)
           .send(any<ProducerRecord<String, String>>())
 
@@ -216,7 +218,7 @@ class KafkaMtbFileSenderTest {
             if (null != testData.exception) {
               throw testData.exception
             }
-            completedFuture(SendResult<String, String>(null, null))
+            completedFuture(SendResult<String, String>(testProducerRecord(), testProducerRecordWithMetadata()))
           }
           .whenever(kafkaTemplate)
           .send(any<ProducerRecord<String, String>>())
@@ -233,6 +235,16 @@ class KafkaMtbFileSenderTest {
 
       verify(kafkaTemplate, expectedCount).send(any<ProducerRecord<String, String>>())
     }
+  }
+
+  fun testProducerRecord(): ProducerRecord<String, String> {
+      return ProducerRecord<String, String>("testtopic", "testkey", "testvalue")
+  }
+
+  fun testProducerRecordWithMetadata(): RecordMetadata {
+      return RecordMetadata(
+          TopicPartition("testtopic", 0), 0, 0, Instant.now().epochSecond, 0, 0
+      )
   }
 
   companion object {
