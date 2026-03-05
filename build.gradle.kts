@@ -26,9 +26,10 @@ var versions = mapOf(
     "hapi-fhir" to "8.4.2",
     "apache-cxf" to "4.1.4",
     "mockito-kotlin" to "6.2.1",
-    "archunit" to "1.4.1",
     "testcontainers" to "1.21.4"
 )
+
+val springModulithVersion by extra("2.0.3")
 
 java {
     toolchain {
@@ -90,6 +91,8 @@ dependencies {
     // gPAS via Soap
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:${versions["apache-cxf"]}")
     implementation("org.apache.cxf:cxf-rt-transports-http:${versions["apache-cxf"]}")
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-starter-jdbc")
 
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
@@ -106,17 +109,23 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${versions["mockito-kotlin"]}")
 
     integrationTestImplementation("org.testcontainers:junit-jupiter:${versions["testcontainers"]}")
     integrationTestImplementation("org.testcontainers:postgresql:${versions["testcontainers"]}")
-    integrationTestImplementation("com.tngtech.archunit:archunit:${versions["archunit"]}")
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
 
     errorprone("com.google.errorprone:error_prone_core:2.43.0")
     errorprone("com.uber.nullaway:nullaway:0.12.11")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.modulith:spring-modulith-bom:$springModulithVersion")
+    }
 }
 
 tasks.withType<JavaCompile> {
