@@ -55,6 +55,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
+import org.springframework.web.context.WebApplicationContext
 
 @WebMvcTest(controllers = [HomeController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
@@ -76,9 +77,13 @@ class HomeControllerTest {
   private lateinit var webClient: WebClient
 
   @BeforeEach
-  fun setup(@Autowired mockMvc: MockMvc, @Autowired requestService: RequestService) {
+  fun setup(
+      @Autowired mockMvc: MockMvc,
+      @Autowired requestService: RequestService,
+      @Autowired webApplicationContext: WebApplicationContext,
+  ) {
     this.mockMvc = mockMvc
-    this.webClient = MockMvcWebClientBuilder.mockMvcSetup(mockMvc).build()
+    this.webClient = MockMvcWebClientBuilder.webAppContextSetup(webApplicationContext).build()
     this.webClient.options.isJavaScriptEnabled = false
 
     whenever(requestService.findAll(any<Pageable>())).thenReturn(Page.empty())
