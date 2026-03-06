@@ -430,6 +430,95 @@ table.config-table td > button:last-of-type {
     min-height: 100vh;
 }
 
+.card {
+    margin: .5rem 0;
+    min-height: 5rem;
+    border-left: 0.5rem solid var(--bg-gray);
+    border-radius: .2rem;
+    background: white;
+    overflow: hidden;
+    box-shadow: 0 .1rem .2rem var(--table-border);
+}
+
+.card > .card-header {
+    content: "";
+    padding: 0.2rem;
+    color: white;
+    background: var(--bg-gray);
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+.card > .card-header.bg-red {
+    background: var(--bg-red);
+}
+
+.card:has(> .card-header.bg-red) {
+    border-left: 0.5rem solid var(--bg-red);
+}
+
+.card > .card-header.bg-yellow {
+    background: var(--bg-yellow);
+}
+
+.card:has(> .card-header.bg-yellow) {
+    border-left: 0.5rem solid var(--bg-yellow);
+}
+
+.card > .card-header.bg-green {
+    background: var(--bg-green);
+}
+
+.card:has(> .card-header.bg-green) {
+    border-left: 0.5rem solid var(--bg-green);
+}
+
+.card > .card-header.bg-blue {
+    background: var(--bg-blue);
+}
+
+.card:has(> .card-header.bg-blue) {
+    border-left: 0.5rem solid var(--bg-blue);
+}
+
+.card > .card-sub-header {
+    display: flex;
+    padding: 0 .5rem;
+    border-bottom: 1px solid var(--table-border);
+    font-size: 1rem;
+    font-weight: bold;
+    background: #eeeeee;
+    align-items: center;
+    height: 3rem;
+}
+
+.card > .card-sub-header.delete {
+    background: #ffdddd;
+}
+
+.card > .card-sub-header > *:nth-child(2) {
+    margin: 0 0 0 auto;
+}
+
+.card > .card-content {
+    padding: .5rem;
+    display: grid;
+    grid-template-columns: 1fr 5fr;
+}
+
+.card > .card-content > div:nth-child(even),
+.card > .card-content > div:nth-child(even) * {
+    font-family: monospace;
+}
+
+.card > .card-content > *:nth-child(odd) {
+    font-weight: bold;
+}
+
+.card > .card-content > div {
+    padding: 0.1rem 0;
+}
+
 table.samples {
     max-width: 100%;
     overflow-x: scroll;

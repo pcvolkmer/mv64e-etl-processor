@@ -28,6 +28,55 @@
         </div>
 
         <div class="border" th:if="${requests.totalElements > 0}">
+            <div class="paged">
+                <div class="card" th:each="request : ${requests}">
+                    <div th:if="${request.status.value.contains('success')}" class="card-header bg-green">Erfolgreiche Übertragung</div>
+                    <div th:if="${request.status.value.contains('warning')}" class="card-header bg-yellow">Übertragung mit Warnungen</div>
+                    <div th:if="${request.status.value.contains('error')}" class="card-header bg-red">Übertragung mit Fehlern</div>
+                    <div th:if="${request.status.value == 'unknown' and not request.isPendingUnknown()}" class="card-header bg-gray">Unbekannter Status</div>
+                    <div th:if="${request.status.value == 'unknown' and request.isPendingUnknown()}" class="card-header bg-gray">⏰ Unbekannter Status ⏰</div>
+                    <div th:if="${request.status.value == 'duplication'}" class="card-header bg-gray">Gestoppt: Duplikation</div>
+                    <div th:if="${request.status.value == 'no-consent'}" class="card-header bg-blue">Gestoppt: Kein Consent</div>
+                    <div th:if="${request.status.value == 'blocked-initial'}" class="card-header bg-blue">Gestoppt: Noch keine Meldebestätigung für vorhergehende Meldung</div>
+                    <div class="card-sub-header" th:classappend="${request.type.value == 'delete' ? 'delete' : ''}">
+                        <div th:if="${request.type.value != 'delete'}">
+                            <span th:if="${request.submissionType.value == 'initial'}"><span>📨 Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
+                            <span th:if="${request.submissionType.value == 'addition'}"><span>🔄 Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
+                            <span th:if="${request.submissionType.value == 'unknown'}"><span>❓ Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
+                        </div>
+                        <div th:if="${request.type.value == 'delete'}">
+                            <span>🗑 Löschanfrage vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time>
+                        </div>
+                        <div th:insert="~{fragments :: accept-initial}" sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}"></div>
+                    </div>
+                    <div class="card-content">
+                        <div>Request-ID</div>
+                        <div th:if="not ${request.report}"><span>[[ ${request.uuid} ]]</span></div>
+                        <div th:if="${request.report}">
+                            <a th:href="@{/report/{id}(id=${request.uuid})}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">[[ ${request.uuid} ]]</a>
+                            <th:block sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">[[ ${request.uuid} ]]</th:block>
+                        </div>
+                        <div>Typ</div>
+                        <div th:style="${request.type.value == 'delete'} ? 'color: red;'">
+                            <span>
+                                [[ ${request.type} ]]
+                                <th:block th:if="${request.submissionType.value != 'unknown'}">([[ ${request.submissionType} ]])</th:block>
+                            </span>
+                        </div>
+                        <div sec:authorize="hasRole('USER') or hasRole('ADMIN')">Patienten-Pseudonym</div>
+                        <div class="patient-id" th:if="${patientPseudonym != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                            [[ ${request.patientPseudonym} ]]
+                        </div>
+                        <div class="patient-id" th:if="${patientPseudonym == null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                            <a th:href="@{/patient/{pid}(pid=${request.patientPseudonym})}">[[ ${request.patientPseudonym} ]]</a>
+                        </div>
+                        <div sec:authorize="hasRole('USER') or hasRole('ADMIN')">TAN</div>
+                        <div class="patient-id" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                            [[ ${request.tan} ]]
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div th:if="${patientPseudonym == null}" class="page-control">
                 <a id="first-page-link" th:href="@{/(page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
                 <a id="prev-page-link" th:href="@{/(page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
@@ -42,50 +91,6 @@
                 <a id="next-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
                 <a id="last-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
             </div>
-            <table class="paged">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Typ</th>
-                        <th sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}">Aktion</th>
-                        <th>ID</th>
-                        <th>Datum</th>
-                        <th>Patienten-ID</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="request : ${requests}">
-                        <td th:if="${request.status.value.contains('success')}" class="bg-green"><small>[[ ${request.status} ]]</small></td>
-                        <td th:if="${request.status.value.contains('warning')}" class="bg-yellow"><small>[[ ${request.status} ]]</small></td>
-                        <td th:if="${request.status.value.contains('error')}" class="bg-red"><small>[[ ${request.status} ]]</small></td>
-                        <td th:if="${request.status.value == 'unknown' and not request.isPendingUnknown()}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
-                        <td th:if="${request.status.value == 'unknown' and request.isPendingUnknown()}" class="bg-yellow"><small>⏰ [[ ${request.status} ]] ⏰</small></td>
-                        <td th:if="${request.status.value == 'duplication'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
-                        <td th:if="${request.status.value == 'no-consent'}" class="bg-blue"><small>[[ ${request.status} ]]</small></td>
-                        <td th:if="${request.status.value == 'blocked-initial'}" class="bg-gray"><small>[[ ${request.status} ]]</small></td>
-                        <td th:style="${request.type.value == 'delete'} ? 'color: red;'">
-                            <small>
-                                [[ ${request.type} ]]
-                                <th:block th:if="${request.submissionType.value != 'unknown'}">([[ ${request.submissionType} ]])</th:block>
-                            </small>
-                        </td>
-                        <td th:insert="~{fragments :: accept-initial}" sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}"></td>
-                        <td th:if="not ${request.report}">[[ ${request.uuid} ]]</td>
-                        <td th:if="${request.report}">
-                            <a th:href="@{/report/{id}(id=${request.uuid})}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">[[ ${request.uuid} ]]</a>
-                            <th:block sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">[[ ${request.uuid} ]]</th:block>
-                        </td>
-                        <td><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></td>
-                        <td class="patient-id" th:if="${patientPseudonym != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
-                            [[ ${request.patientPseudonym} ]]
-                        </td>
-                        <td class="patient-id" th:if="${patientPseudonym == null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
-                            <a th:href="@{/patient/{pid}(pid=${request.patientPseudonym})}">[[ ${request.patientPseudonym} ]]</a>
-                        </td>
-                        <td class="patient-id" sec:authorize="not (hasRole('USER') or hasRole('ADMIN'))">***</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
 
     </main>

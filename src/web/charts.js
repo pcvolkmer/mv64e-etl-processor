@@ -203,7 +203,7 @@ export function drawBarChart(url, elemId, title, data) {
                 '#008000',
                 '#004A9D',
                 '#708090',
-                '#708090',
+                '#004A9D',
                 '#708090'
             ],
             animationDuration: 250,
