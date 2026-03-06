@@ -43,6 +43,7 @@ data class Request(
     val type: RequestType,
     @Column("submission_type") val submissionType: SubmissionType,
     var status: RequestStatus,
+    @Column("tan") val tan: Tan = Tan.empty(),
     var processedAt: Instant = Instant.now(),
     @Embedded.Nullable var report: Report? = null,
     @Column("submission_accepted") var submissionAccepted: Boolean = false,
@@ -55,6 +56,7 @@ data class Request(
       type: RequestType,
       submissionType: SubmissionType,
       status: RequestStatus,
+      tan: Tan,
   ) : this(
       null,
       uuid,
@@ -64,6 +66,7 @@ data class Request(
       type,
       submissionType,
       status,
+      tan,
       Instant.now(),
   )
 
@@ -75,6 +78,7 @@ data class Request(
       type: RequestType,
       submissionType: SubmissionType,
       status: RequestStatus,
+      tan: Tan,
       processedAt: Instant,
   ) : this(
       null,
@@ -85,6 +89,7 @@ data class Request(
       type,
       submissionType,
       status,
+      tan,
       processedAt,
   )
 

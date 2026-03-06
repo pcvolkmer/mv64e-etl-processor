@@ -55,6 +55,7 @@ class ResponseProcessorTest {
           RequestType.MTB_FILE,
           SubmissionType.TEST,
           RequestStatus.UNKNOWN,
+          Tan.empty(),
       )
 
   @BeforeEach

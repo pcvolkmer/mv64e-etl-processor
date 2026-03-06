@@ -54,6 +54,7 @@ class RequestServiceTest {
               RequestType.MTB_FILE,
               SubmissionType.TEST,
               RequestStatus.SUCCESS,
+              Tan.empty(),
               Instant.parse("2023-08-08T02:00:00Z"),
           )
 
@@ -76,6 +77,7 @@ class RequestServiceTest {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.WARNING,
+                Tan.empty(),
                 Instant.parse("2023-07-07T00:00:00Z"),
             ),
             Request(
@@ -87,6 +89,7 @@ class RequestServiceTest {
                 RequestType.DELETE,
                 SubmissionType.TEST,
                 RequestStatus.WARNING,
+                Tan.empty(),
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
             Request(
@@ -98,6 +101,7 @@ class RequestServiceTest {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.UNKNOWN,
+                Tan.empty(),
                 Instant.parse("2023-08-11T00:00:00Z"),
             ),
         )
@@ -120,6 +124,7 @@ class RequestServiceTest {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.WARNING,
+                Tan.empty(),
                 Instant.parse("2023-07-07T00:00:00Z"),
             ),
             Request(
@@ -131,6 +136,7 @@ class RequestServiceTest {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.WARNING,
+                Tan.empty(),
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
             Request(
@@ -142,6 +148,7 @@ class RequestServiceTest {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.UNKNOWN,
+                Tan.empty(),
                 Instant.parse("2023-08-11T00:00:00Z"),
             ),
         )
@@ -164,6 +171,7 @@ class RequestServiceTest {
                 RequestType.DELETE,
                 SubmissionType.TEST,
                 RequestStatus.SUCCESS,
+                Tan.empty(),
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
             Request(
@@ -175,6 +183,7 @@ class RequestServiceTest {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.WARNING,
+                Tan.empty(),
                 Instant.parse("2023-08-08T00:00:00Z"),
             ),
         )
@@ -212,6 +221,7 @@ class RequestServiceTest {
             RequestType.DELETE,
             SubmissionType.TEST,
             RequestStatus.SUCCESS,
+            Tan.empty(),
             Instant.parse("2023-07-07T02:00:00Z"),
         )
 

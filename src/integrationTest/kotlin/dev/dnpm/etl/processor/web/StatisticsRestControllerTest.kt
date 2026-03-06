@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.PatientPseudonym
+import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.monitoring.CountedState
@@ -188,6 +189,7 @@ class StatisticsRestControllerTest {
                         RequestType.MTB_FILE,
                         SubmissionType.TEST,
                         RequestStatus.SUCCESS,
+                        Tan.empty(),
                         Instant
                             .now()
                             .atZone(zoneId)
@@ -204,6 +206,7 @@ class StatisticsRestControllerTest {
                         RequestType.MTB_FILE,
                         SubmissionType.TEST,
                         RequestStatus.WARNING,
+                        Tan.empty(),
                         Instant
                             .now()
                             .atZone(zoneId)
@@ -220,6 +223,7 @@ class StatisticsRestControllerTest {
                         RequestType.DELETE,
                         SubmissionType.TEST,
                         RequestStatus.ERROR,
+                        Tan.empty(),
                         Instant
                             .now()
                             .atZone(zoneId)
@@ -236,6 +240,7 @@ class StatisticsRestControllerTest {
                         RequestType.MTB_FILE,
                         SubmissionType.TEST,
                         RequestStatus.DUPLICATION,
+                        Tan.empty(),
                         Instant
                             .now()
                             .atZone(zoneId)
@@ -252,6 +257,7 @@ class StatisticsRestControllerTest {
                         RequestType.DELETE,
                         SubmissionType.TEST,
                         RequestStatus.UNKNOWN,
+                        Tan.empty(),
                         Instant
                             .now()
                             .atZone(zoneId)

@@ -78,6 +78,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.SUCCESS,
+                Tan.empty(),
                 Instant.parse("2023-07-07T02:00:00Z"),
             ),
             // Should be ignored - wrong patient ID -->
@@ -89,6 +90,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.WARNING,
+                Tan.empty(),
                 Instant.parse("2023-08-08T00:00:00Z"),
             ),
             // <--
@@ -100,6 +102,7 @@ class RequestServiceIntegrationTest : AbstractTestcontainerTest() {
                 RequestType.DELETE,
                 SubmissionType.TEST,
                 RequestStatus.SUCCESS,
+                Tan.empty(),
                 Instant.parse("2023-08-08T02:00:00Z"),
             ),
         )

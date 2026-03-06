@@ -63,6 +63,7 @@ class RequestRepositoryTest : AbstractTestcontainerTest() {
             RequestType.MTB_FILE,
             SubmissionType.TEST,
             RequestStatus.WARNING,
+            Tan.empty(),
             Instant.parse("2023-07-07T00:00:00Z"),
         )
 
