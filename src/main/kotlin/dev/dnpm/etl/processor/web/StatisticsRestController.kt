@@ -52,7 +52,8 @@ class StatisticsRestController(
             RequestStatus.WARNING -> "#FF8C00"
             RequestStatus.SUCCESS -> "#008000"
             RequestStatus.NO_CONSENT,
-            RequestStatus.BLOCKED_INITIAL -> "#004A9D"
+            RequestStatus.BLOCKED_INITIAL,
+            -> "#004A9D"
             else -> "#708090"
         }
 
