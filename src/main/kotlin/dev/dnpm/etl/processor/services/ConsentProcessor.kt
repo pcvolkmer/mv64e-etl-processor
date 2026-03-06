@@ -47,12 +47,12 @@ class ConsentProcessor(
    * @return true if consent is given
    */
   fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
+    mtbFile.ensureMetaDataIsInitialized()
+
     if (consentService is MtbFileConsentService) {
       // consent check is disabled
       return true
     }
-
-    mtbFile.ensureMetaDataIsInitialized()
 
     val personIdentifierValue = mtbFile.patient.id
     val requestDate = Date.from(Instant.now(Clock.systemUTC()))

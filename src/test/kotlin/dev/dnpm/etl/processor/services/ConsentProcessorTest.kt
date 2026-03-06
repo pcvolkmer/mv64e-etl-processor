@@ -7,6 +7,7 @@ import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
+import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.pcvolkmer.mv64e.mtb.Mtb
 import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import dev.pcvolkmer.mv64e.mtb.Patient
@@ -85,6 +86,29 @@ class ConsentProcessorTest {
 
     assertThat(checkResult).isTrue
     assertThat(inputMtb.metadata.researchConsents).isNotEmpty
+  }
+
+  @Test
+  fun ensureMetaDataIsInitializedUsingMtbFileConsentService() {
+    this.consentProcessor =
+        ConsentProcessor(
+            appConfigProperties,
+            gIcsConfigProperties,
+            objectMapper,
+            fhirContext,
+            MtbFileConsentService(),
+        )
+
+    assertThat(consentProcessor.toString()).isNotNull
+
+    val inputMtb =
+        Mtb.builder()
+            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
+            .build()
+    val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
+
+    assertThat(checkResult).isTrue
+    assertThat(inputMtb.metadata).isNotNull
   }
 
   companion object {
