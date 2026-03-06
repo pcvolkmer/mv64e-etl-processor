@@ -167,7 +167,7 @@ class HomeControllerTest {
           )
 
       val page = webClient.getPage<HtmlPage>("http://localhost/report/${requestId.value}")
-      assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
+      assertThat(page.querySelectorAll("div.card")).hasSize(1)
       assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
     }
 
