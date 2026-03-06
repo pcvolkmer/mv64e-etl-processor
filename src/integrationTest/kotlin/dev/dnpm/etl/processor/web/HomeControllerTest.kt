@@ -138,7 +138,7 @@ class HomeControllerTest {
           )
 
       val page = webClient.getPage<HtmlPage>("http://localhost/")
-      assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
+      assertThat(page.querySelectorAll("div.card")).hasSize(2)
       assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
     }
 
@@ -203,7 +203,7 @@ class HomeControllerTest {
           )
 
       val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-      assertThat(page.querySelectorAll("tbody tr")).hasSize(2)
+      assertThat(page.querySelectorAll("div.card")).hasSize(2)
       assertThat(page.querySelectorAll("div.notification.info")).isEmpty()
     }
 
@@ -309,9 +309,9 @@ class HomeControllerTest {
           )
 
       val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-      assertThat(page.querySelectorAll("tbody tr")).hasSize(1)
-      assertThat(page.querySelectorAll("tbody tr > td > small").first().textContent)
-          .isEqualTo("NO_CONSENT")
+      assertThat(page.querySelectorAll("div.card")).hasSize(1)
+      assertThat(page.querySelectorAll("div.card div").first().textContent)
+          .isEqualTo("Gestoppt: Kein Consent")
     }
   }
 }
