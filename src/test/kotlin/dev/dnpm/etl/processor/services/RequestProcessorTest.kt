@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.Fingerprint
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.PatientPseudonym
-import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
@@ -109,6 +109,7 @@ class RequestProcessorTest {
               RequestType.MTB_FILE,
               SubmissionType.TEST,
               RequestStatus.SUCCESS,
+              Tan.empty(),
               Instant.parse("2023-08-08T02:00:00Z"),
           )
         }
@@ -165,6 +166,7 @@ class RequestProcessorTest {
               RequestType.MTB_FILE,
               SubmissionType.TEST,
               RequestStatus.SUCCESS,
+              Tan.empty(),
               Instant.parse("2023-08-08T02:00:00Z"),
           )
         }
@@ -221,6 +223,7 @@ class RequestProcessorTest {
               RequestType.MTB_FILE,
               SubmissionType.TEST,
               RequestStatus.SUCCESS,
+              Tan.empty(),
               Instant.parse("2023-08-08T02:00:00Z"),
           )
         }
@@ -281,6 +284,7 @@ class RequestProcessorTest {
               RequestType.MTB_FILE,
               SubmissionType.TEST,
               RequestStatus.SUCCESS,
+              Tan.empty(),
               Instant.parse("2023-08-08T02:00:00Z"),
           )
         }
@@ -298,6 +302,10 @@ class RequestProcessorTest {
     doAnswer { it.arguments[0] as String }
         .whenever(pseudonymizeService)
         .patientPseudonym(anyValueClass())
+
+    doAnswer { "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2" }
+        .whenever(pseudonymizeService)
+        .genomDeTan(anyValueClass())
 
     doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
@@ -360,6 +368,7 @@ class RequestProcessorTest {
                 RequestType.MTB_FILE,
                 SubmissionType.INITIAL,
                 RequestStatus.SUCCESS,
+                Tan.empty(),
                 Instant.parse("2026-01-05T09:00:00Z"),
                 submissionAccepted = true,
             ),
@@ -372,6 +381,7 @@ class RequestProcessorTest {
                 RequestType.MTB_FILE,
                 SubmissionType.INITIAL,
                 RequestStatus.BLOCKED_INITIAL,
+                Tan.empty(),
                 Instant.parse("2026-01-05T10:00:00Z"),
                 submissionAccepted = false,
             ),
@@ -392,6 +402,10 @@ class RequestProcessorTest {
     doAnswer { it.arguments[0] as String }
         .whenever(pseudonymizeService)
         .patientPseudonym(anyValueClass())
+
+    doAnswer { "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2" }
+        .whenever(pseudonymizeService)
+        .genomDeTan(anyValueClass())
 
     doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
@@ -434,6 +448,7 @@ class RequestProcessorTest {
     verify(sender, times(1)).send(requestCaptor.capture())
     assertThat(requestCaptor.firstValue).isNotNull
     assertThat(requestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+    assertThat(requestCaptor.firstValue.content.metadata.transferTan).isEqualTo("f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2")
 
     val eventCaptor = argumentCaptor<ResponseEvent>()
     verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -597,6 +612,68 @@ class RequestProcessorTest {
     assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
   }
 
+    @Test
+  fun testShouldSaveRequestWithGenomDeTan() {
+
+    doAnswer { false }
+        .whenever(requestService)
+        .isLastRequestWithKnownStatusDeletion(anyValueClass())
+
+    doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+        .whenever(sender)
+        .send(any<DnpmV2MtbFileRequest>())
+
+    doAnswer { it.arguments[0] as String }
+        .whenever(pseudonymizeService)
+        .patientPseudonym(anyValueClass())
+
+    doAnswer { "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2" }
+        .whenever(pseudonymizeService)
+        .genomDeTan(anyValueClass())
+
+    doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+    whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+    requestProcessor =
+        RequestProcessor(
+            pseudonymizeService,
+            transformationService,
+            sender,
+            requestService,
+            ObjectMapper(),
+            applicationEventPublisher,
+            AppConfigProperties(postInitialSubmissionBlock = true),
+            consentProcessor,
+        )
+
+    val mtbFile =
+        Mtb.builder()
+            .patient(Patient.builder().id("123").build())
+            .metadata(MvhMetadata())
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
+                        .build()
+                )
+            )
+            .build()
+
+    this.requestProcessor.processMtbFile(mtbFile)
+
+    val requestCaptor = argumentCaptor<Request>()
+    verify(requestService, times(1)).save(requestCaptor.capture())
+    assertThat(requestCaptor.firstValue).isNotNull
+    assertThat(requestCaptor.firstValue.tan).isEqualTo(Tan("f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2"))
+  }
+
   @Nested
   inner class WithInitialSubmissionBlock {
 
@@ -656,6 +733,7 @@ class RequestProcessorTest {
                   RequestType.MTB_FILE,
                   SubmissionType.INITIAL,
                   RequestStatus.ERROR,
+                  Tan.empty(),
                   Instant.parse("2026-01-05T09:00:00Z"),
                   submissionAccepted = false,
               ),
@@ -668,6 +746,7 @@ class RequestProcessorTest {
                   RequestType.MTB_FILE,
                   SubmissionType.INITIAL,
                   RequestStatus.SUCCESS,
+                  Tan.empty(),
                   Instant.parse("2026-01-05T10:00:00Z"),
                   submissionAccepted = false,
               ),

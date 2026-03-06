@@ -48,6 +48,14 @@ fun emptyPatientId() = PatientId("")
 
 fun emptyPatientPseudonym() = PatientPseudonym("")
 
+@JvmInline value class Tan(val value: String) {
+    fun isValid() = value.matches(Regex("^[a-fA-F0-9]{64}$"))
+
+    companion object {
+        fun empty() = Tan("")
+    }
+}
+
 /**
  * Custom MediaTypes
  *

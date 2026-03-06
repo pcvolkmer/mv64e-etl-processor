@@ -107,6 +107,7 @@ class RequestProcessor(
               RequestType.MTB_FILE,
               submissionType,
               RequestStatus.BLOCKED_INITIAL,
+              Tan(request.content.metadata?.transferTan.orEmpty())
           )
       )
       // Exit - no further processing
@@ -135,6 +136,7 @@ class RequestProcessor(
             RequestType.MTB_FILE,
             submissionType,
             RequestStatus.UNKNOWN,
+            Tan(request.content.metadata?.transferTan.orEmpty()),
         )
     )
 
@@ -228,6 +230,7 @@ class RequestProcessor(
               RequestType.DELETE,
               SubmissionType.UNKNOWN,
               requestStatus,
+              Tan.empty()
           )
       )
 
@@ -256,6 +259,7 @@ class RequestProcessor(
               type = RequestType.DELETE,
               submissionType = SubmissionType.UNKNOWN,
               report = Report("Fehler bei der Pseudonymisierung"),
+              tan = Tan.empty(),
           )
       )
     }

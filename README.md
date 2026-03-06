@@ -18,11 +18,13 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
-### 🔥 Wichtige Änderungen in Version 0.11
+### 🔥 Wichtige Änderungen in Version 0.15
 
-Ab Version 0.11 wird ausschließlich [DNPM:DIP](https://github.com/dnpm-dip) unterstützt.
+Ab Version 0.15 wird zu jeder Anfrage die generierte TAN zusätzlich zur Request-ID gespeichert.
+Die TAN wird nur für MTB-Anfragen gespeichert, da sie für Lösch-Anfragen nicht relevant ist.
 
-Zudem wurde der Name des Pakets in **mv64e-etl-processor** geändert.
+Hierdurch wird es möglich, die in Version 0.14 eingeführte Blockierung weiterer Submissions anhand der TAN
+(z.B. aus der Meldebestätigung) für einen Patienten freizugeben.
 
 ## Funktionsweise
 
@@ -52,7 +54,8 @@ Sobald für einen Patienten eine Übertragung ohne Issues oder mit maximal Warnu
 DNPM:DIP akzeptiert wurde, werden weitere Meldungen solange verworfen, bis ein Administrator den Patienten 
 wieder freigegeben hat.
 
-**ACHTUNG**: Diese Funktionalität ist in Version 0.12.x noch nicht standardmäßig aktiviert und muss erst aktiviert werden.
+**ACHTUNG**: Diese Funktionalität ist ab Version 0.14 verfügbar, jedoch nicht standardmäßig aktiviert und
+muss erst aktiviert werden.
 
 `APP_POST_INITIAL_SUBMISSION_BLOCK` -> `true` | `false` (falls fehlt, wird `false` angenommen)
 
