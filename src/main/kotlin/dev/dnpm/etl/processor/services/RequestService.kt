@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.monitoring.*
 import java.util.*
 import org.springframework.data.domain.Page
@@ -35,6 +36,9 @@ class RequestService(private val requestRepository: RequestRepository) {
   fun findAll(): Iterable<Request> = requestRepository.findAll()
 
   fun findAll(pageable: Pageable): Page<Request> = requestRepository.findAll(pageable)
+
+  fun searchRequestLike(patientPseudonym: PatientPseudonym, tan: Tan, pageable: Pageable): Page<Request> =
+        requestRepository.findByPatientPseudonymContainingIgnoreCaseOrTanContainingIgnoreCase(patientPseudonym, tan, pageable)
 
   fun findByUuid(uuid: RequestId): Optional<Request> = requestRepository.findByUuidEquals(uuid)
 

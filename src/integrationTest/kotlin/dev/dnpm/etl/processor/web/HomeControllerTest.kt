@@ -41,6 +41,9 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyValueClass
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -48,6 +51,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -259,7 +264,7 @@ class HomeControllerTest {
     @Test
     fun testShouldShowHomePage() {
       val page = webClient.getPage<HtmlPage>("http://localhost/")
-      assertThat(page.querySelectorAll("tbody tr")).isEmpty()
+      assertThat(page.querySelectorAll("div.card")).isEmpty()
       assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
     }
 
@@ -283,7 +288,7 @@ class HomeControllerTest {
           .thenReturn(Page.empty())
 
       val page = webClient.getPage<HtmlPage>("http://localhost/patient/PSEUDO1")
-      assertThat(page.querySelectorAll("tbody tr")).isEmpty()
+      assertThat(page.querySelectorAll("div.card")).isEmpty()
       assertThat(page.querySelectorAll("div.notification.info")).hasSize(1)
     }
 
@@ -312,6 +317,78 @@ class HomeControllerTest {
       assertThat(page.querySelectorAll("div.card")).hasSize(1)
       assertThat(page.querySelectorAll("div.card div").first().textContent)
           .isEqualTo("Gestoppt: Kein Consent")
+    }
+
+    @Test
+    fun testSearchAsLoggedInAdmin() {
+      whenever(requestService.searchRequestLike(anyValueClass(), anyValueClass(), any<Pageable>()))
+          .thenReturn(Page.empty())
+
+      mockMvc.get("/") {
+          queryParam("q", "test")
+          with(user("admin").roles("ADMIN"))
+      }.andExpect {
+          status { isOk() }
+          view { name("index") }
+      }
+
+      verify(requestService, times(1))
+          .searchRequestLike(
+              anyValueClass<PatientPseudonym>(),
+              anyValueClass<Tan>(),
+              any<Pageable>()
+          )
+
+      verify(requestService, times(0))
+          .findAll(any<Pageable>())
+    }
+
+    @Test
+    fun testSearchAsLoggedInUser() {
+      whenever(requestService.searchRequestLike(anyValueClass(), anyValueClass(), any<Pageable>()))
+          .thenReturn(Page.empty())
+
+      mockMvc.get("/") {
+          queryParam("q", "test")
+          with(user("user").roles("USER"))
+      }.andExpect {
+          status { isOk() }
+          view { name("index") }
+      }
+
+      verify(requestService, times(1))
+          .searchRequestLike(
+              anyValueClass<PatientPseudonym>(),
+              anyValueClass<Tan>(),
+              any<Pageable>()
+          )
+
+      verify(requestService, times(0))
+          .findAll(any<Pageable>())
+    }
+
+    @Test
+    fun testNotSearchAsAnonymousUser() {
+      whenever(requestService.searchRequestLike(anyValueClass(), anyValueClass(), any<Pageable>()))
+          .thenReturn(Page.empty())
+
+      mockMvc.get("/") {
+          queryParam("q", "test")
+          with(anonymous())
+      }.andExpect {
+          status { isOk() }
+          view { name("index") }
+      }
+
+      verify(requestService, times(0))
+          .searchRequestLike(
+              anyValueClass<PatientPseudonym>(),
+              anyValueClass<Tan>(),
+              any<Pageable>()
+          )
+
+      verify(requestService, times(1))
+          .findAll(any<Pageable>())
     }
   }
 }
