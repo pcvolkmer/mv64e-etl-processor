@@ -144,4 +144,6 @@ interface RequestRepository :
           ") rank WHERE rank = 1 GROUP BY status ORDER BY status, count DESC;"
   )
   fun findPatientUniqueDeleteStates(): List<CountedState>
+
+  fun findByPatientPseudonymContainingIgnoreCaseOrTanContainingIgnoreCase(patientPseudonym: PatientPseudonym, tan: Tan, pageable: Pageable): Page<Request>
 }

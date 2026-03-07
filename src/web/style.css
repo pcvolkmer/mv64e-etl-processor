@@ -43,6 +43,10 @@ body {
     background-size: contain;
 }
 
+code {
+    font-family: monospace;
+}
+
 div.headline {
     position: fixed;
     display: block;
@@ -246,47 +250,6 @@ section {
     margin: 3rem 0;
 }
 
-form {
-    margin: 1rem 0;
-    padding: 1rem;
-
-    border: 1px solid lightgray;
-    border-radius: 3px;
-    background: #eee;
-
-    text-align: center;
-}
-
-form > h2 {
-    margin: 0;
-}
-
-form.samplecode-input > div {
-    padding: 0.6rem;
-    display: inline-block;
-
-    border: 1px solid lightgray;
-    border-radius: 3px;
-
-    background: white;
-}
-
-form.samplecode-input input {
-    padding: 0;
-
-    border: none;
-    outline: none;
-
-    text-align: left;
-    appearance: textfield;
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-form.samplecode-input input:focus-visible {
-    background: lightgreen;
-}
-
 .login-form {
     width: fit-content;
     margin: 3rem auto;
@@ -313,6 +276,56 @@ form.samplecode-input input:focus-visible {
     display: block;
 }
 
+.search-form {
+    width: max-content;
+    margin: 0 0 0 auto;
+}
+
+.search-form form {
+    width: max-content;
+    border: 1px solid var(--table-border);
+    border-radius: 3px;
+    transition: 0.2s;
+}
+
+.search-form form:has(input:focus) {
+    border: 1px solid var(--bg-blue);
+}
+
+.search-form form input {
+    width: 34rem;
+    border: none;
+    display: inline-block;
+    outline: none;
+    font-family: monospace;
+}
+
+.search-form form a {
+    background: var(--text);
+    color: #fff;
+    aspect-ratio: 1;
+    text-align: center;
+    border-radius: 50%;
+    align-content: center;
+    height: 1.2rem;
+    font-size: 1.2rem;
+    text-decoration: none;
+    display: inline-grid;
+    padding: 0;
+    margin-right: .5rem;
+}
+
+.token-form {
+    margin: 1rem 0;
+    padding: 1rem;
+
+    border: 1px solid lightgray;
+    border-radius: 3px;
+    background: #eee;
+
+    text-align: center;
+}
+
 .userrole-form {
     display: inline-block;
 }
@@ -329,7 +342,8 @@ form.samplecode-input input:focus-visible {
 }
 
 .login-form form *,
-.token-form form * {
+.token-form form *,
+.search-form form * {
     padding: 0.5rem;
     border: 1px solid var(--table-border);
     border-radius: 3px;
@@ -349,6 +363,7 @@ form.samplecode-input input:focus-visible {
     background: var(--bg-blue);
     color: white;
     border: none;
+    text-align: center;
 }
 
 .userrole-form form select {

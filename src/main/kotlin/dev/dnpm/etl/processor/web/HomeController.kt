@@ -22,12 +22,14 @@ package dev.dnpm.etl.processor.web
 import dev.dnpm.etl.processor.NotFoundException
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
+import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.services.RequestService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
 @RequestMapping(path = ["/"])
@@ -45,11 +48,26 @@ class HomeController(
 ) {
     @GetMapping
     fun index(
+        @RequestParam(name = "q", required = false) queryString: String?,
         @PageableDefault(page = 0, size = 10, sort = ["processedAt"], direction = Sort.Direction.DESC)
         pageable: Pageable,
         model: Model,
     ): String {
-        val requests = requestService.findAll(pageable)
+        val isAdminOrUser =
+            SecurityContextHolder
+                .getContext()
+                .authentication
+                ?.authorities
+                ?.any { it.authority == "ROLE_USER" || it.authority == "ROLE_ADMIN" } == true
+
+        val requests =
+            // Only available for logged-in admins or users
+            if (null != queryString && isAdminOrUser) {
+                model.addAttribute("query", queryString)
+                requestService.searchRequestLike(PatientPseudonym(queryString), Tan(queryString), pageable)
+            } else {
+                requestService.findAll(pageable)
+            }
         model.addAttribute("requests", requests)
         model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
         return "index"
