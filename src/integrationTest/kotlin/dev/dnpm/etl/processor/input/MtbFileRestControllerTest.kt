@@ -159,16 +159,16 @@ class MtbFileRestControllerTest {
               "/api/mtb/etl/patient-record",
           ]
   )
-  fun testShouldDenyPermissionToSendMtbFile(url: String) {
+  fun testShouldGrantPermissionToSendMtbFileToUser(url: String) {
     mockMvc
         .post(url) {
-          with(anonymous())
+          with(user("testuser").roles("USER"))
           contentType = MediaType.APPLICATION_JSON
           content = ObjectMapper().writeValueAsString(mtbFile)
         }
-        .andExpect { status { isUnauthorized() } }
+        .andExpect { status { isAccepted() } }
 
-    verify(requestProcessor, never()).processMtbFile(any<Mtb>())
+    verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
   }
 
   @ParameterizedTest
@@ -185,14 +185,13 @@ class MtbFileRestControllerTest {
               "/api/mtb/etl/patient-record",
           ]
   )
-  fun testShouldDenyPermissionToSendMtbFileForUser(url: String) {
+  fun testShouldDenyPermissionToSendMtbFileForAnonymous(url: String) {
     mockMvc
         .post(url) {
-          with(user("fakeuser").roles("USER"))
           contentType = MediaType.APPLICATION_JSON
           content = ObjectMapper().writeValueAsString(mtbFile)
         }
-        .andExpect { status { isForbidden() } }
+        .andExpect { status { isUnauthorized() } }
 
     verify(requestProcessor, never()).processMtbFile(any<Mtb>())
   }

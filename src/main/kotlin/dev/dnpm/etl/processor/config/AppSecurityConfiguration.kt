@@ -53,6 +53,22 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
 
   private val logger = LoggerFactory.getLogger(AppSecurityConfiguration::class.java)
 
+    private fun authorizeAppRequests(http: HttpSecurity) {
+        http {
+            authorizeHttpRequests {
+                authorize("/configs/**", hasRole("ADMIN"))
+                authorize("/api/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
+                authorize("/api/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
+                authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
+                authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
+                authorize("/patient/**", hasAnyRole("ADMIN", "USER"))
+                authorize("/report/**", hasAnyRole("ADMIN", "USER"))
+                authorize("/submission/**", hasAnyRole("ADMIN", "USER"))
+                authorize(anyRequest, permitAll)
+            }
+        }
+     }
+
   @Bean
   fun userDetailsService(passwordEncoder: PasswordEncoder): InMemoryUserDetailsManager {
     val adminUser =
@@ -72,10 +88,14 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
           securityConfigProperties.adminPassword
         }
 
-    val user: UserDetails =
+    val admin: UserDetails =
         User.withUsername(adminUser).password(adminPassword).roles("ADMIN").build()
 
-    return InMemoryUserDetailsManager(user)
+    val users = securityConfigProperties.users.map {
+        User.withUsername(it.username).password(it.password).roles("USER").build()
+    }.toTypedArray()
+
+    return InMemoryUserDetailsManager(admin, *users)
   }
 
   @Bean
@@ -86,24 +106,8 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
       userRoleRepository: UserRoleRepository,
       sessionRegistry: SessionRegistry,
   ): SecurityFilterChain {
+    authorizeAppRequests(http)
     http {
-      authorizeHttpRequests {
-        authorize("/configs/**", hasRole("ADMIN"))
-        authorize("/api/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
-        authorize("/api/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
-        authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
-        authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN", "USER"))
-        authorize("/report/**", hasAnyRole("ADMIN", "USER"))
-        authorize("/submission/**", hasAnyRole("ADMIN", "USER"))
-        authorize("/**/*.css", permitAll)
-        authorize("/**/*.ico", permitAll)
-        authorize("/**/*.jpeg", permitAll)
-        authorize("/**/*.js", permitAll)
-        authorize("/**/*.svg", permitAll)
-        authorize("/**/*.css", permitAll)
-        authorize("/login/**", permitAll)
-        authorize(anyRequest, permitAll)
-      }
       httpBasic { realmName = "ETL-Processor" }
       formLogin { loginPage = LOGIN_PATH }
       oauth2Login { loginPage = LOGIN_PATH }
@@ -154,17 +158,8 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
       matchIfMissing = true,
   )
   fun filterChain(http: HttpSecurity, passwordEncoder: PasswordEncoder): SecurityFilterChain {
+    authorizeAppRequests(http)
     http {
-      authorizeHttpRequests {
-        authorize("/configs/**", hasRole("ADMIN"))
-        authorize("/api/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
-        authorize("/api/mtb/**", hasAnyRole("MTBFILE", "ADMIN"))
-        authorize("/mtbfile/**", hasAnyRole("MTBFILE", "ADMIN"))
-        authorize("/mtb/**", hasAnyRole("MTBFILE", "ADMIN"))
-        authorize("/report/**", hasRole("ADMIN"))
-        authorize("/submission/**", hasAnyRole("ADMIN"))
-        authorize(anyRequest, permitAll)
-      }
       httpBasic { realmName = "ETL-Processor" }
       formLogin { loginPage = LOGIN_PATH }
       csrf { disable() }
