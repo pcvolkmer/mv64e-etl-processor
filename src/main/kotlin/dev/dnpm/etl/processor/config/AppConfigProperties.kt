@@ -136,11 +136,17 @@ data class SecurityConfigProperties(
     val enableTokens: Boolean = false,
     val enableOidc: Boolean = false,
     val defaultNewUserRole: Role = Role.USER,
+    val users: List<UserProperties> = listOf(),
 ) {
     companion object {
         const val NAME = "app.security"
     }
 }
+
+data class UserProperties(
+    val username: String,
+    val password: String,
+)
 
 enum class PseudonymGenerator {
     BUILDIN,

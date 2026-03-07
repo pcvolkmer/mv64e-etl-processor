@@ -20,6 +20,13 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ### 🔥 Wichtige Änderungen in Version 0.15
 
+#### Konfiguration von Benutzern
+
+Zusätzlich zu einem Administrator-Account können nun [weitere Benutzer](#weitere-benutzer) 
+mit nicht administrativen Rechten in der Konfiguration angelegt werden.
+
+#### TAN-Speicherung
+
 Ab Version 0.15 wird zu jeder Anfrage die generierte TAN zusätzlich zur Request-ID gespeichert.
 Die TAN wird nur für MTB-Anfragen gespeichert, da sie für Lösch-Anfragen nicht relevant ist.
 
@@ -222,8 +229,22 @@ Hier Beispiele für das Beispielpasswort `very-secret`:
 * `{sha256}9a34717f0646b5e9cfcba70055de62edb026ff4f68671ba3db96aa29297d2df5f1a037d58c745657`
 
 Wird kein Administrator-Passwort angegeben, wird ein zufälliger Wert generiert und beim Start der
-Anwendung in den Logs
-angezeigt.
+Anwendung in den Logs angezeigt.
+
+#### Weitere Benutzer
+
+Ab Version 0.15.0 können weitere Benutzer-Accounts konfiguriert werden, ohne OpenID Connect zu verwenden.
+Diese haben lediglich Benutzerrechte und können keine Konfigurationen einsehen oder ändern.
+
+Beispiele:
+
+```
+APP_SECURITY_USERS[0]_USERNAME=myuser
+APP_SECURITY_USERS[0]_PASSWORD={noop}very-secret
+APP_SECURITY_USERS[1]_USERNAME=otheruser
+APP_SECURITY_USERS[1]_PASSWORD={bcrypt}$2y$05$CCkfsMr/wbTleMyjVIK8g.Aa3RCvrvoLXVAsL.f6KeouS88vXD9b6
+...
+```
 
 #### Weitere (nicht administrative) Nutzer mit OpenID Connect
 
