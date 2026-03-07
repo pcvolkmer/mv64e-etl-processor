@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.15.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.14.0...v0.15.0) (2026-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate to Spring Boot 4 ([#250](https://github.com/pcvolkmer/mv64e-etl-processor/issues/250))
+
+### deps
+
+* migrate to Spring Boot 4 ([#250](https://github.com/pcvolkmer/mv64e-etl-processor/issues/250)) ([159ad72](https://github.com/pcvolkmer/mv64e-etl-processor/commit/159ad72d0c16259e36878baa8ca64b4c4b0d6bf9))
+
+
+### Features
+
+* configuration of additional users ([#254](https://github.com/pcvolkmer/mv64e-etl-processor/issues/254)) ([ee5f909](https://github.com/pcvolkmer/mv64e-etl-processor/commit/ee5f9096c85f6789078597ba19f7c02e6b24d2c5))
+* improve request list ([b7b7fa3](https://github.com/pcvolkmer/mv64e-etl-processor/commit/b7b7fa3da199f2f910c27084a075f91063e46381))
+* save TAN for MTB requests ([#253](https://github.com/pcvolkmer/mv64e-etl-processor/issues/253)) ([bf6bfa9](https://github.com/pcvolkmer/mv64e-etl-processor/commit/bf6bfa904e127f51b79cfafb96e1280b50e9615a))
+* search by patient pseudonym and TAN ([#256](https://github.com/pcvolkmer/mv64e-etl-processor/issues/256)) ([17262ea](https://github.com/pcvolkmer/mv64e-etl-processor/commit/17262ea8cf9478bab2b5c34d814c8e1519adf33a))
+
+
+### Bug Fixes
+
+* code formatting ([882d65c](https://github.com/pcvolkmer/mv64e-etl-processor/commit/882d65c4e2253606eb3315b37800d080fbdb94be))
+* ensure metadata is initialized using MtbFileConsentService ([9eb8d74](https://github.com/pcvolkmer/mv64e-etl-processor/commit/9eb8d74117c4c363f787fbc3e02a90e7f21a402e))
+
 ## [0.14.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.13.1...v0.14.0) (2026-01-22)
 
 
