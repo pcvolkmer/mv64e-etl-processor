@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.security
 
 import jakarta.annotation.PostConstruct
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 import org.springframework.data.annotation.Id
@@ -36,12 +37,18 @@ class TokenService(
     private val tokenRepository: TokenRepository,
 ) {
 
+  private val logger = LoggerFactory.getLogger(TokenService::class.java)
+
   @PostConstruct
   fun setup() {
     tokenRepository.findAll().forEach {
-      userDetailsManager.createUser(
-          User.withUsername(it.username).password(it.password).roles("MTBFILE").build()
-      )
+      if (!userDetailsManager.userExists(it.username)) {
+          userDetailsManager.createUser(
+              User.withUsername(it.username).password(it.password).roles("MTBFILE").build()
+          )
+      } else {
+          logger.error("User ${it.username} already exists - cannot use token - skipping!")
+      }
     }
   }
 
