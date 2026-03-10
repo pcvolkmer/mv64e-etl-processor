@@ -32,8 +32,6 @@ import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
@@ -46,6 +44,7 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ConfigurationCondition
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
+import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.retry.RetryCallback
@@ -60,6 +59,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Sinks
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 @Configuration
 @EnableConfigurationProperties(
@@ -73,6 +74,7 @@ import reactor.core.publisher.Sinks
         ]
 )
 @EnableScheduling
+@EnableJdbcAuditing
 class AppConfiguration {
 
   private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)

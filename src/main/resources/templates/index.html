@@ -75,6 +75,11 @@
                                 <th:block th:if="${request.submissionType.value != 'unknown'}">([[ ${request.submissionType} ]])</th:block>
                             </span>
                         </div>
+                        <div sec:authorize="hasRole('USER') or hasRole('ADMIN')">Letzte Aktualisierung</div>
+                        <div sec:authorize="hasRole('USER') or hasRole('ADMIN')">
+                            <time th:if="${request.updatedAt}" th:datetime="${request.updatedAt}">[[ ${request.updatedAt} ]]</time>
+                            <span th:if="${request.updatedBy}"> durch [[ ${request.updatedBy} ]]</span>
+                        </div>
                         <div sec:authorize="hasRole('USER') or hasRole('ADMIN')">Patienten-Pseudonym</div>
                         <div class="patient-id" th:if="${patientPseudonym != null}" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
                             [[ ${request.patientPseudonym} ]]

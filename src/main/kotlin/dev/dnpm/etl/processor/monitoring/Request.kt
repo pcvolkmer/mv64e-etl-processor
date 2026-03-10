@@ -20,10 +20,13 @@
 package dev.dnpm.etl.processor.monitoring
 
 import dev.dnpm.etl.processor.*
+import org.springframework.data.annotation.CreatedDate
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.LastModifiedBy
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jdbc.repository.query.Query
@@ -44,7 +47,9 @@ data class Request(
     @Column("submission_type") val submissionType: SubmissionType,
     var status: RequestStatus,
     @Column("tan") val tan: Tan = Tan.empty(),
-    var processedAt: Instant = Instant.now(),
+    @CreatedDate var processedAt: Instant = Instant.now(),
+    @LastModifiedDate var updatedAt: Instant? = null,
+    @LastModifiedBy var updatedBy: String? = null,
     @Embedded.Nullable var report: Report? = null,
     @Column("submission_accepted") var submissionAccepted: Boolean = false,
 ) {
