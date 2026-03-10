@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.0...v0.15.1) (2026-03-10)
+
+
+### Features
+
+* request update audit ([#258](https://github.com/pcvolkmer/mv64e-etl-processor/issues/258)) ([1a00117](https://github.com/pcvolkmer/mv64e-etl-processor/commit/1a0011765fa2d34f7d0075f463beb9e614ec8812))
+* show submission statistics table ([#260](https://github.com/pcvolkmer/mv64e-etl-processor/issues/260)) ([ec3f472](https://github.com/pcvolkmer/mv64e-etl-processor/commit/ec3f472f8f37a3d340ddd3a042ecb7f26bd311db))
+
+
+### Bug Fixes
+
+* ignore token users with existing username ([#257](https://github.com/pcvolkmer/mv64e-etl-processor/issues/257)) ([48f6124](https://github.com/pcvolkmer/mv64e-etl-processor/commit/48f6124e2cc27476dba8ebfb398c1b4ad8875164))
+
 ## [0.15.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.14.0...v0.15.0) (2026-03-07)
 
 
