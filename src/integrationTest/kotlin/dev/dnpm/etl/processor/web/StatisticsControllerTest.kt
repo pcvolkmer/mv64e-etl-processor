@@ -21,6 +21,7 @@ package dev.dnpm.etl.processor.web
 
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
+import dev.dnpm.etl.processor.services.RequestService
 import org.htmlunit.WebClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -49,6 +51,7 @@ import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
             "app.security.admin-password={noop}very-secret",
         ],
 )
+@MockitoBean(types = [RequestService::class])
 class StatisticsControllerTest {
     private lateinit var mockMvc: MockMvc
     private lateinit var webClient: WebClient
@@ -62,7 +65,7 @@ class StatisticsControllerTest {
     }
 
     @Test
-    fun testShouldRequestLoginPage() {
+    fun testShouldRequestStatisticsPage() {
         mockMvc.get("/statistics").andExpect {
             status { isOk() }
             view { name("statistics") }
