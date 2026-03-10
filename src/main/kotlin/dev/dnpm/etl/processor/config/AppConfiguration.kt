@@ -74,7 +74,6 @@ import kotlin.time.toJavaDuration
         ]
 )
 @EnableScheduling
-@EnableJdbcAuditing
 class AppConfiguration {
 
   private val logger = LoggerFactory.getLogger(AppConfiguration::class.java)

@@ -166,7 +166,7 @@ class HomeControllerTest {
                       RequestStatus.SUCCESS,
                       Tan.empty(),
                       Instant.now(),
-                      Report("Test"),
+                      report = Report("Test"),
                   )
               )
           )
