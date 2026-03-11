@@ -12,12 +12,23 @@
         <div class="search-form" sec:authorize="hasRole('USER') or hasRole('ADMIN')">
             <form th:action="@{/}" method="get">
                 <input id="search-input" type="text" name="q" maxlength="64" placeholder="Suche nach Patienten-Pseudonym oder TAN" th:value="${query}"/>
+                <select name="f" onchange="this.form.submit()">
+                    <option value="">in allen Anfragen</option>
+                    <option th:selected="${filter == 'all-dip'}" th:value="all-dip">in DNPM:DIP</option>
+                    <option th:if="${postInitialSubmissionBlock}" th:selected="${filter == 'confirmed'}" th:value="confirmed">in DNPM:DIP mit Meldebestätigung</option>
+                    <option th:if="${postInitialSubmissionBlock}" th:selected="${filter == 'unconfirmed'}" th:value="unconfirmed">in DNPM:DIP ohne Meldebestätigung</option>
+                </select>
                 <a th:href="@{/}">🞫</a>
             </form>
         </div>
 
         <h1>
-            Alle Anfragen
+            <th:block th:switch="${filter}">
+                <th:block th:case="null">Alle Anfragen</th:block>
+                <th:block th:case="'all-dip'">Alle Anfragen in DNPM:DIP</th:block>
+                <th:block th:case="'confirmed'">Alle Anfragen in DNPM:DIP mit Meldebestätigung</th:block>
+                <th:block th:case="'unconfirmed'">Alle Anfragen in DNPM:DIP ohne Meldebestätigung</th:block>
+            </th:block>
             <a id="reload-notify" class="btn btn-red reload" title="Neue Anfragen laden" th:href="@{/}">
                 <span>Neue Anfragen laden</span>
             </a>

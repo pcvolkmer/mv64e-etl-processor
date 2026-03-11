@@ -26,18 +26,16 @@ import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.services.RequestService
+import dev.dnpm.etl.processor.services.filter
+import org.springframework.core.convert.converter.Converter
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
 
 @Controller
 @RequestMapping(path = ["/"])
@@ -49,6 +47,7 @@ class HomeController(
     @GetMapping
     fun index(
         @RequestParam(name = "q", required = false) queryString: String?,
+        @RequestParam(name = "f", required = false) filter: RequestService.Filter?,
         @PageableDefault(page = 0, size = 10, sort = ["processedAt"], direction = Sort.Direction.DESC)
         pageable: Pageable,
         model: Model,
@@ -64,10 +63,20 @@ class HomeController(
             // Only available for logged-in admins or users
             if (null != queryString && isAdminOrUser) {
                 model.addAttribute("query", queryString)
-                requestService.searchRequestLike(PatientPseudonym(queryString), Tan(queryString), pageable)
+                if (null != filter) {
+                    model.addAttribute("filter", filter.value)
+                    requestService
+                        .searchRequestLike(PatientPseudonym(queryString), Tan(queryString), pageable)
+                        .filter(filter)
+                } else {
+                    requestService
+                        .searchRequestLike(PatientPseudonym(queryString), Tan(queryString), pageable)
+                }
+
             } else {
                 requestService.findAll(pageable)
             }
+
         model.addAttribute("requests", requests)
         model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
         return "index"
@@ -128,5 +137,17 @@ class HomeController(
         model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
 
         return "fragments :: request"
+    }
+
+    @Component
+    class FilterConverter : Converter<String, RequestService.Filter?> {
+        override fun convert(source: String): RequestService.Filter? {
+            return when (source) {
+                "all-dip" -> RequestService.Filter.ALL_DIP
+                "confirmed" -> RequestService.Filter.CONFIRMED
+                "unconfirmed" -> RequestService.Filter.UNCONFIRMED
+                else -> null
+            }
+        }
     }
 }

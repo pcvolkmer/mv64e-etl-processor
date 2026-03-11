@@ -20,150 +20,202 @@
 package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.*
-import dev.dnpm.etl.processor.monitoring.Request
-import dev.dnpm.etl.processor.monitoring.RequestRepository
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.RequestType
-import dev.dnpm.etl.processor.monitoring.SubmissionType
-import java.time.Instant
+import dev.dnpm.etl.processor.monitoring.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import java.time.Instant
+import java.util.stream.Stream
 
 @ExtendWith(MockitoExtension::class)
 class RequestServiceTest {
 
-  private lateinit var requestRepository: RequestRepository
+    private lateinit var requestRepository: RequestRepository
 
-  private lateinit var requestService: RequestService
+    private lateinit var requestService: RequestService
 
-  private fun anyRequest() =
-      any(Request::class.java)
-          ?: Request(
-              0L,
-              randomRequestId(),
-              PatientPseudonym("TEST_dummy"),
-              PatientId("PX"),
-              Fingerprint("dummy"),
-              RequestType.MTB_FILE,
-              SubmissionType.TEST,
-              RequestStatus.SUCCESS,
-              Tan.empty(),
-              Instant.parse("2023-08-08T02:00:00Z"),
-          )
-
-  @BeforeEach
-  fun setup(@Mock requestRepository: RequestRepository) {
-    this.requestRepository = requestRepository
-    this.requestService = RequestService(requestRepository)
-  }
-
-  @Test
-  fun shouldIndicateLastRequestIsDeleteRequest() {
-    val requests =
-        listOf(
-            Request(
-                1L,
+    private fun anyRequest() =
+        any(Request::class.java)
+            ?: Request(
+                0L,
                 randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("0123456789abcdef1"),
+                PatientPseudonym("TEST_dummy"),
+                PatientId("PX"),
+                Fingerprint("dummy"),
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
-                RequestStatus.WARNING,
+                RequestStatus.SUCCESS,
                 Tan.empty(),
-                Instant.parse("2023-07-07T00:00:00Z"),
-            ),
-            Request(
-                2L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("0123456789abcdefd"),
-                RequestType.DELETE,
-                SubmissionType.TEST,
-                RequestStatus.WARNING,
-                Tan.empty(),
-                Instant.parse("2023-07-07T02:00:00Z"),
-            ),
-            Request(
-                3L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("0123456789abcdef1"),
-                RequestType.MTB_FILE,
-                SubmissionType.TEST,
-                RequestStatus.UNKNOWN,
-                Tan.empty(),
-                Instant.parse("2023-08-11T00:00:00Z"),
-            ),
-        )
+                Instant.parse("2023-08-08T02:00:00Z"),
+            )
 
-    val actual = RequestService.isLastRequestWithKnownStatusDeletion(requests)
+    @BeforeEach
+    fun setup(@Mock requestRepository: RequestRepository) {
+        this.requestRepository = requestRepository
+        this.requestService = RequestService(requestRepository)
+    }
 
-    assertThat(actual).isTrue()
-  }
+    @Test
+    fun shouldIndicateLastRequestIsDeleteRequest() {
+        val requests =
+            listOf(
+                Request(
+                    1L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdef1"),
+                    RequestType.MTB_FILE,
+                    SubmissionType.TEST,
+                    RequestStatus.WARNING,
+                    Tan.empty(),
+                    Instant.parse("2023-07-07T00:00:00Z"),
+                ),
+                Request(
+                    2L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdefd"),
+                    RequestType.DELETE,
+                    SubmissionType.TEST,
+                    RequestStatus.WARNING,
+                    Tan.empty(),
+                    Instant.parse("2023-07-07T02:00:00Z"),
+                ),
+                Request(
+                    3L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdef1"),
+                    RequestType.MTB_FILE,
+                    SubmissionType.TEST,
+                    RequestStatus.UNKNOWN,
+                    Tan.empty(),
+                    Instant.parse("2023-08-11T00:00:00Z"),
+                ),
+            )
 
-  @Test
-  fun shouldIndicateLastRequestIsNotDeleteRequest() {
-    val requests =
-        listOf(
+        val actual = RequestService.isLastRequestWithKnownStatusDeletion(requests)
+
+        assertThat(actual).isTrue()
+    }
+
+    @Test
+    fun shouldIndicateLastRequestIsNotDeleteRequest() {
+        val requests =
+            listOf(
+                Request(
+                    1L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdef1"),
+                    RequestType.MTB_FILE,
+                    SubmissionType.TEST,
+                    RequestStatus.WARNING,
+                    Tan.empty(),
+                    Instant.parse("2023-07-07T00:00:00Z"),
+                ),
+                Request(
+                    2L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdef1"),
+                    RequestType.MTB_FILE,
+                    SubmissionType.TEST,
+                    RequestStatus.WARNING,
+                    Tan.empty(),
+                    Instant.parse("2023-07-07T02:00:00Z"),
+                ),
+                Request(
+                    3L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdef1"),
+                    RequestType.MTB_FILE,
+                    SubmissionType.TEST,
+                    RequestStatus.UNKNOWN,
+                    Tan.empty(),
+                    Instant.parse("2023-08-11T00:00:00Z"),
+                ),
+            )
+
+        val actual = RequestService.isLastRequestWithKnownStatusDeletion(requests)
+
+        assertThat(actual).isFalse()
+    }
+
+    @Test
+    fun shouldReturnPatientsLastRequest() {
+        val requests =
+            listOf(
+                Request(
+                    1L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678901"),
+                    PatientId("P1"),
+                    Fingerprint("0123456789abcdef1"),
+                    RequestType.DELETE,
+                    SubmissionType.TEST,
+                    RequestStatus.SUCCESS,
+                    Tan.empty(),
+                    Instant.parse("2023-07-07T02:00:00Z"),
+                ),
+                Request(
+                    1L,
+                    randomRequestId(),
+                    PatientPseudonym("TEST_12345678902"),
+                    PatientId("P2"),
+                    Fingerprint("0123456789abcdef2"),
+                    RequestType.MTB_FILE,
+                    SubmissionType.TEST,
+                    RequestStatus.WARNING,
+                    Tan.empty(),
+                    Instant.parse("2023-08-08T00:00:00Z"),
+                ),
+            )
+
+        val actual = RequestService.lastMtbFileRequestForPatientPseudonym(requests)
+
+        assertThat(actual).isInstanceOf(Request::class.java)
+        assertThat(actual?.fingerprint).isEqualTo(Fingerprint("0123456789abcdef2"))
+    }
+
+    @Test
+    fun shouldReturnNullIfNoRequests() {
+        val requests = listOf<Request>()
+
+        val actual = RequestService.lastMtbFileRequestForPatientPseudonym(requests)
+
+        assertThat(actual).isNull()
+    }
+
+    @Test
+    fun saveShouldSaveRequestUsingRepository() {
+        doAnswer {
+            val obj = it.arguments[0] as Request
+            obj.copy(id = 1L)
+        }
+            .whenever(requestRepository)
+            .save(anyRequest())
+
+        val request =
             Request(
-                1L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("0123456789abcdef1"),
-                RequestType.MTB_FILE,
-                SubmissionType.TEST,
-                RequestStatus.WARNING,
-                Tan.empty(),
-                Instant.parse("2023-07-07T00:00:00Z"),
-            ),
-            Request(
-                2L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("0123456789abcdef1"),
-                RequestType.MTB_FILE,
-                SubmissionType.TEST,
-                RequestStatus.WARNING,
-                Tan.empty(),
-                Instant.parse("2023-07-07T02:00:00Z"),
-            ),
-            Request(
-                3L,
-                randomRequestId(),
-                PatientPseudonym("TEST_12345678901"),
-                PatientId("P1"),
-                Fingerprint("0123456789abcdef1"),
-                RequestType.MTB_FILE,
-                SubmissionType.TEST,
-                RequestStatus.UNKNOWN,
-                Tan.empty(),
-                Instant.parse("2023-08-11T00:00:00Z"),
-            ),
-        )
-
-    val actual = RequestService.isLastRequestWithKnownStatusDeletion(requests)
-
-    assertThat(actual).isFalse()
-  }
-
-  @Test
-  fun shouldReturnPatientsLastRequest() {
-    val requests =
-        listOf(
-            Request(
-                1L,
                 randomRequestId(),
                 PatientPseudonym("TEST_12345678901"),
                 PatientId("P1"),
@@ -173,84 +225,126 @@ class RequestServiceTest {
                 RequestStatus.SUCCESS,
                 Tan.empty(),
                 Instant.parse("2023-07-07T02:00:00Z"),
+            )
+
+        requestService.save(request)
+
+        verify(requestRepository, times(1)).save(anyRequest())
+    }
+
+    @Test
+    fun allRequestsByPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
+        requestService.allRequestsByPatientPseudonym(PatientPseudonym("TEST_12345678901"))
+
+        verify(requestRepository, times(1))
+            .findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
+    }
+
+    @Test
+    fun lastMtbFileRequestForPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
+        requestService.lastMtbFileRequestForPatientPseudonym(PatientPseudonym("TEST_12345678901"))
+
+        verify(requestRepository, times(1))
+            .findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
+    }
+
+    @Test
+    fun isLastRequestDeletionShouldRequestAllRequestsForPatientPseudonym() {
+        requestService.isLastRequestWithKnownStatusDeletion(PatientPseudonym("TEST_12345678901"))
+
+        verify(requestRepository, times(1))
+            .findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
+    }
+
+    @ParameterizedTest
+    @MethodSource("filterTestData")
+    fun shouldFilter(filter: RequestService.Filter, expectedIds: Array<RequestId>) {
+
+        val requests = listOf(
+            Request(
+                1,
+                RequestId("00000000-0000-0000-0000-000000000001"),
+                PatientPseudonym("TEST_12345678901"),
+                PatientId("P1"),
+                Fingerprint("0123456789abcdef1"),
+                RequestType.MTB_FILE,
+                SubmissionType.INITIAL,
+                RequestStatus.ERROR,
+                Tan.empty(),
+                Instant.parse("2026-03-11T11:00:00Z"),
             ),
             Request(
-                1L,
-                randomRequestId(),
+                2,
+                RequestId("00000000-0000-0000-0000-000000000002"),
                 PatientPseudonym("TEST_12345678902"),
-                PatientId("P2"),
-                Fingerprint("0123456789abcdef2"),
+                PatientId("P1"),
+                Fingerprint("0123456789abcdef1"),
                 RequestType.MTB_FILE,
-                SubmissionType.TEST,
+                SubmissionType.INITIAL,
                 RequestStatus.WARNING,
                 Tan.empty(),
-                Instant.parse("2023-08-08T00:00:00Z"),
+                Instant.parse("2026-03-11T11:00:00Z"),
+                submissionAccepted = true,
             ),
+            Request(
+                3,
+                RequestId("00000000-0000-0000-0000-000000000003"),
+                PatientPseudonym("TEST_12345678903"),
+                PatientId("P1"),
+                Fingerprint("0123456789abcdef1"),
+                RequestType.MTB_FILE,
+                SubmissionType.ADDITION,
+                RequestStatus.SUCCESS,
+                Tan.empty(),
+                Instant.parse("2026-03-11T11:00:00Z"),
+            ),
+            Request(
+                4,
+                RequestId("00000000-0000-0000-0000-000000000004"),
+                PatientPseudonym("TEST_12345678904"),
+                PatientId("P1"),
+                Fingerprint("0123456789abcdef1"),
+                RequestType.DELETE,
+                SubmissionType.TEST,
+                RequestStatus.SUCCESS,
+                Tan.empty(),
+                Instant.parse("2026-03-11T11:00:00Z"),
+            )
         )
 
-    val actual = RequestService.lastMtbFileRequestForPatientPseudonym(requests)
+        val actualIds = PageImpl(requests, PageRequest.of(0, 10), requests.size.toLong())
+            .filter(filter)
+            .toList()
+            .map { it.uuid }
 
-    assertThat(actual).isInstanceOf(Request::class.java)
-    assertThat(actual?.fingerprint).isEqualTo(Fingerprint("0123456789abcdef2"))
-  }
+        assertThat(actualIds).containsExactly(*expectedIds)
 
-  @Test
-  fun shouldReturnNullIfNoRequests() {
-    val requests = listOf<Request>()
+    }
 
-    val actual = RequestService.lastMtbFileRequestForPatientPseudonym(requests)
-
-    assertThat(actual).isNull()
-  }
-
-  @Test
-  fun saveShouldSaveRequestUsingRepository() {
-    doAnswer {
-          val obj = it.arguments[0] as Request
-          obj.copy(id = 1L)
+    companion object {
+        @JvmStatic
+        fun filterTestData(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    RequestService.Filter.ALL_DIP,
+                    arrayOf(
+                        RequestId("00000000-0000-0000-0000-000000000002"),
+                        RequestId("00000000-0000-0000-0000-000000000003")
+                    )
+                ),
+                Arguments.of(
+                    RequestService.Filter.CONFIRMED,
+                    arrayOf(
+                        RequestId("00000000-0000-0000-0000-000000000002"),
+                    )
+                ),
+                Arguments.of(
+                    RequestService.Filter.UNCONFIRMED,
+                    arrayOf(
+                        RequestId("00000000-0000-0000-0000-000000000003")
+                    )
+                )
+            )
         }
-        .whenever(requestRepository)
-        .save(anyRequest())
-
-    val request =
-        Request(
-            randomRequestId(),
-            PatientPseudonym("TEST_12345678901"),
-            PatientId("P1"),
-            Fingerprint("0123456789abcdef1"),
-            RequestType.DELETE,
-            SubmissionType.TEST,
-            RequestStatus.SUCCESS,
-            Tan.empty(),
-            Instant.parse("2023-07-07T02:00:00Z"),
-        )
-
-    requestService.save(request)
-
-    verify(requestRepository, times(1)).save(anyRequest())
-  }
-
-  @Test
-  fun allRequestsByPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
-    requestService.allRequestsByPatientPseudonym(PatientPseudonym("TEST_12345678901"))
-
-    verify(requestRepository, times(1))
-        .findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
-  }
-
-  @Test
-  fun lastMtbFileRequestForPatientPseudonymShouldRequestAllRequestsForPatientPseudonym() {
-    requestService.lastMtbFileRequestForPatientPseudonym(PatientPseudonym("TEST_12345678901"))
-
-    verify(requestRepository, times(1))
-        .findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
-  }
-
-  @Test
-  fun isLastRequestDeletionShouldRequestAllRequestsForPatientPseudonym() {
-    requestService.isLastRequestWithKnownStatusDeletion(PatientPseudonym("TEST_12345678901"))
-
-    verify(requestRepository, times(1))
-        .findAllByPatientPseudonymOrderByProcessedAtDesc(anyValueClass())
-  }
+    }
 }
