@@ -25,6 +25,7 @@ import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.monitoring.*
 import java.util.*
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
@@ -85,4 +86,27 @@ class RequestService(private val requestRepository: RequestRepository) {
             .maxByOrNull { it.processedAt }
             ?.type == RequestType.DELETE
   }
+
+  enum class Filter(val value: String) {
+      ALL_DIP("all-dip"),
+      CONFIRMED("confirmed"),
+      UNCONFIRMED("unconfirmed");
+  }
+}
+
+fun Page<Request>.filter(filter: RequestService.Filter): Page<Request> {
+    val list =
+        this
+            .toList()
+            .filter {
+                it.type == RequestType.MTB_FILE
+                        && sequenceOf(RequestStatus.SUCCESS, RequestStatus.WARNING).contains(it.status)
+            }
+            .filter {
+                filter == RequestService.Filter.ALL_DIP
+                        || filter == RequestService.Filter.CONFIRMED && it.submissionAccepted
+                        || filter == RequestService.Filter.UNCONFIRMED && !it.submissionAccepted
+            }
+
+    return PageImpl(list, this.pageable, list.size.toLong())
 }
