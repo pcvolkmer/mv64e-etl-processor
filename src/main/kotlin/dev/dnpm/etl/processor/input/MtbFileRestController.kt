@@ -33,36 +33,37 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(path = ["mtbfile", "mtb", "api/mtbfile", "api/mtb"])
 class MtbFileRestController(
-    private val requestProcessor: RequestProcessor,
-    private val consentEvaluator: ConsentEvaluator,
+    private val requestProcessor: RequestProcessor
 ) {
-  private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
+    private val logger = LoggerFactory.getLogger(MtbFileRestController::class.java)
 
-  @GetMapping
-  fun info(): ResponseEntity<String> {
-    return ResponseEntity.ok("Test")
-  }
+    @GetMapping
+    fun info(): ResponseEntity<String> {
+        return ResponseEntity.ok("Test")
+    }
 
-  @PostMapping(
-      path = ["", "etl/patient-record"],
-      consumes =
-          [
-              MediaType.APPLICATION_JSON_VALUE,
-              CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE,
-          ],
-  )
-  fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
-    logger.debug("Accepted MTB File (DNPM V2) for processing")
-    requestProcessor.processMtbFile(mtbFile)
-    return ResponseEntity.accepted().build()
-  }
+    @PostMapping(
+        path = ["", "etl/patient-record"],
+        consumes =
+            [
+                MediaType.APPLICATION_JSON_VALUE,
+                CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE,
+            ],
+    )
+    fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
+        logger.debug("Accepted MTB File (DNPM V2) for processing")
+        if (requestProcessor.processMtbFile(mtbFile)) {
+            return ResponseEntity.accepted().build()
+        }
+        return ResponseEntity.badRequest().build()
+    }
 
-  @DeleteMapping(
-      path = ["{patientId}", "etl/patient-record/{patientId}", "etl/patient/{patientId}"]
-  )
-  fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
-    logger.debug("Accepted patient ID to process deletion")
-    requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
-    return ResponseEntity.accepted().build()
-  }
+    @DeleteMapping(
+        path = ["{patientId}", "etl/patient-record/{patientId}", "etl/patient/{patientId}"]
+    )
+    fun deleteData(@PathVariable patientId: String): ResponseEntity<Unit> {
+        logger.debug("Accepted patient ID to process deletion")
+        requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
+        return ResponseEntity.accepted().build()
+    }
 }

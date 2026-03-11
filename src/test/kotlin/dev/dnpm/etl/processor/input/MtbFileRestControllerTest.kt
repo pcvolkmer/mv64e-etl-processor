@@ -22,14 +22,11 @@ package dev.dnpm.etl.processor.input
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.ArgProvider
 import dev.dnpm.etl.processor.CustomMediaType
-import dev.dnpm.etl.processor.consent.ConsentEvaluation
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.input.Dnpm21MtbFile.Companion.buildMtb
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.*
-import java.time.Instant
-import java.util.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -50,134 +47,148 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.Instant
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class MtbFileRestControllerTest {
 
-  private val objectMapper = ObjectMapper()
+    private val objectMapper = ObjectMapper()
 
-  @Nested
-  inner class RequestsForDnpmDataModel21 {
+    @Nested
+    inner class RequestsForDnpmDataModel21 {
 
-    private lateinit var mockMvc: MockMvc
+        private lateinit var mockMvc: MockMvc
 
-    private lateinit var requestProcessor: RequestProcessor
-    private lateinit var consentEvaluator: ConsentEvaluator
+        private lateinit var requestProcessor: RequestProcessor
 
-    @BeforeEach
-    fun setup(@Mock requestProcessor: RequestProcessor, @Mock consentEvaluator: ConsentEvaluator) {
-      this.requestProcessor = requestProcessor
-      this.consentEvaluator = consentEvaluator
-      val controller = MtbFileRestController(requestProcessor, consentEvaluator)
-      this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        @BeforeEach
+        fun setup(@Mock requestProcessor: RequestProcessor) {
+            this.requestProcessor = requestProcessor
+            val controller = MtbFileRestController(requestProcessor)
+            this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        }
+
+        @Test
+        fun shouldRespondPostRequest() {
+            val mtbFileContent =
+                ClassPathResource("mv64e-mtb-fake-patient.json")
+                    .inputStream
+                    .readAllBytes()
+                    .toString(Charsets.UTF_8)
+
+            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+
+            mockMvc
+                .post("/mtb") {
+                    content = mtbFileContent
+                    contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+                }
+                .andExpect { status { isAccepted() } }
+
+            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(Dnpm21MtbFile::class)
+        fun shouldProcessPostRequest(mtb: Mtb) {
+            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+
+            mockMvc
+                .post("/mtbfile") {
+                    content = objectMapper.writeValueAsString(mtb)
+                    contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+                }
+                .andExpect { status { isAccepted() } }
+        }
+
+        @Test
+        fun shouldNotAcceptInvalidPostRequest() {
+            mockMvc
+                .post("/mtbfile") {
+                    content = "{}"
+                    contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+                }
+                .andExpect { status { isBadRequest() } }
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings =
+                [
+                    "/mtbfile",
+                    "/mtbfile/etl/patient-record",
+                    "/mtb",
+                    "/mtb/etl/patient-record",
+                    "/api/mtbfile",
+                    "/api/mtbfile/etl/patient-record",
+                    "/api/mtb",
+                    "/api/mtb/etl/patient-record",
+                ]
+        )
+        fun shouldAcceptPostRequests(url: String) {
+            val mtb =
+                buildMtb(
+                    MvhMetadata.builder()
+                        .modelProjectConsent(
+                            ModelProjectConsent.builder()
+                                .provisions(
+                                    listOf(
+                                        Provision.builder()
+                                            .date(Date())
+                                            .type(ConsentProvision.PERMIT)
+                                            .purpose(ModelProjectConsentPurpose.SEQUENCING)
+                                            .build()
+                                    )
+                                )
+                                .build()
+                        )
+                        .build()
+                )
+
+            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+
+            mockMvc
+                .post(url) {
+                    content = objectMapper.writeValueAsString(mtb)
+                    contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+                }
+                .andExpect { status { isAccepted() } }
+        }
+
+        @Test
+        fun shouldProcessDeleteRequest() {
+            mockMvc.delete("/mtbfile/TEST_12345678").andExpect { status { isAccepted() } }
+
+            verify(requestProcessor, times(1))
+                .processDeletion(
+                    anyValueClass(),
+                    org.mockito.kotlin.eq(TtpConsentStatus.UNKNOWN_CHECK_FILE),
+                )
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings =
+                [
+                    "/mtbfile/TEST_12345678",
+                    "/mtbfile/etl/patient-record/TEST_12345678",
+                    "/mtbfile/etl/patient/TEST_12345678",
+                    "/mtb/TEST_12345678",
+                    "/mtb/etl/patient-record/TEST_12345678",
+                    "/mtb/etl/patient/TEST_12345678",
+                    "/api/mtbfile/TEST_12345678",
+                    "/api/mtbfile/etl/patient-record/TEST_12345678",
+                    "/api/mtbfile/etl/patient/TEST_12345678",
+                    "/api/mtb/TEST_12345678",
+                    "/api/mtb/etl/patient-record/TEST_12345678",
+                    "/api/mtb/etl/patient/TEST_12345678",
+                ]
+        )
+        fun shouldAcceptDeleteRequests(url: String) {
+            mockMvc.delete(url).andExpect { status { isAccepted() } }
+        }
     }
-
-    @Test
-    fun shouldRespondPostRequest() {
-      val mtbFileContent =
-          ClassPathResource("mv64e-mtb-fake-patient.json")
-              .inputStream
-              .readAllBytes()
-              .toString(Charsets.UTF_8)
-
-      mockMvc
-          .post("/mtb") {
-            content = mtbFileContent
-            contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-          }
-          .andExpect { status { isAccepted() } }
-
-      verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
-    }
-
-    @ParameterizedTest
-    @ArgumentsSource(Dnpm21MtbFile::class)
-    fun shouldProcessPostRequest(mtb: Mtb) {
-      mockMvc
-          .post("/mtbfile") {
-            content = objectMapper.writeValueAsString(mtb)
-            contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-          }
-          .andExpect { status { isAccepted() } }
-
-    }
-
-    @ParameterizedTest
-    @ValueSource(
-        strings =
-            [
-                "/mtbfile",
-                "/mtbfile/etl/patient-record",
-                "/mtb",
-                "/mtb/etl/patient-record",
-                "/api/mtbfile",
-                "/api/mtbfile/etl/patient-record",
-                "/api/mtb",
-                "/api/mtb/etl/patient-record",
-            ]
-    )
-    fun shouldAcceptPostRequests(url: String) {
-      val mtb =
-          buildMtb(
-              MvhMetadata.builder()
-                  .modelProjectConsent(
-                      ModelProjectConsent.builder()
-                          .provisions(
-                              listOf(
-                                  Provision.builder()
-                                      .date(Date())
-                                      .type(ConsentProvision.PERMIT)
-                                      .purpose(ModelProjectConsentPurpose.SEQUENCING)
-                                      .build()
-                              )
-                          )
-                          .build()
-                  )
-                  .build()
-          )
-
-      mockMvc
-          .post(url) {
-            content = objectMapper.writeValueAsString(mtb)
-            contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-          }
-          .andExpect { status { isAccepted() } }
-    }
-
-    @Test
-    fun shouldProcessDeleteRequest() {
-      mockMvc.delete("/mtbfile/TEST_12345678").andExpect { status { isAccepted() } }
-
-      verify(requestProcessor, times(1))
-          .processDeletion(
-              anyValueClass(),
-              org.mockito.kotlin.eq(TtpConsentStatus.UNKNOWN_CHECK_FILE),
-          )
-      verify(consentEvaluator, times(0)).check(any<Mtb>())
-    }
-
-    @ParameterizedTest
-    @ValueSource(
-        strings =
-            [
-                "/mtbfile/TEST_12345678",
-                "/mtbfile/etl/patient-record/TEST_12345678",
-                "/mtbfile/etl/patient/TEST_12345678",
-                "/mtb/TEST_12345678",
-                "/mtb/etl/patient-record/TEST_12345678",
-                "/mtb/etl/patient/TEST_12345678",
-                "/api/mtbfile/TEST_12345678",
-                "/api/mtbfile/etl/patient-record/TEST_12345678",
-                "/api/mtbfile/etl/patient/TEST_12345678",
-                "/api/mtb/TEST_12345678",
-                "/api/mtb/etl/patient-record/TEST_12345678",
-                "/api/mtb/etl/patient/TEST_12345678",
-            ]
-    )
-    fun shouldAcceptDeleteRequests(url: String) {
-      mockMvc.delete(url).andExpect { status { isAccepted() } }
-    }
-  }
 }
 
 class Dnpm21MtbFile :
@@ -234,26 +245,26 @@ class Dnpm21MtbFile :
         ),
     ) {
 
-  companion object {
-    fun buildMtb(metadata: MvhMetadata?): Mtb {
-      return Mtb.builder()
-          .patient(
-              Patient.builder()
-                  .id("TEST_12345678")
-                  .birthDate(Date.from(Instant.parse("2000-08-08T12:34:56Z")))
-                  .gender(GenderCoding.builder().code(GenderCodingCode.MALE).build())
-                  .build()
-          )
-          .metadata(metadata)
-          .episodesOfCare(
-              listOf(
-                  MtbEpisodeOfCare.builder()
-                      .id("1")
-                      .patient(Reference.builder().id("TEST_12345678").build())
-                      .build()
-              )
-          )
-          .build()
+    companion object {
+        fun buildMtb(metadata: MvhMetadata?): Mtb {
+            return Mtb.builder()
+                .patient(
+                    Patient.builder()
+                        .id("TEST_12345678")
+                        .birthDate(Date.from(Instant.parse("2000-08-08T12:34:56Z")))
+                        .gender(GenderCoding.builder().code(GenderCodingCode.MALE).build())
+                        .build()
+                )
+                .metadata(metadata)
+                .episodesOfCare(
+                    listOf(
+                        MtbEpisodeOfCare.builder()
+                            .id("1")
+                            .patient(Reference.builder().id("TEST_12345678").build())
+                            .build()
+                    )
+                )
+                .build()
+        }
     }
-  }
 }
