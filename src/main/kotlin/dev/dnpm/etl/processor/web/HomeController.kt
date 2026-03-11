@@ -95,6 +95,7 @@ class HomeController(
         val request = requestService.findByUuid(id).orElse(null) ?: throw NotFoundException()
         model.addAttribute("request", request)
         model.addAttribute("issues", reportService.deserialize(request.report?.dataQualityReport))
+        model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
 
         return "report"
     }
@@ -109,8 +110,9 @@ class HomeController(
         val savedRequest = requestService.save(request)
 
         model.addAttribute("request", savedRequest)
+        model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
 
-        return "fragments :: accept-initial"
+        return "fragments :: request"
     }
 
     @DeleteMapping(path = ["/submission/{id}/accepted"])
@@ -123,7 +125,8 @@ class HomeController(
         val savedRequest = requestService.save(request)
 
         model.addAttribute("request", savedRequest)
+        model.addAttribute("postInitialSubmissionBlock", appConfigProperties.postInitialSubmissionBlock)
 
-        return "fragments :: accept-initial"
+        return "fragments :: request"
     }
 }
