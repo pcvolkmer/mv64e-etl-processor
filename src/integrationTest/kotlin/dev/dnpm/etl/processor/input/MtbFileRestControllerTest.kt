@@ -29,8 +29,6 @@ import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.*
-import java.time.Instant
-import java.util.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.extension.ExtendWith
@@ -51,6 +49,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
+import java.time.Instant
+import java.util.*
 
 @WebMvcTest(controllers = [MtbFileRestController::class])
 @ExtendWith(value = [MockitoExtension::class, SpringExtension::class])
@@ -74,192 +74,53 @@ import org.springframework.test.web.servlet.post
 )
 class MtbFileRestControllerTest {
 
-  lateinit var mockMvc: MockMvc
-  lateinit var requestProcessor: RequestProcessor
-  lateinit var consentEvaluator: ConsentEvaluator
+    lateinit var mockMvc: MockMvc
+    lateinit var requestProcessor: RequestProcessor
+    lateinit var consentEvaluator: ConsentEvaluator
 
-  @BeforeEach
-  fun setup(
-      @Autowired mockMvc: MockMvc,
-      @Autowired requestProcessor: RequestProcessor,
-      @Autowired consentEvaluator: ConsentEvaluator,
-  ) {
-    this.mockMvc = mockMvc
-    this.requestProcessor = requestProcessor
-    this.consentEvaluator = consentEvaluator
+    @BeforeEach
+    fun setup(
+        @Autowired mockMvc: MockMvc,
+        @Autowired requestProcessor: RequestProcessor,
+        @Autowired consentEvaluator: ConsentEvaluator,
+    ) {
+        this.mockMvc = mockMvc
+        this.requestProcessor = requestProcessor
+        this.consentEvaluator = consentEvaluator
 
-    doAnswer { ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true) }
-        .whenever(consentEvaluator)
-        .check(any())
-  }
+        doAnswer { ConsentEvaluation(TtpConsentStatus.BROAD_CONSENT_GIVEN, true) }
+            .whenever(consentEvaluator)
+            .check(any())
+    }
 
-  @ParameterizedTest
-  @ValueSource(
-      strings =
-          [
-              "/mtbfile",
-              "/mtbfile/etl/patient-record",
-              "/mtb",
-              "/mtb/etl/patient-record",
-              "/api/mtbfile",
-              "/api/mtbfile/etl/patient-record",
-              "/api/mtb",
-              "/api/mtb/etl/patient-record",
-          ]
-  )
-  fun testShouldGrantPermissionToSendMtbFile(url: String) {
-    mockMvc
-        .post(url) {
-          with(user("onkostarserver").roles("MTBFILE"))
-          contentType = MediaType.APPLICATION_JSON
-          content = ObjectMapper().writeValueAsString(mtbFile)
-        }
-        .andExpect { status { isAccepted() } }
+    @ParameterizedTest
+    @ValueSource(
+        strings =
+            [
+                "/mtbfile",
+                "/mtbfile/etl/patient-record",
+                "/mtb",
+                "/mtb/etl/patient-record",
+                "/api/mtbfile",
+                "/api/mtbfile/etl/patient-record",
+                "/api/mtb",
+                "/api/mtb/etl/patient-record",
+            ]
+    )
+    fun testShouldGrantPermissionToSendMtbFile(url: String) {
+        whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
 
-    verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
-  }
+        mockMvc
+            .post(url) {
+                with(user("onkostarserver").roles("MTBFILE"))
+                contentType = MediaType.APPLICATION_JSON
+                content = ObjectMapper().writeValueAsString(mtbFile)
+            }
+            .andExpect { status { isAccepted() } }
 
-  @ParameterizedTest
-  @ValueSource(
-      strings =
-          [
-              "/mtbfile",
-              "/mtbfile/etl/patient-record",
-              "/mtb",
-              "/mtb/etl/patient-record",
-              "/api/mtbfile",
-              "/api/mtbfile/etl/patient-record",
-              "/api/mtb",
-              "/api/mtb/etl/patient-record",
-          ]
-  )
-  fun testShouldGrantPermissionToSendMtbFileToAdminUser(url: String) {
-    mockMvc
-        .post(url) {
-          with(user("onkostarserver").roles("ADMIN"))
-          contentType = MediaType.APPLICATION_JSON
-          content = ObjectMapper().writeValueAsString(mtbFile)
-        }
-        .andExpect { status { isAccepted() } }
+        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+    }
 
-    verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
-  }
-
-  @ParameterizedTest
-  @ValueSource(
-      strings =
-          [
-              "/mtbfile",
-              "/mtbfile/etl/patient-record",
-              "/mtb",
-              "/mtb/etl/patient-record",
-              "/api/mtbfile",
-              "/api/mtbfile/etl/patient-record",
-              "/api/mtb",
-              "/api/mtb/etl/patient-record",
-          ]
-  )
-  fun testShouldGrantPermissionToSendMtbFileToUser(url: String) {
-    mockMvc
-        .post(url) {
-          with(user("testuser").roles("USER"))
-          contentType = MediaType.APPLICATION_JSON
-          content = ObjectMapper().writeValueAsString(mtbFile)
-        }
-        .andExpect { status { isAccepted() } }
-
-    verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
-  }
-
-  @ParameterizedTest
-  @ValueSource(
-      strings =
-          [
-              "/mtbfile",
-              "/mtbfile/etl/patient-record",
-              "/mtb",
-              "/mtb/etl/patient-record",
-              "/api/mtbfile",
-              "/api/mtbfile/etl/patient-record",
-              "/api/mtb",
-              "/api/mtb/etl/patient-record",
-          ]
-  )
-  fun testShouldDenyPermissionToSendMtbFileForAnonymous(url: String) {
-    mockMvc
-        .post(url) {
-          contentType = MediaType.APPLICATION_JSON
-          content = ObjectMapper().writeValueAsString(mtbFile)
-        }
-        .andExpect { status { isUnauthorized() } }
-
-    verify(requestProcessor, never()).processMtbFile(any<Mtb>())
-  }
-
-  @ParameterizedTest
-  @ValueSource(
-      strings =
-          [
-              "/mtbfile/TEST_12345678",
-              "/mtbfile/etl/patient-record/TEST_12345678",
-              "/mtbfile/etl/patient/TEST_12345678",
-              "/mtb/TEST_12345678",
-              "/mtb/etl/patient-record/TEST_12345678",
-              "/mtb/etl/patient/TEST_12345678",
-              "/api/mtbfile/TEST_12345678",
-              "/api/mtbfile/etl/patient-record/TEST_12345678",
-              "/api/mtbfile/etl/patient/TEST_12345678",
-              "/api/mtb/TEST_12345678",
-              "/api/mtb/etl/patient-record/TEST_12345678",
-              "/api/mtb/etl/patient/TEST_12345678",
-          ]
-  )
-  fun testShouldGrantPermissionToDeletePatientData(url: String) {
-    mockMvc
-        .delete(url) { with(user("onkostarserver").roles("MTBFILE")) }
-        .andExpect { status { isAccepted() } }
-
-    verify(requestProcessor, times(1))
-        .processDeletion(anyValueClass(), eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
-  }
-
-  @ParameterizedTest
-  @ValueSource(
-      strings =
-          [
-              "/mtbfile/TEST_12345678",
-              "/mtbfile/etl/patient-record/TEST_12345678",
-              "/mtbfile/etl/patient/TEST_12345678",
-              "/mtb/TEST_12345678",
-              "/mtb/etl/patient-record/TEST_12345678",
-              "/mtb/etl/patient/TEST_12345678",
-              "/api/mtbfile/TEST_12345678",
-              "/api/mtbfile/etl/patient-record/TEST_12345678",
-              "/api/mtbfile/etl/patient/TEST_12345678",
-              "/api/mtb/TEST_12345678",
-              "/api/mtb/etl/patient-record/TEST_12345678",
-              "/api/mtb/etl/patient/TEST_12345678",
-          ]
-  )
-  fun testShouldDenyPermissionToDeletePatientData(url: String) {
-    mockMvc.delete(url) { with(anonymous()) }.andExpect { status { isUnauthorized() } }
-
-    verify(requestProcessor, never()).processDeletion(anyValueClass(), any())
-  }
-
-  @Nested
-  @MockitoBean(types = [UserRoleRepository::class, ClientRegistrationRepository::class])
-  @TestPropertySource(
-      properties =
-          [
-              "app.pseudonymize.generator=BUILDIN",
-              "app.security.admin-user=admin",
-              "app.security.admin-password={noop}very-secret",
-              "app.security.enable-tokens=true",
-              "app.security.enable-oidc=true",
-          ]
-  )
-  inner class WithOidcEnabled {
     @ParameterizedTest
     @ValueSource(
         strings =
@@ -275,15 +136,17 @@ class MtbFileRestControllerTest {
             ]
     )
     fun testShouldGrantPermissionToSendMtbFileToAdminUser(url: String) {
-      mockMvc
-          .post(url) {
-            with(user("onkostarserver").roles("ADMIN"))
-            contentType = MediaType.APPLICATION_JSON
-            content = ObjectMapper().writeValueAsString(mtbFile)
-          }
-          .andExpect { status { isAccepted() } }
+        whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
 
-      verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        mockMvc
+            .post(url) {
+                with(user("onkostarserver").roles("ADMIN"))
+                contentType = MediaType.APPLICATION_JSON
+                content = ObjectMapper().writeValueAsString(mtbFile)
+            }
+            .andExpect { status { isAccepted() } }
+
+        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
     }
 
     @ParameterizedTest
@@ -301,36 +164,183 @@ class MtbFileRestControllerTest {
             ]
     )
     fun testShouldGrantPermissionToSendMtbFileToUser(url: String) {
-      mockMvc
-          .post(url) {
-            with(user("onkostarserver").roles("USER"))
-            contentType = MediaType.APPLICATION_JSON
-            content = ObjectMapper().writeValueAsString(mtbFile)
-          }
-          .andExpect { status { isAccepted() } }
+        whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
 
-      verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        mockMvc
+            .post(url) {
+                with(user("testuser").roles("USER"))
+                contentType = MediaType.APPLICATION_JSON
+                content = ObjectMapper().writeValueAsString(mtbFile)
+            }
+            .andExpect { status { isAccepted() } }
+
+        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
     }
-  }
 
-  companion object {
+    @ParameterizedTest
+    @ValueSource(
+        strings =
+            [
+                "/mtbfile",
+                "/mtbfile/etl/patient-record",
+                "/mtb",
+                "/mtb/etl/patient-record",
+                "/api/mtbfile",
+                "/api/mtbfile/etl/patient-record",
+                "/api/mtb",
+                "/api/mtb/etl/patient-record",
+            ]
+    )
+    fun testShouldDenyPermissionToSendMtbFileForAnonymous(url: String) {
+        mockMvc
+            .post(url) {
+                contentType = MediaType.APPLICATION_JSON
+                content = ObjectMapper().writeValueAsString(mtbFile)
+            }
+            .andExpect { status { isUnauthorized() } }
 
-    val mtbFile =
-        Mtb.builder()
-            .patient(Patient.builder().id("PID").build())
-            .episodesOfCare(
-                listOf(
-                    MtbEpisodeOfCare.builder()
-                        .id("1")
-                        .patient(Reference.builder().id("PID").build())
-                        .period(
-                            PeriodDate.builder()
-                                .start(Date.from(Instant.parse("2023-08-08T02:00:00.00Z")))
-                                .build()
-                        )
-                        .build()
+        verify(requestProcessor, never()).processMtbFile(any<Mtb>())
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings =
+            [
+                "/mtbfile/TEST_12345678",
+                "/mtbfile/etl/patient-record/TEST_12345678",
+                "/mtbfile/etl/patient/TEST_12345678",
+                "/mtb/TEST_12345678",
+                "/mtb/etl/patient-record/TEST_12345678",
+                "/mtb/etl/patient/TEST_12345678",
+                "/api/mtbfile/TEST_12345678",
+                "/api/mtbfile/etl/patient-record/TEST_12345678",
+                "/api/mtbfile/etl/patient/TEST_12345678",
+                "/api/mtb/TEST_12345678",
+                "/api/mtb/etl/patient-record/TEST_12345678",
+                "/api/mtb/etl/patient/TEST_12345678",
+            ]
+    )
+    fun testShouldGrantPermissionToDeletePatientData(url: String) {
+        mockMvc
+            .delete(url) { with(user("onkostarserver").roles("MTBFILE")) }
+            .andExpect { status { isAccepted() } }
+
+        verify(requestProcessor, times(1))
+            .processDeletion(anyValueClass(), eq(TtpConsentStatus.UNKNOWN_CHECK_FILE))
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings =
+            [
+                "/mtbfile/TEST_12345678",
+                "/mtbfile/etl/patient-record/TEST_12345678",
+                "/mtbfile/etl/patient/TEST_12345678",
+                "/mtb/TEST_12345678",
+                "/mtb/etl/patient-record/TEST_12345678",
+                "/mtb/etl/patient/TEST_12345678",
+                "/api/mtbfile/TEST_12345678",
+                "/api/mtbfile/etl/patient-record/TEST_12345678",
+                "/api/mtbfile/etl/patient/TEST_12345678",
+                "/api/mtb/TEST_12345678",
+                "/api/mtb/etl/patient-record/TEST_12345678",
+                "/api/mtb/etl/patient/TEST_12345678",
+            ]
+    )
+    fun testShouldDenyPermissionToDeletePatientData(url: String) {
+        mockMvc.delete(url) { with(anonymous()) }.andExpect { status { isUnauthorized() } }
+
+        verify(requestProcessor, never()).processDeletion(anyValueClass(), any())
+    }
+
+    @Nested
+    @MockitoBean(types = [UserRoleRepository::class, ClientRegistrationRepository::class])
+    @TestPropertySource(
+        properties =
+            [
+                "app.pseudonymize.generator=BUILDIN",
+                "app.security.admin-user=admin",
+                "app.security.admin-password={noop}very-secret",
+                "app.security.enable-tokens=true",
+                "app.security.enable-oidc=true",
+            ]
+    )
+    inner class WithOidcEnabled {
+        @ParameterizedTest
+        @ValueSource(
+            strings =
+                [
+                    "/mtbfile",
+                    "/mtbfile/etl/patient-record",
+                    "/mtb",
+                    "/mtb/etl/patient-record",
+                    "/api/mtbfile",
+                    "/api/mtbfile/etl/patient-record",
+                    "/api/mtb",
+                    "/api/mtb/etl/patient-record",
+                ]
+        )
+        fun testShouldGrantPermissionToSendMtbFileToAdminUser(url: String) {
+            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+
+            mockMvc
+                .post(url) {
+                    with(user("onkostarserver").roles("ADMIN"))
+                    contentType = MediaType.APPLICATION_JSON
+                    content = ObjectMapper().writeValueAsString(mtbFile)
+                }
+                .andExpect { status { isAccepted() } }
+
+            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings =
+                [
+                    "/mtbfile",
+                    "/mtbfile/etl/patient-record",
+                    "/mtb",
+                    "/mtb/etl/patient-record",
+                    "/api/mtbfile",
+                    "/api/mtbfile/etl/patient-record",
+                    "/api/mtb",
+                    "/api/mtb/etl/patient-record",
+                ]
+        )
+        fun testShouldGrantPermissionToSendMtbFileToUser(url: String) {
+            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+
+            mockMvc
+                .post(url) {
+                    with(user("onkostarserver").roles("USER"))
+                    contentType = MediaType.APPLICATION_JSON
+                    content = ObjectMapper().writeValueAsString(mtbFile)
+                }
+                .andExpect { status { isAccepted() } }
+
+            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        }
+    }
+
+    companion object {
+
+        val mtbFile =
+            Mtb.builder()
+                .patient(Patient.builder().id("PID").build())
+                .episodesOfCare(
+                    listOf(
+                        MtbEpisodeOfCare.builder()
+                            .id("1")
+                            .patient(Reference.builder().id("PID").build())
+                            .period(
+                                PeriodDate.builder()
+                                    .start(Date.from(Instant.parse("2023-08-08T02:00:00.00Z")))
+                                    .build()
+                            )
+                            .build()
+                    )
                 )
-            )
-            .build()
-  }
+                .build()
+    }
 }
