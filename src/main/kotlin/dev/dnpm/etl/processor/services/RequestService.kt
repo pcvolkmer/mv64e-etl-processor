@@ -41,6 +41,9 @@ class RequestService(private val requestRepository: RequestRepository) {
   fun searchRequestLike(patientPseudonym: PatientPseudonym, tan: Tan, pageable: Pageable): Page<Request> =
         requestRepository.findByPatientPseudonymContainingIgnoreCaseOrTanContainingIgnoreCase(patientPseudonym, tan, pageable)
 
+  fun searchRequestLike(patientPseudonym: PatientPseudonym, tan: Tan): List<Request> =
+        requestRepository.findByPatientPseudonymContainingIgnoreCaseOrTanContainingIgnoreCase(patientPseudonym, tan)
+
   fun findByUuid(uuid: RequestId): Optional<Request> = requestRepository.findByUuidEquals(uuid)
 
   fun findRequestByPatientId(
@@ -94,7 +97,7 @@ class RequestService(private val requestRepository: RequestRepository) {
   }
 }
 
-fun Page<Request>.filter(filter: RequestService.Filter): Page<Request> {
+fun List<Request>.filter(filter: RequestService.Filter, pageable: Pageable): Page<Request> {
     val list =
         this
             .toList()
@@ -108,5 +111,5 @@ fun Page<Request>.filter(filter: RequestService.Filter): Page<Request> {
                         || filter == RequestService.Filter.UNCONFIRMED && !it.submissionAccepted
             }
 
-    return PageImpl(list, this.pageable, list.size.toLong())
+    return PageImpl(list, pageable, list.size.toLong())
 }
