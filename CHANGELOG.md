@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.4](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.3...v0.15.4) (2026-03-12)
+
+
+### Bug Fixes
+
+* filter request list into page ([#267](https://github.com/pcvolkmer/mv64e-etl-processor/issues/267)) ([cb95918](https://github.com/pcvolkmer/mv64e-etl-processor/commit/cb95918555bd635bf4942d8b38998d0821084fbb))
+
 ## [0.15.3](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.2...v0.15.3) (2026-03-12)
 
 
