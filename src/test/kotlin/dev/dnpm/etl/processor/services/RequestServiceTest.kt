@@ -312,8 +312,8 @@ class RequestServiceTest {
             )
         )
 
-        val actualIds = PageImpl(requests, PageRequest.of(0, 10), requests.size.toLong())
-            .filter(filter)
+        val actualIds = requests
+            .filter(filter, PageRequest.of(0, 10))
             .toList()
             .map { it.uuid }
 

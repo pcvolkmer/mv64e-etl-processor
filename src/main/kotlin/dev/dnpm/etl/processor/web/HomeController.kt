@@ -66,8 +66,8 @@ class HomeController(
                 if (null != filter) {
                     model.addAttribute("filter", filter.value)
                     requestService
-                        .searchRequestLike(PatientPseudonym(queryString), Tan(queryString), pageable)
-                        .filter(filter)
+                        .searchRequestLike(PatientPseudonym(queryString), Tan(queryString))
+                        .filter(filter, pageable)
                 } else {
                     requestService
                         .searchRequestLike(PatientPseudonym(queryString), Tan(queryString), pageable)

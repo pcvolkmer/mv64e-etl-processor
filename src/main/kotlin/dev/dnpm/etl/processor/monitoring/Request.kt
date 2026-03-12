@@ -151,4 +151,6 @@ interface RequestRepository :
   fun findPatientUniqueDeleteStates(): List<CountedState>
 
   fun findByPatientPseudonymContainingIgnoreCaseOrTanContainingIgnoreCase(patientPseudonym: PatientPseudonym, tan: Tan, pageable: Pageable): Page<Request>
+
+  fun findByPatientPseudonymContainingIgnoreCaseOrTanContainingIgnoreCase(patientPseudonym: PatientPseudonym, tan: Tan): List<Request>
 }
