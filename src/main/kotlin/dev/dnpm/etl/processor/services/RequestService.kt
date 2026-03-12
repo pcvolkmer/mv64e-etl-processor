@@ -23,11 +23,11 @@ import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.Tan
 import dev.dnpm.etl.processor.monitoring.*
-import java.util.*
+import dev.dnpm.etl.processor.toPage
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class RequestService(private val requestRepository: RequestRepository) {
@@ -98,18 +98,16 @@ class RequestService(private val requestRepository: RequestRepository) {
 }
 
 fun List<Request>.filter(filter: RequestService.Filter, pageable: Pageable): Page<Request> {
-    val list =
-        this
-            .toList()
-            .filter {
-                it.type == RequestType.MTB_FILE
-                        && sequenceOf(RequestStatus.SUCCESS, RequestStatus.WARNING).contains(it.status)
-            }
-            .filter {
-                filter == RequestService.Filter.ALL_DIP
-                        || filter == RequestService.Filter.CONFIRMED && it.submissionAccepted
-                        || filter == RequestService.Filter.UNCONFIRMED && !it.submissionAccepted
-            }
-
-    return PageImpl(list, pageable, list.size.toLong())
+    return this
+        .toList()
+        .filter {
+            it.type == RequestType.MTB_FILE
+                    && sequenceOf(RequestStatus.SUCCESS, RequestStatus.WARNING).contains(it.status)
+        }
+        .filter {
+            filter == RequestService.Filter.ALL_DIP
+                    || filter == RequestService.Filter.CONFIRMED && it.submissionAccepted
+                    || filter == RequestService.Filter.UNCONFIRMED && !it.submissionAccepted
+        }
+        .toPage(pageable)
 }
