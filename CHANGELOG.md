@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.3](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.2...v0.15.3) (2026-03-12)
+
+
+### Features
+
+* save error request for invalid input ([#264](https://github.com/pcvolkmer/mv64e-etl-processor/issues/264)) ([a8f8d5f](https://github.com/pcvolkmer/mv64e-etl-processor/commit/a8f8d5f137c9776a20b2bc91cd3bdd99c9b96991))
+* save error request for non json ([#266](https://github.com/pcvolkmer/mv64e-etl-processor/issues/266)) ([dc3aa92](https://github.com/pcvolkmer/mv64e-etl-processor/commit/dc3aa929216b26d46ce134ac98c279a68d5679c1))
+
 ## [0.15.2](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.1...v0.15.2) (2026-03-11)
 
 
