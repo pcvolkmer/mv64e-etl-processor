@@ -70,37 +70,42 @@ class KafkaInputListener(
     }
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
-        val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
-        val patientId = PatientId(mtbFile.patient.id)
-        val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
-        val requestId =
-            if (null != firstRequestIdHeader) {
-                RequestId(String(firstRequestIdHeader.value()))
-            } else {
-                RequestId("")
-            }
-        val firstRequestMethodHeader = record.headers().headers("requestMethod")?.firstOrNull()
-        val requestMethod =
-            if (null != firstRequestMethodHeader) {
-                String(firstRequestMethodHeader.value())
-            } else {
-                ""
-            }
+        try {
+            val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
+            val patientId = PatientId(mtbFile.patient.id)
+            val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
+            val requestId =
+                if (null != firstRequestIdHeader) {
+                    RequestId(String(firstRequestIdHeader.value()))
+                } else {
+                    RequestId("")
+                }
+            val firstRequestMethodHeader = record.headers().headers("requestMethod")?.firstOrNull()
+            val requestMethod =
+                if (null != firstRequestMethodHeader) {
+                    String(firstRequestMethodHeader.value())
+                } else {
+                    ""
+                }
 
-        if (requestMethod == "DELETE") {
-            logger.debug("Accepted MTB File and process deletion")
-            if (requestId.isBlank()) {
-                requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+            if (requestMethod == "DELETE") {
+                logger.debug("Accepted MTB File and process deletion")
+                if (requestId.isBlank()) {
+                    requestProcessor.processDeletion(patientId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+                } else {
+                    requestProcessor.processDeletion(patientId, requestId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+                }
             } else {
-                requestProcessor.processDeletion(patientId, requestId, TtpConsentStatus.UNKNOWN_CHECK_FILE)
+                logger.debug("Accepted MTB File for processing")
+                if (requestId.isBlank()) {
+                    requestProcessor.processMtbFile(mtbFile)
+                } else {
+                    requestProcessor.processMtbFile(mtbFile, requestId)
+                }
             }
-        } else {
-            logger.debug("Accepted MTB File for processing")
-            if (requestId.isBlank()) {
-                requestProcessor.processMtbFile(mtbFile)
-            } else {
-                requestProcessor.processMtbFile(mtbFile, requestId)
-            }
+        } catch (e: Exception) {
+            logger.error("Error while processing MtbFile", e)
+            requestProcessor.processMtbFile(Mtb.builder().build())
         }
     }
 }

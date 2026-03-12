@@ -28,6 +28,7 @@ import dev.pcvolkmer.mv64e.mtb.Mtb
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -66,4 +67,20 @@ class MtbFileRestController(
         requestProcessor.processDeletion(PatientId(patientId), TtpConsentStatus.UNKNOWN_CHECK_FILE)
         return ResponseEntity.accepted().build()
     }
+}
+
+@RestControllerAdvice(assignableTypes = [MtbFileRestController::class])
+class MtbFileRestControllerAdvice(
+    private val requestProcessor: RequestProcessor
+) {
+
+    private val logger = LoggerFactory.getLogger(MtbFileRestControllerAdvice::class.java)
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleMessageNotReadableException(e: Exception): ResponseEntity<Unit> {
+        logger.error("Error while processing MtbFile", e)
+        requestProcessor.processMtbFile(Mtb.builder().build())
+        return ResponseEntity.badRequest().build()
+    }
+
 }

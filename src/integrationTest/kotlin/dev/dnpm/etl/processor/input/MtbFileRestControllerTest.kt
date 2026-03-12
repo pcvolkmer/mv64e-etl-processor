@@ -20,6 +20,7 @@
 package dev.dnpm.etl.processor.input
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.consent.ConsentEvaluation
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
@@ -29,11 +30,14 @@ import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
 import dev.pcvolkmer.mv64e.mtb.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,6 +62,7 @@ import java.util.*
     classes =
         [
             MtbFileRestController::class,
+            MtbFileRestControllerAdvice::class,
             AppSecurityConfiguration::class,
             MtbFileConsentService::class,
         ]
@@ -251,6 +256,22 @@ class MtbFileRestControllerTest {
         mockMvc.delete(url) { with(anonymous()) }.andExpect { status { isUnauthorized() } }
 
         verify(requestProcessor, never()).processDeletion(anyValueClass(), any())
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = ["[]", "null", "X", ""])
+    fun shouldNotAcceptNonJsonObjectPostRequestContent(requestContent: String) {
+        mockMvc
+            .post("/mtbfile") {
+                content = requestContent
+                contentType = CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
+                with(user("onkostarserver").roles("MTBFILE"))
+            }
+            .andExpect { status { isBadRequest() } }
+
+        val result = verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        assertThat(result).isFalse()
     }
 
     @Nested
