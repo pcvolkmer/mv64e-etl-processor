@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.5](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.4...v0.15.5) (2026-03-16)
+
+
+### Miscellaneous Chores
+
+* release 0.15.5 ([178aeb5](https://github.com/pcvolkmer/mv64e-etl-processor/commit/178aeb5c3bb9593c68ee2cdc980f7cce0821acdb))
+
 ## [0.15.4](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.3...v0.15.4) (2026-03-12)
 
 
