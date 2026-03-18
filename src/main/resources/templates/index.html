@@ -55,26 +55,19 @@
                 <th:block th:insert="~{fragments :: request}" th:each="request : ${requests}">
                 </th:block>
             </div>
-            <div th:if="${patientPseudonym == null && query == null}" class="page-control">
-                <a id="first-page-link" th:href="@{/(page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
-                <a id="prev-page-link" th:href="@{/(page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
+            <div th:if="${patientPseudonym == null}" class="page-control">
+                <a id="first-page-link" th:href="@{/(q=${query},f=${filter},page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&#x23EE;</a><a th:if="${requests.isFirst()}">&#x23EE;</a>
+                <a id="prev-page-link" th:href="@{/(q=${query},f=${filter},page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&#x23F4;</a><a th:if="${requests.isFirst()}">&#x23F4;</a>
                 <span>Seite [[ ${requests.getNumber() + 1} ]] von [[ ${requests.getTotalPages()} ]]</span>
-                <a id="next-page-link" th:href="@{/(page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
-                <a id="last-page-link" th:href="@{/(page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
-            </div>
-            <div th:if="${patientPseudonym == null && query != null}" class="page-control">
-                <a id="first-page-link" th:href="@{/(q=${query},page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
-                <a id="prev-page-link" th:href="@{/(q=${query},page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
-                <span>Seite [[ ${requests.getNumber() + 1} ]] von [[ ${requests.getTotalPages()} ]]</span>
-                <a id="next-page-link" th:href="@{/(q=${query},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
-                <a id="last-page-link" th:href="@{/(q=${query},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
+                <a id="next-page-link" th:href="@{/(q=${query},f=${filter},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&#x23F5;</a><a th:if="${requests.isLast()}">&#x23F5;</a>
+                <a id="last-page-link" th:href="@{/(q=${query},f=${filter},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&#x23ED;</a><a th:if="${requests.isLast()}">&#x23ED;</a>
             </div>
             <div th:if="${patientPseudonym != null}" class="page-control">
-                <a id="first-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&larrb;</a><a th:if="${requests.isFirst()}">&larrb;</a>
-                <a id="prev-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&larr;</a><a th:if="${requests.isFirst()}">&larr;</a>
+                <a id="first-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${0})}" title="Zum Anfang: Taste W" th:if="${not requests.isFirst()}">&#x23EE;</a><a th:if="${requests.isFirst()}">&#x23EE;</a>
+                <a id="prev-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() - 1})}" title="Seite zurück: Taste A" th:if="${not requests.isFirst()}">&#x23EE;</a><a th:if="${requests.isFirst()}">&#x23EE;</a>
                 <span>Seite [[ ${requests.getNumber() + 1} ]] von [[ ${requests.getTotalPages()} ]]</span>
-                <a id="next-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&rarr;</a><a th:if="${requests.isLast()}">&rarr;</a>
-                <a id="last-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&rarrb;</a><a th:if="${requests.isLast()}">&rarrb;</a>
+                <a id="next-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getNumber() + 1})}" title="Seite vor: Taste D" th:if="${not requests.isLast()}">&#x23F5;</a><a th:if="${requests.isLast()}">&#x23F5;</a>
+                <a id="last-page-link" th:href="@{/patient/{patientPseudonym}(patientPseudonym=${patientPseudonym},page=${requests.getTotalPages() - 1})}" title="Zum Ende: Taste S" th:if="${not requests.isLast()}">&#x23ED;</a><a th:if="${requests.isLast()}">&#x23ED;</a>
             </div>
         </div>
 

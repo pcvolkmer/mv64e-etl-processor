@@ -431,6 +431,7 @@ table.config-table td > button:last-of-type {
     font-size: 1.75rem;
     color: var(--bg-gray);
     text-decoration: none;
+    vertical-align: middle;
 }
 
 .page-control a[href] {
@@ -440,6 +441,8 @@ table.config-table td > button:last-of-type {
 .page-control span {
     padding: 0 .5rem;
     vertical-align: text-bottom;
+    font-size: 1rem;
+    vertical-align: middle;
 }
 
 #samples-table.max {
