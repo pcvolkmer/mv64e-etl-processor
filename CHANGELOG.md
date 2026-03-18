@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.6](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.5...v0.15.6) (2026-03-18)
+
+
+### Features
+
+* improve pagination ([#271](https://github.com/pcvolkmer/mv64e-etl-processor/issues/271)) ([6d87add](https://github.com/pcvolkmer/mv64e-etl-processor/commit/6d87addfd08a125ad7cb1fc2dea0eb416408a962))
+
 ## [0.15.5](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.4...v0.15.5) (2026-03-16)
 
 
