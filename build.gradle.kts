@@ -12,8 +12,8 @@ plugins {
     id("com.diffplug.spotless") version "8.0.0"
     id("net.ltgt.errorprone") version "5.1.0"
     id("net.ltgt.nullaway") version "3.0.0"
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.spring") version "2.3.20"
     jacoco
 }
 
