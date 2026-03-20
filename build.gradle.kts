@@ -10,8 +10,8 @@ plugins {
     id("org.springframework.boot") version "4.0.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
-    id("net.ltgt.errorprone") version "4.3.0"
-    id("net.ltgt.nullaway") version "2.3.0"
+    id("net.ltgt.errorprone") version "5.1.0"
+    id("net.ltgt.nullaway") version "3.0.0"
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
     jacoco
@@ -117,8 +117,8 @@ dependencies {
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
 
-    errorprone("com.google.errorprone:error_prone_core:2.43.0")
-    errorprone("com.uber.nullaway:nullaway:0.12.11")
+    errorprone("com.google.errorprone:error_prone_core:2.48.0")
+    errorprone("com.uber.nullaway:nullaway:0.13.1")
 }
 
 dependencyManagement {
