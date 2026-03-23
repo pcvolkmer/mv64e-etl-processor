@@ -100,6 +100,7 @@ class RequestService(private val requestRepository: RequestRepository) {
 fun List<Request>.filter(filter: RequestService.Filter, pageable: Pageable): Page<Request> {
     return this
         .toList()
+        .sortedByDescending { it.processedAt }
         .filter {
             it.type == RequestType.MTB_FILE
                     && sequenceOf(RequestStatus.SUCCESS, RequestStatus.WARNING).contains(it.status)
