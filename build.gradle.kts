@@ -22,7 +22,7 @@ version = "0.15.7" // x-release-please-version
 
 // Additional versions
 val mtbDtoVersion by extra("0.2.0")
-val hapiFhirVersion by extra("8.4.2")
+val hapiFhirVersion by extra("8.8.1")
 val apacheCxfVersion by extra("4.1.5")
 val springModulithVersion by extra("2.0.5")
 val springRetryVersion by extra("2.0.12")
