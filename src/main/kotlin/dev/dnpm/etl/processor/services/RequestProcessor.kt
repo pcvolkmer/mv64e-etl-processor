@@ -115,8 +115,8 @@ class RequestProcessor(
 
         if (
             appConfigProperties.postInitialSubmissionBlock &&
-            hasSuccessfullInitialSubmission(request.patientPseudonym()) &&
-            hasUnacceptedInitialSubmission(request.patientPseudonym())
+            hasSuccessfulInitialSubmission(request.patientPseudonym()) &&
+            hasUnacceptedSuccessfulInitialSubmission(request.patientPseudonym())
         ) {
             requestService.save(
                 Request(
@@ -136,8 +136,8 @@ class RequestProcessor(
 
         if (
             appConfigProperties.postInitialSubmissionBlock &&
-            hasSuccessfullInitialSubmission(request.patientPseudonym()) &&
-            !hasUnacceptedInitialSubmission(request.patientPseudonym())
+            hasSuccessfulInitialSubmission(request.patientPseudonym()) &&
+            !hasUnacceptedSuccessfulInitialSubmission(request.patientPseudonym())
         ) {
             // Use "addition" after "intial" with "Meldebestaetigung"
             request.content.metadata?.let {
@@ -184,16 +184,17 @@ class RequestProcessor(
         )
     }
 
-    private fun hasSuccessfullInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
+    private fun hasSuccessfulInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
         return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
             it.submissionType == SubmissionType.INITIAL &&
                     (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING)
         }
     }
 
-    private fun hasUnacceptedInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
+    private fun hasUnacceptedSuccessfulInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
         return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
             it.submissionType == SubmissionType.INITIAL &&
+                    (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING) &&
                     !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
         }
     }
