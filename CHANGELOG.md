@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.8](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.7...v0.15.8) (2026-04-22)
+
+
+### Bug Fixes
+
+* do not block earlier initial requests with error response ([#281](https://github.com/pcvolkmer/mv64e-etl-processor/issues/281)) ([a7d5758](https://github.com/pcvolkmer/mv64e-etl-processor/commit/a7d57581591c23fd1fd0ad0f4e8f9c6ce2745750))
+
 ## [0.15.7](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.6...v0.15.7) (2026-03-23)
 
 
