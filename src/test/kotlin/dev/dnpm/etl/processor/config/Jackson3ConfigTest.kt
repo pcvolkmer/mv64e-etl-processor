@@ -10,13 +10,13 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.util.*
 
-class JacksonConfigTest {
+class Jackson3ConfigTest {
 
-    lateinit var jacksonConfig: JacksonConfig
+    lateinit var jacksonConfig: Jackson3Config
 
     @BeforeEach
     fun setup() {
-        this.jacksonConfig = JacksonConfig()
+        this.jacksonConfig = Jackson3Config()
     }
 
     @ParameterizedTest
@@ -29,8 +29,8 @@ class JacksonConfigTest {
         val inputJson =
             Objects.requireNonNull(this.javaClass.classLoader.getResourceAsStream(filename))?.readAllBytes()?.decodeToString()
 
-        val jsonNode = this.jacksonConfig.objectMapper().readTree(inputJson)
-        val actual = this.jacksonConfig.objectMapper().writeValueAsString(jsonNode)
+        val jsonNode = this.jacksonConfig.jsonMapper().readTree(inputJson)
+        val actual = this.jacksonConfig.jsonMapper().writeValueAsString(jsonNode)
 
         assertThat(actual).doesNotContain("null")
     }
@@ -44,8 +44,8 @@ class JacksonConfigTest {
         val inputJson =
             Objects.requireNonNull(this.javaClass.classLoader.getResourceAsStream(filename))?.readAllBytes()?.decodeToString()
 
-        val json = this.jacksonConfig.objectMapper().readTree(inputJson)
-        val actual = this.jacksonConfig.objectMapper().writeValueAsString(json)
+        val json = this.jacksonConfig.jsonMapper().readTree(inputJson)
+        val actual = this.jacksonConfig.jsonMapper().writeValueAsString(json)
 
         assertThat(actual).contains(""""lastUpdated":"2025-08-15T11:13:59.143+02:00"""")
     }
@@ -58,15 +58,15 @@ class JacksonConfigTest {
         val inputConsentJson =
             Objects.requireNonNull(this.javaClass.classLoader.getResourceAsStream("fake_broadConsent_mii_response_permit.json"))?.readAllBytes()?.decodeToString()
 
-        val mtb = this.jacksonConfig.objectMapper().readValue<Mtb>(inputMtbFileJson, Mtb::class.java)
-        val consentJsonNode = this.jacksonConfig.objectMapper().readTree(inputConsentJson)
+        val mtb = this.jacksonConfig.jsonMapper().readValue<Mtb>(inputMtbFileJson, Mtb::class.java)
+        // Still use Jackson2 ObjectMapper since MTB DTO requires Jackson2 ObjectNode
+        val consentJsonNode = JacksonConfig().objectMapper().readTree(inputConsentJson)
         mtb.metadata = MvhMetadata.builder().researchConsents(listOf(MvhMetadata.ResearchConsent.from(consentJsonNode as ObjectNode))).build()
 
-        val actual = this.jacksonConfig.objectMapper().writeValueAsString(mtb)
+        val actual = this.jacksonConfig.jsonMapper().writeValueAsString(mtb)
 
         assertThat(actual).doesNotContain("null")
         assertThat(actual).contains(""""lastUpdated":"2025-08-15T11:13:59.143+02:00"""")
         assertThat(actual).contains("""{"entry":[{"fullUrl":"http://localhost:8080/ttp-fhir/fhir/gics/Consent/7d3456c2-79b1-11f0-ab27-6ed0ed82d0fd"""")
     }
-
 }
