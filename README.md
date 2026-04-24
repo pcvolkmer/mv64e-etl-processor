@@ -66,8 +66,26 @@ muss erst aktiviert werden.
 
 `APP_POST_INITIAL_SUBMISSION_BLOCK` -> `true` | `false` (falls fehlt, wird `false` angenommen)
 
+Nach Aktivierung des Features wird es für ältere Meldungen erforderlich sein, bereits durchgeführte
+Initialmeldungen als solche zu kennzeichnen. Dies **muss** manuell in der Datenbank gemacht werden.
+
+Gezielt Meldungen kennzeichnen:
+
+```sql
+UPDATE request SET submission_type = "INITIAL"
+  WHERE id IN (...);
+```
+
+Alle MTB-File Meldungen (ohne Lösch-Request) kennzeichnen, die erfolgreich an DNPM:DIP gesendet wurden:
+
+```sql
+UPDATE request SET submission_type = "INITIAL"
+  WHERE (status = "WARNING" OR status = "SUCCESS")
+  AND type = "MTB_FILE";
+```
+
 #### Test Betriebsbereitschaft
-Um die voll Betriebsbereitschaft herzustellen, muss eine erfolgreiche Übertragung mit dem
+Um die volle Betriebsbereitschaft herzustellen, muss eine erfolgreiche Übertragung mit dem
 Submission-Typ *Test* erfolgt sein. Über die Umgebungsvariable wird dieser Übertragungsmodus
 aktiviert. Alle Datensätze mit erteilter Teilnahme am Modelvorhaben werden mit der Test-Submission-Kennung
 übertragen, unabhängig vom ursprünglichen Wert.
