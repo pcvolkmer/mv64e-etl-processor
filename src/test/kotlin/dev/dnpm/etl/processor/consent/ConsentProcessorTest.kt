@@ -15,13 +15,14 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import tools.jackson.databind.json.JsonMapper
 
 @ExtendWith(MockitoExtension::class)
 class ConsentProcessorTest {
 
   lateinit var consentProcessor: ConsentProcessor
 
-  val objectMapper = ObjectMapper()
+  val jsonMapper = JsonMapper()
   val fhirContext = FhirContext.forR4()
 
   @BeforeEach
@@ -33,7 +34,7 @@ class ConsentProcessorTest {
         ConsentProcessor(
             appConfigProperties,
             gIcsConfigProperties,
-            objectMapper,
+            jsonMapper,
             fhirContext,
             consentService,
         )

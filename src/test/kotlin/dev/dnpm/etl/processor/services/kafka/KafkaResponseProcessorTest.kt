@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,8 +20,6 @@
 
 package dev.dnpm.etl.processor.services.kafka
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.dnpm.etl.processor.services.ResponseEvent
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
@@ -36,11 +35,13 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpStatus
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 
 @ExtendWith(MockitoExtension::class)
 class KafkaResponseProcessorTest {
     private lateinit var eventPublisher: ApplicationEventPublisher
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     private lateinit var kafkaResponseProcessor: KafkaResponseProcessor
 
@@ -57,7 +58,7 @@ class KafkaResponseProcessorTest {
             if (statusBody == null) {
                 ""
             } else {
-                this.objectMapper.writeValueAsString(
+                this.jsonMapper.writeValueAsString(
                     KafkaResponseProcessor.ResponseBody(requestId, statusCode, statusBody),
                 )
             },
@@ -68,9 +69,9 @@ class KafkaResponseProcessorTest {
         @Mock eventPublisher: ApplicationEventPublisher,
     ) {
         this.eventPublisher = eventPublisher
-        this.objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+        this.jsonMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
 
-        this.kafkaResponseProcessor = KafkaResponseProcessor(eventPublisher, objectMapper)
+        this.kafkaResponseProcessor = KafkaResponseProcessor(eventPublisher, jsonMapper)
     }
 
     @Test

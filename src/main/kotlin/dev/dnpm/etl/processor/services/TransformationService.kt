@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,18 +20,18 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import tools.jackson.databind.json.JsonMapper
 
 class TransformationService(
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
     private val transformations: List<Transformation>,
 ) {
     fun transform(mtbFile: Mtb): Mtb {
-        val json = transform(objectMapper.writeValueAsString(mtbFile))
-        return objectMapper.readValue(json, Mtb::class.java)
+        val json = transform(jsonMapper.writeValueAsString(mtbFile))
+        return jsonMapper.readValue(json, Mtb::class.java)
     }
 
     private fun transform(content: String): String {
@@ -61,7 +62,7 @@ class TransformationService(
                     newValue,
                     { it.item(HashMap::class.java)[last] == existingValue },
                 )
-            } catch (e: PathNotFoundException) {
+            } catch (_: PathNotFoundException) {
                 // Ignore
             }
 

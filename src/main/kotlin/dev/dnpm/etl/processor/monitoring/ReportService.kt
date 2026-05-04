@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -23,31 +24,28 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
-import com.fasterxml.jackson.core.JsonParseException
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.ReportService.Issue
 import dev.dnpm.etl.processor.monitoring.ReportService.Severity
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.json.JsonMapper
 import java.util.*
 
-class ReportService(private val objectMapper: ObjectMapper) {
+class ReportService(private val jsonMapper: JsonMapper) {
 
   fun deserialize(dataQualityReport: String?): List<Issue> {
     if (dataQualityReport.isNullOrBlank()) {
       return listOf()
     }
     return try {
-      objectMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues.sortedBy {
+      jsonMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues.sortedBy {
         it.severity
       }
-    } catch (e: Exception) {
+    } catch (_: JacksonException) {
       val otherIssue =
           Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
-      return when (e) {
-        is JsonMappingException -> listOf(otherIssue)
-        is JsonParseException -> listOf(otherIssue)
-        else -> throw e
-      }
+      return listOf(otherIssue)
+    } catch (e: Exception) {
+      throw e
     }
   }
 

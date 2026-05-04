@@ -20,8 +20,6 @@
 
 package dev.dnpm.etl.processor.output
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppRestConfiguration
@@ -31,8 +29,6 @@ import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.pcvolkmer.mv64e.mtb.*
-import java.time.Instant
-import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.Matchers.containsString
@@ -53,6 +49,10 @@ import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
+import java.time.Instant
+import java.util.*
 
 @SpringBootTest
 @MockitoBean(types = [ReportService::class])
@@ -78,8 +78,7 @@ class RestDipMtbFileSenderTest {
     private lateinit var restMtbFileSender: RestMtbFileSender
 
     private var reportService =
-        ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
-
+        ReportService(JsonMapper.builder().addModule(KotlinModule.Builder().build()).build())
     @BeforeEach
     fun setup(@Autowired restTemplate: RestTemplate) {
       val restTemplate = restTemplate
