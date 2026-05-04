@@ -74,7 +74,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.retry:spring-retry:${springRetryVersion}")
     implementation("org.flywaydb:flyway-database-postgresql")

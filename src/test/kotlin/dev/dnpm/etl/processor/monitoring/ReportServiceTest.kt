@@ -1,6 +1,26 @@
+/*
+ * This file is part of ETL-Processor
+ *
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dev.dnpm.etl.processor.monitoring
 
-import dev.dnpm.etl.processor.config.JacksonConfig
+import dev.dnpm.etl.processor.config.Jackson3Config
 import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -12,8 +32,8 @@ class ReportServiceTest {
 
   @BeforeEach
   fun setUp() {
-    val jacksonConfig = JacksonConfig()
-    service = ReportService(jacksonConfig.objectMapper())
+    val jackson3Config = Jackson3Config()
+    service = ReportService(jackson3Config.jsonMapper())
   }
 
   @Test

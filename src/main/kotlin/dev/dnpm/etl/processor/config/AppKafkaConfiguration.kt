@@ -43,6 +43,7 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.retry.support.RetryTemplate
 import reactor.core.publisher.Sinks
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 @EnableConfigurationProperties(value = [KafkaProperties::class])
@@ -77,8 +78,8 @@ class AppKafkaConfiguration {
     @Bean
     fun kafkaResponseProcessor(
         applicationEventPublisher: ApplicationEventPublisher,
-        objectMapper: ObjectMapper,
-    ): KafkaResponseProcessor = KafkaResponseProcessor(applicationEventPublisher, objectMapper)
+        jsonMapper: JsonMapper,
+    ): KafkaResponseProcessor = KafkaResponseProcessor(applicationEventPublisher, jsonMapper)
 
     @Bean
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
