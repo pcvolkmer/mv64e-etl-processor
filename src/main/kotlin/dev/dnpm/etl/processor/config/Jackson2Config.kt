@@ -30,6 +30,11 @@ import org.hl7.fhir.r4.model.Consent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
+/**
+ * @deprecated Use JacksonConfig instead
+ * @since 0.16
+ */
+@Deprecated("Use JacksonConfig instead")
 @Configuration
 class Jackson2Config {
     companion object {
