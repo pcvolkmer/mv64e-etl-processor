@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -48,6 +49,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import tools.jackson.databind.json.JsonMapper
 
 @SpringBootTest
 @ContextConfiguration(
@@ -61,7 +63,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
             ConsentEvaluator::class,
         ],
 )
-@MockitoBean(types = [ObjectMapper::class])
+@MockitoBean(types = [ObjectMapper::class, JsonMapper::class])
 @TestPropertySource(
     properties =
         [

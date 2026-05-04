@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2025-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,7 +20,6 @@
 
 package dev.dnpm.etl.processor.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
@@ -43,6 +43,7 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.retry.support.RetryTemplate
 import reactor.core.publisher.Sinks
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 @EnableConfigurationProperties(value = [KafkaProperties::class])
@@ -57,10 +58,10 @@ class AppKafkaConfiguration {
         kafkaTemplate: KafkaTemplate<String, String>,
         kafkaProperties: KafkaProperties,
         retryTemplate: RetryTemplate,
-        objectMapper: ObjectMapper,
+        jsonMapper: JsonMapper,
     ): MtbFileSender {
         logger.info("Selected 'KafkaMtbFileSender'")
-        return KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
+        return KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, jsonMapper)
     }
 
     @Bean
@@ -77,8 +78,8 @@ class AppKafkaConfiguration {
     @Bean
     fun kafkaResponseProcessor(
         applicationEventPublisher: ApplicationEventPublisher,
-        objectMapper: ObjectMapper,
-    ): KafkaResponseProcessor = KafkaResponseProcessor(applicationEventPublisher, objectMapper)
+        jsonMapper: JsonMapper,
+    ): KafkaResponseProcessor = KafkaResponseProcessor(applicationEventPublisher, jsonMapper)
 
     @Bean
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
@@ -99,9 +100,9 @@ class AppKafkaConfiguration {
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
     fun kafkaInputListener(
         requestProcessor: RequestProcessor,
-        objectMapper: ObjectMapper,
+        jsonMapper: JsonMapper,
         consentEvaluator: ConsentEvaluator,
-    ): KafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
+    ): KafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, jsonMapper)
 
     @Bean
     fun kafkaConnectionCheckService(

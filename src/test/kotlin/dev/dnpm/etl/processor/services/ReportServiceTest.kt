@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,8 +20,6 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.asRequestStatus
@@ -30,6 +29,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 
 class ReportServiceTest {
     private lateinit var reportService: ReportService
@@ -37,7 +38,7 @@ class ReportServiceTest {
     @BeforeEach
     fun setup() {
         this.reportService =
-            ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
+            ReportService(JsonMapper.builder().addModule(KotlinModule.Builder().build()).build())
     }
 
     @Test

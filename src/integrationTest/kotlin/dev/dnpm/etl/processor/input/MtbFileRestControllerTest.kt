@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2024  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2024-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,7 +20,6 @@
 
 package dev.dnpm.etl.processor.input
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
 import dev.dnpm.etl.processor.consent.ConsentEvaluation
@@ -36,8 +36,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,6 +51,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.post
+import tools.jackson.databind.json.JsonMapper
 import java.time.Instant
 import java.util.*
 
@@ -119,7 +118,7 @@ class MtbFileRestControllerTest {
             .post(url) {
                 with(user("onkostarserver").roles("MTBFILE"))
                 contentType = MediaType.APPLICATION_JSON
-                content = ObjectMapper().writeValueAsString(mtbFile)
+                content = JsonMapper().writeValueAsString(mtbFile)
             }
             .andExpect { status { isAccepted() } }
 
@@ -147,7 +146,7 @@ class MtbFileRestControllerTest {
             .post(url) {
                 with(user("onkostarserver").roles("ADMIN"))
                 contentType = MediaType.APPLICATION_JSON
-                content = ObjectMapper().writeValueAsString(mtbFile)
+                content = JsonMapper().writeValueAsString(mtbFile)
             }
             .andExpect { status { isAccepted() } }
 
@@ -175,7 +174,7 @@ class MtbFileRestControllerTest {
             .post(url) {
                 with(user("testuser").roles("USER"))
                 contentType = MediaType.APPLICATION_JSON
-                content = ObjectMapper().writeValueAsString(mtbFile)
+                content = JsonMapper().writeValueAsString(mtbFile)
             }
             .andExpect { status { isAccepted() } }
 
@@ -200,7 +199,7 @@ class MtbFileRestControllerTest {
         mockMvc
             .post(url) {
                 contentType = MediaType.APPLICATION_JSON
-                content = ObjectMapper().writeValueAsString(mtbFile)
+                content = JsonMapper().writeValueAsString(mtbFile)
             }
             .andExpect { status { isUnauthorized() } }
 
@@ -308,7 +307,7 @@ class MtbFileRestControllerTest {
                 .post(url) {
                     with(user("onkostarserver").roles("ADMIN"))
                     contentType = MediaType.APPLICATION_JSON
-                    content = ObjectMapper().writeValueAsString(mtbFile)
+                    content = JsonMapper().writeValueAsString(mtbFile)
                 }
                 .andExpect { status { isAccepted() } }
 
@@ -336,7 +335,7 @@ class MtbFileRestControllerTest {
                 .post(url) {
                     with(user("onkostarserver").roles("USER"))
                     contentType = MediaType.APPLICATION_JSON
-                    content = ObjectMapper().writeValueAsString(mtbFile)
+                    content = JsonMapper().writeValueAsString(mtbFile)
                 }
                 .andExpect { status { isAccepted() } }
 
