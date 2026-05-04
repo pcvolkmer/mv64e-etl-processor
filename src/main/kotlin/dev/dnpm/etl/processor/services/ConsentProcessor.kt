@@ -22,8 +22,6 @@ package dev.dnpm.etl.processor.services
 
 import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.consent.ConsentDomain
@@ -31,10 +29,6 @@ import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.mtb.*
-import java.io.IOException
-import java.time.Clock
-import java.time.Instant
-import java.util.*
 import org.apache.commons.lang3.NotImplementedException
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
@@ -44,6 +38,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import tools.jackson.databind.json.JsonMapper
+import java.io.IOException
+import java.time.Clock
+import java.time.Instant
+import java.util.*
 
 @Service
 class ConsentProcessor(

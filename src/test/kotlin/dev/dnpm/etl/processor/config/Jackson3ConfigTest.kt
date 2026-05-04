@@ -32,11 +32,11 @@ import java.util.*
 
 class Jackson3ConfigTest {
 
-    lateinit var jacksonConfig: Jackson3Config
+    lateinit var jacksonConfig: JacksonConfig
 
     @BeforeEach
     fun setup() {
-        this.jacksonConfig = Jackson3Config()
+        this.jacksonConfig = JacksonConfig()
     }
 
     @ParameterizedTest
@@ -80,7 +80,7 @@ class Jackson3ConfigTest {
 
         val mtb = this.jacksonConfig.jsonMapper().readValue<Mtb>(inputMtbFileJson, Mtb::class.java)
         // Still use Jackson2 ObjectMapper since MTB DTO requires Jackson2 ObjectNode
-        val consentJsonNode = JacksonConfig().objectMapper().readTree(inputConsentJson)
+        val consentJsonNode = Jackson2Config().objectMapper().readTree(inputConsentJson)
         mtb.metadata = MvhMetadata.builder().researchConsents(listOf(MvhMetadata.ResearchConsent.from(consentJsonNode as ObjectNode))).build()
 
         val actual = this.jacksonConfig.jsonMapper().writeValueAsString(mtb)

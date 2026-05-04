@@ -20,6 +20,7 @@
 
 package dev.dnpm.etl.processor.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.GicsGetBroadConsentService
 import dev.dnpm.etl.processor.consent.IConsentService
@@ -175,7 +176,7 @@ class AppConfiguration {
 
     @Bean
     fun getJsonMapper(): JsonMapper {
-        return Jackson3Config().jsonMapper()
+        return JacksonConfig().jsonMapper()
     }
 
     @Bean

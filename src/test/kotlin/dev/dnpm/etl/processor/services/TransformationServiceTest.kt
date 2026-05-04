@@ -23,7 +23,7 @@ package dev.dnpm.etl.processor.services
 import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import dev.dnpm.etl.processor.config.Jackson3Config
+import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +39,7 @@ class TransformationServiceTest {
   fun setup() {
     this.service =
         TransformationService(
-            Jackson3Config().jsonMapper(),
+            JacksonConfig().jsonMapper(),
             listOf(
                 Transformation.of("diagnoses[*].code.version") from "2013" to "2014",
             ),

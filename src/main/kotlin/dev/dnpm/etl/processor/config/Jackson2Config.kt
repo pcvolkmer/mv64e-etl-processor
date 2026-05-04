@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class JacksonConfig {
+class Jackson2Config {
     companion object {
         var fhirContext: FhirContext = FhirContext.forR4()
 
@@ -62,7 +62,7 @@ class Jackson2ConsentResourceSerializer : com.fasterxml.jackson.databind.JsonSer
         gen: JsonGenerator,
         serializers: com.fasterxml.jackson.databind.SerializerProvider,
     ) {
-        val json = JacksonConfig.fhirContext().newJsonParser().encodeResourceToString(value)
+        val json = Jackson2Config.fhirContext().newJsonParser().encodeResourceToString(value)
         gen.writeRawValue(json)
     }
 }
@@ -75,6 +75,6 @@ class Jackson2ConsentResourceDeserializer : com.fasterxml.jackson.databind.JsonD
         val jsonNode = p?.readValueAsTree<com.fasterxml.jackson.databind.JsonNode>()
         val json = jsonNode?.toString()
 
-        return JacksonConfig.fhirContext().newJsonParser().parseResource(json) as Consent
+        return Jackson2Config.fhirContext().newJsonParser().parseResource(json) as Consent
     }
 }

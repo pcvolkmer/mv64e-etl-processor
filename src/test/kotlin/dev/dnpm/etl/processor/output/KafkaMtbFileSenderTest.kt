@@ -20,17 +20,12 @@
 
 package dev.dnpm.etl.processor.output
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.pcvolkmer.mv64e.mtb.*
-import java.time.Instant
-import java.util.*
-import java.util.concurrent.CompletableFuture.completedFuture
-import java.util.concurrent.ExecutionException
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -48,6 +43,11 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplateBuilder
+import tools.jackson.databind.json.JsonMapper
+import java.time.Instant
+import java.util.*
+import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.concurrent.ExecutionException
 
 @ExtendWith(MockitoExtension::class)
 class KafkaMtbFileSenderTest {
@@ -59,18 +59,18 @@ class KafkaMtbFileSenderTest {
 
     private lateinit var kafkaMtbFileSender: KafkaMtbFileSender
 
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     @BeforeEach
     fun setup(@Mock kafkaTemplate: KafkaTemplate<String, String>) {
       val kafkaProperties = KafkaProperties("testtopic")
       val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
-      this.objectMapper = ObjectMapper()
+      this.jsonMapper = JsonMapper.builder().build()
       this.kafkaTemplate = kafkaTemplate
 
       this.kafkaMtbFileSender =
-          KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
+          KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, jsonMapper)
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ class KafkaMtbFileSenderTest {
       val kafkaProperties = KafkaProperties("testtopic")
       val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
       this.kafkaMtbFileSender =
-          KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.objectMapper)
+          KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.jsonMapper)
 
       doAnswer {
             if (null != testData.exception) {
@@ -127,18 +127,18 @@ class KafkaMtbFileSenderTest {
 
     private lateinit var kafkaMtbFileSender: KafkaMtbFileSender
 
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     @BeforeEach
     fun setup(@Mock kafkaTemplate: KafkaTemplate<String, String>) {
       val kafkaProperties = KafkaProperties("testtopic")
       val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
 
-      this.objectMapper = ObjectMapper()
+      this.jsonMapper = JsonMapper()
       this.kafkaTemplate = kafkaTemplate
 
       this.kafkaMtbFileSender =
-          KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
+          KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, jsonMapper)
     }
 
     @ParameterizedTest
@@ -180,7 +180,7 @@ class KafkaMtbFileSenderTest {
           .isEqualTo("POST".toByteArray())
       assertThat(captor.firstValue.value()).isNotNull
       assertThat(captor.firstValue.value())
-          .isEqualTo(objectMapper.writeValueAsString(dnmpV2kafkaRecordData(TEST_REQUEST_ID)))
+          .isEqualTo(jsonMapper.writeValueAsString(dnmpV2kafkaRecordData(TEST_REQUEST_ID)))
     }
 
     @Test
@@ -213,7 +213,7 @@ class KafkaMtbFileSenderTest {
       val kafkaProperties = KafkaProperties("testtopic")
       val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
       this.kafkaMtbFileSender =
-          KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.objectMapper)
+          KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.jsonMapper)
 
       doAnswer {
             if (null != testData.exception) {

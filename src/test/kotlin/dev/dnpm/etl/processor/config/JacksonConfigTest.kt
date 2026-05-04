@@ -32,11 +32,11 @@ import java.util.*
 
 class JacksonConfigTest {
 
-    lateinit var jacksonConfig: JacksonConfig
+    lateinit var jacksonConfig: Jackson2Config
 
     @BeforeEach
     fun setup() {
-        this.jacksonConfig = JacksonConfig()
+        this.jacksonConfig = Jackson2Config()
     }
 
     @ParameterizedTest

@@ -31,7 +31,7 @@ import tools.jackson.databind.module.SimpleModule
 import tools.jackson.module.kotlin.KotlinModule
 
 @Configuration
-class Jackson3Config {
+class JacksonConfig {
 
     companion object {
         var fhirContext: FhirContext = FhirContext.forR4()
@@ -64,7 +64,7 @@ class JacksonConsentResourceSerializer : ValueSerializer<Consent>() {
         gen: tools.jackson.core.JsonGenerator?,
         ctxt: SerializationContext?,
     ) {
-        val json = Jackson3Config.fhirContext().newJsonParser().encodeResourceToString(value)
+        val json = JacksonConfig.fhirContext().newJsonParser().encodeResourceToString(value)
         gen?.writeRawValue(json)
     }
 }
@@ -77,6 +77,6 @@ class JacksonConsentResourceDeserializer : ValueDeserializer<Consent>() {
         val jsonNode = p?.readValueAsTree<JsonNode>()
         val json = jsonNode?.toString()
 
-        return Jackson3Config.fhirContext().newJsonParser().parseResource(json) as Consent
+        return JacksonConfig.fhirContext().newJsonParser().parseResource(json) as Consent
     }
 }

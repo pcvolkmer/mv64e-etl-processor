@@ -24,6 +24,7 @@ import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.AppConfiguration
 import dev.dnpm.etl.processor.config.AppRestConfiguration
 import dev.dnpm.etl.processor.config.AppSecurityConfiguration
+import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.monitoring.ReportService
