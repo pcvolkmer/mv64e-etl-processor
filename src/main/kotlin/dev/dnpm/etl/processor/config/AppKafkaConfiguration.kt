@@ -20,7 +20,6 @@
 
 package dev.dnpm.etl.processor.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
@@ -59,10 +58,10 @@ class AppKafkaConfiguration {
         kafkaTemplate: KafkaTemplate<String, String>,
         kafkaProperties: KafkaProperties,
         retryTemplate: RetryTemplate,
-        objectMapper: ObjectMapper,
+        jsonMapper: JsonMapper,
     ): MtbFileSender {
         logger.info("Selected 'KafkaMtbFileSender'")
-        return KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, objectMapper)
+        return KafkaMtbFileSender(kafkaTemplate, kafkaProperties, retryTemplate, jsonMapper)
     }
 
     @Bean
@@ -101,9 +100,9 @@ class AppKafkaConfiguration {
     @ConditionalOnProperty(value = ["app.kafka.input-topic"])
     fun kafkaInputListener(
         requestProcessor: RequestProcessor,
-        objectMapper: ObjectMapper,
+        jsonMapper: JsonMapper,
         consentEvaluator: ConsentEvaluator,
-    ): KafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
+    ): KafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, jsonMapper)
 
     @Bean
     fun kafkaConnectionCheckService(

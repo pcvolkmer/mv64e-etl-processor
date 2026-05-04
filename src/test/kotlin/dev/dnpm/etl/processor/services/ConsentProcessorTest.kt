@@ -23,7 +23,7 @@ package dev.dnpm.etl.processor.services
 import ca.uhn.fhir.context.FhirContext
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.config.Jackson3Config
+import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
@@ -71,9 +71,9 @@ class ConsentProcessorTest {
   ) {
 
     this.gIcsConfigProperties = GIcsConfigProperties(uri = "https://gics.example.com", genomDeConsentDomainName = "GenomDE_MV")
-    val jacksonConfig = Jackson3Config()
+    val jacksonConfig = JacksonConfig()
     this.jsonMapper = jacksonConfig.jsonMapper()
-    this.fhirContext = Jackson3Config.fhirContext()
+    this.fhirContext = JacksonConfig.fhirContext()
     this.gicsConsentService = gicsConsentService
     this.appConfigProperties = AppConfigProperties(emptyList())
     this.consentProcessor =

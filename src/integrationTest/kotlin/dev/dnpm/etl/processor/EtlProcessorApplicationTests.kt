@@ -20,7 +20,6 @@
 
 package dev.dnpm.etl.processor
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
@@ -44,6 +43,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.testcontainers.junit.jupiter.Testcontainers
+import tools.jackson.databind.json.JsonMapper
 
 @Testcontainers
 @ExtendWith(SpringExtension::class)
@@ -85,16 +85,16 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
     @MockitoBean private lateinit var mtbFileSender: MtbFileSender
 
     private lateinit var mockMvc: MockMvc
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     @BeforeEach
     fun setup(
         @Autowired mockMvc: MockMvc,
-        @Autowired objectMapper: ObjectMapper,
+        @Autowired jsonMapper: JsonMapper,
         @Autowired requestRepository: RequestRepository
     ) {
       this.mockMvc = mockMvc
-      this.objectMapper = objectMapper
+      this.jsonMapper = jsonMapper
       requestRepository.deleteAll()
     }
 
@@ -136,7 +136,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
 
       mockMvc
           .post("/mtbfile") {
-            content = objectMapper.writeValueAsString(mtbFile)
+            content = jsonMapper.writeValueAsString(mtbFile)
             contentType = MediaType.APPLICATION_JSON
             with(user("admin").roles("ADMIN"))
           }

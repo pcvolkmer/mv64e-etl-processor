@@ -23,7 +23,7 @@ package dev.dnpm.etl.processor.pseudonym
 import ca.uhn.fhir.context.FhirContext
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.config.Jackson3Config
+import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.ConsentProcessorTest
@@ -47,7 +47,7 @@ import java.util.*
 @ExtendWith(MockitoExtension::class)
 class ExtensionsTest {
     fun getJsonMapper(): JsonMapper {
-        return Jackson3Config().jsonMapper()
+        return JacksonConfig().jsonMapper()
     }
 
     @Nested
@@ -96,7 +96,7 @@ class ExtensionsTest {
             ConsentProcessor(
                 appConfigProperties,
                 gIcsConfigProperties,
-                Jackson3Config().jsonMapper(),
+                JacksonConfig().jsonMapper(),
                 FhirContext.forR4(),
                 MtbFileConsentService(),
             )

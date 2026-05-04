@@ -21,11 +21,9 @@
 package dev.dnpm.etl.processor.consent
 
 import ca.uhn.fhir.context.FhirContext
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.services.ConsentProcessor
-import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.Consent
@@ -36,6 +34,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import tools.jackson.databind.json.JsonMapper
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class ConsentProcessorTest {

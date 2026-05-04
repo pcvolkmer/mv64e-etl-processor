@@ -20,7 +20,7 @@
 
 package dev.dnpm.etl.processor.monitoring
 
-import dev.dnpm.etl.processor.config.Jackson3Config
+import dev.dnpm.etl.processor.config.JacksonConfig
 import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -32,7 +32,7 @@ class ReportServiceTest {
 
   @BeforeEach
   fun setUp() {
-    val jackson3Config = Jackson3Config()
+    val jackson3Config = JacksonConfig()
     service = ReportService(jackson3Config.jsonMapper())
   }
 
