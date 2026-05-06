@@ -2,6 +2,7 @@ package dev.dnpm.etl.processor.config
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.getBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
@@ -26,7 +27,7 @@ class GPasConfigPropertiesTest {
                 "app.pseudonymize.gpas.uri=http://localhost/",
                 "app.pseudonymize.gpas.pid-domain=test-pid-domain",
             ).run { context ->
-                val properties = context.getBean(GPasConfigProperties::class.java)
+                val properties = context.getBean<GPasConfigProperties>()
 
                 assertThat(properties).isNotNull
                 assertThat(properties.patientDomain).isEqualTo("test-pid-domain")
@@ -41,7 +42,7 @@ class GPasConfigPropertiesTest {
                 "app.pseudonymize.gpas.uri=http://localhost/",
                 "app.pseudonymize.gpas.patient-domain=test-patient-domain",
             ).run { context ->
-                val properties = context.getBean(GPasConfigProperties::class.java)
+                val properties = context.getBean<GPasConfigProperties>()
 
                 assertThat(properties).isNotNull
                 assertThat(properties.patientDomain).isEqualTo("test-patient-domain")

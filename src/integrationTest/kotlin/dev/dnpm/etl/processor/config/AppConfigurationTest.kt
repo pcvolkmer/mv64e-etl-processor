@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
+import org.springframework.beans.factory.getBean
 import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
@@ -76,9 +77,9 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
-            assertThat(context.getBean(RestMtbFileSender::class.java)).isNotNull
+            assertThat(context.getBean<RestMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
-                context.getBean(KafkaMtbFileSender::class.java)
+                context.getBean<KafkaMtbFileSender>()
             }
         }
     }
@@ -99,8 +100,8 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseKafkaMtbFileSenderNotRestMtbFileSender() {
-            assertThrows<NoSuchBeanDefinitionException> { context.getBean(RestMtbFileSender::class.java) }
-            assertThat(context.getBean(KafkaMtbFileSender::class.java)).isNotNull
+            assertThrows<NoSuchBeanDefinitionException> { context.getBean<RestMtbFileSender>() }
+            assertThat(context.getBean<KafkaMtbFileSender>()).isNotNull
         }
     }
 
@@ -120,9 +121,9 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
-            assertThat(context.getBean(RestMtbFileSender::class.java)).isNotNull
+            assertThat(context.getBean<RestMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
-                context.getBean(KafkaMtbFileSender::class.java)
+                context.getBean<KafkaMtbFileSender>()
             }
         }
     }
@@ -143,7 +144,7 @@ class AppConfigurationTest {
         @Test
         fun shouldNotUseKafkaInputListener() {
             assertThrows<NoSuchBeanDefinitionException> {
-                context.getBean(KafkaInputListener::class.java)
+                context.getBean<KafkaInputListener>()
             }
         }
     }
@@ -165,7 +166,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseKafkaInputListener() {
-            assertThat(context.getBean(KafkaInputListener::class.java)).isNotNull
+            assertThat(context.getBean<KafkaInputListener>()).isNotNull
         }
     }
 
@@ -183,7 +184,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldRecognizeTransformations() {
-            val appConfigProperties = context.getBean(AppConfigProperties::class.java)
+            val appConfigProperties = context.getBean<AppConfigProperties>()
 
             assertThat(appConfigProperties).isNotNull
             assertThat(appConfigProperties.transformations).hasSize(1)
@@ -199,7 +200,7 @@ class AppConfigurationTest {
         ) {
             @Test
             fun shouldUseConfiguredGenerator() {
-                assertThat(context.getBean(AnonymizingGenerator::class.java)).isNotNull
+                assertThat(context.getBean<AnonymizingGenerator>()).isNotNull
             }
         }
 
@@ -213,7 +214,7 @@ class AppConfigurationTest {
         ) {
             @Test
             fun shouldUseConfiguredGenerator() {
-                assertThat(context.getBean(GpasPseudonymGenerator::class.java)).isNotNull
+                assertThat(context.getBean<GpasPseudonymGenerator>()).isNotNull
             }
         }
 
@@ -230,7 +231,7 @@ class AppConfigurationTest {
         ) {
             @Test
             fun shouldUseConfiguredGenerator() {
-                assertThat(context.getBean(GpasSoapPseudonymGenerator::class.java)).isNotNull
+                assertThat(context.getBean<GpasSoapPseudonymGenerator>()).isNotNull
             }
         }
 
@@ -244,7 +245,7 @@ class AppConfigurationTest {
         ) {
             @Test
             fun checkTokenService() {
-                assertThat(context.getBean(TokenService::class.java)).isNotNull
+                assertThat(context.getBean<TokenService>()).isNotNull
             }
         }
 
@@ -257,7 +258,7 @@ class AppConfigurationTest {
         ) {
             @Test
             fun checkTokenService() {
-                assertThrows<NoSuchBeanDefinitionException> { context.getBean(TokenService::class.java) }
+                assertThrows<NoSuchBeanDefinitionException> { context.getBean<TokenService>() }
             }
         }
     }
@@ -273,7 +274,7 @@ class AppConfigurationTest {
 
         @Test
         fun shouldUseRetryTemplateWithConfiguredMaxAttempts() {
-            val retryTemplate = context.getBean(RetryTemplate::class.java)
+            val retryTemplate = context.getBean<RetryTemplate>()
             assertThat(retryTemplate).isNotNull
 
             assertThrows<RuntimeException> {
@@ -298,7 +299,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(GicsConsentService::class.java)).isNotNull
+            assertThat(context.getBean<GicsConsentService>()).isNotNull
         }
     }
 
@@ -315,7 +316,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(GicsGetBroadConsentService::class.java)).isNotNull
+            assertThat(context.getBean<GicsGetBroadConsentService>()).isNotNull
         }
     }
 
@@ -325,7 +326,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseConfiguredGenerator() {
-            assertThat(context.getBean(MtbFileConsentService::class.java)).isNotNull
+            assertThat(context.getBean<MtbFileConsentService>()).isNotNull
         }
     }
 }

@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.*
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.exchange
+import org.springframework.web.client.getForEntity
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Sinks
 
@@ -139,13 +141,12 @@ class RestConnectionCheckService(
         try {
           val statusCode =
               restTemplate
-                  .getForEntity(
+                  .getForEntity<String>(
                       UriComponentsBuilder.fromUriString(restTargetProperties.uri.toString())
                           .pathSegment("mtb")
                           .pathSegment("kaplan-meier")
                           .pathSegment("config")
                           .toUriString(),
-                      String::class.java,
                   )
                   .statusCode
           val available = statusCode == HttpStatus.OK
@@ -215,7 +216,7 @@ class GPasConnectionCheckService(
 
           val statusCode =
               restTemplate
-                  .exchange(uri, HttpMethod.GET, HttpEntity<Void>(headers), Void::class.java)
+                  .exchange<Void>(uri, HttpMethod.GET, HttpEntity<Void>(headers))
                   .statusCode
           val available = statusCode == HttpStatus.OK
 
@@ -285,7 +286,7 @@ class GIcsConnectionCheckService(
 
           val statusCode =
               restTemplate
-                  .exchange(uri, HttpMethod.GET, HttpEntity<Void>(headers), Void::class.java)
+                  .exchange<Void>(uri, HttpMethod.GET, HttpEntity<Void>(headers))
                   .statusCode
           val available = statusCode == HttpStatus.OK
 

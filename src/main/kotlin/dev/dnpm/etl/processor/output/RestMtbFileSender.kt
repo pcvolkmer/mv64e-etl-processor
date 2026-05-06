@@ -35,6 +35,7 @@ import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.exchange
 
 abstract class RestMtbFileSender(
     private val restTemplate: RestTemplate,
@@ -54,7 +55,7 @@ abstract class RestMtbFileSender(
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(request.content, headers)
                 val response =
-                    restTemplate.exchange(sendUrl(), HttpMethod.POST, entityReq, String::class.java)
+                    restTemplate.exchange<String>(sendUrl(), HttpMethod.POST, entityReq)
                 if (!response.statusCode.is2xxSuccessful) {
                     logger.warn("Error sending to remote system: {}", response.body)
                     return@execute MtbFileSender.Response(

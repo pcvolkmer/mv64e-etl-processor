@@ -58,6 +58,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.returnResult
 import org.springframework.test.web.servlet.*
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder
@@ -351,7 +352,7 @@ class ConfigControllerTest {
               .isOk()
               .expectHeader()
               .contentType(TEXT_EVENT_STREAM)
-              .returnResult(ConnectionCheckResult.GPasConnectionCheckResult::class.java)
+              .returnResult<ConnectionCheckResult.GPasConnectionCheckResult>()
 
       StepVerifier.create(result.responseBody).expectNext(expectedEvent).expectComplete().verify()
     }

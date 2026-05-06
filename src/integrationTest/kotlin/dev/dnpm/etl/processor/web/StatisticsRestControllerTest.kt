@@ -49,6 +49,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.returnResult
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient
 import org.springframework.test.web.servlet.get
@@ -333,7 +334,7 @@ class StatisticsRestControllerTest {
                     .isOk()
                     .expectHeader()
                     .contentType(TEXT_EVENT_STREAM)
-                    .returnResult(String::class.java)
+                    .returnResult<String>()
 
             StepVerifier.create(result.responseBody).expectComplete().verify()
         }
