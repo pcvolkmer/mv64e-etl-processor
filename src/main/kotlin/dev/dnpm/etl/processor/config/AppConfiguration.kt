@@ -44,7 +44,6 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ConfigurationCondition
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
-import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.retry.RetryCallback
@@ -197,7 +196,7 @@ class AppConfiguration {
     return RetryTemplateBuilder()
         .notRetryOn(IllegalArgumentException::class.java)
         .notRetryOn(HttpClientErrorException.BadRequest::class.java)
-        .notRetryOn(HttpClientErrorException.UnprocessableEntity::class.java)
+        .notRetryOn(HttpClientErrorException.UnprocessableContent::class.java)
         .exponentialBackoff(2.seconds.toJavaDuration(), 1.25, 5.seconds.toJavaDuration())
         .customPolicy(SimpleRetryPolicy(configProperties.maxRetryAttempts))
         .withListener(
