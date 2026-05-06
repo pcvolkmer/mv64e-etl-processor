@@ -104,4 +104,17 @@ class EtlProcessorArchTest {
 
         rule.check(noTestClasses)
     }
+
+    @Test
+    fun noClassesDependOnJackson2() {
+        val rule =
+            noClasses()
+                .that()
+                .haveSimpleNameNotStartingWith("Jackson")
+                .should()
+                .dependOnClassesThat()
+                .resideInAPackage("com.fasterxml.jackson.*")
+
+        rule.check(noTestClasses)
+    }
 }

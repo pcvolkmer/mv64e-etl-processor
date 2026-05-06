@@ -20,61 +20,58 @@
 
 package dev.dnpm.etl.processor.monitoring
 
-import com.fasterxml.jackson.annotation.JsonAlias
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonValue
 import dev.dnpm.etl.processor.monitoring.ReportService.Issue
 import dev.dnpm.etl.processor.monitoring.ReportService.Severity
 import tools.jackson.core.JacksonException
+import tools.jackson.databind.EnumNamingStrategies
+import tools.jackson.databind.annotation.EnumNaming
 import tools.jackson.databind.json.JsonMapper
 import java.util.*
 
 class ReportService(private val jsonMapper: JsonMapper) {
 
-  fun deserialize(dataQualityReport: String?): List<Issue> {
-    if (dataQualityReport.isNullOrBlank()) {
-      return listOf()
+    fun deserialize(dataQualityReport: String?): List<Issue> {
+        if (dataQualityReport.isNullOrBlank()) {
+            return listOf()
+        }
+        return try {
+            jsonMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues.sortedBy {
+                it.severity
+            }
+        } catch (_: JacksonException) {
+            val otherIssue =
+                Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
+            return listOf(otherIssue)
+        } catch (e: Exception) {
+            throw e
+        }
     }
-    return try {
-      jsonMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues.sortedBy {
-        it.severity
-      }
-    } catch (_: JacksonException) {
-      val otherIssue =
-          Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
-      return listOf(otherIssue)
-    } catch (e: Exception) {
-      throw e
+
+    private data class DataQualityReport(
+        val issues: List<Issue>
+    )
+
+    data class Issue(
+        val severity: Severity,
+        val message: String,
+        val path: Optional<String> = Optional.empty(),
+    )
+
+    @EnumNaming(EnumNamingStrategies.LowerCaseStrategy::class)
+    enum class Severity(val value: String) {
+        FATAL("fatal"),
+        ERROR("error"),
+        WARNING("warning"),
+        INFO("info"),
     }
-  }
-
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  private data class DataQualityReport(
-      @param:JsonProperty(value = "issues") val issues: List<Issue>
-  )
-
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  data class Issue(
-      @param:JsonProperty(value = "severity") val severity: Severity,
-      @param:JsonProperty(value = "message") @param:JsonAlias("details") val message: String,
-      @param:JsonProperty(value = "path") val path: Optional<String> = Optional.empty(),
-  )
-
-  enum class Severity(@JsonValue val value: String) {
-    FATAL("fatal"),
-    ERROR("error"),
-    WARNING("warning"),
-    INFO("info"),
-  }
 }
 
 fun List<Issue>.asRequestStatus(): RequestStatus {
-  val severity = this.minOfOrNull { it.severity }
-  return when (severity) {
-    Severity.FATAL,
-    Severity.ERROR -> RequestStatus.ERROR
-    Severity.WARNING -> RequestStatus.WARNING
-    else -> RequestStatus.SUCCESS
-  }
+    val severity = this.minOfOrNull { it.severity }
+    return when (severity) {
+        Severity.FATAL,
+        Severity.ERROR -> RequestStatus.ERROR
+        Severity.WARNING -> RequestStatus.WARNING
+        else -> RequestStatus.SUCCESS
+    }
 }
