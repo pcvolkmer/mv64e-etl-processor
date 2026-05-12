@@ -2,7 +2,7 @@
  * This file is part of ETL-Processor
  *
  * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
- * Copyright (c) 2023-2026  Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,7 +20,6 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
@@ -41,6 +40,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import tools.jackson.databind.json.JsonMapper
 import java.time.Instant
 import java.util.*
 
@@ -50,7 +50,7 @@ class RequestProcessor(
     private val transformationService: TransformationService,
     private val sender: MtbFileSender,
     private val requestService: RequestService,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val appConfigProperties: AppConfigProperties,
     private val consentProcessor: ConsentProcessor?,
@@ -292,7 +292,7 @@ class RequestProcessor(
 
     private fun <T> fingerprint(request: MtbFileRequest<T>): Fingerprint {
         return when (request) {
-            is DnpmV2MtbFileRequest -> fingerprint(objectMapper.writeValueAsString(request.content))
+            is DnpmV2MtbFileRequest -> fingerprint(jsonMapper.writeValueAsString(request.content))
         }
     }
 

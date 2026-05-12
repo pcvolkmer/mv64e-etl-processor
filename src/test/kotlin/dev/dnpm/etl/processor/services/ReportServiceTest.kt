@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,8 +20,6 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.asRequestStatus
@@ -30,6 +29,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 
 class ReportServiceTest {
     private lateinit var reportService: ReportService
@@ -37,7 +38,7 @@ class ReportServiceTest {
     @BeforeEach
     fun setup() {
         this.reportService =
-            ReportService(ObjectMapper().registerModule(KotlinModule.Builder().build()))
+            ReportService(JsonMapper.builder().addModule(KotlinModule.Builder().build()).build())
     }
 
     @Test
@@ -59,13 +60,34 @@ class ReportServiceTest {
 
         assertThat(actual).hasSize(4)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.FATAL)
-        assertThat(actual[0].message).isEqualTo("Fatal Message")
+        assertThat(actual[0].getMessage()).isEqualTo("Fatal Message")
         assertThat(actual[1].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[1].message).isEqualTo("Error Message")
+        assertThat(actual[1].getMessage()).isEqualTo("Error Message")
         assertThat(actual[2].severity).isEqualTo(ReportService.Severity.WARNING)
-        assertThat(actual[2].message).isEqualTo("Warning Message")
+        assertThat(actual[2].getMessage()).isEqualTo("Warning Message")
         assertThat(actual[3].severity).isEqualTo(ReportService.Severity.INFO)
-        assertThat(actual[3].message).isEqualTo("Info Message")
+        assertThat(actual[3].getMessage()).isEqualTo("Info Message")
+
+        assertThat(actual.asRequestStatus()).isEqualTo(RequestStatus.ERROR)
+    }
+
+    @Test
+    fun shouldParseDataQualityReportWithMissingPathError() {
+        val json =
+            """
+            {
+                "patient": "4711",
+                "issues": [
+                    { "severity": "error", "details": "/specimens(0)/type/code: error.path.missing" }
+                ]
+            }
+            """.trimIndent()
+
+        val actual = this.reportService.deserialize(json)
+
+        assertThat(actual).hasSize(1)
+        assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
+        assertThat(actual[0].getMessage()).isEqualTo("/specimens(0)/type/code: error.path.missing")
 
         assertThat(actual.asRequestStatus()).isEqualTo(RequestStatus.ERROR)
     }
@@ -88,7 +110,7 @@ class ReportServiceTest {
 
         assertThat(actual).hasSize(1)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[0].message).isEqualTo("Not parsable data quality report '$invalidResponse'")
+        assertThat(actual[0].getMessage()).isEqualTo("Not parsable data quality report '$invalidResponse'")
     }
 
     companion object {

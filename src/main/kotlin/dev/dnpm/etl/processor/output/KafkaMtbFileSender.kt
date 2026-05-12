@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2025-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,7 +20,6 @@
 
 package dev.dnpm.etl.processor.output
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -29,12 +29,13 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.retry.support.RetryTemplate
+import tools.jackson.databind.json.JsonMapper
 
 class KafkaMtbFileSender(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val kafkaProperties: KafkaProperties,
     private val retryTemplate: RetryTemplate,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
 ) : MtbFileSender {
     private val logger = LoggerFactory.getLogger(KafkaMtbFileSender::class.java)
 
@@ -45,7 +46,7 @@ class KafkaMtbFileSender(
                     ProducerRecord(
                         kafkaProperties.outputTopic,
                         key(request),
-                        objectMapper.writeValueAsString(request.content),
+                        jsonMapper.writeValueAsString(request.content),
                     )
                 record.headers().add("requestId", request.requestId.value.toByteArray())
                 record.headers().add("requestMethod", "POST".toByteArray())
@@ -82,7 +83,7 @@ class KafkaMtbFileSender(
                     ProducerRecord(
                         kafkaProperties.outputTopic,
                         key(request),
-                        objectMapper.writeValueAsString(
+                        jsonMapper.writeValueAsString(
                             DnpmV2MtbFileRequest(request.requestId, dummyMtbFile),
                         ),
                     )

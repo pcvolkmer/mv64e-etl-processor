@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2025-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,7 +20,6 @@
 
 package dev.dnpm.etl.processor.input
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
 import dev.dnpm.etl.processor.RequestId
@@ -31,12 +31,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.kafka.listener.MessageListener
+import tools.jackson.databind.json.JsonMapper
 import java.nio.charset.Charset
 
 class KafkaInputListener(
     private val requestProcessor: RequestProcessor,
     private val consentEvaluator: ConsentEvaluator,
-    private val objectMapper: ObjectMapper,
+    private val jsonMapper: JsonMapper,
 ) : MessageListener<String, String> {
     private val logger = LoggerFactory.getLogger(KafkaInputListener::class.java)
 
@@ -71,7 +72,7 @@ class KafkaInputListener(
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
         try {
-            val mtbFile = objectMapper.readValue(record.value(), Mtb::class.java)
+            val mtbFile = jsonMapper.readValue(record.value(), Mtb::class.java)
             val patientId = PatientId(mtbFile.patient.id)
             val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
             val requestId =

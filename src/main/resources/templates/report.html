@@ -34,7 +34,7 @@
                 <td th:if="${issue.severity.value == 'error'}" class="bg-red"><small>[[ ${issue.severity} ]]</small></td>
                 <td th:if="${issue.severity.value == 'fatal'}" class="bg-red"><small>[[ ${issue.severity} ]]</small></td>
                 <td>
-                    <div class="issue-message">[[ ${issue.message} ]]</div>
+                    <div class="issue-message">[[ ${issue.getMessage()} ]]</div>
                     <div class="issue-path" th:if="${issue.path.isPresent()}">[[ ${issue.path.get()} ]]</div>
                     <div class="issue-path" th:if="${issue.path.isEmpty()}"><i>Keine Angabe</i></div>
                 </td>

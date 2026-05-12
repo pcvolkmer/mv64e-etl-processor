@@ -1,7 +1,26 @@
+/*
+ * This file is part of ETL-Processor
+ *
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dev.dnpm.etl.processor.services
 
 import ca.uhn.fhir.context.FhirContext
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
@@ -29,6 +48,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource
+import tools.jackson.databind.json.JsonMapper
 import java.io.IOException
 import java.io.InputStream
 import java.time.Instant
@@ -40,7 +60,7 @@ class ConsentProcessorTest {
 
   private lateinit var appConfigProperties: AppConfigProperties
   private lateinit var gicsConsentService: GicsConsentService
-  private lateinit var objectMapper: ObjectMapper
+  private lateinit var jsonMapper: JsonMapper
   private lateinit var gIcsConfigProperties: GIcsConfigProperties
   private lateinit var fhirContext: FhirContext
   private lateinit var consentProcessor: ConsentProcessor
@@ -52,7 +72,7 @@ class ConsentProcessorTest {
 
     this.gIcsConfigProperties = GIcsConfigProperties(uri = "https://gics.example.com", genomDeConsentDomainName = "GenomDE_MV")
     val jacksonConfig = JacksonConfig()
-    this.objectMapper = jacksonConfig.objectMapper()
+    this.jsonMapper = jacksonConfig.jsonMapper()
     this.fhirContext = JacksonConfig.fhirContext()
     this.gicsConsentService = gicsConsentService
     this.appConfigProperties = AppConfigProperties(emptyList())
@@ -60,7 +80,7 @@ class ConsentProcessorTest {
         ConsentProcessor(
             appConfigProperties,
             gIcsConfigProperties,
-            objectMapper,
+            jsonMapper,
             fhirContext,
             gicsConsentService,
         )
@@ -94,7 +114,7 @@ class ConsentProcessorTest {
         ConsentProcessor(
             appConfigProperties,
             gIcsConfigProperties,
-            objectMapper,
+            jsonMapper,
             fhirContext,
             MtbFileConsentService(),
         )
@@ -220,7 +240,7 @@ class ConsentProcessorTest {
         ConsentProcessor(
             appConfigProperties,
             gIcsConfigProperties,
-            objectMapper,
+            jsonMapper,
             fhirContext,
             gicsConsentService,
         )

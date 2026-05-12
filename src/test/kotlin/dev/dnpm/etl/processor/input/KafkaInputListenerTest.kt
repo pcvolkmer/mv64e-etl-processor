@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2025  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2025-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -43,13 +44,14 @@ import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.firstValue
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import tools.jackson.databind.json.JsonMapper
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class KafkaInputListenerTest {
 
     private lateinit var requestProcessor: RequestProcessor
-    private lateinit var objectMapper: ObjectMapper
+    private lateinit var jsonMapper: JsonMapper
 
     private lateinit var kafkaInputListener: KafkaInputListener
 
@@ -59,9 +61,9 @@ class KafkaInputListenerTest {
         @Mock consentEvaluator: ConsentEvaluator,
     ) {
         this.requestProcessor = requestProcessor
-        this.objectMapper = ObjectMapper()
+        this.jsonMapper = JsonMapper()
 
-        this.kafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, objectMapper)
+        this.kafkaInputListener = KafkaInputListener(requestProcessor, consentEvaluator, jsonMapper)
     }
 
     @Test
@@ -88,7 +90,7 @@ class KafkaInputListenerTest {
                 .build()
 
         kafkaInputListener.onMessage(
-            ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile))
+            ConsumerRecord("testtopic", 0, 0, "", this.jsonMapper.writeValueAsString(mtbFile))
         )
 
         verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
@@ -113,7 +115,7 @@ class KafkaInputListenerTest {
                 .build()
 
         kafkaInputListener.onMessage(
-            ConsumerRecord("testtopic", 0, 0, "", this.objectMapper.writeValueAsString(mtbFile))
+            ConsumerRecord("testtopic", 0, 0, "", this.jsonMapper.writeValueAsString(mtbFile))
         )
         verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
     }
@@ -153,7 +155,7 @@ class KafkaInputListenerTest {
                 -1,
                 -1,
                 "",
-                this.objectMapper.writeValueAsString(mtbFile),
+                this.jsonMapper.writeValueAsString(mtbFile),
                 headers,
                 Optional.empty(),
             )
@@ -197,7 +199,7 @@ class KafkaInputListenerTest {
                 -1,
                 -1,
                 "",
-                this.objectMapper.writeValueAsString(mtbFile),
+                this.jsonMapper.writeValueAsString(mtbFile),
                 headers,
                 Optional.empty(),
             )
@@ -248,7 +250,7 @@ class KafkaInputListenerTest {
                 -1,
                 -1,
                 "",
-                this.objectMapper.writeValueAsString(mtbFile),
+                this.jsonMapper.writeValueAsString(mtbFile),
                 headers,
                 Optional.empty(),
             )
@@ -303,7 +305,7 @@ class KafkaInputListenerTest {
                 -1,
                 -1,
                 "",
-                this.objectMapper.writeValueAsString(mtbFile),
+                this.jsonMapper.writeValueAsString(mtbFile),
                 headers,
                 Optional.empty(),
             )

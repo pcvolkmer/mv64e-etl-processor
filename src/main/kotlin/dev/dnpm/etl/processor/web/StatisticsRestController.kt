@@ -1,7 +1,7 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
  * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,8 +20,6 @@
 
 package dev.dnpm.etl.processor.web
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.services.RequestService
@@ -34,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
+import tools.jackson.databind.PropertyNamingStrategies
+import tools.jackson.databind.annotation.JsonNaming
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -201,15 +201,13 @@ data class DateNameValues(
     val nameValues: NameValues,
 )
 
-@JsonPropertyOrder(value = ["error", "warning", "success", "no_consent", "duplication", "blocked_initial", "unknown"])
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class NameValues(
     val error: Int = 0,
     val warning: Int = 0,
     val success: Int = 0,
-    @field:JsonProperty("no_consent")
     val noConsent: Int = 0,
     val duplication: Int = 0,
-    @field:JsonProperty("blocked_initial")
     val blockedInitial: Int = 0,
     val unknown: Int = 0,
 )

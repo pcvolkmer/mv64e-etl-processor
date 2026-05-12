@@ -1,7 +1,8 @@
 /*
  * This file is part of ETL-Processor
  *
- * Copyright (c) 2023  Comprehensive Cancer Center Mainfranken, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -34,6 +35,7 @@ import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
+import org.hl7.fhir.r4.model.Consent
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -46,6 +48,7 @@ import org.mockito.kotlin.anyValueClass
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationEventPublisher
+import tools.jackson.databind.json.JsonMapper
 import java.time.Instant
 import java.util.*
 
@@ -60,6 +63,7 @@ class RequestProcessorTest {
     private lateinit var appConfigProperties: AppConfigProperties
     private lateinit var consentProcessor: ConsentProcessor
     private lateinit var requestProcessor: RequestProcessor
+    private lateinit var jsonMapper: JsonMapper
 
     @BeforeEach
     fun setup(
@@ -77,8 +81,7 @@ class RequestProcessorTest {
         this.applicationEventPublisher = applicationEventPublisher
         this.appConfigProperties = AppConfigProperties()
         this.consentProcessor = consentProcessor
-
-        val objectMapper = ObjectMapper()
+        this.jsonMapper = JsonMapper()
 
         requestProcessor =
             RequestProcessor(
@@ -86,7 +89,7 @@ class RequestProcessorTest {
                 transformationService,
                 sender,
                 requestService,
-                objectMapper,
+                jsonMapper,
                 applicationEventPublisher,
                 appConfigProperties,
                 consentProcessor,
@@ -101,7 +104,7 @@ class RequestProcessorTest {
                 randomRequestId(),
                 PatientPseudonym("TEST_12345678901"),
                 PatientId("P1"),
-                Fingerprint("6vkiti5bk6ikwifpajpt7cygmd3dvw54d6lwfhzlynb3pqtzferq"),
+                Fingerprint("syehahte4oyqd5m2rbd5imnth4rx6md32g2msb7sztnayxoc4kaq"),
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.SUCCESS,
@@ -158,7 +161,7 @@ class RequestProcessorTest {
                 randomRequestId(),
                 PatientPseudonym("TEST_12345678901"),
                 PatientId("P1"),
-                Fingerprint("4gcjwtjjtcczybsljxepdfpkaeusvd7g3vogfqpmphyffyzfx7dq"),
+                Fingerprint("me6ockoru4boi4ypghfia5myfqtuffwlbszwhtop2rtltb3ycjva"),
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.SUCCESS,
@@ -413,7 +416,7 @@ class RequestProcessorTest {
                 transformationService,
                 sender,
                 requestService,
-                ObjectMapper(),
+                jsonMapper,
                 applicationEventPublisher,
                 AppConfigProperties(postInitialSubmissionBlock = true),
                 consentProcessor,
@@ -637,7 +640,7 @@ class RequestProcessorTest {
                 transformationService,
                 sender,
                 requestService,
-                ObjectMapper(),
+                jsonMapper,
                 applicationEventPublisher,
                 AppConfigProperties(postInitialSubmissionBlock = true),
                 consentProcessor,
@@ -681,6 +684,7 @@ class RequestProcessorTest {
         private lateinit var appConfigProperties: AppConfigProperties
         private lateinit var consentProcessor: ConsentProcessor
         private lateinit var requestProcessor: RequestProcessor
+        private lateinit var jsonMapper: JsonMapper
 
         @BeforeEach
         fun setup(
@@ -698,8 +702,7 @@ class RequestProcessorTest {
             this.applicationEventPublisher = applicationEventPublisher
             this.appConfigProperties = AppConfigProperties()
             this.consentProcessor = consentProcessor
-
-            val objectMapper = ObjectMapper()
+            this.jsonMapper = JsonMapper()
 
             requestProcessor =
                 RequestProcessor(
@@ -707,7 +710,7 @@ class RequestProcessorTest {
                     transformationService,
                     sender,
                     requestService,
-                    objectMapper,
+                    jsonMapper,
                     applicationEventPublisher,
                     appConfigProperties,
                     consentProcessor,
@@ -779,7 +782,7 @@ class RequestProcessorTest {
                     transformationService,
                     sender,
                     requestService,
-                    ObjectMapper(),
+                    jsonMapper,
                     applicationEventPublisher,
                     AppConfigProperties(postInitialSubmissionBlock = true),
                     consentProcessor,
@@ -883,7 +886,7 @@ class RequestProcessorTest {
                     transformationService,
                     sender,
                     requestService,
-                    ObjectMapper(),
+                    jsonMapper,
                     applicationEventPublisher,
                     AppConfigProperties(postInitialSubmissionBlock = true),
                     consentProcessor,
@@ -994,7 +997,7 @@ class RequestProcessorTest {
                     transformationService,
                     sender,
                     requestService,
-                    ObjectMapper(),
+                    jsonMapper,
                     applicationEventPublisher,
                     AppConfigProperties(postInitialSubmissionBlock = true),
                     consentProcessor,
@@ -1092,7 +1095,7 @@ class RequestProcessorTest {
                     transformationService,
                     sender,
                     requestService,
-                    ObjectMapper(),
+                    jsonMapper,
                     applicationEventPublisher,
                     AppConfigProperties(postInitialSubmissionBlock = true),
                     consentProcessor,
