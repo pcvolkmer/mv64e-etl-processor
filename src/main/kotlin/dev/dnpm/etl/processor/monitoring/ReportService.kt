@@ -40,7 +40,7 @@ class ReportService(private val jsonMapper: JsonMapper) {
             }
         } catch (_: JacksonException) {
             val otherIssue =
-                Issue(Severity.ERROR, "Not parsable data quality report '$dataQualityReport'")
+                Issue(Severity.ERROR, Optional.of("Not parsable data quality report '$dataQualityReport'"))
             return listOf(otherIssue)
         } catch (e: Exception) {
             throw e
@@ -53,9 +53,12 @@ class ReportService(private val jsonMapper: JsonMapper) {
 
     data class Issue(
         val severity: Severity,
-        val message: String,
+        val message: Optional<String> = Optional.empty(),
+        val details: Optional<String> = Optional.empty(),
         val path: Optional<String> = Optional.empty(),
-    )
+    ) {
+        fun getMessage() = message.orElse(details.orElse("No details available"))
+    }
 
     @EnumNaming(EnumNamingStrategies.LowerCaseStrategy::class)
     enum class Severity(val value: String) {
