@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.9](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.8...v0.15.9) (2026-05-14)
+
+
+### Features
+
+* use Jackson 3 for JSON serde ([#286](https://github.com/pcvolkmer/mv64e-etl-processor/issues/286)) ([6c50e2b](https://github.com/pcvolkmer/mv64e-etl-processor/commit/6c50e2b76e78b44d65de9d68b842a9f77bab85c3))
+
 ## [0.15.8](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.7...v0.15.8) (2026-04-22)
 
 
