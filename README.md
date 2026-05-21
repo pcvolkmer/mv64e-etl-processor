@@ -18,6 +18,22 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
+### 🔥 Wichtige Änderungen in Version 0.16
+
+#### Erkennung von Follow-Ups
+
+Ab Version 0.16 werden Meldungen als Follow-Ups erkannt und entsprechend weiterleiten, wenn
+
+* die zu bearbeitende Meldung Follow-Ups enthält und das neueste Follow-Up nach der letzten Meldung für den Patienten datiert ist.
+* zuvor eine initiale Meldung bereits erfolgte, die akzeptiert wurde.
+
+Dies erfordert das Aktivieren der Funktion [Blockieren weiterer initialer Submissions](#blockieren-weiterer-initialer-submissions)
+
+#### Monitoring von ungültigen Anfragen
+
+Ungültige Anfragen werden nun protokolliert und können in der Übersicht eingesehen werden.
+Zuvor wurden diese ignoriert.
+
 ### 🔥 Wichtige Änderungen in Version 0.15
 
 #### Konfiguration von Benutzern
