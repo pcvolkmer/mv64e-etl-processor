@@ -24,7 +24,7 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 Ab Version 0.16 werden Meldungen als Follow-Ups erkannt und entsprechend weiterleiten, wenn
 
-* die zu bearbeitende Meldung Follow-Ups enthält und diese nach der letzten Meldung für den Patienten datiert ist.
+* die zu bearbeitende Meldung Follow-Ups enthält und das neueste Follow-Up nach der letzten Meldung für den Patienten datiert ist.
 * zuvor eine initiale Meldung bereits erfolgte, die akzeptiert wurde.
 
 Dies erfordert das Aktivieren der Funktion [Blockieren weiterer initialer Submissions](#blockieren-weiterer-initialer-submissions)
