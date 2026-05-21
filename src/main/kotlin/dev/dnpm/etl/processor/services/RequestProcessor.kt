@@ -139,11 +139,19 @@ class RequestProcessor(
             hasSuccessfulInitialSubmission(request.patientPseudonym()) &&
             !hasUnacceptedSuccessfulInitialSubmission(request.patientPseudonym())
         ) {
-            // Use "addition" after "intial" with "Meldebestaetigung"
+            // Use "addition" or "followup" depending on existing follow-ups after "intial" with "Meldebestaetigung"
             request.content.metadata?.let {
                 logger.warn("Override submission type using 'addition' after first initial submission!")
-                it.type = MvhSubmissionType.ADDITION
-                submissionType = SubmissionType.ADDITION
+                it.type = if (hasFollowUpAfterLastSuccessfulSubmission(request)) {
+                    MvhSubmissionType.FOLLOWUP
+                } else {
+                    MvhSubmissionType.ADDITION
+                }
+                submissionType = if (hasFollowUpAfterLastSuccessfulSubmission(request)) {
+                    SubmissionType.FOLLOWUP
+                } else {
+                    SubmissionType.ADDITION
+                }
             }
         }
 
@@ -182,6 +190,24 @@ class RequestProcessor(
                 },
             )
         )
+    }
+
+    private fun hasFollowUpAfterLastSuccessfulSubmission(request: DnpmV2MtbFileRequest): Boolean {
+        val lastSuccessfulSubmission = this.requestService.allRequestsByPatientPseudonym(request.patientPseudonym())
+            .sortedBy { it.processedAt }
+            .filterNot {
+                it.submissionType == SubmissionType.INITIAL &&
+                        (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING) &&
+                        !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
+            }
+            .lastOrNull() ?: return false
+
+        val lastFollowUp = request.content.followUps
+            ?.filterNot { it.date == null }
+            ?.sortedBy { it.date }
+            ?.lastOrNull { it.date != null } ?: return false
+
+        return lastSuccessfulSubmission.processedAt.isBefore( lastFollowUp.date.toInstant())
     }
 
     private fun hasSuccessfulInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
