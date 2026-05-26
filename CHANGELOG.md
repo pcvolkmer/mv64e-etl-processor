@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.16.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.8...v0.16.0) (2026-05-22)
+
+
+### Features
+
+* send submission as a follow-up ([#290](https://github.com/pcvolkmer/mv64e-etl-processor/issues/290)) ([0e64b9a](https://github.com/pcvolkmer/mv64e-etl-processor/commit/0e64b9a6ba69a829c231ab2c04c81d277d73f5c3))
+* use Jackson 3 for JSON serde ([#286](https://github.com/pcvolkmer/mv64e-etl-processor/issues/286)) ([6c50e2b](https://github.com/pcvolkmer/mv64e-etl-processor/commit/6c50e2b76e78b44d65de9d68b842a9f77bab85c3))
+
+
+### Miscellaneous Chores
+
+* release 0.16.0 ([6f4907e](https://github.com/pcvolkmer/mv64e-etl-processor/commit/6f4907e6d3f958c24748ec173f3f18cfb72559c1))
+
 ## [0.15.8](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.7...v0.15.8) (2026-04-22)
 
 
