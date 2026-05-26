@@ -21,11 +21,7 @@
 package dev.dnpm.etl.processor.output
 
 import dev.dnpm.etl.processor.RequestId
-import dev.dnpm.etl.processor.config.AppConfiguration
-import dev.dnpm.etl.processor.config.AppRestConfiguration
-import dev.dnpm.etl.processor.config.AppSecurityConfiguration
-import dev.dnpm.etl.processor.config.JacksonConfig
-import dev.dnpm.etl.processor.config.RestTargetProperties
+import dev.dnpm.etl.processor.config.*
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
@@ -64,6 +60,7 @@ import java.util.*
             AppSecurityConfiguration::class,
             AppRestConfiguration::class,
             ConsentEvaluator::class,
+            JacksonConfig::class,
         ],
 )
 @TestPropertySource(
@@ -80,8 +77,11 @@ class RestDipMtbFileSenderTest {
 
     private var reportService =
         ReportService(JsonMapper.builder().addModule(KotlinModule.Builder().build()).build())
+
     @BeforeEach
-    fun setup(@Autowired restTemplate: RestTemplate) {
+    fun setup(
+        @Autowired restTemplate: RestTemplate
+    ) {
       val restTemplate = restTemplate
       val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
       val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
