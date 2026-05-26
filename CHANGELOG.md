@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.0...v0.16.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* update Jackson config to fix probably bean dependency issue ([#291](https://github.com/pcvolkmer/mv64e-etl-processor/issues/291)) ([a66c495](https://github.com/pcvolkmer/mv64e-etl-processor/commit/a66c4959f4f651f5e92473f3f346ff50bd6fb7ff))
+
 ## [0.16.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.15.8...v0.16.0) (2026-05-22)
 
 
