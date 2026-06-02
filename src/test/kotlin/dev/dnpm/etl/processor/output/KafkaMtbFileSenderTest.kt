@@ -25,7 +25,11 @@ import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.GenderCoding
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.PeriodDate
+import dev.pcvolkmer.mv64e.model.Reference
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.TopicPartition
@@ -252,13 +256,13 @@ class KafkaMtbFileSenderTest {
     val TEST_REQUEST_ID = RequestId("TestId")
     val TEST_PATIENT_PSEUDONYM = PatientPseudonym("PID")
 
-    fun dnpmV2MtbFile(): Mtb {
-      return Mtb().apply {
+    fun dnpmV2MtbFile(): PatientRecord {
+      return PatientRecord().apply {
         this.patient =
-            dev.pcvolkmer.mv64e.mtb.Patient().apply {
+            dev.pcvolkmer.mv64e.model.Patient().apply {
               this.id = "PID"
               this.birthDate = Date.from(Instant.now())
-              this.gender = GenderCoding().apply { this.code = GenderCodingCode.MALE }
+              this.gender = GenderCoding().apply { this.code = GenderCoding.CodeEnum.MALE }
             }
         this.episodesOfCare =
             listOf(
@@ -271,7 +275,7 @@ class KafkaMtbFileSenderTest {
       }
     }
 
-    fun dnmpV2kafkaRecordData(requestId: RequestId): Mtb {
+    fun dnmpV2kafkaRecordData(requestId: RequestId): PatientRecord {
       return DnpmV2MtbFileRequest(requestId, dnpmV2MtbFile()).content
     }
 

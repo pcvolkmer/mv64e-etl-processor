@@ -32,8 +32,8 @@ import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.Logger
@@ -58,11 +58,11 @@ class RequestProcessor(
 
     private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
 
-    fun processMtbFile(mtbFile: Mtb): Boolean {
+    fun processMtbFile(mtbFile: PatientRecord): Boolean {
         return processMtbFile(mtbFile, randomRequestId())
     }
 
-    fun processMtbFile(mtbFile: Mtb, requestId: RequestId): Boolean {
+    fun processMtbFile(mtbFile: PatientRecord, requestId: RequestId): Boolean {
         val isConsentOk =
             consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) ||
                     consentProcessor == null
@@ -131,7 +131,7 @@ class RequestProcessor(
                     type = RequestType.MTB_FILE,
                     submissionType = submissionType,
                     status = RequestStatus.BLOCKED_INITIAL,
-                    tan = Tan(request.content.metadata?.transferTan.orEmpty()),
+                    tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                     followupCount = maxFollowUpCount,
                     expectedFollowupCount = request.content.followUps?.size ?: 0,
                 )
@@ -170,7 +170,7 @@ class RequestProcessor(
                 type = RequestType.MTB_FILE,
                 submissionType = submissionType,
                 status = RequestStatus.UNKNOWN,
-                tan = Tan(request.content.metadata?.transferTan.orEmpty()),
+                tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                 followupCount = maxFollowUpCount,
                 expectedFollowupCount = request.content.followUps?.size ?: 0,
             )
@@ -240,7 +240,7 @@ class RequestProcessor(
         val patientPseudonym =
             when (pseudonymizedMtbFileRequest) {
                 is DnpmV2MtbFileRequest ->
-                    PatientPseudonym(pseudonymizedMtbFileRequest.content.patient.id)
+                    PatientPseudonym(pseudonymizedMtbFileRequest.content.patient!!.id)
             }
 
         val lastMtbFileRequestForPatient =

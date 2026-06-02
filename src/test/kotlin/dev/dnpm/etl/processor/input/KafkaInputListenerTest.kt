@@ -25,7 +25,13 @@ import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsent
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
@@ -69,16 +75,16 @@ class KafkaInputListenerTest {
     @Test
     fun shouldProcessMtbFileRequest() {
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("DUMMY_12345678").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
-                                            .type(ConsentProvision.PERMIT)
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                            .type(ConsentProvisionType.PERMIT)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -93,18 +99,18 @@ class KafkaInputListenerTest {
             ConsumerRecord("testtopic", 0, 0, "", this.jsonMapper.writeValueAsString(mtbFile))
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
     }
 
     @Test
     fun shouldProcessRequestEvenIfNoConsentInformation() {
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("DUMMY_12345678").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf()
                                 )
@@ -117,22 +123,22 @@ class KafkaInputListenerTest {
         kafkaInputListener.onMessage(
             ConsumerRecord("testtopic", 0, 0, "", this.jsonMapper.writeValueAsString(mtbFile))
         )
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
     }
 
     @Test
     fun shouldProcessMtbFileRequestWithExistingRequestId() {
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("DUMMY_12345678").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
-                                            .type(ConsentProvision.PERMIT)
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                            .type(ConsentProvisionType.PERMIT)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -161,22 +167,22 @@ class KafkaInputListenerTest {
             )
         )
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>(), anyValueClass())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>(), anyValueClass())
     }
 
     @Test
     fun shouldProcessRequestWithoutConsentGiven() {
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("DUMMY_12345678").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
-                                            .type(ConsentProvision.DENY)
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                            .type(ConsentProvisionType.DENY)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -204,22 +210,22 @@ class KafkaInputListenerTest {
                 Optional.empty(),
             )
         )
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>(), anyValueClass())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>(), anyValueClass())
     }
 
     @Test
     fun shouldProcessDnpmV2Request() {
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("DUMMY_12345678").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
-                                            .type(ConsentProvision.DENY)
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                            .type(ConsentProvisionType.DENY)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -255,22 +261,22 @@ class KafkaInputListenerTest {
                 Optional.empty(),
             )
         )
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>(), anyValueClass())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>(), anyValueClass())
     }
 
     @Test
     fun shouldProcessDnpmV2DeleteRequest() {
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("DUMMY_12345678").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
-                                            .type(ConsentProvision.DENY)
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                            .type(ConsentProvisionType.DENY)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -323,7 +329,7 @@ class KafkaInputListenerTest {
             ConsumerRecord("testtopic", 0, 0, "", content)
         )
 
-        val result = verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        val result = verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
         assertThat(result).isFalse()
     }
 }
