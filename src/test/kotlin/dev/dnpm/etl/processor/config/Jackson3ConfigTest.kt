@@ -21,8 +21,9 @@
 package dev.dnpm.etl.processor.config
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.ResearchConsent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -78,10 +79,10 @@ class Jackson3ConfigTest {
         val inputConsentJson =
             Objects.requireNonNull(this.javaClass.classLoader.getResourceAsStream("fake_broadConsent_mii_response_permit.json"))?.readAllBytes()?.decodeToString()
 
-        val mtb = this.jacksonConfig.jsonMapper().readValue<Mtb>(inputMtbFileJson, Mtb::class.java)
+        val mtb = this.jacksonConfig.jsonMapper().readValue<PatientRecord>(inputMtbFileJson, PatientRecord::class.java)
         // Still use Jackson2 ObjectMapper since MTB DTO requires Jackson2 ObjectNode
         val consentJsonNode = Jackson2Config().objectMapper().readTree(inputConsentJson)
-        mtb.metadata = MvhMetadata.builder().researchConsents(listOf(MvhMetadata.ResearchConsent.from(consentJsonNode as ObjectNode))).build()
+        mtb.metadata = MvhMetadata.builder().researchConsents(listOf(ResearchConsent.from(consentJsonNode as ObjectNode))).build()
 
         val actual = this.jacksonConfig.jsonMapper().writeValueAsString(mtb)
 

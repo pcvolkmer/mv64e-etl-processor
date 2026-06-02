@@ -21,7 +21,11 @@
 package dev.dnpm.etl.processor.pseudonym
 
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.PeriodDate
+import dev.pcvolkmer.mv64e.model.Reference
 import java.time.Instant
 import java.util.*
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +41,7 @@ import org.mockito.kotlin.whenever
 class PseudonymizeServiceTest {
 
   private val mtbFile =
-      Mtb.builder()
+      PatientRecord.builder()
           .patient(Patient.builder().id("123").build())
           .episodesOfCare(
               listOf(
@@ -62,7 +66,7 @@ class PseudonymizeServiceTest {
 
     mtbFile.pseudonymizeWith(pseudonymizeService)
 
-    assertThat(mtbFile.patient.id).isEqualTo("123")
+    assertThat(mtbFile.patient?.id).isEqualTo("123")
   }
 
   @Test
@@ -80,7 +84,7 @@ class PseudonymizeServiceTest {
 
     mtbFile.pseudonymizeWith(pseudonymizeService)
 
-    assertThat(mtbFile.patient.id).isEqualTo("UNKNOWN_123")
+    assertThat(mtbFile.patient?.id).isEqualTo("UNKNOWN_123")
   }
 
   @Test
