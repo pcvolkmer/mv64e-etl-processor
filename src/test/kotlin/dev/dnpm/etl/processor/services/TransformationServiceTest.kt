@@ -24,7 +24,15 @@ import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import dev.dnpm.etl.processor.config.JacksonConfig
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.Coding
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.MtbDiagnosis
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsent
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.ResearchConsent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,7 +57,7 @@ class TransformationServiceTest {
   @Test
   fun shouldTransformMtbFile() {
     val mtbFile =
-        Mtb.builder()
+        PatientRecord.builder()
             .diagnoses(
                 listOf(
                     MtbDiagnosis.builder()
@@ -63,13 +71,13 @@ class TransformationServiceTest {
     val actual = this.service.transform(mtbFile)
 
     assertThat(actual).isNotNull
-    assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
+    assertThat(actual.diagnoses!![0].code.version).isEqualTo("2014")
   }
 
   @Test
   fun shouldOnlyTransformGivenValues() {
     val mtbFile =
-        Mtb.builder()
+        PatientRecord.builder()
             .diagnoses(
                 listOf(
                     MtbDiagnosis.builder()
@@ -87,16 +95,16 @@ class TransformationServiceTest {
     val actual = this.service.transform(mtbFile)
 
     assertThat(actual).isNotNull
-    assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
-    assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
-    assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
-    assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
+    assertThat(actual.diagnoses!![0].code.code).isEqualTo("F79.9")
+    assertThat(actual.diagnoses!![0].code.version).isEqualTo("2014")
+    assertThat(actual.diagnoses!![1].code.code).isEqualTo("F79.8")
+    assertThat(actual.diagnoses!![1].code.version).isEqualTo("2019")
   }
 
   @Test
   fun shouldTransformConsentValues() {
     val mtbFile =
-        Mtb.builder()
+        PatientRecord.builder()
             .diagnoses(
                 listOf(
                     MtbDiagnosis.builder()
@@ -114,35 +122,35 @@ class TransformationServiceTest {
     val actual = this.service.transform(mtbFile)
 
     assertThat(actual).isNotNull
-    assertThat(actual.diagnoses[0].code.code).isEqualTo("F79.9")
-    assertThat(actual.diagnoses[0].code.version).isEqualTo("2014")
-    assertThat(actual.diagnoses[1].code.code).isEqualTo("F79.8")
-    assertThat(actual.diagnoses[1].code.version).isEqualTo("2019")
+    assertThat(actual.diagnoses!![0].code.code).isEqualTo("F79.9")
+    assertThat(actual.diagnoses!![0].code.version).isEqualTo("2014")
+    assertThat(actual.diagnoses!![1].code.code).isEqualTo("F79.8")
+    assertThat(actual.diagnoses!![1].code.version).isEqualTo("2019")
   }
 
   @Test
   fun shouldTransformConsent() {
-    val mvhMetadata = MvhMetadata.builder().transferTan("transfertan12345").build()
+    val mvhMetadata = MvhMetadata.builder().transferTAN("transfertan12345").build()
 
     assertThat(mvhMetadata).isNotNull
     mvhMetadata.modelProjectConsent =
-        ModelProjectConsent.builder()
+        MvhMetadataModelProjectConsent.builder()
             .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
             .version("1")
             .provisions(
                 listOf(
-                    Provision.builder()
-                        .type(ConsentProvision.PERMIT)
+                    MvhMetadataModelProjectConsentProvisionsInner.builder()
+                        .type(ConsentProvisionType.PERMIT)
                         .purpose(ModelProjectConsentPurpose.SEQUENCING)
                         .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
                         .build(),
-                    Provision.builder()
-                        .type(ConsentProvision.PERMIT)
+                    MvhMetadataModelProjectConsentProvisionsInner.builder()
+                        .type(ConsentProvisionType.PERMIT)
                         .purpose(ModelProjectConsentPurpose.REIDENTIFICATION)
                         .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
                         .build(),
-                    Provision.builder()
-                        .type(ConsentProvision.DENY)
+                    MvhMetadataModelProjectConsentProvisionsInner.builder()
+                        .type(ConsentProvisionType.DENY)
                         .purpose(ModelProjectConsentPurpose.CASE_IDENTIFICATION)
                         .date(Date.from(Instant.parse("2025-08-15T00:00:00.00Z")))
                         .build(),
@@ -158,11 +166,11 @@ class TransformationServiceTest {
             )
 
     mvhMetadata.researchConsents = mutableListOf()
-    mvhMetadata.researchConsents.add(MvhMetadata.ResearchConsent.from(jsonNode))
+    mvhMetadata.researchConsents?.add(ResearchConsent.from(jsonNode))
 
-    val mtbFile = Mtb.builder().metadata(mvhMetadata).build()
+    val mtbFile = PatientRecord.builder().metadata(mvhMetadata).build()
 
     val transformed = service.transform(mtbFile)
-    assertThat(transformed.metadata.modelProjectConsent.date).isNotNull
+    assertThat(transformed.metadata?.modelProjectConsent?.date).isNotNull
   }
 }

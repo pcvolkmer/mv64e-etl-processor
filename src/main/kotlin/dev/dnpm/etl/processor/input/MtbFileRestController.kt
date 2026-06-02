@@ -22,10 +22,9 @@ package dev.dnpm.etl.processor.input
 
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientId
-import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -52,7 +51,7 @@ class MtbFileRestController(
                 CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE,
             ],
     )
-    fun mtbFile(@RequestBody mtbFile: Mtb): ResponseEntity<Unit> {
+    fun mtbFile(@RequestBody mtbFile: PatientRecord): ResponseEntity<Unit> {
         logger.debug("Accepted MTB File (DNPM V2) for processing")
         if (requestProcessor.processMtbFile(mtbFile)) {
             return ResponseEntity.accepted().build()
@@ -80,7 +79,7 @@ class MtbFileRestControllerAdvice(
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleMessageNotReadableException(e: Exception): ResponseEntity<Unit> {
         logger.error("Error while processing MtbFile", e)
-        requestProcessor.processMtbFile(Mtb.builder().build())
+        requestProcessor.processMtbFile(PatientRecord.builder().build())
         return ResponseEntity.badRequest().build()
     }
 

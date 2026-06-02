@@ -32,7 +32,18 @@ import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.FollowUp
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsent
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
+import dev.pcvolkmer.mv64e.model.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.PeriodDate
+import dev.pcvolkmer.mv64e.model.Reference
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -121,12 +132,12 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .patientPseudonym(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .episodesOfCare(
                     listOf(
@@ -178,12 +189,12 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .patientPseudonym(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .episodesOfCare(
                     listOf(
@@ -239,12 +250,12 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .patientPseudonym(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .episodesOfCare(
                     listOf(
@@ -304,21 +315,21 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .genomDeTan(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .metadata(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
-                                            .type(ConsentProvision.PERMIT)
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                            .type(ConsentProvisionType.PERMIT)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -404,7 +415,7 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .genomDeTan(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
@@ -421,7 +432,7 @@ class RequestProcessorTest {
             )
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .metadata(MvhMetadata())
                 .episodesOfCare(
@@ -444,8 +455,8 @@ class RequestProcessorTest {
         val requestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
         verify(sender, times(1)).send(requestCaptor.capture())
         assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
-        assertThat(requestCaptor.firstValue.content.metadata.transferTan).isEqualTo("f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2")
+        assertThat(requestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.ADDITION)
+        assertThat(requestCaptor.firstValue.content.metadata?.transferTAN).isEqualTo("f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2")
 
         val eventCaptor = argumentCaptor<ResponseEvent>()
         verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -501,10 +512,10 @@ class RequestProcessorTest {
 
         doAnswer { it.arguments.first() }
             .whenever(transformationService)
-            .transform(any<Mtb>())
+            .transform(any<PatientRecord>())
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .metadata(MvhMetadata())
                 .episodesOfCare(
@@ -575,7 +586,7 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .patientPseudonym(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
             .whenever(sender)
@@ -584,7 +595,7 @@ class RequestProcessorTest {
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .episodesOfCare(
                     listOf(
@@ -628,7 +639,7 @@ class RequestProcessorTest {
             .whenever(pseudonymizeService)
             .genomDeTan(anyValueClass())
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
         whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
@@ -645,7 +656,7 @@ class RequestProcessorTest {
             )
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
                 .metadata(MvhMetadata())
                 .episodesOfCare(
@@ -770,7 +781,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
@@ -787,7 +798,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .episodesOfCare(
                         listOf(
@@ -871,7 +882,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -892,7 +903,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -925,7 +936,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.ADDITION)
         }
 
         @Test
@@ -983,7 +994,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1004,7 +1015,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1037,7 +1048,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.ADDITION)
         }
 
         @Test
@@ -1082,7 +1093,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1103,7 +1114,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1136,7 +1147,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.INITIAL)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.INITIAL)
         }
 
     }
@@ -1239,7 +1250,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1260,7 +1271,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1303,7 +1314,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
         }
 
 
@@ -1361,7 +1372,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1382,7 +1393,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1425,7 +1436,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
         }
 
         @Test
@@ -1469,7 +1480,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1490,7 +1501,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1533,7 +1544,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
         }
 
         @Test
@@ -1593,7 +1604,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1614,7 +1625,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1657,7 +1668,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.ADDITION)
         }
 
         @Test
@@ -1731,7 +1742,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1752,7 +1763,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1800,7 +1811,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
         }
 
         @Test
@@ -1860,7 +1871,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1881,7 +1892,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -1924,7 +1935,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.ADDITION)
         }
 
         @Test
@@ -1956,7 +1967,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -1977,7 +1988,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -2020,7 +2031,7 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.INITIAL)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.INITIAL)
         }
 
         @Test
@@ -2066,7 +2077,7 @@ class RequestProcessorTest {
                 .whenever(pseudonymizeService)
                 .patientPseudonym(anyValueClass())
 
-            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<PatientRecord>())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
                 .whenever(sender)
@@ -2087,7 +2098,7 @@ class RequestProcessorTest {
                 )
 
             val mtbFile =
-                Mtb.builder()
+                PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
                     .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
                     .episodesOfCare(
@@ -2121,13 +2132,13 @@ class RequestProcessorTest {
 
             val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
             verify(sender, times(1)).send(sendRequestCaptor.capture())
-            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+            assertThat(sendRequestCaptor.firstValue.content.metadata?.type).isEqualTo(MvhSubmissionType.ADDITION)
         }
     }
 
     @Test
     fun shouldCatchExceptionsWhenProcessingMtbFileAndSaveError() {
-        val invalidMtbFile = Mtb.builder().build()
+        val invalidMtbFile = PatientRecord.builder().build()
 
         val success = this.requestProcessor.processMtbFile(invalidMtbFile)
 

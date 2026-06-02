@@ -23,8 +23,8 @@ package dev.dnpm.etl.processor.output
 import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.config.KafkaProperties
 import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -75,7 +75,7 @@ class KafkaMtbFileSender(
     }
 
     override fun send(request: DeleteRequest): MtbFileSender.Response {
-        val dummyMtbFile = Mtb.builder().metadata(MvhMetadata()).build()
+        val dummyMtbFile = PatientRecord.builder().metadata(MvhMetadata()).build()
 
         return try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
@@ -114,7 +114,7 @@ class KafkaMtbFileSender(
 
     private fun key(request: MtbRequest): String =
         when (request) {
-            is DnpmV2MtbFileRequest -> "{\"pid\": \"${request.content.patient.id}\"}"
+            is DnpmV2MtbFileRequest -> "{\"pid\": \"${request.content.patient?.id}\"}"
             is DeleteRequest -> "{\"pid\": \"${request.patientId.value}\"}"
             else ->
                 throw IllegalArgumentException("Unsupported request type: ${request::class.simpleName}")
