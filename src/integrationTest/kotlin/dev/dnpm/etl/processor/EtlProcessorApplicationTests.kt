@@ -24,7 +24,16 @@ import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.Coding
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.MtbDiagnosis
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsent
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.Reference
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -105,16 +114,16 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
           .send(any<DnpmV2MtbFileRequest>())
 
       val mtbFile =
-          Mtb.builder()
+          PatientRecord.builder()
               .patient(Patient.builder().id("TEST_12345678").build())
               .metadata(
                   MvhMetadata.builder()
                       .modelProjectConsent(
-                          ModelProjectConsent.builder()
+                          MvhMetadataModelProjectConsent.builder()
                               .provisions(
                                   listOf(
-                                      Provision.builder()
-                                          .type(ConsentProvision.PERMIT)
+                                      MvhMetadataModelProjectConsentProvisionsInner.builder()
+                                          .type(ConsentProvisionType.PERMIT)
                                           .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                           .build()
                                   )

@@ -25,7 +25,12 @@ import dev.dnpm.etl.processor.config.*
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.GenderCoding
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.PeriodDate
+import dev.pcvolkmer.mv64e.model.Reference
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.CoreMatchers.not
 import org.hamcrest.Matchers.containsString
@@ -121,13 +126,13 @@ class RestDipMtbFileSenderTest {
   }
 
   companion object {
-    fun dnpmV2MtbFile(): Mtb {
-      return Mtb().apply {
+    fun dnpmV2MtbFile(): PatientRecord {
+      return PatientRecord().apply {
         this.patient =
             Patient().apply {
               this.id = "PID"
               this.birthDate = Date.from(Instant.now())
-              this.gender = GenderCoding().apply { this.code = GenderCodingCode.MALE }
+              this.gender = GenderCoding().apply { this.code = GenderCoding.CodeEnum.MALE }
             }
         this.episodesOfCare =
             listOf(

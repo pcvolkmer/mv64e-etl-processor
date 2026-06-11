@@ -21,7 +21,7 @@ group = "dev.dnpm"
 version = "0.16.1" // x-release-please-version
 
 // Additional versions
-val mtbDtoVersion by extra("0.3.0")
+val mtbModelVersion by extra("0.4.2")
 val hapiFhirVersion by extra("8.8.1")
 val apacheCxfVersion by extra("4.1.5")
 val springModulithVersion by extra("2.0.5")
@@ -81,7 +81,7 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("dev.pcvolkmer.mv64e:mtb-dto:${mtbDtoVersion}")
+    implementation("dev.pcvolkmer.mv64e:mtb-model:${mtbModelVersion}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${hapiFhirVersion}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiFhirVersion}")
     implementation("org.apache.httpcomponents.client5:httpclient5")

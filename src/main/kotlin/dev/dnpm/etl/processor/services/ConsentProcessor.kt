@@ -28,7 +28,13 @@ import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.IConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
+import dev.pcvolkmer.mv64e.model.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.ResearchConsent
 import org.apache.commons.lang3.NotImplementedException
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent
@@ -65,7 +71,7 @@ class ConsentProcessor(
    * @param mtbFile File v2 (will be enriched with consent data)
    * @return true if consent is given
    */
-  fun consentGatedCheckAndTryEmbedding(mtbFile: Mtb): Boolean {
+  fun consentGatedCheckAndTryEmbedding(mtbFile: PatientRecord): Boolean {
     mtbFile.ensureMetaDataIsInitialized()
 
     if (consentService is MtbFileConsentService) {
@@ -73,7 +79,7 @@ class ConsentProcessor(
       return true
     }
 
-    val personIdentifierValue = mtbFile.patient.id
+    val personIdentifierValue = mtbFile.patient!!.id
     val requestDate = Date.from(Instant.now(Clock.systemUTC()))
 
     // 1. Broad consent Entry exists?
@@ -129,7 +135,7 @@ class ConsentProcessor(
     return false
   }
 
-  fun embedBroadConsentResources(mtbFile: Mtb, broadConsent: Bundle) {
+  fun embedBroadConsentResources(mtbFile: PatientRecord, broadConsent: Bundle) {
     for (entry in broadConsent.entry) {
       val resource = entry.resource
       if (resource is Consent) {
@@ -137,12 +143,12 @@ class ConsentProcessor(
         // we need another step to back to string, before we convert to object map
         val asJsonString = fhirContext.newJsonParser().encodeResourceToString(resource)
         try {
-          val mapOfJson: MvhMetadata.ResearchConsent? =
+          val mapOfJson: ResearchConsent? =
               jsonMapper.readValue(
                   asJsonString,
-                  MvhMetadata.ResearchConsent::class.java,
+                  ResearchConsent::class.java,
               )
-          mtbFile.metadata.researchConsents.add(mapOfJson)
+          mtbFile.metadata?.researchConsents?.add(mapOfJson)
         } catch (e: JsonProcessingException) {
           throw RuntimeException(e)
         }
@@ -150,7 +156,7 @@ class ConsentProcessor(
     }
   }
 
-  fun addGenomeDbProvisions(mtbFile: Mtb, consentGnomeDe: Bundle) {
+  fun addGenomeDbProvisions(mtbFile: PatientRecord, consentGnomeDe: Bundle) {
     for (entry in consentGnomeDe.entry) {
       val resource = entry.resource
       if (resource !is Consent) {
@@ -167,22 +173,22 @@ class ConsentProcessor(
       val provisionCode = getProvisionCode(provisionComponent)
       if (provisionCode != null) {
         try {
-          val modelProjectConsentPurpose = ModelProjectConsentPurpose.forValue(provisionCode)
+          val modelProjectConsentPurpose = ModelProjectConsentPurpose.fromValue(provisionCode)
 
           if (ModelProjectConsentPurpose.SEQUENCING == modelProjectConsentPurpose) {
             // CONVENTION: wrapping date is date of SEQUENCING consent
-            mtbFile.metadata.modelProjectConsent.date = resource.dateTime
+            mtbFile.metadata?.modelProjectConsent?.date = resource.dateTime
           }
 
           val provision =
-              Provision.builder()
-                  .type(ConsentProvision.valueOf(provisionComponent.type.name))
+              MvhMetadataModelProjectConsentProvisionsInner.builder()
+                  .type(ConsentProvisionType.valueOf(provisionComponent.type.name))
                   .date(provisionComponent.period.start)
                   .purpose(modelProjectConsentPurpose)
                   .build()
 
-          mtbFile.metadata.modelProjectConsent.provisions.add(provision)
-        } catch (ioe: IOException) {
+          mtbFile.metadata?.modelProjectConsent?.provisions?.add(provision)
+        } catch (ioe: IllegalArgumentException) {
           logger.error(
               "Provision code '$provisionCode' is unknown and cannot be mapped.",
               ioe.toString(),
@@ -190,8 +196,8 @@ class ConsentProcessor(
         }
       }
 
-      if (mtbFile.metadata.modelProjectConsent.provisions.isNotEmpty()) {
-        mtbFile.metadata.modelProjectConsent.version = gIcsConfigProperties.genomeDeConsentVersion
+      if (mtbFile.metadata?.modelProjectConsent?.provisions?.isNotEmpty() == true) {
+        mtbFile.metadata?.modelProjectConsent?.version = gIcsConfigProperties.genomeDeConsentVersion
       }
     }
   }
@@ -207,15 +213,15 @@ class ConsentProcessor(
     return provisionCode
   }
 
-  private fun setGenomDeSubmissionType(mtbFile: Mtb) {
+  private fun setGenomDeSubmissionType(mtbFile: PatientRecord) {
     if (appConfigProperties.genomDeTestSubmission) {
-      mtbFile.metadata.type = MvhSubmissionType.TEST
+      mtbFile.metadata?.type = MvhSubmissionType.TEST
       logger.info("genomeDe submission mit TEST")
     } else {
-      mtbFile.metadata.type =
-          when (mtbFile.metadata.type) {
+      mtbFile.metadata?.type =
+          when (mtbFile.metadata?.type) {
             null -> MvhSubmissionType.INITIAL
-            else -> mtbFile.metadata.type
+            else -> mtbFile.metadata?.type
           }
     }
   }
