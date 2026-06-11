@@ -48,6 +48,7 @@
             <div th:if="${request.type.value != 'delete'}">
                 <span th:if="${request.submissionType.value == 'initial'}"><span>📨 Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
                 <span th:if="${request.submissionType.value == 'addition'}"><span>🔄 Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
+                <span th:if="${request.submissionType.value == 'followup'}"><span>📅 Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
                 <span th:if="${request.submissionType.value == 'unknown'}"><span>❓ Übertragung vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time></span>
             </div>
             <div th:if="${request.type.value == 'delete'}">
