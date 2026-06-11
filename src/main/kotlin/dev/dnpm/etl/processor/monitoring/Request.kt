@@ -53,6 +53,7 @@ data class Request(
     @LastModifiedBy var updatedBy: String? = null,
     @Embedded.Nullable var report: Report? = null,
     @Column("submission_accepted") var submissionAccepted: Boolean = false,
+    @Column("followup_count") var followupCount: Int = 0,
 ) {
   constructor(
       uuid: RequestId,

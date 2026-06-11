@@ -20,7 +20,6 @@
 
 package dev.dnpm.etl.processor.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
@@ -35,7 +34,6 @@ import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.pcvolkmer.mv64e.mtb.*
 import org.assertj.core.api.Assertions.assertThat
-import org.hl7.fhir.r4.model.Consent
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -812,6 +810,7 @@ class RequestProcessorTest {
             verify(requestService, times(1)).save(requestCaptor.capture())
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.BLOCKED_INITIAL)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
 
             verify(applicationEventPublisher, times(0)).publishEvent(any())
             verify(sender, times(0)).send(any<DnpmV2MtbFileRequest>())
@@ -918,6 +917,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1029,6 +1029,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1127,6 +1128,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.INITIAL)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1137,10 +1139,55 @@ class RequestProcessorTest {
             assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.INITIAL)
         }
 
+    }
+
+    @Nested
+    inner class FollowUpSubmission {
+
+        private lateinit var pseudonymizeService: PseudonymizeService
+        private lateinit var transformationService: TransformationService
+        private lateinit var sender: MtbFileSender
+        private lateinit var requestService: RequestService
+        private lateinit var applicationEventPublisher: ApplicationEventPublisher
+        private lateinit var appConfigProperties: AppConfigProperties
+        private lateinit var consentProcessor: ConsentProcessor
+        private lateinit var requestProcessor: RequestProcessor
+        private lateinit var jsonMapper: JsonMapper
+
+        @BeforeEach
+        fun setup(
+            @Mock pseudonymizeService: PseudonymizeService,
+            @Mock transformationService: TransformationService,
+            @Mock sender: RestMtbFileSender,
+            @Mock requestService: RequestService,
+            @Mock applicationEventPublisher: ApplicationEventPublisher,
+            @Mock consentProcessor: ConsentProcessor,
+        ) {
+            this.pseudonymizeService = pseudonymizeService
+            this.transformationService = transformationService
+            this.sender = sender
+            this.requestService = requestService
+            this.applicationEventPublisher = applicationEventPublisher
+            this.appConfigProperties = AppConfigProperties()
+            this.consentProcessor = consentProcessor
+            this.jsonMapper = JsonMapper()
+
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    appConfigProperties,
+                    consentProcessor,
+                )
+        }
+
         @Test
         fun testShouldSendFollowUpMtbFileIfUnacceptedErrorsAndAcceptedInitialFileWasSent() {
 
-            // One failed attempt and one successful but not accepted
             val lastRequests =
                 listOf(
                     Request(
@@ -1247,6 +1294,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1261,7 +1309,6 @@ class RequestProcessorTest {
         @Test
         fun testShouldSendFollowUpMtbFileAfterAdditionWasSent() {
 
-            // One failed attempt and one successful but not accepted
             val lastRequests =
                 listOf(
                     Request(
@@ -1368,6 +1415,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1377,233 +1425,695 @@ class RequestProcessorTest {
             verify(sender, times(1)).send(sendRequestCaptor.capture())
             assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
         }
-    }
 
-    @Test
-    fun testShouldSendFollowUpMtbFileAfterInitialWasSent() {
+        @Test
+        fun testShouldSendFollowUpMtbFileAfterInitialWasSent() {
 
-        // One failed attempt and one successful but not accepted
-        val lastRequests =
-            listOf(
-                Request(
-                    1L,
-                    randomRequestId(),
-                    PatientPseudonym("TEST_12345678901"),
-                    PatientId("P1"),
-                    Fingerprint("initial"),
-                    RequestType.MTB_FILE,
-                    SubmissionType.INITIAL,
-                    RequestStatus.ERROR,
-                    Tan.empty(),
-                    Instant.parse("2026-02-10T09:00:00Z"),
-                    submissionAccepted = false,
-                ),
-                Request(
-                    2L,
-                    randomRequestId(),
-                    PatientPseudonym("TEST_12345678901"),
-                    PatientId("P1"),
-                    Fingerprint("initial"),
-                    RequestType.MTB_FILE,
-                    SubmissionType.INITIAL,
-                    RequestStatus.WARNING,
-                    Tan.empty(),
-                    Instant.parse("2026-05-20T09:00:00Z"),
-                    submissionAccepted = true,
-                )
-            )
-
-        doAnswer { lastRequests }
-            .whenever(requestService)
-            .allRequestsByPatientPseudonym(anyValueClass())
-
-        doAnswer { it.arguments[0] as String }
-            .whenever(pseudonymizeService)
-            .patientPseudonym(anyValueClass())
-
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
-
-        doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
-            .whenever(sender)
-            .send(any<DnpmV2MtbFileRequest>())
-
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
-
-        requestProcessor =
-            RequestProcessor(
-                pseudonymizeService,
-                transformationService,
-                sender,
-                requestService,
-                jsonMapper,
-                applicationEventPublisher,
-                AppConfigProperties(postInitialSubmissionBlock = true),
-                consentProcessor,
-            )
-
-        val mtbFile =
-            Mtb.builder()
-                .patient(Patient.builder().id("123").build())
-                .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
-                .episodesOfCare(
-                    listOf(
-                        MtbEpisodeOfCare.builder()
-                            .id("1")
-                            .patient(Reference.builder().id("123").build())
-                            .period(
-                                PeriodDate.builder()
-                                    .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
-                                    .build()
-                            )
-                            .build()
+            val lastRequests =
+                listOf(
+                    Request(
+                        1L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.ERROR,
+                        Tan.empty(),
+                        Instant.parse("2026-02-10T09:00:00Z"),
+                        submissionAccepted = false,
+                    ),
+                    Request(
+                        2L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-05-20T09:00:00Z"),
+                        submissionAccepted = true,
                     )
                 )
-                .followUps(
-                    listOf(
-                        FollowUp.builder()
-                            .patient(Reference.builder().id("123").build())
-                            .date(Date.from(Instant.parse("2026-05-21T00:00:00.00Z")))
-                            .lastContactDate(Date.from(Instant.parse("2026-05-21T00:00:00.00Z")))
-                            .build()
+
+            doAnswer { lastRequests }
+                .whenever(requestService)
+                .allRequestsByPatientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] as String }
+                .whenever(pseudonymizeService)
+                .patientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+            doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+                .whenever(sender)
+                .send(any<DnpmV2MtbFileRequest>())
+
+            whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    AppConfigProperties(postInitialSubmissionBlock = true),
+                    consentProcessor,
+                )
+
+            val mtbFile =
+                Mtb.builder()
+                    .patient(Patient.builder().id("123").build())
+                    .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
+                    .episodesOfCare(
+                        listOf(
+                            MtbEpisodeOfCare.builder()
+                                .id("1")
+                                .patient(Reference.builder().id("123").build())
+                                .period(
+                                    PeriodDate.builder()
+                                        .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
+                                        .build()
+                                )
+                                .build()
+                        )
+                    )
+                    .followUps(
+                        listOf(
+                            FollowUp.builder()
+                                .patient(Reference.builder().id("123").build())
+                                .date(Date.from(Instant.parse("2026-05-21T00:00:00.00Z")))
+                                .lastContactDate(Date.from(Instant.parse("2026-05-21T00:00:00.00Z")))
+                                .build()
+                        )
+                    )
+                    .build()
+
+            this.requestProcessor.processMtbFile(mtbFile)
+
+            val requestCaptor = argumentCaptor<Request>()
+            verify(requestService, times(1)).save(requestCaptor.capture())
+            assertThat(requestCaptor.firstValue).isNotNull
+            assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+            assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
+
+            val eventCaptor = argumentCaptor<ResponseEvent>()
+            verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+            assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+
+            val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+            verify(sender, times(1)).send(sendRequestCaptor.capture())
+            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
+        }
+
+        @Test
+        fun testShouldSendAdditionMtbFileAfterFollowUpWasSent() {
+
+            val lastRequests =
+                listOf(
+                    Request(
+                        1L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.ERROR,
+                        Tan.empty(),
+                        Instant.parse("2026-02-10T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 0
+                    ),
+                    Request(
+                        2L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-02-11T09:00:00Z"),
+                        submissionAccepted = true,
+                        followupCount = 0
+                    ),
+                    Request(
+                        3L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.FOLLOWUP,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-05-20T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 1
                     )
                 )
-                .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+            doAnswer { lastRequests }
+                .whenever(requestService)
+                .allRequestsByPatientPseudonym(anyValueClass())
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
-        assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
+            doAnswer { it.arguments[0] as String }
+                .whenever(pseudonymizeService)
+                .patientPseudonym(anyValueClass())
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
-        verify(sender, times(1)).send(sendRequestCaptor.capture())
-        assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
-    }
+            doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+                .whenever(sender)
+                .send(any<DnpmV2MtbFileRequest>())
 
-    @Test
-    fun testShouldSendAdditionMtbFileAfterFollowUpWasSent() {
+            whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
 
-        // One failed attempt and one successful but not accepted
-        val lastRequests =
-            listOf(
-                Request(
-                    1L,
-                    randomRequestId(),
-                    PatientPseudonym("TEST_12345678901"),
-                    PatientId("P1"),
-                    Fingerprint("initial"),
-                    RequestType.MTB_FILE,
-                    SubmissionType.INITIAL,
-                    RequestStatus.ERROR,
-                    Tan.empty(),
-                    Instant.parse("2026-02-10T09:00:00Z"),
-                    submissionAccepted = false,
-                ),
-                Request(
-                    2L,
-                    randomRequestId(),
-                    PatientPseudonym("TEST_12345678901"),
-                    PatientId("P1"),
-                    Fingerprint("initial"),
-                    RequestType.MTB_FILE,
-                    SubmissionType.INITIAL,
-                    RequestStatus.WARNING,
-                    Tan.empty(),
-                    Instant.parse("2026-02-11T09:00:00Z"),
-                    submissionAccepted = true,
-                ),
-                Request(
-                    3L,
-                    randomRequestId(),
-                    PatientPseudonym("TEST_12345678901"),
-                    PatientId("P1"),
-                    Fingerprint("initial"),
-                    RequestType.MTB_FILE,
-                    SubmissionType.FOLLOWUP,
-                    RequestStatus.WARNING,
-                    Tan.empty(),
-                    Instant.parse("2026-05-20T09:00:00Z"),
-                    submissionAccepted = false,
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    AppConfigProperties(postInitialSubmissionBlock = true),
+                    consentProcessor,
                 )
-            )
 
-        doAnswer { lastRequests }
-            .whenever(requestService)
-            .allRequestsByPatientPseudonym(anyValueClass())
+            val mtbFile =
+                Mtb.builder()
+                    .patient(Patient.builder().id("123").build())
+                    .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
+                    .episodesOfCare(
+                        listOf(
+                            MtbEpisodeOfCare.builder()
+                                .id("1")
+                                .patient(Reference.builder().id("123").build())
+                                .period(
+                                    PeriodDate.builder()
+                                        .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
+                                        .build()
+                                )
+                                .build()
+                        )
+                    )
+                    .followUps(
+                        listOf(
+                            FollowUp.builder()
+                                .patient(Reference.builder().id("123").build())
+                                .date(Date.from(Instant.parse("2026-05-20T00:00:00.00Z")))
+                                .lastContactDate(Date.from(Instant.parse("2026-05-20T00:00:00.00Z")))
+                                .build()
+                        )
+                    )
+                    .build()
 
-        doAnswer { it.arguments[0] as String }
-            .whenever(pseudonymizeService)
-            .patientPseudonym(anyValueClass())
+            this.requestProcessor.processMtbFile(mtbFile)
 
-        doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+            val requestCaptor = argumentCaptor<Request>()
+            verify(requestService, times(1)).save(requestCaptor.capture())
+            assertThat(requestCaptor.firstValue).isNotNull
+            assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+            assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
 
-        doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
-            .whenever(sender)
-            .send(any<DnpmV2MtbFileRequest>())
+            val eventCaptor = argumentCaptor<ResponseEvent>()
+            verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+            assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
 
-        whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+            val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+            verify(sender, times(1)).send(sendRequestCaptor.capture())
+            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+        }
 
-        requestProcessor =
-            RequestProcessor(
-                pseudonymizeService,
-                transformationService,
-                sender,
-                requestService,
-                jsonMapper,
-                applicationEventPublisher,
-                AppConfigProperties(postInitialSubmissionBlock = true),
-                consentProcessor,
-            )
+        @Test
+        fun testShouldSendAdditionalFollowUpMtbFileAfterAdditionWasSentOnSameDay() {
 
-        val mtbFile =
-            Mtb.builder()
-                .patient(Patient.builder().id("123").build())
-                .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
-                .episodesOfCare(
-                    listOf(
-                        MtbEpisodeOfCare.builder()
-                            .id("1")
-                            .patient(Reference.builder().id("123").build())
-                            .period(
-                                PeriodDate.builder()
-                                    .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
-                                    .build()
-                            )
-                            .build()
+            val lastRequests =
+                listOf(
+                    Request(
+                        1L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.ERROR,
+                        Tan.empty(),
+                        Instant.parse("2026-02-10T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 0
+                    ),
+                    Request(
+                        2L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-02-11T09:00:00Z"),
+                        submissionAccepted = true,
+                        followupCount = 0
+                    ),
+                    Request(
+                        3L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.FOLLOWUP,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-05-20T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 1
+                    ),
+                    Request(
+                        4L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.ADDITION,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-06-11T05:41:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 1
                     )
                 )
-                .followUps(
-                    listOf(
-                        FollowUp.builder()
-                            .patient(Reference.builder().id("123").build())
-                            .date(Date.from(Instant.parse("2026-05-20T00:00:00.00Z")))
-                            .lastContactDate(Date.from(Instant.parse("2026-05-20T00:00:00.00Z")))
-                            .build()
+
+            doAnswer { lastRequests }
+                .whenever(requestService)
+                .allRequestsByPatientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] as String }
+                .whenever(pseudonymizeService)
+                .patientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+            doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+                .whenever(sender)
+                .send(any<DnpmV2MtbFileRequest>())
+
+            whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    AppConfigProperties(postInitialSubmissionBlock = true),
+                    consentProcessor,
+                )
+
+            val mtbFile =
+                Mtb.builder()
+                    .patient(Patient.builder().id("123").build())
+                    .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
+                    .episodesOfCare(
+                        listOf(
+                            MtbEpisodeOfCare.builder()
+                                .id("1")
+                                .patient(Reference.builder().id("123").build())
+                                .period(
+                                    PeriodDate.builder()
+                                        .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
+                                        .build()
+                                )
+                                .build()
+                        )
+                    )
+                    .followUps(
+                        listOf(
+                            FollowUp.builder()
+                                .patient(Reference.builder().id("123").build())
+                                .date(Date.from(Instant.parse("2026-05-20T00:00:00.00Z")))
+                                .lastContactDate(Date.from(Instant.parse("2026-05-20T00:00:00.00Z")))
+                                .build(),
+                            FollowUp.builder()
+                                .patient(Reference.builder().id("123").build())
+                                .date(Date.from(Instant.parse("2026-06-11T00:00:00.00Z")))
+                                .lastContactDate(Date.from(Instant.parse("2026-06-11T00:00:00.00Z")))
+                                .build()
+                        )
+                    )
+                    .build()
+
+            this.requestProcessor.processMtbFile(mtbFile)
+
+            val requestCaptor = argumentCaptor<Request>()
+            verify(requestService, times(1)).save(requestCaptor.capture())
+            assertThat(requestCaptor.firstValue).isNotNull
+            assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+            assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(2)
+
+            val eventCaptor = argumentCaptor<ResponseEvent>()
+            verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+            assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+
+            val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+            verify(sender, times(1)).send(sendRequestCaptor.capture())
+            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.FOLLOWUP)
+        }
+
+        @Test
+        fun testShouldSendAdditionMtbFileWithoutNewHigherFollowUpsCount() {
+
+            val lastRequests =
+                listOf(
+                    Request(
+                        1L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.ERROR,
+                        Tan.empty(),
+                        Instant.parse("2026-02-10T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = -1
+                    ),
+                    Request(
+                        2L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-02-11T09:00:00Z"),
+                        submissionAccepted = true,
+                        followupCount = -1
+                    ),
+                    Request(
+                        3L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.FOLLOWUP,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-06-11T05:41:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 1
                     )
                 )
-                .build()
 
-        this.requestProcessor.processMtbFile(mtbFile)
+            doAnswer { lastRequests }
+                .whenever(requestService)
+                .allRequestsByPatientPseudonym(anyValueClass())
 
-        val requestCaptor = argumentCaptor<Request>()
-        verify(requestService, times(1)).save(requestCaptor.capture())
-        assertThat(requestCaptor.firstValue).isNotNull
-        assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
-        assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
+            doAnswer { it.arguments[0] as String }
+                .whenever(pseudonymizeService)
+                .patientPseudonym(anyValueClass())
 
-        val eventCaptor = argumentCaptor<ResponseEvent>()
-        verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
-        assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
 
-        val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
-        verify(sender, times(1)).send(sendRequestCaptor.capture())
-        assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+            doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+                .whenever(sender)
+                .send(any<DnpmV2MtbFileRequest>())
+
+            whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    AppConfigProperties(postInitialSubmissionBlock = true),
+                    consentProcessor,
+                )
+
+            val mtbFile =
+                Mtb.builder()
+                    .patient(Patient.builder().id("123").build())
+                    .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
+                    .episodesOfCare(
+                        listOf(
+                            MtbEpisodeOfCare.builder()
+                                .id("1")
+                                .patient(Reference.builder().id("123").build())
+                                .period(
+                                    PeriodDate.builder()
+                                        .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
+                                        .build()
+                                )
+                                .build()
+                        )
+                    )
+                    .followUps(
+                        listOf(
+                            FollowUp.builder()
+                                .patient(Reference.builder().id("123").build())
+                                .date(Date.from(Instant.parse("2026-06-11T00:00:00.00Z")))
+                                .lastContactDate(Date.from(Instant.parse("2026-06-11T00:00:00.00Z")))
+                                .build()
+                        )
+                    )
+                    .build()
+
+            this.requestProcessor.processMtbFile(mtbFile)
+
+            val requestCaptor = argumentCaptor<Request>()
+            verify(requestService, times(1)).save(requestCaptor.capture())
+            assertThat(requestCaptor.firstValue).isNotNull
+            assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+            assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+
+            val eventCaptor = argumentCaptor<ResponseEvent>()
+            verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+            assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+
+            val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+            verify(sender, times(1)).send(sendRequestCaptor.capture())
+            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+        }
+
+        @Test
+        fun testShouldSendInitialMtbFileContainingFollowUpsWithoutSuccessfulInitialSubmission() {
+
+            val lastRequests =
+                listOf(
+                    Request(
+                        1L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.ERROR,
+                        Tan.empty(),
+                        Instant.parse("2026-02-10T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = 0
+                    )
+                )
+
+            doAnswer { lastRequests }
+                .whenever(requestService)
+                .allRequestsByPatientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] as String }
+                .whenever(pseudonymizeService)
+                .patientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+            doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+                .whenever(sender)
+                .send(any<DnpmV2MtbFileRequest>())
+
+            whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    AppConfigProperties(postInitialSubmissionBlock = true),
+                    consentProcessor,
+                )
+
+            val mtbFile =
+                Mtb.builder()
+                    .patient(Patient.builder().id("123").build())
+                    .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
+                    .episodesOfCare(
+                        listOf(
+                            MtbEpisodeOfCare.builder()
+                                .id("1")
+                                .patient(Reference.builder().id("123").build())
+                                .period(
+                                    PeriodDate.builder()
+                                        .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
+                                        .build()
+                                )
+                                .build()
+                        )
+                    )
+                    .followUps(
+                        listOf(
+                            FollowUp.builder()
+                                .patient(Reference.builder().id("123").build())
+                                .date(Date.from(Instant.parse("2026-06-11T00:00:00.00Z")))
+                                .lastContactDate(Date.from(Instant.parse("2026-06-11T00:00:00.00Z")))
+                                .build()
+                        )
+                    )
+                    .build()
+
+            this.requestProcessor.processMtbFile(mtbFile)
+
+            val requestCaptor = argumentCaptor<Request>()
+            verify(requestService, times(1)).save(requestCaptor.capture())
+            assertThat(requestCaptor.firstValue).isNotNull
+            assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+            assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.INITIAL)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+
+            val eventCaptor = argumentCaptor<ResponseEvent>()
+            verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+            assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+
+            val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+            verify(sender, times(1)).send(sendRequestCaptor.capture())
+            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.INITIAL)
+        }
+
+        @Test
+        fun testShouldSendAdditionMtbFileWithoutFollowUpsAndInitialNegativeCount() {
+
+            val lastRequests =
+                listOf(
+                    Request(
+                        1L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.ERROR,
+                        Tan.empty(),
+                        Instant.parse("2026-02-10T09:00:00Z"),
+                        submissionAccepted = false,
+                        followupCount = -1
+                    ),
+                    Request(
+                        2L,
+                        randomRequestId(),
+                        PatientPseudonym("TEST_12345678901"),
+                        PatientId("P1"),
+                        Fingerprint("initial"),
+                        RequestType.MTB_FILE,
+                        SubmissionType.INITIAL,
+                        RequestStatus.WARNING,
+                        Tan.empty(),
+                        Instant.parse("2026-02-11T09:00:00Z"),
+                        submissionAccepted = true,
+                        followupCount = -1
+                    ),
+                )
+
+            doAnswer { lastRequests }
+                .whenever(requestService)
+                .allRequestsByPatientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] as String }
+                .whenever(pseudonymizeService)
+                .patientPseudonym(anyValueClass())
+
+            doAnswer { it.arguments[0] }.whenever(transformationService).transform(any<Mtb>())
+
+            doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
+                .whenever(sender)
+                .send(any<DnpmV2MtbFileRequest>())
+
+            whenever(consentProcessor.consentGatedCheckAndTryEmbedding(any())).thenReturn(true)
+
+            requestProcessor =
+                RequestProcessor(
+                    pseudonymizeService,
+                    transformationService,
+                    sender,
+                    requestService,
+                    jsonMapper,
+                    applicationEventPublisher,
+                    AppConfigProperties(postInitialSubmissionBlock = true),
+                    consentProcessor,
+                )
+
+            val mtbFile =
+                Mtb.builder()
+                    .patient(Patient.builder().id("123").build())
+                    .metadata(MvhMetadata.builder().type(MvhSubmissionType.INITIAL).build())
+                    .episodesOfCare(
+                        listOf(
+                            MtbEpisodeOfCare.builder()
+                                .id("1")
+                                .patient(Reference.builder().id("123").build())
+                                .period(
+                                    PeriodDate.builder()
+                                        .start(Date.from(Instant.parse("2026-01-20T00:00:00.00Z")))
+                                        .build()
+                                )
+                                .build()
+                        )
+                    )
+                    .build()
+
+            this.requestProcessor.processMtbFile(mtbFile)
+
+            val requestCaptor = argumentCaptor<Request>()
+            verify(requestService, times(1)).save(requestCaptor.capture())
+            assertThat(requestCaptor.firstValue).isNotNull
+            assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
+            assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
+
+            val eventCaptor = argumentCaptor<ResponseEvent>()
+            verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
+            assertThat(eventCaptor.firstValue.status).isEqualTo(RequestStatus.SUCCESS)
+
+            val sendRequestCaptor = argumentCaptor<DnpmV2MtbFileRequest>()
+            verify(sender, times(1)).send(sendRequestCaptor.capture())
+            assertThat(sendRequestCaptor.firstValue.content.metadata.type).isEqualTo(MvhSubmissionType.ADDITION)
+        }
     }
 
     @Test
