@@ -120,14 +120,15 @@ class RequestProcessor(
         ) {
             requestService.save(
                 Request(
-                    request.requestId,
-                    request.patientPseudonym(),
-                    emptyPatientId(),
-                    fingerprint(request),
-                    RequestType.MTB_FILE,
-                    submissionType,
-                    RequestStatus.BLOCKED_INITIAL,
-                    Tan(request.content.metadata?.transferTan.orEmpty())
+                    uuid = request.requestId,
+                    patientPseudonym = request.patientPseudonym(),
+                    pid = emptyPatientId(),
+                    fingerprint = fingerprint(request),
+                    type = RequestType.MTB_FILE,
+                    submissionType = submissionType,
+                    status = RequestStatus.BLOCKED_INITIAL,
+                    tan = Tan(request.content.metadata?.transferTan.orEmpty()),
+                    followupCount = request.content.followUps?.size ?: 0,
                 )
             )
             // Exit - no further processing
@@ -157,14 +158,15 @@ class RequestProcessor(
 
         requestService.save(
             Request(
-                request.requestId,
-                request.patientPseudonym(),
-                emptyPatientId(),
-                fingerprint(request),
-                RequestType.MTB_FILE,
-                submissionType,
-                RequestStatus.UNKNOWN,
-                Tan(request.content.metadata?.transferTan.orEmpty()),
+                uuid = request.requestId,
+                patientPseudonym = request.patientPseudonym(),
+                pid = emptyPatientId(),
+                fingerprint = fingerprint(request),
+                type = RequestType.MTB_FILE,
+                submissionType = submissionType,
+                status = RequestStatus.UNKNOWN,
+                tan = Tan(request.content.metadata?.transferTan.orEmpty()),
+                followupCount = request.content.followUps?.size ?: 0,
             )
         )
 
@@ -207,7 +209,10 @@ class RequestProcessor(
             ?.sortedBy { it.date }
             ?.lastOrNull { it.date != null } ?: return false
 
-        return lastSuccessfulSubmission.processedAt.isBefore( lastFollowUp.date.toInstant())
+        // Follow-up after last successful submission by date or ...
+        return lastSuccessfulSubmission.processedAt.isBefore(lastFollowUp.date.toInstant()) ||
+                // ... more follow-ups than on last successful submission
+                lastSuccessfulSubmission.followupCount < (request.content.followUps?.size ?: 0)
     }
 
     private fun hasSuccessfulInitialSubmission(patientPseudonym: PatientPseudonym): Boolean {
