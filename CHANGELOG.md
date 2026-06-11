@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.16.2](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.1...v0.16.2) (2026-06-11)
+
+
+### Features
+
+* count follow-ups to update submission type ([#297](https://github.com/pcvolkmer/mv64e-etl-processor/issues/297)) ([7298078](https://github.com/pcvolkmer/mv64e-etl-processor/commit/7298078077d27380255ad5eb42a30876a4babede))
+
+
+### Bug Fixes
+
+* add template icon for followups ([#294](https://github.com/pcvolkmer/mv64e-etl-processor/issues/294)) ([20d1182](https://github.com/pcvolkmer/mv64e-etl-processor/commit/20d1182da9d8f9900d5580b8f4525847e03cbaba))
+
 ## [0.16.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.0...v0.16.1) (2026-05-26)
 
 

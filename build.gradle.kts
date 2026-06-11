@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "dev.dnpm"
-version = "0.16.1" // x-release-please-version
+version = "0.16.2" // x-release-please-version
 
 // Additional versions
 val mtbDtoVersion by extra("0.3.0")
