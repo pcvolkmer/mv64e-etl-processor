@@ -28,8 +28,10 @@ import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.mtb.MvhMetadata
 import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
 import dev.pcvolkmer.mv64e.mtb.Patient
+import dev.pcvolkmer.mv64e.mtb.ResearchConsentReasonMissing
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.CodeableConcept
@@ -46,6 +48,8 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.core.io.ClassPathResource
 import tools.jackson.databind.json.JsonMapper
@@ -266,5 +270,27 @@ class ConsentProcessorTest {
     else {
       assertThat(inputMtb.metadata.type).isEqualTo(MvhSubmissionType.INITIAL)
     }
+  }
+
+  @Test
+  fun doNotRequestBroadConsentIfReasonMissingIsGiven() {
+    doAnswer { Bundle() }
+        .whenever(gicsConsentService)
+        .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
+
+    val inputMtb =
+        Mtb.builder()
+            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
+            .metadata(MvhMetadata.builder().reasonResearchConsentMissing(ResearchConsentReasonMissing.OTHER_PATIENT_REASON).build())
+            .build()
+    val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
+
+    verify(gicsConsentService, times(1))
+        .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
+    verify(gicsConsentService, times(0))
+        .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
+
+    assertThat(checkResult).isFalse
+    assertThat(inputMtb.metadata.researchConsents).isEmpty()
   }
 }

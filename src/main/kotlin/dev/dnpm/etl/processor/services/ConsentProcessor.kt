@@ -83,16 +83,6 @@ class ConsentProcessor(
     // 2.1 -> yes -> send mtb file
     // 2.2 -> no ->  warn/info no consent given
 
-    /*
-     * broad consent
-     */
-    val broadConsent =
-        consentService.getConsent(personIdentifierValue, requestDate, ConsentDomain.BROAD_CONSENT)
-    val broadConsentHasBeenAsked = broadConsent.entry.isNotEmpty()
-
-    // fast exit - if patient has not been asked, we can skip and exit
-    if (!broadConsentHasBeenAsked) return false
-
     // GenomDE_MV-Consent only if domain name available else fallback to file check
     val genomDeSequencingStatus = if (null != gIcsConfigProperties.genomDeConsentDomainName) {
         val genomeDeConsent =
@@ -110,6 +100,21 @@ class ConsentProcessor(
     } else {
         true
     }
+
+    /*
+     * broad consent
+     */
+    if (null != mtbFile.metadata?.reasonResearchConsentMissing) {
+        // early return if there is a reason for missing broad consent
+        return false
+    }
+
+    val broadConsent =
+          consentService.getConsent(personIdentifierValue, requestDate, ConsentDomain.BROAD_CONSENT)
+    val broadConsentHasBeenAsked = broadConsent.entry.isNotEmpty()
+
+    // fast exit - if patient has not been asked, we can skip and exit
+    if (!broadConsentHasBeenAsked) return false
 
     embedBroadConsentResources(mtbFile, broadConsent)
 
