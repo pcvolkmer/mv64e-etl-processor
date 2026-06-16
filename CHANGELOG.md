@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.3](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.2...v0.16.3) (2026-06-16)
+
+
+### Features
+
+* do not request research consent if reason missing is given ([#298](https://github.com/pcvolkmer/mv64e-etl-processor/issues/298)) ([5565771](https://github.com/pcvolkmer/mv64e-etl-processor/commit/556577102ed8287b25351f68241264c7062fd362))
+
 ## [0.16.2](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.1...v0.16.2) (2026-06-11)
 
 
