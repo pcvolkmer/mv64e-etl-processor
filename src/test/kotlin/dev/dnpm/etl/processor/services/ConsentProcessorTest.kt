@@ -293,4 +293,23 @@ class ConsentProcessorTest {
     assertThat(checkResult).isFalse
     assertThat(inputMtb.metadata.researchConsents).isEmpty()
   }
+
+  @ParameterizedTest
+  @CsvSource(value = ["permittedConsentBundle.json,permit", "deniedConsentBundle.json,deny"])
+  fun checkGetProvisionTypeByPolicyCode(filename: String, expected: String) {
+    val bundle =
+        fhirContext
+            .newJsonParser()
+            .parseResource(this.javaClass.classLoader.getResourceAsStream(filename))
+    assertThat(bundle).isInstanceOf(Bundle::class.java)
+
+    val actual =
+        consentProcessor.getProvisionTypeByPolicyCode(
+            bundle as Bundle,
+            Date(),
+            ConsentDomain.BROAD_CONSENT,
+        )
+
+    assertThat(actual).isEqualTo(Consent.ConsentProvisionType.valueOf(expected.uppercase()))
+  }
 }
