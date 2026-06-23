@@ -53,10 +53,12 @@ class ResponseProcessor(
                       Report(
                           "Keine Probleme erkannt",
                       )
+                  it.followupCount = it.expectedFollowupCount
                 }
 
                 RequestStatus.WARNING -> {
                   it.report = Report("Warnungen über mangelhafte Daten", event.body.orElse(""))
+                  it.followupCount = it.expectedFollowupCount
                 }
 
                 RequestStatus.ERROR -> {

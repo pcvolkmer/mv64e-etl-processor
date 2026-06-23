@@ -113,6 +113,10 @@ class RequestProcessor(
                 }
             }
 
+        val maxFollowUpCount = this.requestService.allRequestsByPatientPseudonym(request.patientPseudonym())
+            .maxByOrNull { it.followupCount }
+            ?.followupCount ?: -1
+
         if (
             appConfigProperties.postInitialSubmissionBlock &&
             hasSuccessfulInitialSubmission(request.patientPseudonym()) &&
@@ -128,7 +132,8 @@ class RequestProcessor(
                     submissionType = submissionType,
                     status = RequestStatus.BLOCKED_INITIAL,
                     tan = Tan(request.content.metadata?.transferTan.orEmpty()),
-                    followupCount = request.content.followUps?.size ?: 0,
+                    followupCount = maxFollowUpCount,
+                    expectedFollowupCount = request.content.followUps?.size ?: 0,
                 )
             )
             // Exit - no further processing
@@ -166,7 +171,8 @@ class RequestProcessor(
                 submissionType = submissionType,
                 status = RequestStatus.UNKNOWN,
                 tan = Tan(request.content.metadata?.transferTan.orEmpty()),
-                followupCount = request.content.followUps?.size ?: 0,
+                followupCount = maxFollowUpCount,
+                expectedFollowupCount = request.content.followUps?.size ?: 0,
             )
         )
 

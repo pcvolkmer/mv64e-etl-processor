@@ -1294,7 +1294,8 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
-            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1415,7 +1416,8 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
-            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1522,6 +1524,8 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1645,6 +1649,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
             assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1786,7 +1791,8 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.FOLLOWUP)
-            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(2)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(2)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -1910,6 +1916,7 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
             assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -2004,7 +2011,8 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.INITIAL)
-            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(1)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(1)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -2104,7 +2112,8 @@ class RequestProcessorTest {
             assertThat(requestCaptor.firstValue).isNotNull
             assertThat(requestCaptor.firstValue.status).isEqualTo(RequestStatus.UNKNOWN)
             assertThat(requestCaptor.firstValue.submissionType).isEqualTo(SubmissionType.ADDITION)
-            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(0)
+            assertThat(requestCaptor.firstValue.followupCount).isEqualTo(-1)
+            assertThat(requestCaptor.firstValue.expectedFollowupCount).isEqualTo(0)
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())

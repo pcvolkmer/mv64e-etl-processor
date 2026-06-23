@@ -54,6 +54,7 @@ data class Request(
     @Embedded.Nullable var report: Report? = null,
     @Column("submission_accepted") var submissionAccepted: Boolean = false,
     @Column("followup_count") var followupCount: Int = 0,
+    @Column("expected_followup_count") var expectedFollowupCount: Int = 0,
 ) {
   constructor(
       uuid: RequestId,
