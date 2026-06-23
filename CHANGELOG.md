@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.4](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.3...v0.16.4) (2026-06-23)
+
+
+### Features
+
+* support for asynchronous follow-up count calculation ([#300](https://github.com/pcvolkmer/mv64e-etl-processor/issues/300)) ([b16cd39](https://github.com/pcvolkmer/mv64e-etl-processor/commit/b16cd39aa622f018e318ebef2006c517708cf06e))
+
 ## [0.16.3](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.2...v0.16.3) (2026-06-16)
 
 
