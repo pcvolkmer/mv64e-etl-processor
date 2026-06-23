@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -115,6 +116,27 @@ class ResponseProcessorTest {
     assertThat(captor.firstValue.status).isEqualTo(requestStatus)
   }
 
+  @ParameterizedTest
+  @MethodSource("requestFollowUpCount")
+  fun shoulUpdateFollowUpCountFromExpectedFollowUpCountOnSuccess(requestStatus: RequestStatus, followUpCount: Int, expectedFollowUpCount: Int) {
+    doAnswer {
+        testRequest.followupCount = followUpCount
+        testRequest.expectedFollowupCount = expectedFollowUpCount
+        Optional.of(testRequest)
+    }.whenever(requestService).findByUuid(anyValueClass())
+
+    val event =
+        ResponseEvent(RequestId("TestID1234"), Instant.parse("2023-09-09T00:00:00Z"), requestStatus)
+
+    this.responseProcessor.handleResponseEvent(event)
+
+    val captor = argumentCaptor<Request>()
+    verify(requestService, times(1)).save(captor.capture())
+    assertThat(captor.firstValue).isNotNull
+    assertThat(captor.firstValue.status).isEqualTo(requestStatus)
+    assertThat(captor.firstValue.followupCount).isEqualTo(expectedFollowUpCount)
+  }
+
   companion object {
 
     @JvmStatic
@@ -124,6 +146,17 @@ class ResponseProcessorTest {
           RequestStatus.WARNING,
           RequestStatus.ERROR,
           RequestStatus.DUPLICATION,
+      )
+    }
+
+    @JvmStatic
+    fun requestFollowUpCount(): Set<Arguments> {
+      return setOf(
+          Arguments.of(RequestStatus.SUCCESS, 1, 2),
+          Arguments.of(RequestStatus.WARNING, 1, 2),
+          Arguments.of(RequestStatus.ERROR, 1, 1),
+          Arguments.of(RequestStatus.DUPLICATION, 1, 1),
+          Arguments.of(RequestStatus.NO_CONSENT, 1, 1),
       )
     }
   }
