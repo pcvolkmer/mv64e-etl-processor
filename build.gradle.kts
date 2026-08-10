@@ -21,7 +21,7 @@ group = "dev.dnpm"
 version = "0.16.4" // x-release-please-version
 
 // Additional versions
-val mtbModelVersion by extra("0.4.2")
+val mtbModelVersion by extra("0.4.3")
 val hapiFhirVersion by extra("8.8.1")
 val apacheCxfVersion by extra("4.1.5")
 val springModulithVersion by extra("2.0.5")
