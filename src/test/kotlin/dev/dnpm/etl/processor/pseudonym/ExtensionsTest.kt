@@ -27,7 +27,17 @@ import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.services.ConsentProcessor
 import dev.dnpm.etl.processor.services.ConsentProcessorTest
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.GenderCoding
+import dev.pcvolkmer.mv64e.model.Msi
+import dev.pcvolkmer.mv64e.model.MtbDiagnosis
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.MtbSystemicTherapy
+import dev.pcvolkmer.mv64e.model.OncoProcedure
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.PeriodDate
+import dev.pcvolkmer.mv64e.model.Reference
+import dev.pcvolkmer.mv64e.model.TumorSpecimen
 import org.assertj.core.api.Assertions.assertThat
 import org.hl7.fhir.r4.model.Bundle
 import org.junit.jupiter.api.Nested
@@ -56,12 +66,12 @@ class ExtensionsTest {
         val FAKE_MTB_FILE_PATH = "mv64e-mtb-fake-patient.json"
         val CLEAN_PATIENT_ID = "644bae7a-56f6-4ee8-b02f-c532e65af5b1"
 
-        private fun fakeMtbFile(): Mtb {
+        private fun fakeMtbFile(): PatientRecord {
             val mtbFile = ClassPathResource(FAKE_MTB_FILE_PATH).inputStream
-            return getJsonMapper().readValue(mtbFile, Mtb::class.java)
+            return getJsonMapper().readValue(mtbFile, PatientRecord::class.java)
         }
 
-        private fun Mtb.serialized(): String {
+        private fun PatientRecord.serialized(): String {
             return getJsonMapper().writeValueAsString(this)
         }
 
@@ -80,11 +90,11 @@ class ExtensionsTest {
 
             mtbFile.pseudonymizeWith(pseudonymizeService)
 
-            assertThat(mtbFile.patient.id).isEqualTo("PSEUDO-ID")
+            assertThat(mtbFile.patient?.id).isEqualTo("PSEUDO-ID")
             assertThat(mtbFile.serialized()).doesNotContain(CLEAN_PATIENT_ID)
         }
 
-        private fun addConsentData(mtbFile: Mtb) {
+        private fun addConsentData(mtbFile: PatientRecord) {
             val gIcsConfigProperties = GIcsConfigProperties("", "", "")
             val appConfigProperties = AppConfigProperties(emptyList())
 
@@ -115,12 +125,12 @@ class ExtensionsTest {
             doAnswer { "TESTDOMAIN" }.whenever(pseudonymizeService).prefix()
 
             val mtbFile =
-                Mtb().apply {
+                PatientRecord().apply {
                     this.patient =
                         Patient().apply {
                             this.id = "PID"
                             this.birthDate = Date.from(Instant.now())
-                            this.gender = GenderCoding().apply { this.code = GenderCodingCode.MALE }
+                            this.gender = GenderCoding().apply { this.code = GenderCoding.CodeEnum.MALE }
                         }
                     this.episodesOfCare =
                         listOf(
@@ -136,7 +146,7 @@ class ExtensionsTest {
             mtbFile.anonymizeContentWith(pseudonymizeService)
 
             assertThat(mtbFile.episodesOfCare).hasSize(1)
-            assertThat(mtbFile.episodesOfCare.map { it.id }).isNotNull
+            assertThat(mtbFile.episodesOfCare?.map { it.id }).isNotNull
         }
 
         @Test
@@ -153,20 +163,20 @@ class ExtensionsTest {
             val mtbFile = fakeMtbFile()
 
             /** replace hex values with random long, so our test does not match false positives */
-            mtbFile.ngsReports.forEach { report ->
-                report.results.simpleVariants.forEach { simpleVariant ->
-                    simpleVariant.externalIds.forEach { extIdValue ->
+            mtbFile.ngsReports?.forEach { report ->
+                report.results.simpleVariants?.forEach { simpleVariant ->
+                    simpleVariant.externalIds?.forEach { extIdValue ->
                         extIdValue.value = Math.random().toLong().toString()
                     }
                 }
             }
-            mtbFile.ngsReports.forEach { report ->
-                report.results.rnaFusions.forEach { simpleVariant ->
-                    simpleVariant.externalIds.forEach { extIdValue ->
+            mtbFile.ngsReports?.forEach { report ->
+                report.results.rnaFusions?.forEach { simpleVariant ->
+                    simpleVariant.externalIds?.forEach { extIdValue ->
                         extIdValue.value = Math.random().toLong().toString()
                     }
-                    simpleVariant.fusionPartner3Prime?.transcriptId?.value = Math.random().toLong().toString()
-                    simpleVariant.fusionPartner5Prime?.transcriptId?.value = Math.random().toLong().toString()
+                    simpleVariant.fusionPartner3prime?.transcriptId?.value = Math.random().toLong().toString()
+                    simpleVariant.fusionPartner5prime?.transcriptId?.value = Math.random().toLong().toString()
                     simpleVariant.externalIds?.forEach { it?.value = Math.random().toLong().toString() }
                 }
             }
@@ -203,12 +213,12 @@ class ExtensionsTest {
         doAnswer { "TESTDOMAIN" }.whenever(pseudonymizeService).prefix()
 
         val mtbFile =
-            Mtb().apply {
+            PatientRecord().apply {
                 this.patient =
                     Patient().apply {
                         this.id = "PID"
                         this.birthDate = Date.from(Instant.now())
-                        this.gender = GenderCoding().apply { this.code = GenderCodingCode.MALE }
+                        this.gender = GenderCoding().apply { this.code = GenderCoding.CodeEnum.MALE }
                     }
                 this.diagnoses = listOf(MtbDiagnosis().apply { this.id = "Diagnosis-1" })
                 this.episodesOfCare =
@@ -244,12 +254,12 @@ class ExtensionsTest {
         mtbFile.pseudonymizeWith(pseudonymizeService)
         mtbFile.anonymizeContentWith(pseudonymizeService)
 
-        assertThat(mtbFile.diagnoses.first().id)
-            .isEqualTo(mtbFile.episodesOfCare.first().diagnoses.first().id)
-        assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.guidelineTherapies.first().reason.id)
-        assertThat(mtbFile.diagnoses.first().id)
-            .isEqualTo(mtbFile.guidelineProcedures.first().reason.id)
-        assertThat(mtbFile.diagnoses.first().id).isEqualTo(mtbFile.specimens.first().diagnosis.id)
+        assertThat(mtbFile.diagnoses?.first()?.id)
+            .isEqualTo(mtbFile.episodesOfCare?.first()?.diagnoses?.first()?.id)
+        assertThat(mtbFile.diagnoses?.first()?.id).isEqualTo(mtbFile.guidelineTherapies?.first()?.reason?.id)
+        assertThat(mtbFile.diagnoses?.first()?.id)
+            .isEqualTo(mtbFile.guidelineProcedures?.first()?.reason?.id)
+        assertThat(mtbFile.diagnoses?.first()?.id).isEqualTo(mtbFile.specimens?.first()?.diagnosis?.id)
     }
 
     @Test
@@ -265,12 +275,12 @@ class ExtensionsTest {
         doAnswer { "TESTDOMAIN" }.whenever(pseudonymizeService).prefix()
 
         val mtbFile =
-            Mtb().apply {
+            PatientRecord().apply {
                 this.patient =
                     Patient().apply {
                         this.id = "PID"
                         this.birthDate = Date.from(Instant.now())
-                        this.gender = GenderCoding().apply { this.code = GenderCodingCode.MALE }
+                        this.gender = GenderCoding().apply { this.code = GenderCoding.CodeEnum.MALE }
                     }
                 this.msiFindings =
                     listOf(
@@ -286,10 +296,10 @@ class ExtensionsTest {
         mtbFile.anonymizeContentWith(pseudonymizeService)
 
         assertThat(mtbFile.msiFindings).isNotNull
-        assertThat(mtbFile.msiFindings[1])
+        assertThat(mtbFile.msiFindings?.get(1))
             .satisfiesAnyOf(
-                { assertThat(it.id).isNull() },
-                { assertThat(it.id).isEqualTo("TESTDOMAIN44e20a53bbbf9f3ae39626d05df7014dcd77d6098") },
+                { assertThat(it?.id).isNull() },
+                { assertThat(it?.id).isEqualTo("TESTDOMAIN44e20a53bbbf9f3ae39626d05df7014dcd77d6098") },
             )
     }
 }

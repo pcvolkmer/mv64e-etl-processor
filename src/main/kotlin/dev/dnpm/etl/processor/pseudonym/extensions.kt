@@ -21,9 +21,9 @@
 package dev.dnpm.etl.processor.pseudonym
 
 import dev.dnpm.etl.processor.PatientId
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsent
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsent
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.commons.codec.digest.DigestUtils
 
 /**
@@ -33,8 +33,8 @@ import org.apache.commons.codec.digest.DigestUtils
  * @return The MTB file containing patient pseudonymes
  * @since 0.11.0
  */
-infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
-  val patientPseudonym = pseudonymizeService.patientPseudonym(PatientId(this.patient.id)).value
+infix fun PatientRecord.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
+  val patientPseudonym = pseudonymizeService.patientPseudonym(PatientId(this.patient!!.id)).value
 
   this.episodesOfCare?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.carePlans?.filterNotNull()?.forEach { carePlan ->
@@ -57,7 +57,7 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
   this.diagnoses?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.guidelineTherapies?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.guidelineProcedures?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
-  this.patient.id = patientPseudonym
+  this.patient?.id = patientPseudonym
   this.claims?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.claimResponses?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   this.familyMemberHistories?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
@@ -116,7 +116,7 @@ infix fun Mtb.pseudonymizeWith(pseudonymizeService: PseudonymizeService) {
  * @return The MTB file containing rehashed content IDs
  * @since 0.11.0
  */
-infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
+infix fun PatientRecord.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
   val prefix = pseudonymizeService.prefix()
 
   fun anonymize(id: String): String {
@@ -280,25 +280,25 @@ infix fun Mtb.anonymizeContentWith(pseudonymizeService: PseudonymizeService) {
   }
 }
 
-fun Mtb.ensureMetaDataIsInitialized() {
+fun PatientRecord.ensureMetaDataIsInitialized() {
   // init metadata if necessary
   if (this.metadata == null) {
     val mvhMetadata = MvhMetadata.builder().build()
     this.metadata = mvhMetadata
   }
-  if (this.metadata.researchConsents == null) {
-    this.metadata.researchConsents = mutableListOf()
+  if (this.metadata?.researchConsents == null) {
+    this.metadata?.researchConsents = mutableListOf()
   }
-  if (this.metadata.modelProjectConsent == null) {
-    this.metadata.modelProjectConsent = ModelProjectConsent()
-    this.metadata.modelProjectConsent.provisions = mutableListOf()
-  } else if (this.metadata.modelProjectConsent.provisions != null) {
+  if (this.metadata?.modelProjectConsent == null) {
+    this.metadata?.modelProjectConsent = MvhMetadataModelProjectConsent()
+    this.metadata?.modelProjectConsent?.provisions = mutableListOf()
+  } else if (this.metadata?.modelProjectConsent?.provisions != null) {
     // make sure list can be changed
-    this.metadata.modelProjectConsent.provisions =
-        this.metadata.modelProjectConsent.provisions.toMutableList()
+    this.metadata?.modelProjectConsent?.provisions =
+        this.metadata?.modelProjectConsent?.provisions?.toMutableList()
   }
 }
 
-infix fun Mtb.addGenomDeTan(pseudonymizeService: PseudonymizeService) {
-  this.metadata?.transferTan = pseudonymizeService.genomDeTan(PatientId(this.patient.id))
+infix fun PatientRecord.addGenomDeTan(pseudonymizeService: PseudonymizeService) {
+  this.metadata?.transferTAN = pseudonymizeService.genomDeTan(PatientId(this.patient!!.id))
 }

@@ -20,9 +20,9 @@
 
 package dev.dnpm.etl.processor.consent
 
-import dev.pcvolkmer.mv64e.mtb.ConsentProvision
-import dev.pcvolkmer.mv64e.mtb.ModelProjectConsentPurpose
-import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.springframework.stereotype.Service
 
 /** Evaluates consent using provided consent service and file based consent information */
@@ -30,8 +30,8 @@ import org.springframework.stereotype.Service
 class ConsentEvaluator(
     private val consentService: IConsentService,
 ) {
-    fun check(mtbFile: Mtb): ConsentEvaluation {
-        val ttpConsentStatus = consentService.getTtpBroadConsentStatus(mtbFile.patient.id)
+    fun check(mtbFile: PatientRecord): ConsentEvaluation {
+        val ttpConsentStatus = consentService.getTtpBroadConsentStatus(mtbFile.patient!!.id)
         val consentGiven =
             ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN ||
                 ttpConsentStatus == TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT ||
@@ -39,7 +39,7 @@ class ConsentEvaluator(
                 ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE &&
                 mtbFile.metadata?.modelProjectConsent?.provisions?.any {
                     it.purpose == ModelProjectConsentPurpose.SEQUENCING &&
-                        it.type == ConsentProvision.PERMIT
+                        it.type == ConsentProvisionType.PERMIT
                 } == true
 
         return ConsentEvaluation(ttpConsentStatus, consentGiven)
