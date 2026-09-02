@@ -21,7 +21,7 @@ group = "dev.dnpm"
 version = "0.16.4" // x-release-please-version
 
 // Additional versions
-val mtbModelVersion by extra("0.4.3")
+val mtbModelVersion by extra("0.5.0")
 val hapiFhirVersion by extra("8.8.1")
 val apacheCxfVersion by extra("4.1.5")
 val springModulithVersion by extra("2.0.5")
@@ -183,17 +183,21 @@ tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("ghcr.io/pcvolkmer/mv64e-etl-processor")
 
     // Binding for CA Certs
-    bindings.set(listOf(
-        "$rootDir/bindings/ca-certificates/:/platform/bindings/ca-certificates"
-    ))
+    bindings.set(
+        listOf(
+            "$rootDir/bindings/ca-certificates/:/platform/bindings/ca-certificates"
+        )
+    )
 
-    environment.set(environment.get() + mapOf(
-        // Enable this line to embed CA Certs into image on build time
-        //"BP_EMBED_CERTS" to "true",
-        "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/mv64e-etl-processor",
-        "BP_OCI_LICENSES" to "AGPLv3",
-        "BP_OCI_DESCRIPTION" to "ETL Processor for MV § 64e and DNPM:DIP"
-    ))
+    environment.set(
+        environment.get() + mapOf(
+            // Enable this line to embed CA Certs into image on build time
+            //"BP_EMBED_CERTS" to "true",
+            "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/mv64e-etl-processor",
+            "BP_OCI_LICENSES" to "AGPLv3",
+            "BP_OCI_DESCRIPTION" to "ETL Processor for MV § 64e and DNPM:DIP"
+        )
+    )
 }
 
 spotless {
