@@ -7,13 +7,13 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     java
-    id("org.springframework.boot") version "4.0.7"
+    id("org.springframework.boot") version "4.0.8"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
     id("net.ltgt.errorprone") version "5.1.0"
     id("net.ltgt.nullaway") version "3.0.0"
-    kotlin("jvm") version "2.3.20"
-    kotlin("plugin.spring") version "2.3.20"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
     jacoco
 }
 
@@ -22,8 +22,8 @@ version = "0.16.4" // x-release-please-version
 
 // Additional versions
 val mtbModelVersion by extra("0.5.0")
-val hapiFhirVersion by extra("8.8.1")
-val apacheCxfVersion by extra("4.1.5")
+val hapiFhirVersion by extra("8.10.1")
+val apacheCxfVersion by extra("4.2.3")
 val springModulithVersion by extra("2.0.5")
 val springRetryVersion by extra("2.0.12")
 
@@ -33,7 +33,7 @@ val testcontainersVersion by extra("1.21.4")
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -63,7 +63,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
@@ -140,8 +139,7 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        freeCompilerArgs.add("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 }
 
