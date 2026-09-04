@@ -56,16 +56,14 @@ class RequestProcessor(
     private val consentProcessor: ConsentProcessor?,
 ) {
 
-    private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
+    private var logger: Logger = LoggerFactory.getLogger(RequestProcessor::class.java)
 
     fun processMtbFile(mtbFile: PatientRecord): Boolean {
         return processMtbFile(mtbFile, randomRequestId())
     }
 
     fun processMtbFile(mtbFile: PatientRecord, requestId: RequestId): Boolean {
-        val isConsentOk =
-            consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) ||
-                    consentProcessor == null
+        val isConsentOk = consentProcessor?.consentGatedCheckAndTryEmbedding(mtbFile) ?: true
 
         if (!isConsentOk) {
             logger.warn("consent check failed but will be sent to DNPM:DIP!")
@@ -145,15 +143,16 @@ class RequestProcessor(
             hasSuccessfulInitialSubmission(request.patientPseudonym()) &&
             !hasUnacceptedSuccessfulInitialSubmission(request.patientPseudonym())
         ) {
-            // Use "addition" or "followup" depending on existing follow-ups after "intial" with "Meldebestaetigung"
+            // Use "addition" or "followup" depending on existing follow-ups after "initial" with "Meldebestaetigung"
             request.content.metadata?.let {
                 logger.warn("Override submission type using 'addition' after first initial submission!")
-                it.type = if (hasFollowUpAfterLastSuccessfulSubmission(request)) {
+                val hasFollowUp = hasFollowUpAfterLastSuccessfulSubmission(request)
+                it.type = if (hasFollowUp) {
                     MvhSubmissionType.FOLLOWUP
                 } else {
                     MvhSubmissionType.ADDITION
                 }
-                submissionType = if (hasFollowUpAfterLastSuccessfulSubmission(request)) {
+                submissionType = if (hasFollowUp) {
                     SubmissionType.FOLLOWUP
                 } else {
                     SubmissionType.ADDITION
@@ -206,7 +205,7 @@ class RequestProcessor(
             .filterNot {
                 it.submissionType == SubmissionType.INITIAL &&
                         (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING) &&
-                        !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
+                        !it.submissionAccepted
             }
             .lastOrNull() ?: return false
 
@@ -232,7 +231,7 @@ class RequestProcessor(
         return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
             it.submissionType == SubmissionType.INITIAL &&
                     (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING) &&
-                    !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
+                    !it.submissionAccepted
         }
     }
 
@@ -311,6 +310,7 @@ class RequestProcessor(
                 )
             )
         } catch (_: Exception) {
+            logger.warn("An exception occurred while processing the DELETE request. Saving request as ERROR.")
             requestService.save(
                 Request(
                     uuid = requestId,

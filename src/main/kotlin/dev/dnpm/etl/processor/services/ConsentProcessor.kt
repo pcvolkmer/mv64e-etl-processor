@@ -30,7 +30,6 @@ import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.model.ConsentProvisionType
 import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
-import dev.pcvolkmer.mv64e.model.MvhMetadata
 import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
 import dev.pcvolkmer.mv64e.model.MvhSubmissionType
 import dev.pcvolkmer.mv64e.model.PatientRecord
@@ -44,7 +43,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import tools.jackson.databind.json.JsonMapper
-import java.io.IOException
 import java.time.Clock
 import java.time.Instant
 import java.util.*
@@ -98,7 +96,7 @@ class ConsentProcessor(
                 ConsentDomain.MODELLVORHABEN_64E,
             )
 
-        addGenomeDbProvisions(mtbFile, genomeDeConsent)
+        addGenomDeProvisions(mtbFile, genomeDeConsent)
 
         if (genomeDeConsent.entry.isNotEmpty()) setGenomDeSubmissionType(mtbFile)
 
@@ -148,12 +146,14 @@ class ConsentProcessor(
         // we need another step to back to string, before we convert to object map
         val asJsonString = fhirContext.newJsonParser().encodeResourceToString(resource)
         try {
-          val mapOfJson: ResearchConsent? =
+            val mapOfJson: ResearchConsent? =
               jsonMapper.readValue(
                   asJsonString,
                   ResearchConsent::class.java,
               )
-          mtbFile.metadata?.researchConsents?.add(mapOfJson)
+            if (mapOfJson != null) {
+                mtbFile.metadata?.researchConsents?.add(mapOfJson)
+            }
         } catch (e: JsonProcessingException) {
           throw RuntimeException(e)
         }
@@ -161,8 +161,8 @@ class ConsentProcessor(
     }
   }
 
-  fun addGenomeDbProvisions(mtbFile: PatientRecord, consentGnomeDe: Bundle) {
-    for (entry in consentGnomeDe.entry) {
+  fun addGenomDeProvisions(mtbFile: PatientRecord, consentGenomDe: Bundle) {
+    for (entry in consentGenomDe.entry) {
       val resource = entry.resource
       if (resource !is Consent) {
         continue
@@ -195,8 +195,7 @@ class ConsentProcessor(
           mtbFile.metadata?.modelProjectConsent?.provisions?.add(provision)
         } catch (ioe: IllegalArgumentException) {
           logger.error(
-              "Provision code '$provisionCode' is unknown and cannot be mapped.",
-              ioe.toString(),
+              "Provision code '$provisionCode' is unknown and cannot be mapped: ${ioe.message}",
           )
         }
       }
