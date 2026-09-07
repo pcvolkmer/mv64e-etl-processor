@@ -25,6 +25,7 @@ import dev.dnpm.etl.processor.config.GIcsConfigProperties;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.Objects;
 import kotlin.random.Random;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +60,7 @@ public class GicsConsentService extends AbstractConsentService {
   private final RetryTemplate retryTemplate;
   private final RestTemplate restTemplate;
   private final GIcsConfigProperties gIcsConfigProperties;
+  private final URI gIcsUri;
 
   public GicsConsentService(
       GIcsConfigProperties gIcsConfigProperties,
@@ -70,6 +72,20 @@ public class GicsConsentService extends AbstractConsentService {
     this.retryTemplate = retryTemplate;
     this.restTemplate = restTemplate;
     this.gIcsConfigProperties = gIcsConfigProperties;
+
+    Objects.requireNonNull(
+        this.gIcsConfigProperties.getUri(), "gICS URI must be a valid URI in configuration");
+    try {
+      final var uri = URI.create(this.gIcsConfigProperties.getUri());
+      if (null == uri.getScheme()
+          || !(uri.getScheme().equals("http") || uri.getScheme().equals("https"))) {
+        throw new IllegalArgumentException("gICS URI must be a valid URI in configuration");
+      }
+      this.gIcsUri = uri;
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("gICS URI must be a valid URI in configuration", e);
+    }
+
     log.info("GicsConsentService initialized...");
   }
 
@@ -127,20 +143,7 @@ public class GicsConsentService extends AbstractConsentService {
   }
 
   private URI endpointUri(String endpoint) throws URISyntaxException {
-    if (null == this.gIcsConfigProperties.getUri()) {
-      throw new URISyntaxException("null", "URI must not be null");
-    }
-    var gPasUrl1 = this.gIcsConfigProperties.getUri();
-    if (this.gIcsConfigProperties.getUri().lastIndexOf("/")
-        == this.gIcsConfigProperties.getUri().length() - 1) {
-      gPasUrl1 =
-          this.gIcsConfigProperties
-              .getUri()
-              .substring(0, this.gIcsConfigProperties.getUri().length() - 1);
-    }
-    var urlBuilder = new URIBuilder(new URI(gPasUrl1)).appendPath(endpoint);
-
-    return urlBuilder.build();
+    return new URIBuilder(this.gIcsUri).appendPath(endpoint).build();
   }
 
   private HttpHeaders headersWithHttpBasicAuth() {
@@ -194,7 +197,7 @@ public class GicsConsentService extends AbstractConsentService {
       log.error(msg);
       return null;
     } catch (URISyntaxException e) {
-      var msg = String.format("Invalid URI for consents status request: '%s", e.getMessage());
+      var msg = String.format("Invalid URI for consents status request: '%s'", e.getMessage());
       log.error(msg);
       return null;
     }
