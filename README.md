@@ -18,6 +18,11 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
+### 🔥 Wichtige Änderungen in Version 0.17
+
+Ab Version 0.17 verwendet diese Anwendung [pcvolkmer/mv64e-mtb-model](https://github.com/pcvolkmer/mv64e-mtb-model) und ersetzt
+damit die bisher genutzte und veraltete Implementierung des DNPM-Datenmodells 2.1.
+
 ### 🔥 Wichtige Änderungen in Version 0.16
 
 #### Erkennung von Follow-Ups
