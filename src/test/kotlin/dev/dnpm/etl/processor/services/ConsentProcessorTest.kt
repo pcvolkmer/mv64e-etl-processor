@@ -27,289 +27,325 @@ import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.ConsentDomain
 import dev.dnpm.etl.processor.consent.GicsConsentService
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
-import dev.pcvolkmer.mv64e.model.BroadConsentReasonMissing
-import dev.pcvolkmer.mv64e.model.MvhMetadata
-import dev.pcvolkmer.mv64e.model.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.*
 import dev.pcvolkmer.mv64e.model.Patient
-import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.assertj.core.api.Assertions.assertThat
-import org.hl7.fhir.r4.model.Bundle
-import org.hl7.fhir.r4.model.CodeableConcept
+import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Coding
-import org.hl7.fhir.r4.model.Consent
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.core.io.ClassPathResource
 import tools.jackson.databind.json.JsonMapper
 import java.io.IOException
 import java.io.InputStream
 import java.time.Instant
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.*
+import java.util.stream.Stream
 
 @ExtendWith(MockitoExtension::class)
 class ConsentProcessorTest {
 
-  private lateinit var appConfigProperties: AppConfigProperties
-  private lateinit var gicsConsentService: GicsConsentService
-  private lateinit var jsonMapper: JsonMapper
-  private lateinit var gIcsConfigProperties: GIcsConfigProperties
-  private lateinit var fhirContext: FhirContext
-  private lateinit var consentProcessor: ConsentProcessor
+    private lateinit var appConfigProperties: AppConfigProperties
+    private lateinit var gicsConsentService: GicsConsentService
+    private lateinit var jsonMapper: JsonMapper
+    private lateinit var gIcsConfigProperties: GIcsConfigProperties
+    private lateinit var fhirContext: FhirContext
+    private lateinit var consentProcessor: ConsentProcessor
 
-  @BeforeEach
-  fun setups(
-      @Mock gicsConsentService: GicsConsentService,
-  ) {
+    @BeforeEach
+    fun setups(
+        @Mock gicsConsentService: GicsConsentService,
+    ) {
 
-    this.gIcsConfigProperties = GIcsConfigProperties(uri = "https://gics.example.com", genomDeConsentDomainName = "GenomDE_MV")
-    val jacksonConfig = JacksonConfig()
-    this.jsonMapper = jacksonConfig.jsonMapper()
-    this.fhirContext = JacksonConfig.fhirContext()
-    this.gicsConsentService = gicsConsentService
-    this.appConfigProperties = AppConfigProperties(emptyList())
-    this.consentProcessor =
-        ConsentProcessor(
-            appConfigProperties,
-            gIcsConfigProperties,
-            jsonMapper,
-            fhirContext,
-            gicsConsentService,
-        )
-  }
-
-  @Test
-  fun consentOk() {
-    assertThat(consentProcessor.toString()).isNotNull
-    // prep gICS response
-    doAnswer { getDummyBroadConsentBundle() }
-        .whenever(gicsConsentService)
-        .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
-
-    doAnswer { Bundle() }
-        .whenever(gicsConsentService)
-        .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
-
-    val inputMtb =
-        PatientRecord.builder()
-            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
-            .build()
-    val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
-
-    assertThat(checkResult).isTrue
-    assertThat(inputMtb.metadata?.researchConsents).isNotEmpty
-  }
-
-  @Test
-  fun ensureMetaDataIsInitializedUsingMtbFileConsentService() {
-    this.consentProcessor =
-        ConsentProcessor(
-            appConfigProperties,
-            gIcsConfigProperties,
-            jsonMapper,
-            fhirContext,
-            MtbFileConsentService(),
-        )
-
-    assertThat(consentProcessor.toString()).isNotNull
-
-    val inputMtb =
-        PatientRecord.builder()
-            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
-            .build()
-    val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
-
-    assertThat(checkResult).isTrue
-    assertThat(inputMtb.metadata).isNotNull
-  }
-
-  companion object {
-    fun getDummyGenomDeConsent(): Consent {
-      val consent = Consent()
-      consent.id = "consent 1 id"
-      consent.patient.reference = "Patient/1234-pat1"
-
-      consent.provision.setType(Consent.ConsentProvisionType.fromCode("deny"))
-      consent.provision.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
-      consent.provision.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
-
-      val addProvision1 = consent.provision.addProvision()
-      addProvision1.setType(Consent.ConsentProvisionType.fromCode("permit"))
-      addProvision1.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
-      addProvision1.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
-      addProvision1.code.addLast(
-          CodeableConcept(
-              Coding(
-                  "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
-                  "Teilnahme",
-                  "Teilnahme am Modellvorhaben und Einwilligung zur Genomsequenzierung",
-              )
-          )
-      )
-
-      val addProvision2 = consent.provision.addProvision()
-      addProvision2.setType(Consent.ConsentProvisionType.fromCode("deny"))
-      addProvision2.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
-      addProvision2.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
-      addProvision2.code.addLast(
-          CodeableConcept(
-              Coding(
-                  "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
-                  "Rekontaktierung",
-                  "Re-Identifizierung meiner Daten über die Vertrauensstelle beim Robert Koch-Institut und in die erneute Kontaktaufnahme durch meine behandelnde Ärztin oder meinen behandelnden Arzt",
-              )
-          )
-      )
-      return consent
-    }
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,PERMIT,expect permit",
-      "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,PERMIT,expect permit date is exactly on start",
-      "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2055-08-15T00:00:00+02:00,PERMIT,expect permit date is exactly on end",
-      "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2021-08-15T00:00:00+02:00,NULL,date is before start",
-      "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2060-08-15T00:00:00+02:00,NULL,date is after end",
-      "2.16.840.1.113883.3.1937.777.24.5.3.27,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,DENY,provision is denied",
-      "unknownCode,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,NULL,code does not exist - therefore expect NULL",
-      "2.16.840.1.113883.3.1937.777.24.5.3.8,XXXX,2025-08-15T00:00:00+02:00,NULL,system not found - therefore expect NULL",
-  )
-  fun getProvisionTypeByPolicyCode(
-      code: String?,
-      system: String?,
-      timeStamp: String,
-      expected: String?,
-      desc: String?,
-  ) {
-    val testData = getDummyBroadConsentBundle()
-
-    val requestDate = Date.from(OffsetDateTime.parse(timeStamp).toInstant())
-
-    val result: Consent.ConsentProvisionType =
-        consentProcessor.getProvisionTypeByPolicyCode(testData, code, system, requestDate)
-    assertThat(result).isNotNull()
-
-    assertThat(result).`as`(desc).isEqualTo(Consent.ConsentProvisionType.valueOf(expected!!))
-  }
-
-  @Test
-  fun getProvisionTypeOnEmptyConsent() {
-    val emptyResources = Bundle().addEntry(Bundle.BundleEntryComponent().setResource(Consent()))
-
-    val requestDate = Date.from(OffsetDateTime.parse("2025-08-15T00:00:00+02:00").toInstant())
-
-    val result: Consent.ConsentProvisionType =
-        consentProcessor.getProvisionTypeByPolicyCode(
-            emptyResources,
-            "anyCode",
-            "anySystem",
-            requestDate,
-        )
-    assertThat(result).isNotNull()
-
-    assertThat(result)
-        .`as`("empty consent resource - expect NULL")
-        .isEqualTo(Consent.ConsentProvisionType.NULL)
-  }
-
-  fun getDummyBroadConsentBundle(): Bundle {
-    val bundle: InputStream?
-    try {
-      bundle = ClassPathResource("fake_broadConsent_gics_response_permit.json").getInputStream()
-    } catch (e: IOException) {
-      throw RuntimeException(e)
+        this.gIcsConfigProperties =
+            GIcsConfigProperties(uri = "https://gics.example.com", genomDeConsentDomainName = "GenomDE_MV")
+        val jacksonConfig = JacksonConfig()
+        this.jsonMapper = jacksonConfig.jsonMapper()
+        this.fhirContext = JacksonConfig.fhirContext()
+        this.gicsConsentService = gicsConsentService
+        this.appConfigProperties = AppConfigProperties(emptyList())
+        this.consentProcessor =
+            ConsentProcessor(
+                appConfigProperties,
+                gIcsConfigProperties,
+                jsonMapper,
+                fhirContext,
+                gicsConsentService,
+            )
     }
 
-    return FhirContext.forR4().newJsonParser().parseResource<Bundle>(Bundle::class.java, bundle)
-  }
+    @Test
+    fun consentOk() {
+        assertThat(consentProcessor.toString()).isNotNull
+        // prep gICS response
+        doAnswer { getDummyBroadConsentBundle() }
+            .whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
 
-  @ParameterizedTest
-  @ValueSource(booleans = [true, false])
-  fun mvSubmissionTypeIsSet(isTestSubmission: Boolean) {
-    appConfigProperties.genomDeTestSubmission = isTestSubmission
-    val fixture =
-        ConsentProcessor(
-            appConfigProperties,
-            gIcsConfigProperties,
-            jsonMapper,
-            fhirContext,
-            gicsConsentService,
-        )
+        doAnswer { Bundle() }
+            .whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
 
-    doAnswer { getDummyBroadConsentBundle() }
-        .whenever(gicsConsentService)
-        .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
+        val inputMtb =
+            PatientRecord.builder()
+                .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
+                .build()
+        val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
 
-    doAnswer {
-          Bundle().addEntry(Bundle.BundleEntryComponent().setResource(getDummyGenomDeConsent()))
+        assertThat(checkResult).isTrue
+        assertThat(inputMtb.metadata?.researchConsents).isNotEmpty
+    }
+
+    @Test
+    fun ensureMetaDataIsInitializedUsingMtbFileConsentService() {
+        this.consentProcessor =
+            ConsentProcessor(
+                appConfigProperties,
+                gIcsConfigProperties,
+                jsonMapper,
+                fhirContext,
+                MtbFileConsentService(),
+            )
+
+        assertThat(consentProcessor.toString()).isNotNull
+
+        val inputMtb =
+            PatientRecord.builder()
+                .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
+                .build()
+        val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
+
+        assertThat(checkResult).isTrue
+        assertThat(inputMtb.metadata).isNotNull
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,PERMIT,expect permit",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,PERMIT,expect permit date is exactly on start",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2055-08-15T00:00:00+02:00,PERMIT,expect permit date is exactly on end",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2021-08-15T00:00:00+02:00,NULL,date is before start",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2060-08-15T00:00:00+02:00,NULL,date is after end",
+        "2.16.840.1.113883.3.1937.777.24.5.3.27,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,DENY,provision is denied",
+        "unknownCode,urn:oid:2.16.840.1.113883.3.1937.777.24.5.3,2025-08-15T00:00:00+02:00,NULL,code does not exist - therefore expect NULL",
+        "2.16.840.1.113883.3.1937.777.24.5.3.8,XXXX,2025-08-15T00:00:00+02:00,NULL,system not found - therefore expect NULL",
+    )
+    fun getProvisionTypeByPolicyCode(
+        code: String?,
+        system: String?,
+        timeStamp: String,
+        expected: String?,
+        desc: String?,
+    ) {
+        val testData = getDummyBroadConsentBundle()
+
+        val requestDate = Date.from(OffsetDateTime.parse(timeStamp).toInstant())
+
+        val result: Consent.ConsentProvisionType =
+            consentProcessor.getProvisionTypeByPolicyCode(testData, code, system, requestDate)
+        assertThat(result).isNotNull()
+
+        assertThat(result).`as`(desc).isEqualTo(Consent.ConsentProvisionType.valueOf(expected!!))
+    }
+
+    @Test
+    fun getProvisionTypeOnEmptyConsent() {
+        val emptyResources = Bundle().addEntry(Bundle.BundleEntryComponent().setResource(Consent()))
+
+        val requestDate = Date.from(OffsetDateTime.parse("2025-08-15T00:00:00+02:00").toInstant())
+
+        val result: Consent.ConsentProvisionType =
+            consentProcessor.getProvisionTypeByPolicyCode(
+                emptyResources,
+                "anyCode",
+                "anySystem",
+                requestDate,
+            )
+        assertThat(result).isNotNull()
+
+        assertThat(result)
+            .`as`("empty consent resource - expect NULL")
+            .isEqualTo(Consent.ConsentProvisionType.NULL)
+    }
+
+    fun getDummyBroadConsentBundle(): Bundle {
+        val bundle: InputStream?
+        try {
+            bundle = ClassPathResource("fake_broadConsent_gics_response_permit.json").getInputStream()
+        } catch (e: IOException) {
+            throw RuntimeException(e)
         }
-        .whenever(gicsConsentService)
-        .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
 
-    val inputMtb =
-        PatientRecord.builder()
-            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
-            .build()
-    val checkResult = fixture.consentGatedCheckAndTryEmbedding(inputMtb)
-    assertThat(checkResult).isNotNull
-
-    if (isTestSubmission) assertThat(inputMtb.metadata?.type).isEqualTo(MvhSubmissionType.TEST)
-    else {
-      assertThat(inputMtb.metadata?.type).isEqualTo(MvhSubmissionType.INITIAL)
+        return FhirContext.forR4().newJsonParser().parseResource<Bundle>(Bundle::class.java, bundle)
     }
-  }
 
-  @Test
-  fun doNotRequestBroadConsentIfReasonMissingIsGiven() {
-    doAnswer { Bundle() }
-        .whenever(gicsConsentService)
-        .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun mvSubmissionTypeIsSet(isTestSubmission: Boolean) {
+        appConfigProperties.genomDeTestSubmission = isTestSubmission
+        val fixture =
+            ConsentProcessor(
+                appConfigProperties,
+                gIcsConfigProperties,
+                jsonMapper,
+                fhirContext,
+                gicsConsentService,
+            )
 
-    val inputMtb =
-        PatientRecord.builder()
-            .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
-            .metadata(MvhMetadata.builder().reasonResearchConsentMissing(BroadConsentReasonMissing.OTHER_PATIENT_REASON).build())
-            .build()
-    val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
+        doAnswer { getDummyBroadConsentBundle() }
+            .whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
 
-    verify(gicsConsentService, times(1))
-        .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
-    verify(gicsConsentService, times(0))
-        .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
+        doAnswer {
+            Bundle().addEntry(Bundle.BundleEntryComponent().setResource(getDummyGenomDeConsent()))
+        }
+            .whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
 
-    assertThat(checkResult).isFalse
-    assertThat(inputMtb.metadata?.researchConsents).isEmpty()
-  }
+        val inputMtb =
+            PatientRecord.builder()
+                .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
+                .build()
+        val checkResult = fixture.consentGatedCheckAndTryEmbedding(inputMtb)
+        assertThat(checkResult).isNotNull
 
-  @ParameterizedTest
-  @CsvSource(value = ["permittedConsentBundle.json,permit", "deniedConsentBundle.json,deny"])
-  fun checkGetProvisionTypeByPolicyCode(filename: String, expected: String) {
-    val bundle =
-        fhirContext
-            .newJsonParser()
-            .parseResource(this.javaClass.classLoader.getResourceAsStream(filename))
-    assertThat(bundle).isInstanceOf(Bundle::class.java)
+        if (isTestSubmission) assertThat(inputMtb.metadata?.type).isEqualTo(MvhSubmissionType.TEST)
+        else {
+            assertThat(inputMtb.metadata?.type).isEqualTo(MvhSubmissionType.INITIAL)
+        }
+    }
 
-    val actual =
-        consentProcessor.getProvisionTypeByPolicyCode(
-            bundle as Bundle,
-            Date(),
-            ConsentDomain.BROAD_CONSENT,
-        )
+    @Test
+    fun doNotRequestBroadConsentIfReasonMissingIsGiven() {
+        doAnswer { Bundle() }
+            .whenever(gicsConsentService)
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
 
-    assertThat(actual).isEqualTo(Consent.ConsentProvisionType.valueOf(expected.uppercase()))
-  }
+        val inputMtb =
+            PatientRecord.builder()
+                .patient(Patient.builder().id("d611d429-5003-11f0-a144-661e92ac9503").build())
+                .metadata(
+                    MvhMetadata.builder().reasonResearchConsentMissing(BroadConsentReasonMissing.OTHER_PATIENT_REASON)
+                        .build()
+                )
+                .build()
+        val checkResult = consentProcessor.consentGatedCheckAndTryEmbedding(inputMtb)
+
+        verify(gicsConsentService, times(1))
+            .getConsent(any(), any(), eq(ConsentDomain.MODELLVORHABEN_64E))
+        verify(gicsConsentService, times(0))
+            .getConsent(any(), any(), eq(ConsentDomain.BROAD_CONSENT))
+
+        assertThat(checkResult).isFalse
+        assertThat(inputMtb.metadata?.researchConsents).isEmpty()
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["permittedConsentBundle.json,permit", "deniedConsentBundle.json,deny"])
+    fun checkGetProvisionTypeByPolicyCode(filename: String, expected: String) {
+        val bundle =
+            fhirContext
+                .newJsonParser()
+                .parseResource(this.javaClass.classLoader.getResourceAsStream(filename))
+        assertThat(bundle).isInstanceOf(Bundle::class.java)
+
+        val actual =
+            consentProcessor.getProvisionTypeByPolicyCode(
+                bundle as Bundle,
+                Date(),
+                ConsentDomain.BROAD_CONSENT,
+            )
+
+        assertThat(actual).isEqualTo(Consent.ConsentProvisionType.valueOf(expected.uppercase()))
+    }
+
+    @ParameterizedTest
+    @MethodSource("isRequestDateInRange")
+    fun checkRequestDateIsInRange(requestDate: Date?, provPeriod: Period, isInRange: Boolean) {
+        assertThat(this.consentProcessor.isRequestDateInRange(requestDate, provPeriod)).isEqualTo(isInRange)
+    }
+
+    companion object {
+        fun getDummyGenomDeConsent(): Consent {
+            val consent = Consent()
+            consent.id = "consent 1 id"
+            consent.patient.reference = "Patient/1234-pat1"
+
+            consent.provision.setType(Consent.ConsentProvisionType.fromCode("deny"))
+            consent.provision.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
+            consent.provision.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
+
+            val addProvision1 = consent.provision.addProvision()
+            addProvision1.setType(Consent.ConsentProvisionType.fromCode("permit"))
+            addProvision1.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
+            addProvision1.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
+            addProvision1.code.addLast(
+                CodeableConcept(
+                    Coding(
+                        "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                        "Teilnahme",
+                        "Teilnahme am Modellvorhaben und Einwilligung zur Genomsequenzierung",
+                    )
+                )
+            )
+
+            val addProvision2 = consent.provision.addProvision()
+            addProvision2.setType(Consent.ConsentProvisionType.fromCode("deny"))
+            addProvision2.period.start = Date.from(Instant.parse("2025-08-15T00:00:00.00Z"))
+            addProvision2.period.end = Date.from(Instant.parse("3000-01-01T00:00:00.00Z"))
+            addProvision2.code.addLast(
+                CodeableConcept(
+                    Coding(
+                        "https://ths-greifswald.de/fhir/CodeSystem/gics/Policy/GenomDE_MV",
+                        "Rekontaktierung",
+                        "Re-Identifizierung meiner Daten über die Vertrauensstelle beim Robert Koch-Institut und in die erneute Kontaktaufnahme durch meine behandelnde Ärztin oder meinen behandelnden Arzt",
+                    )
+                )
+            )
+            return consent
+        }
+
+        @JvmStatic
+        fun isRequestDateInRange(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    null,
+                    Period(),
+                    false
+                ),
+                Arguments.of(
+                    Date.from(LocalDate.parse("2026-09-07").atStartOfDay(ZoneOffset.UTC).toInstant()),
+                    Period()
+                        .setStart(Date.from(LocalDate.parse("2026-01-01").atStartOfDay(ZoneOffset.UTC).toInstant())),
+                    false
+                ),
+                Arguments.of(
+                    Date.from(LocalDate.parse("2026-09-07").atStartOfDay(ZoneOffset.UTC).toInstant()),
+                    Period()
+                        .setEnd(Date.from(LocalDate.parse("2026-12-31").atStartOfDay(ZoneOffset.UTC).toInstant())),
+                    false
+                ),
+                Arguments.of(
+                    Date.from(LocalDate.parse("2026-09-07").atStartOfDay(ZoneOffset.UTC).toInstant()),
+                    Period()
+                        .setStart(Date.from(LocalDate.parse("2026-01-01").atStartOfDay(ZoneOffset.UTC).toInstant()))
+                        .setEnd(Date.from(LocalDate.parse("2026-12-31").atStartOfDay(ZoneOffset.UTC).toInstant())),
+                    true
+                ),
+            )
+        }
+    }
+
 }

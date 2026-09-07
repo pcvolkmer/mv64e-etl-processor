@@ -325,7 +325,18 @@ class ConsentProcessor(
     }
   }
 
+  /**
+   * Checks if the given request date is within the range specified by the provided period.
+   *
+   * @param requestDate The date to check, can be null.
+   * @param provPeriod The period containing the start and end dates for the range, where both `start` and `end` must not be null.
+   * @return `true` if the request date is within the range (inclusive of start and end), otherwise `false`.
+   */
   fun isRequestDateInRange(requestDate: Date?, provPeriod: Period): Boolean {
+    if (null == requestDate || null == provPeriod.start || null == provPeriod.end) {
+        return false
+    }
+
     val isRequestDateAfterOrEqualStart = provPeriod.start.compareTo(requestDate)
     val isRequestDateBeforeOrEqualEnd = provPeriod.end.compareTo(requestDate)
     return isRequestDateAfterOrEqualStart <= 0 && isRequestDateBeforeOrEqualEnd >= 0
