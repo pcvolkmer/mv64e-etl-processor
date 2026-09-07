@@ -75,15 +75,25 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
     return evaluateConsentResponse(consentStatusResponse);
   }
 
+  /**
+   * This method is used to retrieve broad consent data from the gICS service.
+   *
+   * @param personIdentifierValue patient identifier used for consent data
+   * @param requestDate Ignored, just present for compatibility with other consent services
+   * @param consentDomain Ignored, just present for compatibility with other consent services
+   * @return A {@link Bundle} containing the consent data or empty Bundle if consent fails
+   */
   @Override
   public Bundle getConsent(
       String personIdentifierValue, Date requestDate, ConsentDomain consentDomain) {
-    return fhirContext
-        .newJsonParser()
-        .parseResource(
-            Bundle.class,
-            requestResponse(
-                personIdentifierValue, gIcsConfigProperties.getBroadConsentDomainName()));
+    final var response =
+        requestResponse(personIdentifierValue, gIcsConfigProperties.getBroadConsentDomainName());
+
+    if (null == response) {
+      throw new IllegalStateException("Failed to retrieve consent data from gICS");
+    }
+
+    return fhirContext.newJsonParser().parseResource(Bundle.class, response);
   }
 
   @Nullable
