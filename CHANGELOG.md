@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.17.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.4...v0.17.0) (2026-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* change data model library ([#293](https://github.com/pcvolkmer/mv64e-etl-processor/issues/293))
+
+### Features
+
+* change data model library ([#293](https://github.com/pcvolkmer/mv64e-etl-processor/issues/293)) ([0ff760c](https://github.com/pcvolkmer/mv64e-etl-processor/commit/0ff760c51cdf45f2044f20222598093515877251))
+* extract resource ID from URL if missing ([#319](https://github.com/pcvolkmer/mv64e-etl-processor/issues/319)) ([4de37a8](https://github.com/pcvolkmer/mv64e-etl-processor/commit/4de37a89c564292a95a2529aa2681ba5d7d5dbad))
+* fail early on invalid gICS HTTP(S) URI ([#316](https://github.com/pcvolkmer/mv64e-etl-processor/issues/316)) ([a0b85ed](https://github.com/pcvolkmer/mv64e-etl-processor/commit/a0b85ed6a990e8cf533be4ace3b1fabb5ad14d6f))
+
+
+### Bug Fixes
+
+* handle possible missing start/end in FHIR period ([#320](https://github.com/pcvolkmer/mv64e-etl-processor/issues/320)) ([126ce65](https://github.com/pcvolkmer/mv64e-etl-processor/commit/126ce65e344dbf8a7f4c2a4b2303312e5b0ca6e0))
+* log correct service name ([66a765b](https://github.com/pcvolkmer/mv64e-etl-processor/commit/66a765b434210a6d90c1a28ed03f52d4454224bc))
+* no consent status without consented parameter in Parameters ([26edfd8](https://github.com/pcvolkmer/mv64e-etl-processor/commit/26edfd897f0a65d252ebf74f1b4f33cba0742643))
+* possible NPE and throw IllegalStateException for gICS ([6367426](https://github.com/pcvolkmer/mv64e-etl-processor/commit/63674260450e915078c15d94f6eebf3a3152331e))
+
 ## [0.16.4](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.3...v0.16.4) (2026-06-23)
 
 
