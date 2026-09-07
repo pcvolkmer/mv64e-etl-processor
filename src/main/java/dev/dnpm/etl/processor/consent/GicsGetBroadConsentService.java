@@ -156,7 +156,7 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
       log.error(msg);
       return null;
     } catch (URISyntaxException e) {
-      var msg = String.format("Invalid URI for consents status request: '%s", e.getMessage());
+      var msg = String.format("Invalid URI for consents status request: '%s'", e.getMessage());
       log.error(msg);
       return null;
     }
