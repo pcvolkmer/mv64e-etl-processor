@@ -380,6 +380,19 @@ public class GicsConsentService extends AbstractConsentService {
 
   private static void hashBundleEntry(Bundle.BundleEntryComponent entry) {
     String id = entry.getResource().getIdPart();
+
+    // Extract ID from FullUrl if ID is blank
+    if (id.isBlank() && entry.getFullUrl() != null && entry.getFullUrl().contains("/")) {
+      final var fullUrl = entry.getFullUrl();
+      id = fullUrl.substring(fullUrl.lastIndexOf("/") + 1);
+    }
+
+    // Still no ID found, skip processing - no hashing possible.
+    // DNPM:DIP might not validate this bundle in later versions
+    if (id.isBlank()) {
+      return;
+    }
+
     var hash = DigestUtils.sha256Hex("%s_%s".formatted(Random.Default.toString(), id));
 
     entry.getResource().setId(hash);
