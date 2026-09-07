@@ -31,7 +31,7 @@ public class MtbFileConsentService implements IConsentService {
   private static final Logger log = LoggerFactory.getLogger(MtbFileConsentService.class);
 
   public MtbFileConsentService() {
-    log.info("ConsentCheckFileBased initialized...");
+    log.info("MtbFileConsentService initialized...");
   }
 
   @Override
