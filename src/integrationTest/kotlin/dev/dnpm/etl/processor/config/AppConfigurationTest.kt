@@ -30,6 +30,7 @@ import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
 import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
+import dev.dnpm.etl.processor.output.RoutedRestNngmMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasSoapPseudonymGenerator
@@ -62,7 +63,7 @@ import tools.jackson.databind.json.JsonMapper
             KafkaAutoConfiguration::class,
             AppKafkaConfiguration::class,
             AppRestConfiguration::class,
-            AppSwitchRestConfiguration::class,
+            AppRoutedRestConfiguration::class,
             ConsentEvaluator::class,
         ],
 )
@@ -92,14 +93,14 @@ class AppConfigurationTest {
     }
 
     @Nested
-    @TestPropertySource(properties = ["app.rest.uri=http://localhost:9000", "app.switch.nngm.uri=http://localhost:9999"])
+    @TestPropertySource(properties = ["app.rest.uri=http://localhost:9000", "app.routing.nngm.uri=http://localhost:9999"])
     inner class AppConfigurationSwitchedRestTest(
         private val context: ApplicationContext,
     ) {
         @Test
         fun shouldUseRestMtbFileSenderAndSwitchedNngmFileSender() {
             assertThat(context.getBean<RestDipMtbFileSender>()).isNotNull
-            assertThat(context.getBean<RestNngmMtbFileSender>()).isNotNull
+            assertThat(context.getBean<RoutedRestNngmMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
                 context.getBean<KafkaMtbFileSender>()
             }

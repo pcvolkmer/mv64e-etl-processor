@@ -26,6 +26,8 @@ import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
 import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestDipMtbFileSender
+import dev.dnpm.etl.processor.output.RestMtbFileSender
+import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -40,7 +42,6 @@ import reactor.core.publisher.Sinks
 @Configuration
 @EnableConfigurationProperties(value = [RestTargetProperties::class])
 @ConditionalOnProperty(value = ["app.rest.uri"])
-@ConditionalOnMissingBean(MtbFileSender::class)
 @Order(-10)
 class AppRestConfiguration {
     private val logger = LoggerFactory.getLogger(AppRestConfiguration::class.java)
@@ -51,10 +52,17 @@ class AppRestConfiguration {
         restTargetProperties: RestTargetProperties,
         retryTemplate: RetryTemplate,
         reportService: ReportService,
-    ): RestDipMtbFileSender {
-        logger.info("Selected 'RestDipMtbFileSender'")
-        return RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
-    }
+    ): RestMtbFileSender =
+        when (restTargetProperties.type) {
+            RestTargetType.DIP -> {
+                logger.info("Selected 'RestDipMtbFileSender'")
+                RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
+            }
+            RestTargetType.NNGM -> {
+                logger.info("Selected 'RestNngmMtbFileSender'")
+                RestNngmMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
+            }
+        }
 
     @Bean
     fun restConnectionCheckService(

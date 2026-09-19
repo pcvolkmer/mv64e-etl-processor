@@ -24,7 +24,7 @@ import dev.dnpm.etl.processor.output.MtbFileSender.Response
 import dev.pcvolkmer.mv64e.model.MtbDiagnosis
 import dev.pcvolkmer.mv64e.model.PatientRecord
 
-interface SwitchedMtbFileSender {
+interface RoutedMtbFileSender {
     fun supportsDiagnosis(diagnosis: MtbDiagnosis): Boolean
 
     fun send(request: MtbFileRequest<PatientRecord>): Response

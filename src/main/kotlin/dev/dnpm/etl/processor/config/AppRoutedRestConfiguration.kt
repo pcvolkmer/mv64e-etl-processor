@@ -21,8 +21,8 @@
 package dev.dnpm.etl.processor.config
 
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
-import dev.dnpm.etl.processor.output.SwitchedMtbFileSender
+import dev.dnpm.etl.processor.output.RoutedMtbFileSender
+import dev.dnpm.etl.processor.output.RoutedRestNngmMtbFileSender
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -33,20 +33,20 @@ import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestTemplate
 
 @Configuration
-@EnableConfigurationProperties(value = [SwitchProperties::class])
+@EnableConfigurationProperties(value = [RoutingProperties::class])
 @Order(-10)
-class AppSwitchRestConfiguration {
-    private val logger = LoggerFactory.getLogger(AppSwitchRestConfiguration::class.java)
+class AppRoutedRestConfiguration {
+    private val logger = LoggerFactory.getLogger(AppRoutedRestConfiguration::class.java)
 
     @Bean
-    @ConditionalOnProperty(prefix = "app.switch", name = ["nngm.uri"])
+    @ConditionalOnProperty(prefix = "app.routing", name = ["nngm.uri"])
     fun switchRestMtbFileSender(
         restTemplate: RestTemplate,
-        switchProperties: SwitchProperties,
+        routingProperties: RoutingProperties,
         retryTemplate: RetryTemplate,
         reportService: ReportService,
-    ): SwitchedMtbFileSender {
+    ): RoutedMtbFileSender {
         logger.info("Added switched 'RestNngmMtbFileSender' ... ")
-        return RestNngmMtbFileSender(restTemplate, switchProperties, retryTemplate, reportService)
+        return RoutedRestNngmMtbFileSender(restTemplate, routingProperties, retryTemplate, reportService)
     }
 }

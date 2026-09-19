@@ -46,7 +46,7 @@ class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
     private val transformationService: TransformationService,
     private val sender: MtbFileSender,
-    private val switchedSenders: List<SwitchedMtbFileSender>,
+    private val switchedSenders: List<RoutedMtbFileSender>,
     private val requestService: RequestService,
     private val jsonMapper: JsonMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
@@ -206,7 +206,7 @@ class RequestProcessor(
     /*
      * Selects MtbFileSender based on latest diagnosis ICD10 code
      */
-    private fun selectSwitchedSender(request: MtbFileRequest<PatientRecord>): Optional<SwitchedMtbFileSender> {
+    private fun selectSwitchedSender(request: MtbFileRequest<PatientRecord>): Optional<RoutedMtbFileSender> {
 
         when (request) {
             is DnpmV2MtbFileRequest -> {

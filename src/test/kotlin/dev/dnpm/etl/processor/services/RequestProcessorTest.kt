@@ -31,7 +31,7 @@ import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.SwitchedMtbFileSender
+import dev.dnpm.etl.processor.output.RoutedMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.pcvolkmer.mv64e.model.Coding
 import dev.pcvolkmer.mv64e.model.ConsentProvisionType
@@ -70,7 +70,7 @@ class RequestProcessorTest {
     private lateinit var pseudonymizeService: PseudonymizeService
     private lateinit var transformationService: TransformationService
     private lateinit var sender: MtbFileSender
-    private lateinit var switchedMtbFileSender: SwitchedMtbFileSender
+    private lateinit var routedMtbFileSender: RoutedMtbFileSender
     private lateinit var requestService: RequestService
     private lateinit var applicationEventPublisher: ApplicationEventPublisher
     private lateinit var appConfigProperties: AppConfigProperties
@@ -83,7 +83,7 @@ class RequestProcessorTest {
         @Mock pseudonymizeService: PseudonymizeService,
         @Mock transformationService: TransformationService,
         @Mock sender: MtbFileSender,
-        @Mock switchedMtbFileSender: SwitchedMtbFileSender,
+        @Mock routedMtbFileSender: RoutedMtbFileSender,
         @Mock requestService: RequestService,
         @Mock applicationEventPublisher: ApplicationEventPublisher,
         @Mock consentProcessor: ConsentProcessor,
@@ -91,7 +91,7 @@ class RequestProcessorTest {
         this.pseudonymizeService = pseudonymizeService
         this.transformationService = transformationService
         this.sender = sender
-        this.switchedMtbFileSender = switchedMtbFileSender
+        this.routedMtbFileSender = routedMtbFileSender
         this.requestService = requestService
         this.applicationEventPublisher = applicationEventPublisher
         this.appConfigProperties = AppConfigProperties()
@@ -103,7 +103,7 @@ class RequestProcessorTest {
                 pseudonymizeService,
                 transformationService,
                 sender,
-                listOf(switchedMtbFileSender),
+                listOf(routedMtbFileSender),
                 requestService,
                 jsonMapper,
                 applicationEventPublisher,
@@ -449,7 +449,7 @@ class RequestProcessorTest {
                 pseudonymizeService,
                 transformationService,
                 sender,
-                listOf(switchedMtbFileSender),
+                listOf(routedMtbFileSender),
                 requestService,
                 jsonMapper,
                 applicationEventPublisher,
@@ -692,7 +692,7 @@ class RequestProcessorTest {
                 pseudonymizeService,
                 transformationService,
                 sender,
-                listOf(switchedMtbFileSender),
+                listOf(routedMtbFileSender),
                 requestService,
                 jsonMapper,
                 applicationEventPublisher,
@@ -769,7 +769,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -842,7 +842,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -948,7 +948,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1067,7 +1067,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1173,7 +1173,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1257,7 +1257,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1333,7 +1333,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1462,7 +1462,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1577,7 +1577,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1708,7 +1708,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1853,7 +1853,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -1989,7 +1989,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -2092,7 +2092,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -2209,7 +2209,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -2268,7 +2268,7 @@ class RequestProcessorTest {
         private lateinit var pseudonymizeService: PseudonymizeService
         private lateinit var transformationService: TransformationService
         private lateinit var sender: MtbFileSender
-        private lateinit var switchedMtbFileSender: SwitchedMtbFileSender
+        private lateinit var routedMtbFileSender: RoutedMtbFileSender
         private lateinit var requestService: RequestService
         private lateinit var applicationEventPublisher: ApplicationEventPublisher
         private lateinit var appConfigProperties: AppConfigProperties
@@ -2281,7 +2281,7 @@ class RequestProcessorTest {
             @Mock pseudonymizeService: PseudonymizeService,
             @Mock transformationService: TransformationService,
             @Mock sender: MtbFileSender,
-            @Mock switchedMtbFileSender: SwitchedMtbFileSender,
+            @Mock routedMtbFileSender: RoutedMtbFileSender,
             @Mock requestService: RequestService,
             @Mock applicationEventPublisher: ApplicationEventPublisher,
             @Mock consentProcessor: ConsentProcessor,
@@ -2289,7 +2289,7 @@ class RequestProcessorTest {
             this.pseudonymizeService = pseudonymizeService
             this.transformationService = transformationService
             this.sender = sender
-            this.switchedMtbFileSender = switchedMtbFileSender
+            this.routedMtbFileSender = routedMtbFileSender
             this.requestService = requestService
             this.applicationEventPublisher = applicationEventPublisher
             this.appConfigProperties = AppConfigProperties()
@@ -2301,7 +2301,7 @@ class RequestProcessorTest {
                     pseudonymizeService,
                     transformationService,
                     sender,
-                    listOf(switchedMtbFileSender),
+                    listOf(routedMtbFileSender),
                     requestService,
                     jsonMapper,
                     applicationEventPublisher,
@@ -2312,7 +2312,7 @@ class RequestProcessorTest {
             doAnswer {
                 val diagnosis = it.arguments[0] as MtbDiagnosis
                 diagnosis.code.code.equals("C34.9")
-            }.whenever(switchedMtbFileSender).supportsDiagnosis(any<MtbDiagnosis>())
+            }.whenever(routedMtbFileSender).supportsDiagnosis(any<MtbDiagnosis>())
         }
 
         @Test
@@ -2339,7 +2339,7 @@ class RequestProcessorTest {
                 .isLastRequestWithKnownStatusDeletion(anyValueClass())
 
             doAnswer { MtbFileSender.Response(status = RequestStatus.SUCCESS) }
-                .whenever(switchedMtbFileSender)
+                .whenever(routedMtbFileSender)
                 .send(any<DnpmV2MtbFileRequest>())
 
             doAnswer { it.arguments[0] as String }
@@ -2379,7 +2379,7 @@ class RequestProcessorTest {
             // Do not use DNPM:DIP sender
             verify(sender, never()).send(any<MtbFileRequest<PatientRecord>>())
             // Use switched sender instead
-            verify(switchedMtbFileSender, times(1)).send(any<MtbFileRequest<PatientRecord>>())
+            verify(routedMtbFileSender, times(1)).send(any<MtbFileRequest<PatientRecord>>())
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())
@@ -2451,7 +2451,7 @@ class RequestProcessorTest {
             // Use DNPM:DIP sender
             verify(sender, times(1)).send(any<MtbFileRequest<PatientRecord>>())
             // Not switched sender
-            verify(switchedMtbFileSender, never()).send(any<MtbFileRequest<PatientRecord>>())
+            verify(routedMtbFileSender, never()).send(any<MtbFileRequest<PatientRecord>>())
 
             val eventCaptor = argumentCaptor<ResponseEvent>()
             verify(applicationEventPublisher, times(1)).publishEvent(eventCaptor.capture())

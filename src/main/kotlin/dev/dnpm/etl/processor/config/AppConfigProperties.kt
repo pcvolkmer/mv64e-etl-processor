@@ -111,18 +111,25 @@ data class RestTargetProperties(
     val uri: String?,
     val username: String?,
     val password: String?,
+    val apiKey: String? = null,
+    val type: RestTargetType = RestTargetType.DIP,
 ) {
     companion object {
         const val NAME = "app.rest"
     }
 }
 
-@ConfigurationProperties(SwitchProperties.NAME)
-data class SwitchProperties(
+enum class RestTargetType {
+    DIP,
+    NNGM,
+}
+
+@ConfigurationProperties(RoutingProperties.NAME)
+data class RoutingProperties(
     val nngm: SwitchTargetProperties? = null,
 ) {
     companion object {
-        const val NAME = "app.switch"
+        const val NAME = "app.routing"
     }
 }
 

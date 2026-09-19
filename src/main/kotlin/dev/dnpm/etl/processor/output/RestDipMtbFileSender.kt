@@ -39,14 +39,12 @@ import org.springframework.web.client.exchange
 import org.springframework.web.util.UriComponentsBuilder
 
 class RestDipMtbFileSender(
-    private val restTemplate: RestTemplate,
+    restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
-    private val retryTemplate: RetryTemplate,
-    private val reportService: ReportService,
-) : MtbFileSender {
-    private val logger = LoggerFactory.getLogger(RestDipMtbFileSender::class.java)
-
-    fun sendUrl(): String =
+    retryTemplate: RetryTemplate,
+    reportService: ReportService,
+) : RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService) {
+    override fun sendUrl(): String =
         UriComponentsBuilder
             .fromUriString(restTargetProperties.uri.toString())
             .pathSegment("mtb")
@@ -54,7 +52,7 @@ class RestDipMtbFileSender(
             .pathSegment("patient-record")
             .toUriString()
 
-    fun deleteUrl(patientId: PatientPseudonym): String =
+    override fun deleteUrl(patientId: PatientPseudonym): String =
         UriComponentsBuilder
             .fromUriString(restTargetProperties.uri.toString())
             .pathSegment("mtb")
@@ -63,60 +61,9 @@ class RestDipMtbFileSender(
             .pathSegment(patientId.value)
             .toUriString()
 
-    override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
-        try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = getHttpHeaders(request)
-                val entityReq = HttpEntity(request.content, headers)
-                val response =
-                    restTemplate.exchange<String>(sendUrl(), HttpMethod.POST, entityReq)
-                if (!response.statusCode.is2xxSuccessful) {
-                    logger.warn("Error sending to remote system: {}", response.body)
-                    return@execute MtbFileSender.Response(
-                        reportService.deserialize(response.body).asRequestStatus(),
-                        "Status-Code: ${response.statusCode.value()}",
-                    )
-                }
-                logger.debug("Sent file via RestDipMtbFileSender")
-                return@execute MtbFileSender.Response(
-                    reportService.deserialize(response.body).asRequestStatus(),
-                    response.body.orEmpty(),
-                )
-            }
-        } catch (e: IllegalArgumentException) {
-            logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
-        } catch (e: RestClientResponseException) {
-            logger.info(restTargetProperties.uri!!.toString())
-            logger.error("Request data not accepted by remote system", e)
-            return MtbFileSender.Response(
-                reportService.deserialize(e.responseBodyAsString).asRequestStatus(),
-                e.responseBodyAsString,
-            )
-        }
-        return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
-    }
-
-    override fun send(request: DeleteRequest): MtbFileSender.Response {
-        try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = getHttpHeaders(request)
-                val entityReq = HttpEntity(null, headers)
-                restTemplate.delete(deleteUrl(request.patientId), entityReq, String::class.java)
-                logger.debug("Sent file via RestDipMtbFileSender")
-                return@execute MtbFileSender.Response(RequestStatus.SUCCESS)
-            }
-        } catch (e: IllegalArgumentException) {
-            logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
-        } catch (e: RestClientException) {
-            logger.info(restTargetProperties.uri!!.toString())
-            logger.error("Cannot send data to remote system", e)
-        }
-        return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
-    }
-
     override fun endpoint(): String = this.restTargetProperties.uri.orEmpty()
 
-    private fun getHttpHeaders(request: MtbRequest): HttpHeaders {
+    override fun getHttpHeaders(request: MtbRequest): HttpHeaders {
         val username = restTargetProperties.username
         val password = restTargetProperties.password
         val headers = HttpHeaders()

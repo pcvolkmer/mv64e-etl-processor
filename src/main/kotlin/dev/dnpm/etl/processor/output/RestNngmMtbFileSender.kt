@@ -20,90 +20,32 @@
 
 package dev.dnpm.etl.processor.output
 
-import dev.dnpm.etl.processor.config.SwitchProperties
+import dev.dnpm.etl.processor.PatientPseudonym
+import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.asRequestStatus
-import dev.pcvolkmer.mv64e.model.MtbDiagnosis
-import dev.pcvolkmer.mv64e.model.PatientRecord
-import org.slf4j.LoggerFactory
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.support.RetryTemplate
-import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
 import org.springframework.web.util.UriComponentsBuilder
 
 class RestNngmMtbFileSender(
-    private val restTemplate: RestTemplate,
-    private val switchProperties: SwitchProperties,
-    private val retryTemplate: RetryTemplate,
-    private val reportService: ReportService,
-) : SwitchedMtbFileSender {
-    private val logger = LoggerFactory.getLogger(RestNngmMtbFileSender::class.java)
-
-    fun sendUrl(): String =
+    restTemplate: RestTemplate,
+    private val restTargetProperties: RestTargetProperties,
+    retryTemplate: RetryTemplate,
+    reportService: ReportService,
+) : RestMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService) {
+    override fun sendUrl(): String =
         UriComponentsBuilder
-            .fromUriString(switchProperties.nngm?.uri.toString())
+            .fromUriString(restTargetProperties.uri.toString())
             .toUriString()
 
-    override fun supportsDiagnosis(diagnosis: MtbDiagnosis): Boolean {
-        val code = diagnosis.code?.code ?: return false
+    override fun deleteUrl(patientId: PatientPseudonym): String = throw UnsupportedOperationException("Not implemented")
 
-        if (code.isBlank()) {
-            return false
-        }
+    override fun endpoint(): String = this.restTargetProperties.uri.orEmpty()
 
-        this.switchProperties.nngm?.icd10?.forEach {
-            if (code.startsWith(it)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    override fun send(request: MtbFileRequest<PatientRecord>): MtbFileSender.Response {
-        try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val entityReq = HttpEntity(request.content, getHttpHeaders())
-                val response =
-                    restTemplate.exchange<String>(sendUrl(), HttpMethod.POST, entityReq)
-                if (!response.statusCode.is2xxSuccessful) {
-                    logger.warn("Error sending to remote system: {}", response.body)
-                    return@execute MtbFileSender.Response(
-                        reportService.deserialize(response.body).asRequestStatus(),
-                        "Status-Code: ${response.statusCode.value()}",
-                    )
-                }
-                logger.debug("Sent file via RestNngmMtbFileSender")
-                return@execute MtbFileSender.Response(
-                    reportService.deserialize(response.body).asRequestStatus(),
-                    response.body.orEmpty(),
-                )
-            }
-        } catch (_: IllegalArgumentException) {
-            logger.error("Not a valid URI to export to: '{}'", switchProperties.nngm?.uri!!)
-        } catch (e: RestClientResponseException) {
-            logger.info(switchProperties.nngm?.uri!!)
-            logger.error("Request data not accepted by remote system", e)
-            return MtbFileSender.Response(
-                reportService.deserialize(e.responseBodyAsString).asRequestStatus(),
-                e.responseBodyAsString,
-            )
-        }
-        return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
-    }
-
-    fun endpoint(): String =
-        this.switchProperties.nngm
-            ?.uri
-            .orEmpty()
-
-    private fun getHttpHeaders(): HttpHeaders {
-        val apiKey = switchProperties.nngm?.apiKey
+    override fun getHttpHeaders(request: MtbRequest): HttpHeaders {
+        val apiKey = restTargetProperties.apiKey
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
