@@ -24,12 +24,11 @@ import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
 import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
-import dev.dnpm.etl.processor.output.MtbFileSender
 import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -65,6 +64,7 @@ class AppRestConfiguration {
         }
 
     @Bean
+    @ConditionalOnBean(RestDipMtbFileSender::class)
     fun restConnectionCheckService(
         restTemplate: RestTemplate,
         restTargetProperties: RestTargetProperties,

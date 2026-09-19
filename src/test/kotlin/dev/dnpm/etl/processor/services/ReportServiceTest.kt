@@ -60,13 +60,13 @@ class ReportServiceTest {
 
         assertThat(actual).hasSize(4)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.FATAL)
-        assertThat(actual[0].getMessage()).isEqualTo("Fatal Message")
+        assertThat(actual[0].getMessageText()).isEqualTo("Fatal Message")
         assertThat(actual[1].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[1].getMessage()).isEqualTo("Error Message")
+        assertThat(actual[1].getMessageText()).isEqualTo("Error Message")
         assertThat(actual[2].severity).isEqualTo(ReportService.Severity.WARNING)
-        assertThat(actual[2].getMessage()).isEqualTo("Warning Message")
+        assertThat(actual[2].getMessageText()).isEqualTo("Warning Message")
         assertThat(actual[3].severity).isEqualTo(ReportService.Severity.INFO)
-        assertThat(actual[3].getMessage()).isEqualTo("Info Message")
+        assertThat(actual[3].getMessageText()).isEqualTo("Info Message")
 
         assertThat(actual.asRequestStatus()).isEqualTo(RequestStatus.ERROR)
     }
@@ -87,7 +87,7 @@ class ReportServiceTest {
 
         assertThat(actual).hasSize(1)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[0].getMessage()).isEqualTo("/specimens(0)/type/code: error.path.missing")
+        assertThat(actual[0].getMessageText()).isEqualTo("/specimens(0)/type/code: error.path.missing")
 
         assertThat(actual.asRequestStatus()).isEqualTo(RequestStatus.ERROR)
     }
@@ -110,7 +110,7 @@ class ReportServiceTest {
 
         assertThat(actual).hasSize(1)
         assertThat(actual[0].severity).isEqualTo(ReportService.Severity.ERROR)
-        assertThat(actual[0].getMessage()).isEqualTo("Not parsable data quality report '$invalidResponse'")
+        assertThat(actual[0].getMessageText()).isEqualTo("Not parsable data quality report '$invalidResponse'")
     }
 
     companion object {

@@ -35,19 +35,23 @@ class ReportService(private val jsonMapper: JsonMapper) {
             return listOf()
         }
         return try {
-            jsonMapper.readValue(dataQualityReport, DataQualityReport::class.java).issues.sortedBy {
+            jsonMapper.readValue(dataQualityReport, DipDataQualityReport::class.java).issues.sortedBy {
                 it.severity
             }
         } catch (_: JacksonException) {
-            val otherIssue =
-                Issue(Severity.ERROR, Optional.of("Not parsable data quality report '$dataQualityReport'"))
-            return listOf(otherIssue)
+            return try {
+                jsonMapper.readValue(dataQualityReport, NngmDataQualityReport::class.java).getIssues()
+            } catch (_: JacksonException) {
+                val otherIssue =
+                    Issue(Severity.ERROR, Optional.of("Not parsable data quality report '$dataQualityReport'"))
+                return listOf(otherIssue)
+            }
         } catch (e: Exception) {
             throw e
         }
     }
 
-    private data class DataQualityReport(
+    private data class DipDataQualityReport(
         val issues: List<Issue>
     )
 
@@ -57,7 +61,7 @@ class ReportService(private val jsonMapper: JsonMapper) {
         val details: Optional<String> = Optional.empty(),
         val path: Optional<String> = Optional.empty(),
     ) {
-        fun getMessage() = message.orElse(details.orElse("No details available"))
+        fun getMessageText() = message.orElse(details.orElse("No details available"))
     }
 
     @EnumNaming(EnumNamingStrategies.LowerCaseStrategy::class)
@@ -67,6 +71,22 @@ class ReportService(private val jsonMapper: JsonMapper) {
         WARNING("warning"),
         INFO("info"),
     }
+
+    private data class NngmDataQualityReport(
+        val qualityChecksReport: QualityChecksReport,
+    ) {
+        fun getIssues(): List<Issue> {
+            val severity = if (this.qualityChecksReport.importAccepted) Severity.INFO else Severity.ERROR
+            return this.qualityChecksReport.qualityChecks
+                .split('|')
+                .map { Issue(severity, Optional.of(it)) }
+        }
+    }
+
+    private data class QualityChecksReport(
+        val importAccepted: Boolean,
+        val qualityChecks: String
+    )
 }
 
 fun List<Issue>.asRequestStatus(): RequestStatus {
@@ -74,6 +94,7 @@ fun List<Issue>.asRequestStatus(): RequestStatus {
     return when (severity) {
         Severity.FATAL,
         Severity.ERROR -> RequestStatus.ERROR
+
         Severity.WARNING -> RequestStatus.WARNING
         else -> RequestStatus.SUCCESS
     }
