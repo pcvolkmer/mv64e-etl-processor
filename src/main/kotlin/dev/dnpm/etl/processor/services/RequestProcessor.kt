@@ -24,10 +24,7 @@ import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.*
-import dev.dnpm.etl.processor.output.DeleteRequest
-import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
-import dev.dnpm.etl.processor.output.MtbFileRequest
-import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
@@ -49,6 +46,7 @@ class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
     private val transformationService: TransformationService,
     private val sender: MtbFileSender,
+    private val switchedSenders: List<SwitchedMtbFileSender>,
     private val requestService: RequestService,
     private val jsonMapper: JsonMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
@@ -182,7 +180,13 @@ class RequestProcessor(
             return
         }
 
-        val responseStatus = sender.send(request)
+        val switchedSender = selectSwitchedSender(request)
+
+        val responseStatus = if (!switchedSender.isEmpty) {
+            switchedSender.get().send(request)
+        } else {
+            sender.send(request)
+        }
 
         applicationEventPublisher.publishEvent(
             ResponseEvent(
@@ -197,6 +201,28 @@ class RequestProcessor(
                 },
             )
         )
+    }
+
+    /*
+     * Selects MtbFileSender based on latest diagnosis ICD10 code
+     */
+    private fun selectSwitchedSender(request: MtbFileRequest<PatientRecord>): Optional<SwitchedMtbFileSender> {
+
+        when (request) {
+            is DnpmV2MtbFileRequest -> {
+                val latestDiagnosis = request.content.diagnoses.maxBy { it.recordedOn } ?: return Optional.empty()
+
+                this.switchedSenders.forEach { sender ->
+                    if (sender.supportsDiagnosis(latestDiagnosis)) {
+                        return Optional.of(sender)
+                    }
+                }
+
+            }
+        }
+
+        // Default
+        return Optional.empty()
     }
 
     private fun hasFollowUpAfterLastSuccessfulSubmission(request: DnpmV2MtbFileRequest): Boolean {

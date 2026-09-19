@@ -20,54 +20,55 @@
 
 package dev.dnpm.etl.processor.output
 
-import dev.dnpm.etl.processor.CustomMediaType
-import dev.dnpm.etl.processor.PatientPseudonym
-import dev.dnpm.etl.processor.config.RestTargetProperties
+import dev.dnpm.etl.processor.config.SwitchProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.asRequestStatus
+import dev.pcvolkmer.mv64e.model.MtbDiagnosis
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.support.RetryTemplate
-import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
 import org.springframework.web.util.UriComponentsBuilder
 
-class RestDipMtbFileSender(
+class RestNngmMtbFileSender(
     private val restTemplate: RestTemplate,
-    private val restTargetProperties: RestTargetProperties,
+    private val switchProperties: SwitchProperties,
     private val retryTemplate: RetryTemplate,
     private val reportService: ReportService,
-) : MtbFileSender {
-    private val logger = LoggerFactory.getLogger(RestDipMtbFileSender::class.java)
+) : SwitchedMtbFileSender {
+    private val logger = LoggerFactory.getLogger(RestNngmMtbFileSender::class.java)
 
     fun sendUrl(): String =
         UriComponentsBuilder
-            .fromUriString(restTargetProperties.uri.toString())
-            .pathSegment("mtb")
-            .pathSegment("etl")
-            .pathSegment("patient-record")
+            .fromUriString(switchProperties.nngm?.uri.toString())
             .toUriString()
 
-    fun deleteUrl(patientId: PatientPseudonym): String =
-        UriComponentsBuilder
-            .fromUriString(restTargetProperties.uri.toString())
-            .pathSegment("mtb")
-            .pathSegment("etl")
-            .pathSegment("patient")
-            .pathSegment(patientId.value)
-            .toUriString()
+    override fun supportsDiagnosis(diagnosis: MtbDiagnosis): Boolean {
+        val code = diagnosis.code?.code ?: return false
 
-    override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
+        if (code.isBlank()) {
+            return false
+        }
+
+        this.switchProperties.nngm?.icd10?.forEach {
+            if (code.startsWith(it)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun send(request: MtbFileRequest<PatientRecord>): MtbFileSender.Response {
         try {
             return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = getHttpHeaders(request)
-                val entityReq = HttpEntity(request.content, headers)
+                val entityReq = HttpEntity(request.content, getHttpHeaders())
                 val response =
                     restTemplate.exchange<String>(sendUrl(), HttpMethod.POST, entityReq)
                 if (!response.statusCode.is2xxSuccessful) {
@@ -77,16 +78,16 @@ class RestDipMtbFileSender(
                         "Status-Code: ${response.statusCode.value()}",
                     )
                 }
-                logger.debug("Sent file via RestDipMtbFileSender")
+                logger.debug("Sent file via RestNngmMtbFileSender")
                 return@execute MtbFileSender.Response(
                     reportService.deserialize(response.body).asRequestStatus(),
                     response.body.orEmpty(),
                 )
             }
-        } catch (e: IllegalArgumentException) {
-            logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
+        } catch (_: IllegalArgumentException) {
+            logger.error("Not a valid URI to export to: '{}'", switchProperties.nngm?.uri!!)
         } catch (e: RestClientResponseException) {
-            logger.info(restTargetProperties.uri!!.toString())
+            logger.info(switchProperties.nngm?.uri!!)
             logger.error("Request data not accepted by remote system", e)
             return MtbFileSender.Response(
                 reportService.deserialize(e.responseBodyAsString).asRequestStatus(),
@@ -96,41 +97,21 @@ class RestDipMtbFileSender(
         return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
     }
 
-    override fun send(request: DeleteRequest): MtbFileSender.Response {
-        try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
-                val headers = getHttpHeaders(request)
-                val entityReq = HttpEntity(null, headers)
-                restTemplate.delete(deleteUrl(request.patientId), entityReq, String::class.java)
-                logger.debug("Sent file via RestDipMtbFileSender")
-                return@execute MtbFileSender.Response(RequestStatus.SUCCESS)
-            }
-        } catch (e: IllegalArgumentException) {
-            logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
-        } catch (e: RestClientException) {
-            logger.info(restTargetProperties.uri!!.toString())
-            logger.error("Cannot send data to remote system", e)
-        }
-        return MtbFileSender.Response(RequestStatus.ERROR, "Sonstiger Fehler bei der Übertragung")
-    }
+    fun endpoint(): String =
+        this.switchProperties.nngm
+            ?.uri
+            .orEmpty()
 
-    override fun endpoint(): String = this.restTargetProperties.uri.orEmpty()
-
-    private fun getHttpHeaders(request: MtbRequest): HttpHeaders {
-        val username = restTargetProperties.username
-        val password = restTargetProperties.password
+    private fun getHttpHeaders(): HttpHeaders {
+        val apiKey = switchProperties.nngm?.apiKey
         val headers = HttpHeaders()
-        headers.contentType =
-            when (request) {
-                is DnpmV2MtbFileRequest -> CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-                else -> MediaType.APPLICATION_JSON
-            }
+        headers.contentType = MediaType.APPLICATION_JSON
 
-        if (username.isNullOrBlank() || password.isNullOrBlank()) {
+        if (apiKey.isNullOrBlank()) {
             return headers
         }
 
-        headers.setBasicAuth(username, password)
+        headers.set(HttpHeaders.AUTHORIZATION, "X-API-KEY $apiKey")
         return headers
     }
 }

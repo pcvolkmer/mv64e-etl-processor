@@ -117,6 +117,23 @@ data class RestTargetProperties(
     }
 }
 
+@ConfigurationProperties(SwitchProperties.NAME)
+data class SwitchProperties(
+    val nngm: SwitchTargetProperties? = null,
+) {
+    companion object {
+        const val NAME = "app.switch"
+    }
+}
+
+data class SwitchTargetProperties(
+    val uri: String,
+    val username: String?,
+    val password: String?,
+    val apiKey: String?,
+    val icd10: List<String> = listOf(),
+)
+
 @ConfigurationProperties(KafkaProperties.NAME)
 data class KafkaProperties(
     val inputTopic: String?,

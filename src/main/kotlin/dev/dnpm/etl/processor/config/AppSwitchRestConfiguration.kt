@@ -20,14 +20,10 @@
 
 package dev.dnpm.etl.processor.config
 
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckResult
-import dev.dnpm.etl.processor.monitoring.ConnectionCheckService
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.monitoring.RestConnectionCheckService
-import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.RestDipMtbFileSender
+import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
+import dev.dnpm.etl.processor.output.SwitchedMtbFileSender
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -35,36 +31,22 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestTemplate
-import reactor.core.publisher.Sinks
 
 @Configuration
-@EnableConfigurationProperties(value = [RestTargetProperties::class])
-@ConditionalOnProperty(value = ["app.rest.uri"])
-@ConditionalOnMissingBean(MtbFileSender::class)
+@EnableConfigurationProperties(value = [SwitchProperties::class])
 @Order(-10)
-class AppRestConfiguration {
-    private val logger = LoggerFactory.getLogger(AppRestConfiguration::class.java)
+class AppSwitchRestConfiguration {
+    private val logger = LoggerFactory.getLogger(AppSwitchRestConfiguration::class.java)
 
     @Bean
-    fun restMtbFileSender(
+    @ConditionalOnProperty(prefix = "app.switch", name = ["nngm.uri"])
+    fun switchRestMtbFileSender(
         restTemplate: RestTemplate,
-        restTargetProperties: RestTargetProperties,
+        switchProperties: SwitchProperties,
         retryTemplate: RetryTemplate,
         reportService: ReportService,
-    ): RestDipMtbFileSender {
-        logger.info("Selected 'RestDipMtbFileSender'")
-        return RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
+    ): SwitchedMtbFileSender {
+        logger.info("Added switched 'RestNngmMtbFileSender' ... ")
+        return RestNngmMtbFileSender(restTemplate, switchProperties, retryTemplate, reportService)
     }
-
-    @Bean
-    fun restConnectionCheckService(
-        restTemplate: RestTemplate,
-        restTargetProperties: RestTargetProperties,
-        connectionCheckUpdateProducer: Sinks.Many<ConnectionCheckResult>,
-    ): ConnectionCheckService =
-        RestConnectionCheckService(
-            restTemplate,
-            restTargetProperties,
-            connectionCheckUpdateProducer,
-        )
 }

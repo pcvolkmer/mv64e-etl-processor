@@ -21,13 +21,8 @@
 package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.*
-import dev.dnpm.etl.processor.monitoring.Request
-import dev.dnpm.etl.processor.monitoring.RequestRepository
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.RequestType
-import dev.dnpm.etl.processor.monitoring.SubmissionType
-import dev.dnpm.etl.processor.output.MtbFileSender
-import java.time.Instant
+import dev.dnpm.etl.processor.monitoring.*
+import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,12 +34,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.time.Instant
 
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 @Transactional
-@MockitoBean(types = [MtbFileSender::class])
+@MockitoBean(types = [RestDipMtbFileSender::class])
 @TestPropertySource(
     properties = ["app.pseudonymize.generator=buildin", "app.rest.uri=http://example.com"]
 )
