@@ -30,7 +30,6 @@ import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.output.DeleteRequest
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
-import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.pcvolkmer.mv64e.model.ConsentProvisionType
 import dev.pcvolkmer.mv64e.model.FollowUp
@@ -78,7 +77,7 @@ class RequestProcessorTest {
     fun setup(
         @Mock pseudonymizeService: PseudonymizeService,
         @Mock transformationService: TransformationService,
-        @Mock sender: RestMtbFileSender,
+        @Mock sender: MtbFileSender,
         @Mock requestService: RequestService,
         @Mock applicationEventPublisher: ApplicationEventPublisher,
         @Mock consentProcessor: ConsentProcessor,
@@ -699,7 +698,7 @@ class RequestProcessorTest {
         fun setup(
             @Mock pseudonymizeService: PseudonymizeService,
             @Mock transformationService: TransformationService,
-            @Mock sender: RestMtbFileSender,
+            @Mock sender: MtbFileSender,
             @Mock requestService: RequestService,
             @Mock applicationEventPublisher: ApplicationEventPublisher,
             @Mock consentProcessor: ConsentProcessor,
@@ -1169,7 +1168,7 @@ class RequestProcessorTest {
         fun setup(
             @Mock pseudonymizeService: PseudonymizeService,
             @Mock transformationService: TransformationService,
-            @Mock sender: RestMtbFileSender,
+            @Mock sender: MtbFileSender,
             @Mock requestService: RequestService,
             @Mock applicationEventPublisher: ApplicationEventPublisher,
             @Mock consentProcessor: ConsentProcessor,
