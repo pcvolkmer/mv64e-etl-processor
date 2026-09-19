@@ -109,6 +109,18 @@ class RequestProcessor(
                 }
             }
 
+        var destination = when (sender) {
+            is RestDipMtbFileSender -> Destination.DNPM_DIP
+            is RestNngmMtbFileSender -> Destination.NNGM_API
+            is KafkaMtbFileSender -> Destination.KAFKA
+            else -> Destination.UNKNOWN
+        }
+
+        val routedSender = selectRoutedSender(request)
+        if (routedSender.isPresent && routedSender.get() is RoutedRestNngmMtbFileSender) {
+            destination = Destination.NNGM_API
+        }
+
         val maxFollowUpCount = this.requestService.allRequestsByPatientPseudonym(request.patientPseudonym())
             .maxByOrNull { it.followupCount }
             ?.followupCount ?: -1
@@ -130,6 +142,7 @@ class RequestProcessor(
                     tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                     followupCount = maxFollowUpCount,
                     expectedFollowupCount = request.content.followUps?.size ?: 0,
+                    destination = destination,
                 )
             )
             // Exit - no further processing
@@ -170,6 +183,7 @@ class RequestProcessor(
                 tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                 followupCount = maxFollowUpCount,
                 expectedFollowupCount = request.content.followUps?.size ?: 0,
+                destination = destination,
             )
         )
 
@@ -180,10 +194,8 @@ class RequestProcessor(
             return
         }
 
-        val switchedSender = selectSwitchedSender(request)
-
-        val responseStatus = if (!switchedSender.isEmpty) {
-            switchedSender.get().send(request)
+        val responseStatus = if (!routedSender.isEmpty) {
+            routedSender.get().send(request)
         } else {
             sender.send(request)
         }
@@ -206,7 +218,7 @@ class RequestProcessor(
     /*
      * Selects MtbFileSender based on latest diagnosis ICD10 code
      */
-    private fun selectSwitchedSender(request: MtbFileRequest<PatientRecord>): Optional<RoutedMtbFileSender> {
+    private fun selectRoutedSender(request: MtbFileRequest<PatientRecord>): Optional<RoutedMtbFileSender> {
 
         when (request) {
             is DnpmV2MtbFileRequest -> {

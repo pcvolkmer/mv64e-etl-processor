@@ -183,7 +183,7 @@ class RequestProcessorTest {
                 randomRequestId(),
                 PatientPseudonym("TEST_12345678901"),
                 PatientId("P1"),
-                Fingerprint("me6ockoru4boi4ypghfia5myfqtuffwlbszwhtop2rtltb3ycjva"),
+                Fingerprint("q3qfwecsw3tcmdsg4kg5ki4ob3qw3warnwi4qc54nptjgzft53nq"),
                 RequestType.MTB_FILE,
                 SubmissionType.TEST,
                 RequestStatus.SUCCESS,
@@ -209,6 +209,12 @@ class RequestProcessorTest {
         val mtbFile =
             PatientRecord.builder()
                 .patient(Patient.builder().id("123").build())
+                .diagnoses(
+                    listOf(
+                        MtbDiagnosis().code(Coding().code("C80.9"))
+                            .recordedOn(Date.from(Instant.parse("2020-01-01T02:00:00.00Z")))
+                    )
+                )
                 .episodesOfCare(
                     listOf(
                         MtbEpisodeOfCare.builder()
@@ -853,6 +859,7 @@ class RequestProcessorTest {
             val mtbFile =
                 PatientRecord.builder()
                     .patient(Patient.builder().id("123").build())
+                    .diagnoses(listOf(MtbDiagnosis().code(Coding().code("C80.9")).recordedOn(Date())))
                     .episodesOfCare(
                         listOf(
                             MtbEpisodeOfCare.builder()

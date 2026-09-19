@@ -76,7 +76,7 @@ abstract class RestMtbFileSender(
             logger.info(restTargetProperties.uri!!.toString())
             logger.error("Request data not accepted by remote system", e)
             return MtbFileSender.Response(
-                reportService.deserialize(e.responseBodyAsString).asRequestStatus(),
+                RequestStatus.ERROR,
                 e.responseBodyAsString,
             )
         }

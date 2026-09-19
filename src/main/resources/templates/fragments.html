@@ -54,7 +54,10 @@
             <div th:if="${request.type.value == 'delete'}">
                 <span>🗑 Löschanfrage vom </span><time th:datetime="${request.processedAt}">[[ ${request.processedAt} ]]</time>
             </div>
-            <div sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}">
+            <div class="destination" th:if="${request.destination.value == 'kafka'}">Kafka Broker</div>
+            <div class="destination" th:if="${request.destination.value == 'dnpm_dip'}">DNPM:DIP</div>
+            <div class="destination" th:if="${request.destination.value == 'nngm_api'}">nNGM-API</div>
+            <div class="accepted" sec:authorize="hasRole('USER') or hasRole('ADMIN')" th:if="${postInitialSubmissionBlock}">
                 <button class="btn btn-green" hx-swap="outerHTML" th:hx-target="${'#request_' + request.uuid}" th:hx-delete="@{/submission/{requestId}/accepted(requestId=${request.uuid})}" th:if="${         request.submissionType.value == 'initial'         and (request.status.value == 'success' or request.status.value == 'warning')         and request.submissionAccepted == true}" title="Doch keine Meldebestätigung - jetzt blockieren">
                     🔓 Bestätigte Initialmeldung
                 </button>
