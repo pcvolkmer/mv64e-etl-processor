@@ -78,7 +78,7 @@ class RestDipMtbFileSenderTest {
 
     private lateinit var mockRestServiceServer: MockRestServiceServer
 
-    private lateinit var restMtbFileSender: RestMtbFileSender
+    private lateinit var restMtbFileSender: MtbFileSender
 
     private var reportService =
         ReportService(JsonMapper.builder().addModule(KotlinModule.Builder().build()).build())

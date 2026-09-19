@@ -28,7 +28,7 @@ import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
-import dev.dnpm.etl.processor.output.RestMtbFileSender
+import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasSoapPseudonymGenerator
@@ -79,7 +79,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
-            assertThat(context.getBean<RestMtbFileSender>()).isNotNull
+            assertThat(context.getBean<RestDipMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
                 context.getBean<KafkaMtbFileSender>()
             }
@@ -102,7 +102,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseKafkaMtbFileSenderNotRestMtbFileSender() {
-            assertThrows<NoSuchBeanDefinitionException> { context.getBean<RestMtbFileSender>() }
+            assertThrows<NoSuchBeanDefinitionException> { context.getBean<RestDipMtbFileSender>() }
             assertThat(context.getBean<KafkaMtbFileSender>()).isNotNull
         }
     }
@@ -123,7 +123,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
-            assertThat(context.getBean<RestMtbFileSender>()).isNotNull
+            assertThat(context.getBean<RestDipMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
                 context.getBean<KafkaMtbFileSender>()
             }
