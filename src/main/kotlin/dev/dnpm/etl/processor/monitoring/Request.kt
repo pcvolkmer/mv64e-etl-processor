@@ -55,6 +55,7 @@ data class Request(
     @Column("submission_accepted") var submissionAccepted: Boolean = false,
     @Column("followup_count") var followupCount: Int = 0,
     @Column("expected_followup_count") var expectedFollowupCount: Int = 0,
+    @Column("destination") var destination: Destination = Destination.UNKNOWN,
 ) {
   constructor(
       uuid: RequestId,

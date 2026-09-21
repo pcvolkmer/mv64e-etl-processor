@@ -24,10 +24,7 @@ import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.*
-import dev.dnpm.etl.processor.output.DeleteRequest
-import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
-import dev.dnpm.etl.processor.output.MtbFileRequest
-import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
@@ -49,6 +46,7 @@ class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
     private val transformationService: TransformationService,
     private val sender: MtbFileSender,
+    private val switchedSenders: List<RoutedMtbFileSender>,
     private val requestService: RequestService,
     private val jsonMapper: JsonMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
@@ -111,6 +109,18 @@ class RequestProcessor(
                 }
             }
 
+        var destination = when (sender) {
+            is RestDipMtbFileSender -> Destination.DNPM_DIP
+            is RestNngmMtbFileSender -> Destination.NNGM_API
+            is KafkaMtbFileSender -> Destination.KAFKA
+            else -> Destination.UNKNOWN
+        }
+
+        val routedSender = selectRoutedSender(request)
+        if (routedSender.isPresent && routedSender.get() is RoutedRestNngmMtbFileSender) {
+            destination = Destination.NNGM_API
+        }
+
         val maxFollowUpCount = this.requestService.allRequestsByPatientPseudonym(request.patientPseudonym())
             .maxByOrNull { it.followupCount }
             ?.followupCount ?: -1
@@ -132,6 +142,7 @@ class RequestProcessor(
                     tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                     followupCount = maxFollowUpCount,
                     expectedFollowupCount = request.content.followUps?.size ?: 0,
+                    destination = destination,
                 )
             )
             // Exit - no further processing
@@ -172,6 +183,7 @@ class RequestProcessor(
                 tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                 followupCount = maxFollowUpCount,
                 expectedFollowupCount = request.content.followUps?.size ?: 0,
+                destination = destination,
             )
         )
 
@@ -182,7 +194,11 @@ class RequestProcessor(
             return
         }
 
-        val responseStatus = sender.send(request)
+        val responseStatus = if (!routedSender.isEmpty) {
+            routedSender.get().send(request)
+        } else {
+            sender.send(request)
+        }
 
         applicationEventPublisher.publishEvent(
             ResponseEvent(
@@ -197,6 +213,28 @@ class RequestProcessor(
                 },
             )
         )
+    }
+
+    /*
+     * Selects MtbFileSender based on latest diagnosis ICD10 code
+     */
+    private fun selectRoutedSender(request: MtbFileRequest<PatientRecord>): Optional<RoutedMtbFileSender> {
+
+        when (request) {
+            is DnpmV2MtbFileRequest -> {
+                val latestDiagnosis = request.content.diagnoses.maxBy { it.recordedOn } ?: return Optional.empty()
+
+                this.switchedSenders.forEach { sender ->
+                    if (sender.supportsDiagnosis(latestDiagnosis)) {
+                        return Optional.of(sender)
+                    }
+                }
+
+            }
+        }
+
+        // Default
+        return Optional.empty()
     }
 
     private fun hasFollowUpAfterLastSuccessfulSubmission(request: DnpmV2MtbFileRequest): Boolean {

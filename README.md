@@ -18,6 +18,14 @@ Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in 
 
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
 
+### 🔥 Wichtige Änderungen in Version 0.18
+
+Ab Version 0.18 kann diese Anwendung zur Datenausleitung über die nNGM-REST-API verwendet werden.
+Dazu ist eine Konfiguration des in dieser Version eingeführten [Routing-Mechanismus](#routed-rest) erforderlich
+
+Hier wird jeder `PatientRecord`, dessen (letzte) Diagnose einen ICD-10-Code beginnend mit `C34` und beliebiger Endung hat,
+nicht über den Standard-Weg versendet, sondern an den für nNGM konfigurierten API-Endpunkt.
+
 ### 🔥 Wichtige Änderungen in Version 0.17
 
 Ab Version 0.17 verwendet diese Anwendung [pcvolkmer/mv64e-mtb-model](https://github.com/pcvolkmer/mv64e-mtb-model) und ersetzt
@@ -402,8 +410,27 @@ Werden sowohl REST als auch Kafka-Endpunkt konfiguriert, wird nur der REST-Endpu
 Folgende Umgebungsvariablen müssen gesetzt sein, damit ein MTB-File an DNPM:DIP gesendet wird:
 
 * `APP_REST_URI`: URI der zu benutzenden API der Backend-Instanz. Zum Beispiel `http://localhost:9000/api`
+* `APP_REST_TYPE`: Mögliche Werte `dip` (Standard) für DNPM:DIP und `nngm` für die nNGM-API.
 * `APP_REST_USERNAME`: Basic-Auth-Benutzername für den REST-Endpunkt
 * `APP_REST_PASSWORD`: Basic-Auth-Passwort für den REST-Endpunkt
+* `APP_REST_API_KEY`: Angabe eines API-Keys zur Verwendung mit `APP_REST_TYPE=nngm` für die nNGM-API
+
+#### Routed REST
+
+Seit Version 0.18 ist eine Konfiguration des neu eingeführten **Routing**-Mechanismus möglich.
+Damit kann für bestimmte Entitäten und Diagnosen ein abweichender REST-Endpunkt definiert werden.
+
+Beispiel:
+
+* `APP_ROUTING_NNGM_URI`: URI der nNGM-REST-API.
+* `APP_ROUTING_NNGM_API_KEY`: API-Key zur Nutzung der nNGM-REST-API.
+* `APP_ROUTING_NNGM_ICD10[0]`: Erster ICD-Code - weitere möglich.
+
+Mit dieser Konfiguration wird jeder `PatientRecord`, dessen (letzte) Diagnose einen ICD-10-Code hat, dessen Anfang
+konfiguriert ist, nicht über den Standard-Weg versendet, sondern an den für nNGM konfigurierten API-Endpunkt.
+
+Wird zum Beispiel `APP_ROUTING_NNGM_ICD10[0] = C34` konfiguriert, werden Diagnosen wie "C34.0", "C34.1", etc. an das nNGM
+übermittelt.
 
 #### Kafka-Topics
 

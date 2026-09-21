@@ -20,25 +20,16 @@
 
 package dev.dnpm.etl.processor.output
 
-import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.asRequestStatus
-import org.slf4j.LoggerFactory
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.retry.support.RetryTemplate
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
 import org.springframework.web.util.UriComponentsBuilder
 
-class RestDipMtbFileSender(
+class RestNngmMtbFileSender(
     restTemplate: RestTemplate,
     private val restTargetProperties: RestTargetProperties,
     retryTemplate: RetryTemplate,
@@ -47,37 +38,22 @@ class RestDipMtbFileSender(
     override fun sendUrl(): String =
         UriComponentsBuilder
             .fromUriString(restTargetProperties.uri.toString())
-            .pathSegment("mtb")
-            .pathSegment("etl")
-            .pathSegment("patient-record")
             .toUriString()
 
-    override fun deleteUrl(patientId: PatientPseudonym): String =
-        UriComponentsBuilder
-            .fromUriString(restTargetProperties.uri.toString())
-            .pathSegment("mtb")
-            .pathSegment("etl")
-            .pathSegment("patient")
-            .pathSegment(patientId.value)
-            .toUriString()
+    override fun deleteUrl(patientId: PatientPseudonym): String = throw UnsupportedOperationException("Not implemented")
 
     override fun endpoint(): String = this.restTargetProperties.uri.orEmpty()
 
     override fun getHttpHeaders(request: MtbRequest): HttpHeaders {
-        val username = restTargetProperties.username
-        val password = restTargetProperties.password
+        val apiKey = restTargetProperties.apiKey
         val headers = HttpHeaders()
-        headers.contentType =
-            when (request) {
-                is DnpmV2MtbFileRequest -> CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-                else -> MediaType.APPLICATION_JSON
-            }
+        headers.contentType = MediaType.APPLICATION_JSON
 
-        if (username.isNullOrBlank() || password.isNullOrBlank()) {
+        if (apiKey.isNullOrBlank()) {
             return headers
         }
 
-        headers.setBasicAuth(username, password)
+        headers.set(HttpHeaders.AUTHORIZATION, "X-API-KEY $apiKey")
         return headers
     }
 }

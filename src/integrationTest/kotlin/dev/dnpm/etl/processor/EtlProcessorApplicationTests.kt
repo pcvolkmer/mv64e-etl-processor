@@ -24,6 +24,8 @@ import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
 import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.output.RestDipMtbFileSender
+import dev.dnpm.etl.processor.output.RestMtbFileSender
 import dev.pcvolkmer.mv64e.model.Coding
 import dev.pcvolkmer.mv64e.model.ConsentProvisionType
 import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
@@ -57,7 +59,7 @@ import tools.jackson.databind.json.JsonMapper
 @Testcontainers
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-@MockitoBean(types = [MtbFileSender::class])
+@MockitoBean(types = [RestMtbFileSender::class])
 @TestPropertySource(
     properties =
         [
@@ -91,7 +93,7 @@ class EtlProcessorApplicationTests : AbstractTestcontainerTest() {
   )
   inner class TransformationTest {
 
-    @MockitoBean private lateinit var mtbFileSender: MtbFileSender
+    @MockitoBean private lateinit var mtbFileSender: RestMtbFileSender
 
     private lateinit var mockMvc: MockMvc
     private lateinit var jsonMapper: JsonMapper

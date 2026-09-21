@@ -56,6 +56,7 @@ class ConnectionCheckServiceTest {
                     "http://localhost/api",
                     "user",
                     "password",
+                    null,
                 )
             this.sink = Sinks.many().multicast().onBackpressureBuffer()
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
