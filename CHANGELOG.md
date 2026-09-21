@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.17.0...v0.17.1) (2026-09-21)
+
+
+### Features
+
+* add switch/routing to send dedicated data to nNGM ([#322](https://github.com/pcvolkmer/mv64e-etl-processor/issues/322)) ([d9961a9](https://github.com/pcvolkmer/mv64e-etl-processor/commit/d9961a9baccaff511662b1aa1de18bdd02f94f5e))
+
 ## [0.17.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.4...v0.17.0) (2026-09-14)
 
 
