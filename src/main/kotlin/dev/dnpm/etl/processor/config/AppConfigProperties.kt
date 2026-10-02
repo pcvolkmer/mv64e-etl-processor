@@ -41,6 +41,7 @@ data class AppConfigProperties(
 data class PseudonymizeConfigProperties(
     var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN,
     val prefix: String = "UNKNOWN",
+    val hmacKey: String? = null,
 ) {
     companion object {
         const val NAME = "app.pseudonymize"

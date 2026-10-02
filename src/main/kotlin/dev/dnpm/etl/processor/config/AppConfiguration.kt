@@ -155,7 +155,11 @@ class AppConfiguration {
         matchIfMissing = true,
     )
     @Bean
-    fun buildinPseudonymGenerator(): Generator {
+    fun buildinPseudonymGenerator(pseudonymizeConfigProperties: PseudonymizeConfigProperties): Generator {
+        if (null != pseudonymizeConfigProperties.hmacKey) {
+            logger.info("Selected 'BUILDIN Pseudonym Generator' using HMAC")
+            return AnonymizingHmacGenerator(pseudonymizeConfigProperties)
+        }
         logger.info("Selected 'BUILDIN Pseudonym Generator'")
         return AnonymizingGenerator()
     }

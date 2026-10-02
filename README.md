@@ -166,6 +166,7 @@ Ist diese nicht gesetzt. wird intern eine Anonymisierung der Patienten-ID vorgen
 
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Präfix - `UNKNOWN`, wenn nicht gesetzt
 * `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
+* `APP_PSEUDONYMIZE_HMAC_KEY`: Wenn gesetzt, wird anstelle `SHA256` nun `SHA256-HMAC` mit diesem Key verwendet.
 
 **Hinweis**
 
@@ -177,8 +178,20 @@ vergleichbare IDs bereitzustellen.
 #### Eingebaute Anonymisierung
 
 Wurde keine oder die Verwendung der eingebauten Anonymisierung konfiguriert, so wird für die
-Patienten-ID der entsprechende SHA-256-Hash gebildet und Base64-codiert - hier ohne endende 
-"=" - zuzüglich des konfigurierten Präfixes als Patienten-Pseudonym verwendet.
+Patienten-ID der entsprechende SHA-256-Hash gebildet und Base32-codiert - hierzu werden die ersten 42 Zeichen des Hashes
+ohne endende "=" - zuzüglich des konfigurierten Präfixes als Patienten-Pseudonym verwendet.
+
+Beispiel für ID `123` und Prefix `123`:
+
+`UNKNOWN_uzs2iwjaiixz2ql6jbt67xcpxcqeuhz774p2a7uzr2`
+
+Wird `APP_PSEUDONYMIZE_HMAC_KEY` konfiguriert, wird der Hash mit diesem Wert als HMAC-Key gebildet.
+Auch hier werden die ersten 42 Zeichen Base64-codiert verwendet.
+Hierdurch wird die Nutzung von Rainbow-Tables erschwert, solange der HMAC-Key geheim gehalten wird.
+
+Beispiel für ID `123` und HMAC-Key `TEST` (gleichzeitig HMAC-Key):
+
+`UNKNOWN_3u2nc3hzwbe2kylbmcrhoahgkisxl5jfbcwr3wonr3`
 
 #### Pseudonymisierung mit gPAS
 
