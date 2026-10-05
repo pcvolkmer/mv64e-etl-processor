@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.17.0...v0.18.0) (2026-10-05)
+
+
+### Features
+
+* add SHA256-HMAC for use in build-in pseudonym generator ([#324](https://github.com/pcvolkmer/mv64e-etl-processor/issues/324)) ([3e49d70](https://github.com/pcvolkmer/mv64e-etl-processor/commit/3e49d70ff69b5382e0ad62d8f321aa0c15b1f85b))
+* add switch/routing to send dedicated data to nNGM ([#322](https://github.com/pcvolkmer/mv64e-etl-processor/issues/322)) ([d9961a9](https://github.com/pcvolkmer/mv64e-etl-processor/commit/d9961a9baccaff511662b1aa1de18bdd02f94f5e))
+
+
+### Documentation
+
+* update README.md and ETL diagram ([#325](https://github.com/pcvolkmer/mv64e-etl-processor/issues/325)) ([f4efdd9](https://github.com/pcvolkmer/mv64e-etl-processor/commit/f4efdd93401485ce1ed63e7c34efbce4f6640964))
+
 ## [0.17.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.16.4...v0.17.0) (2026-09-14)
 
 
