@@ -1,30 +1,27 @@
 # ETL-Processor für das MV gem. §64e und DNPM:DIP
 [![Run Tests](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml/badge.svg)](https://github.com/pcvolkmer/etl-processor/actions/workflows/test.yml)
 
-Diese Anwendung pseudonymisiert/anonymisiert Daten im DNPM-Datenmodell 2.1 für das Modellvorhaben
-Genomsequenzierung nach §64e unter Beachtung des Consents und sendet sie an DNPM:DIP.
+ETL-Anwendung zur Pseudonymisierung von klinischen Daten für das Modellvorhaben Genomsequenzierung gem. §64e SGB V
+im DNPM-Datenmodell 2.1 unter Beachtung des Consents.
 
-## Einordnung innerhalb einer DNPM-ETL-Strecke
+Pseudonymisierte und mit Consent versehene Daten können sowohl an DNPM:DIP als auch an nNGM weitergeleitet werden.
+Eine Differenzierung anhand der Erkrankung und ICD10-Code ist dabei möglich.
+So können zum Beispiel alle Lungenfälle an nNGM, sonstige Fällen an DNPM:DIP weitergeleitet werden.
 
-Diese Anwendung erlaubt das Entgegennehmen von HTTP/REST-Anfragen aus dem Onkostar-Plugin
+Zur Pseudonymgenerierung und Consentverwaltung werden die [Greifswalder Tools gPAS und gICS](https://www.ths-greifswald.de/)
+unterstützt.
+
+Diese Anwendung erlaubt das Entgegennehmen von Datensetzen im DNPM-Datenmodell 2.1 aus dem Onkostar-Plugin
 **[mv64e-onkostar-plugin-export](https://github.com/pcvolkmer/mv64e-onkostar-plugin-export)**.
 
-Der Inhalt einer Anfrage, wenn ein MTB-File, wird pseudonymisiert und auf Duplikate geprüft.
-Duplikate werden verworfen, Änderungen werden weitergeleitet.
-
-Löschanfragen werden immer als Löschanfrage an DNPM:DIP weitergeleitet.
-
-Zudem ist eine minimalistische Weboberfläche integriert, die einen Einblick in den aktuellen Zustand der Anwendung gewährt.
-
 ![Modell DNPM-ETL-Strecke](docs/etl.png)
+
+## Wichtige Änderungen in den letzten Versionen
 
 ### 🔥 Wichtige Änderungen in Version 0.18
 
 Ab Version 0.18 kann diese Anwendung zur Datenausleitung über die nNGM-REST-API verwendet werden.
-Dazu ist eine Konfiguration des in dieser Version eingeführten [Routing-Mechanismus](#routed-rest) erforderlich
-
-Hier wird jeder `PatientRecord`, dessen (letzte) Diagnose einen ICD-10-Code beginnend mit `C34` und beliebiger Endung hat,
-nicht über den Standard-Weg versendet, sondern an den für nNGM konfigurierten API-Endpunkt.
+Dazu kann auch die Konfiguration des in dieser Version eingeführten [Routing-Mechanismus](#routed-rest) verwendet werden.
 
 ### 🔥 Wichtige Änderungen in Version 0.17
 
