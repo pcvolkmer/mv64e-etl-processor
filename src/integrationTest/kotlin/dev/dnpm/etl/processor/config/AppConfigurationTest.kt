@@ -32,6 +32,7 @@ import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
 import dev.dnpm.etl.processor.output.RoutedRestNngmMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
+import dev.dnpm.etl.processor.pseudonym.AnonymizingHmacGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasSoapPseudonymGenerator
 import dev.dnpm.etl.processor.security.TokenRepository
@@ -224,6 +225,17 @@ class AppConfigurationTest {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean<AnonymizingGenerator>()).isNotNull
+            }
+        }
+
+        @Nested
+        @TestPropertySource(properties = ["app.pseudonymize.generator=buildin", "app.pseudonymize.hmac-key=Test"])
+        inner class AppConfigurationPseudonymizeGeneratorBuildinHmacTest(
+            private val context: ApplicationContext,
+        ) {
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean<AnonymizingHmacGenerator>()).isNotNull
             }
         }
 

@@ -20,6 +20,7 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
+import dev.dnpm.etl.processor.config.PseudonymGenerator
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
 import dev.pcvolkmer.mv64e.model.Patient
@@ -31,72 +32,102 @@ import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
+import java.util.stream.Stream
 
 @ExtendWith(MockitoExtension::class)
 class PseudonymizeServiceTest {
 
-  private val mtbFile =
-      PatientRecord.builder()
-          .patient(Patient.builder().id("123").build())
-          .episodesOfCare(
-              listOf(
-                  MtbEpisodeOfCare.builder()
-                      .id("1")
-                      .patient(Reference.builder().id("123").build())
-                      .period(
-                          PeriodDate.builder()
-                              .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
-                              .build()
-                      )
-                      .build()
-              )
-          )
-          .build()
+    private val mtbFile =
+        PatientRecord.builder()
+            .patient(Patient.builder().id("123").build())
+            .episodesOfCare(
+                listOf(
+                    MtbEpisodeOfCare.builder()
+                        .id("1")
+                        .patient(Reference.builder().id("123").build())
+                        .period(
+                            PeriodDate.builder()
+                                .start(Date.from(Instant.parse("2021-01-01T00:00:00.00Z")))
+                                .build()
+                        )
+                        .build()
+                )
+            )
+            .build()
 
-  @Test
-  fun shouldNotUsePseudonymPrefixForGpas(@Mock generator: GpasPseudonymGenerator) {
-    doAnswer { it.arguments[0] }.whenever(generator).generate(anyString())
+    @Test
+    fun shouldNotUsePseudonymPrefixForGpas(@Mock generator: GpasPseudonymGenerator) {
+        doAnswer { it.arguments[0] }.whenever(generator).generate(anyString())
 
-    val pseudonymizeService = PseudonymizeService(generator, PseudonymizeConfigProperties())
+        val pseudonymizeService = PseudonymizeService(generator, PseudonymizeConfigProperties())
 
-    mtbFile.pseudonymizeWith(pseudonymizeService)
+        mtbFile.pseudonymizeWith(pseudonymizeService)
 
-    assertThat(mtbFile.patient?.id).isEqualTo("123")
-  }
-
-  @Test
-  fun sanitizeFileName() {
-    val result = GpasPseudonymGenerator.sanitizeValue("l://a\\bs;1*2?3>")
-
-    assertThat(result).isEqualTo("l___a_bs_1_2_3_")
-  }
-
-  @Test
-  fun shouldUsePseudonymPrefixForBuiltin(@Mock generator: AnonymizingGenerator) {
-    doAnswer { it.arguments[0] }.whenever(generator).generate(anyString())
-
-    val pseudonymizeService = PseudonymizeService(generator, PseudonymizeConfigProperties())
-
-    mtbFile.pseudonymizeWith(pseudonymizeService)
-
-    assertThat(mtbFile.patient?.id).isEqualTo("UNKNOWN_123")
-  }
-
-  @Test
-  fun shouldReturnDifferentValues() {
-    val ag = AnonymizingGenerator()
-
-    val tans = HashSet<String>()
-
-    (1..1000).forEach { i ->
-      val tan = ag.generateGenomDeTan("12345")
-      assertThat(tan).hasSize(64)
-      assertThat(tans.add(tan)).`as`("never the same result!").isTrue
+        assertThat(mtbFile.patient?.id).isEqualTo("123")
     }
-  }
+
+    @Test
+    fun sanitizeFileName() {
+        val result = GpasPseudonymGenerator.sanitizeValue("l://a\\bs;1*2?3>")
+
+        assertThat(result).isEqualTo("l___a_bs_1_2_3_")
+    }
+
+    @Test
+    fun shouldUsePseudonymPrefixForBuiltin(@Mock generator: AnonymizingGenerator) {
+        doAnswer { it.arguments[0] }.whenever(generator).generate(anyString())
+
+        val pseudonymizeService = PseudonymizeService(generator, PseudonymizeConfigProperties())
+
+        mtbFile.pseudonymizeWith(pseudonymizeService)
+
+        assertThat(mtbFile.patient?.id).isEqualTo("UNKNOWN_123")
+    }
+
+    @Test
+    fun shouldReturnDifferentValues() {
+        val ag = AnonymizingGenerator()
+
+        val tans = HashSet<String>()
+
+        (1..1000).forEach { i ->
+            val tan = ag.generateGenomDeTan("12345")
+            assertThat(tan).hasSize(64)
+            assertThat(tans.add(tan)).`as`("never the same result!").isTrue
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("providePseudonymizeServiceTestProvider")
+    fun shouldGenerateExpectedPseudonym(generator: Generator, expected: String) {
+        val pseudonymizeService = PseudonymizeService(generator, PseudonymizeConfigProperties())
+        mtbFile.pseudonymizeWith(pseudonymizeService)
+        assertThat(mtbFile.patient?.id).isEqualTo(expected)
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun providePseudonymizeServiceTestProvider(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(AnonymizingGenerator(), "UNKNOWN_uzs2iwjaiixz2ql6jbt67xcpxcqeuhz774p2a7uzr2"),
+                Arguments.of(
+                    AnonymizingHmacGenerator(
+                        PseudonymizeConfigProperties(
+                            hmacKey = "TEST"
+                        )
+                    ), "UNKNOWN_3u2nc3hzwbe2kylbmcrhoahgkisxl5jfbcwr3wonr3"
+                )
+            )
+        }
+
+    }
 }

@@ -2,7 +2,7 @@
  * This file is part of ETL-Processor
  *
  * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
- * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -20,14 +20,27 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
+import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.codec.digest.HmacAlgorithms
+import org.apache.commons.codec.digest.HmacUtils
 import java.security.SecureRandom
 
-class AnonymizingGenerator : Generator {
+/**
+ * Variant of AnonymizingGenerator that uses app.pseudonymize.prefix as HMAC-SHA256 key
+ */
+class AnonymizingHmacGenerator(
+    private val pseudonymizeConfigProperties: PseudonymizeConfigProperties,
+) : Generator {
     fun getSecureRandom(): SecureRandom = SecureRandom()
 
-    override fun generate(id: String): String = Base32().encodeAsString(DigestUtils.sha256(id)).substring(0..41).lowercase()
+    override fun generate(id: String): String =
+        Base32()
+            .encodeAsString(HmacUtils(HmacAlgorithms.HMAC_SHA_256, pseudonymizeConfigProperties.hmacKey).hmac(id))
+            .substring(0..41)
+            .lowercase()
 
     @OptIn(ExperimentalStdlibApi::class)
     override fun generateGenomDeTan(id: String): String {
