@@ -53,4 +53,16 @@ class ReportServiceTest {
     assertThat(actual[4].severity).isEqualTo(ReportService.Severity.WARNING)
     assertThat(actual[5].severity).isEqualTo(ReportService.Severity.INFO)
   }
+
+  @Test
+  fun shouldParseDataQualityReportMessageText() {
+    val dataQualityReport = """{"issues":[
+      {"severity":"error","details":"/histologyReports(0)/issuedOn: error.path.missing"},
+      {"severity":"error","message":"Ungültiger Code 'Nx'","path":"/Diagnose[1234]/Tumor-Staging/TNM/N-Code"}
+    ]}""".trimIndent()
+    val actual = service.deserialize(dataQualityReport)
+    assertThat(actual).hasSize(2)
+    assertThat(actual[0].getMessageText()).isEqualTo("/histologyReports(0)/issuedOn: error.path.missing")
+    assertThat(actual[1].getMessageText()).isEqualTo("Ungültiger Code 'Nx'")
+  }
 }
