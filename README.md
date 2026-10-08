@@ -30,7 +30,7 @@ https://github.com/pcvolkmer/mv64e-etl-processor/pkgs/container/mv64e-etl-proces
 ### 🔥 Wichtige Änderungen in Version 0.18
 
 Ab Version 0.18 kann diese Anwendung zur Datenausleitung über die nNGM-REST-API verwendet werden.
-Dazu kann auch die Konfiguration des in dieser Version eingeführten [Routing-Mechanismus](#routed-rest) verwendet
+Dazu kann auch die Konfiguration des in dieser Version eingeführten [Routing-Mechanismus](docs/configuration.md#routed-rest) verwendet
 werden.
 
 ### Weitere Änderungen
