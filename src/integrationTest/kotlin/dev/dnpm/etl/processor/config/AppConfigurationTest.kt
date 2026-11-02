@@ -28,8 +28,11 @@ import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.input.KafkaInputListener
 import dev.dnpm.etl.processor.monitoring.RequestRepository
 import dev.dnpm.etl.processor.output.KafkaMtbFileSender
-import dev.dnpm.etl.processor.output.RestMtbFileSender
+import dev.dnpm.etl.processor.output.RestDipMtbFileSender
+import dev.dnpm.etl.processor.output.RestNngmMtbFileSender
+import dev.dnpm.etl.processor.output.RoutedRestNngmMtbFileSender
 import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
+import dev.dnpm.etl.processor.pseudonym.AnonymizingHmacGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasSoapPseudonymGenerator
 import dev.dnpm.etl.processor.security.TokenRepository
@@ -61,6 +64,7 @@ import tools.jackson.databind.json.JsonMapper
             KafkaAutoConfiguration::class,
             AppKafkaConfiguration::class,
             AppRestConfiguration::class,
+            AppRoutedRestConfiguration::class,
             ConsentEvaluator::class,
         ],
 )
@@ -79,7 +83,25 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
-            assertThat(context.getBean<RestMtbFileSender>()).isNotNull
+            assertThat(context.getBean<RestDipMtbFileSender>()).isNotNull
+            assertThrows<NoSuchBeanDefinitionException> {
+                context.getBean<KafkaMtbFileSender>()
+            }
+            assertThrows<NoSuchBeanDefinitionException> {
+                context.getBean<RestNngmMtbFileSender>()
+            }
+        }
+    }
+
+    @Nested
+    @TestPropertySource(properties = ["app.rest.uri=http://localhost:9000", "app.routing.nngm.uri=http://localhost:9999"])
+    inner class AppConfigurationSwitchedRestTest(
+        private val context: ApplicationContext,
+    ) {
+        @Test
+        fun shouldUseRestMtbFileSenderAndSwitchedNngmFileSender() {
+            assertThat(context.getBean<RestDipMtbFileSender>()).isNotNull
+            assertThat(context.getBean<RoutedRestNngmMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
                 context.getBean<KafkaMtbFileSender>()
             }
@@ -102,7 +124,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseKafkaMtbFileSenderNotRestMtbFileSender() {
-            assertThrows<NoSuchBeanDefinitionException> { context.getBean<RestMtbFileSender>() }
+            assertThrows<NoSuchBeanDefinitionException> { context.getBean<RestDipMtbFileSender>() }
             assertThat(context.getBean<KafkaMtbFileSender>()).isNotNull
         }
     }
@@ -123,7 +145,7 @@ class AppConfigurationTest {
     ) {
         @Test
         fun shouldUseRestMtbFileSenderNotKafkaMtbFileSender() {
-            assertThat(context.getBean<RestMtbFileSender>()).isNotNull
+            assertThat(context.getBean<RestDipMtbFileSender>()).isNotNull
             assertThrows<NoSuchBeanDefinitionException> {
                 context.getBean<KafkaMtbFileSender>()
             }
@@ -203,6 +225,17 @@ class AppConfigurationTest {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean<AnonymizingGenerator>()).isNotNull
+            }
+        }
+
+        @Nested
+        @TestPropertySource(properties = ["app.pseudonymize.generator=buildin", "app.pseudonymize.hmac-key=Test"])
+        inner class AppConfigurationPseudonymizeGeneratorBuildinHmacTest(
+            private val context: ApplicationContext,
+        ) {
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean<AnonymizingHmacGenerator>()).isNotNull
             }
         }
 

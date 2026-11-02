@@ -24,16 +24,13 @@ import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.*
-import dev.dnpm.etl.processor.output.DeleteRequest
-import dev.dnpm.etl.processor.output.DnpmV2MtbFileRequest
-import dev.dnpm.etl.processor.output.MtbFileRequest
-import dev.dnpm.etl.processor.output.MtbFileSender
+import dev.dnpm.etl.processor.output.*
 import dev.dnpm.etl.processor.pseudonym.PseudonymizeService
 import dev.dnpm.etl.processor.pseudonym.addGenomDeTan
 import dev.dnpm.etl.processor.pseudonym.anonymizeContentWith
 import dev.dnpm.etl.processor.pseudonym.pseudonymizeWith
-import dev.pcvolkmer.mv64e.mtb.Mtb
-import dev.pcvolkmer.mv64e.mtb.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.MvhSubmissionType
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.codec.digest.DigestUtils
 import org.slf4j.Logger
@@ -49,6 +46,7 @@ class RequestProcessor(
     private val pseudonymizeService: PseudonymizeService,
     private val transformationService: TransformationService,
     private val sender: MtbFileSender,
+    private val switchedSenders: List<RoutedMtbFileSender>,
     private val requestService: RequestService,
     private val jsonMapper: JsonMapper,
     private val applicationEventPublisher: ApplicationEventPublisher,
@@ -56,16 +54,14 @@ class RequestProcessor(
     private val consentProcessor: ConsentProcessor?,
 ) {
 
-    private var logger: Logger = LoggerFactory.getLogger("RequestProcessor")
+    private var logger: Logger = LoggerFactory.getLogger(RequestProcessor::class.java)
 
-    fun processMtbFile(mtbFile: Mtb): Boolean {
+    fun processMtbFile(mtbFile: PatientRecord): Boolean {
         return processMtbFile(mtbFile, randomRequestId())
     }
 
-    fun processMtbFile(mtbFile: Mtb, requestId: RequestId): Boolean {
-        val isConsentOk =
-            consentProcessor != null && consentProcessor.consentGatedCheckAndTryEmbedding(mtbFile) ||
-                    consentProcessor == null
+    fun processMtbFile(mtbFile: PatientRecord, requestId: RequestId): Boolean {
+        val isConsentOk = consentProcessor?.consentGatedCheckAndTryEmbedding(mtbFile) ?: true
 
         if (!isConsentOk) {
             logger.warn("consent check failed but will be sent to DNPM:DIP!")
@@ -113,6 +109,18 @@ class RequestProcessor(
                 }
             }
 
+        var destination = when (sender) {
+            is RestDipMtbFileSender -> Destination.DNPM_DIP
+            is RestNngmMtbFileSender -> Destination.NNGM_API
+            is KafkaMtbFileSender -> Destination.KAFKA
+            else -> Destination.UNKNOWN
+        }
+
+        val routedSender = selectRoutedSender(request)
+        if (routedSender.isPresent && routedSender.get() is RoutedRestNngmMtbFileSender) {
+            destination = Destination.NNGM_API
+        }
+
         val maxFollowUpCount = this.requestService.allRequestsByPatientPseudonym(request.patientPseudonym())
             .maxByOrNull { it.followupCount }
             ?.followupCount ?: -1
@@ -131,9 +139,10 @@ class RequestProcessor(
                     type = RequestType.MTB_FILE,
                     submissionType = submissionType,
                     status = RequestStatus.BLOCKED_INITIAL,
-                    tan = Tan(request.content.metadata?.transferTan.orEmpty()),
+                    tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                     followupCount = maxFollowUpCount,
                     expectedFollowupCount = request.content.followUps?.size ?: 0,
+                    destination = destination,
                 )
             )
             // Exit - no further processing
@@ -145,15 +154,16 @@ class RequestProcessor(
             hasSuccessfulInitialSubmission(request.patientPseudonym()) &&
             !hasUnacceptedSuccessfulInitialSubmission(request.patientPseudonym())
         ) {
-            // Use "addition" or "followup" depending on existing follow-ups after "intial" with "Meldebestaetigung"
+            // Use "addition" or "followup" depending on existing follow-ups after "initial" with "Meldebestaetigung"
             request.content.metadata?.let {
                 logger.warn("Override submission type using 'addition' after first initial submission!")
-                it.type = if (hasFollowUpAfterLastSuccessfulSubmission(request)) {
+                val hasFollowUp = hasFollowUpAfterLastSuccessfulSubmission(request)
+                it.type = if (hasFollowUp) {
                     MvhSubmissionType.FOLLOWUP
                 } else {
                     MvhSubmissionType.ADDITION
                 }
-                submissionType = if (hasFollowUpAfterLastSuccessfulSubmission(request)) {
+                submissionType = if (hasFollowUp) {
                     SubmissionType.FOLLOWUP
                 } else {
                     SubmissionType.ADDITION
@@ -170,9 +180,10 @@ class RequestProcessor(
                 type = RequestType.MTB_FILE,
                 submissionType = submissionType,
                 status = RequestStatus.UNKNOWN,
-                tan = Tan(request.content.metadata?.transferTan.orEmpty()),
+                tan = Tan(request.content.metadata?.transferTAN.orEmpty()),
                 followupCount = maxFollowUpCount,
                 expectedFollowupCount = request.content.followUps?.size ?: 0,
+                destination = destination,
             )
         )
 
@@ -183,7 +194,11 @@ class RequestProcessor(
             return
         }
 
-        val responseStatus = sender.send(request)
+        val responseStatus = if (!routedSender.isEmpty) {
+            routedSender.get().send(request)
+        } else {
+            sender.send(request)
+        }
 
         applicationEventPublisher.publishEvent(
             ResponseEvent(
@@ -200,13 +215,35 @@ class RequestProcessor(
         )
     }
 
+    /*
+     * Selects MtbFileSender based on latest diagnosis ICD10 code
+     */
+    private fun selectRoutedSender(request: MtbFileRequest<PatientRecord>): Optional<RoutedMtbFileSender> {
+
+        when (request) {
+            is DnpmV2MtbFileRequest -> {
+                val latestDiagnosis = request.content.diagnoses.maxBy { it.recordedOn } ?: return Optional.empty()
+
+                this.switchedSenders.forEach { sender ->
+                    if (sender.supportsDiagnosis(latestDiagnosis)) {
+                        return Optional.of(sender)
+                    }
+                }
+
+            }
+        }
+
+        // Default
+        return Optional.empty()
+    }
+
     private fun hasFollowUpAfterLastSuccessfulSubmission(request: DnpmV2MtbFileRequest): Boolean {
         val lastSuccessfulSubmission = this.requestService.allRequestsByPatientPseudonym(request.patientPseudonym())
             .sortedBy { it.processedAt }
             .filterNot {
                 it.submissionType == SubmissionType.INITIAL &&
                         (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING) &&
-                        !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
+                        !it.submissionAccepted
             }
             .lastOrNull() ?: return false
 
@@ -232,7 +269,7 @@ class RequestProcessor(
         return this.requestService.allRequestsByPatientPseudonym(patientPseudonym).any {
             it.submissionType == SubmissionType.INITIAL &&
                     (it.status == RequestStatus.SUCCESS || it.status == RequestStatus.WARNING) &&
-                    !(it.submissionAccepted || it.status == RequestStatus.BLOCKED_INITIAL)
+                    !it.submissionAccepted
         }
     }
 
@@ -240,7 +277,7 @@ class RequestProcessor(
         val patientPseudonym =
             when (pseudonymizedMtbFileRequest) {
                 is DnpmV2MtbFileRequest ->
-                    PatientPseudonym(pseudonymizedMtbFileRequest.content.patient.id)
+                    PatientPseudonym(pseudonymizedMtbFileRequest.content.patient!!.id)
             }
 
         val lastMtbFileRequestForPatient =
@@ -311,6 +348,7 @@ class RequestProcessor(
                 )
             )
         } catch (_: Exception) {
+            logger.warn("An exception occurred while processing the DELETE request. Saving request as ERROR.")
             requestService.save(
                 Request(
                     uuid = requestId,

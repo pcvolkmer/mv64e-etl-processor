@@ -27,7 +27,17 @@ import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.input.Dnpm21MtbFile.Companion.buildMtb
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.ConsentProvisionType
+import dev.pcvolkmer.mv64e.model.GenderCoding
+import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.MvhMetadata
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsent
+import dev.pcvolkmer.mv64e.model.MvhMetadataModelProjectConsentProvisionsInner
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.Reference
+import org.flywaydb.core.internal.configuration.resolvers.ProvisionerMode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -78,7 +88,7 @@ class MtbFileRestControllerTest {
                     .readAllBytes()
                     .toString(Charsets.UTF_8)
 
-            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+            whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
             mockMvc
                 .post("/mtb") {
@@ -87,13 +97,13 @@ class MtbFileRestControllerTest {
                 }
                 .andExpect { status { isAccepted() } }
 
-            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+            verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
         }
 
         @ParameterizedTest
         @ArgumentsSource(Dnpm21MtbFile::class)
-        fun shouldProcessPostRequest(mtb: Mtb) {
-            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+        fun shouldProcessPostRequest(mtb: PatientRecord) {
+            whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
             mockMvc
                 .post("/mtbfile") {
@@ -132,12 +142,12 @@ class MtbFileRestControllerTest {
                 buildMtb(
                     MvhMetadata.builder()
                         .modelProjectConsent(
-                            ModelProjectConsent.builder()
+                            MvhMetadataModelProjectConsent.builder()
                                 .provisions(
                                     listOf(
-                                        Provision.builder()
+                                        MvhMetadataModelProjectConsentProvisionsInner.builder()
                                             .date(Date())
-                                            .type(ConsentProvision.PERMIT)
+                                            .type(ConsentProvisionType.PERMIT)
                                             .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                             .build()
                                     )
@@ -147,7 +157,7 @@ class MtbFileRestControllerTest {
                         .build()
                 )
 
-            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+            whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
             mockMvc
                 .post(url) {
@@ -200,7 +210,7 @@ class Dnpm21MtbFile :
         Arguments.of(
             buildMtb(
                 MvhMetadata.builder()
-                    .modelProjectConsent(ModelProjectConsent.builder().build())
+                    .modelProjectConsent(MvhMetadataModelProjectConsent.builder().build())
                     .build()
             )
         ),
@@ -209,12 +219,12 @@ class Dnpm21MtbFile :
             buildMtb(
                 MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent.builder()
+                        MvhMetadataModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder()
+                                    MvhMetadataModelProjectConsentProvisionsInner.builder()
                                         .date(Date())
-                                        .type(ConsentProvision.PERMIT)
+                                        .type(ConsentProvisionType.PERMIT)
                                         .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                         .build()
                                 )
@@ -229,12 +239,12 @@ class Dnpm21MtbFile :
             buildMtb(
                 MvhMetadata.builder()
                     .modelProjectConsent(
-                        ModelProjectConsent.builder()
+                        MvhMetadataModelProjectConsent.builder()
                             .provisions(
                                 listOf(
-                                    Provision.builder()
+                                    MvhMetadataModelProjectConsentProvisionsInner.builder()
                                         .date(Date())
-                                        .type(ConsentProvision.PERMIT)
+                                        .type(ConsentProvisionType.PERMIT)
                                         .purpose(ModelProjectConsentPurpose.SEQUENCING)
                                         .build()
                                 )
@@ -247,13 +257,13 @@ class Dnpm21MtbFile :
     ) {
 
     companion object {
-        fun buildMtb(metadata: MvhMetadata?): Mtb {
-            return Mtb.builder()
+        fun buildMtb(metadata: MvhMetadata?): PatientRecord {
+            return PatientRecord.builder()
                 .patient(
                     Patient.builder()
                         .id("TEST_12345678")
                         .birthDate(Date.from(Instant.parse("2000-08-08T12:34:56Z")))
-                        .gender(GenderCoding.builder().code(GenderCodingCode.MALE).build())
+                        .gender(GenderCoding.builder().code(GenderCoding.CodeEnum.MALE).build())
                         .build()
                 )
                 .metadata(metadata)

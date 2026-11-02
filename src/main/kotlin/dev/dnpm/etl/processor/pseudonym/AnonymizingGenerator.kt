@@ -25,8 +25,6 @@ import org.apache.commons.codec.digest.DigestUtils
 import java.security.SecureRandom
 
 class AnonymizingGenerator : Generator {
-    companion object
-
     fun getSecureRandom(): SecureRandom = SecureRandom()
 
     override fun generate(id: String): String = Base32().encodeAsString(DigestUtils.sha256(id)).substring(0..41).lowercase()

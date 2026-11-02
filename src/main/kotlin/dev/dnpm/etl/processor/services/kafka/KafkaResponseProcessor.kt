@@ -48,42 +48,40 @@ class KafkaResponseProcessor(
             logger.error("Cannot process Kafka response", e)
             Optional.empty()
         }
-            .ifPresentOrElse(
-                { responseBody ->
-                    val event =
-                        ResponseEvent(
-                            RequestId(responseBody.requestId),
-                            Instant.ofEpochMilli(data.timestamp()),
-                            responseBody.statusCode.asRequestStatus(),
-                            when (responseBody.statusCode.asRequestStatus()) {
-                                RequestStatus.SUCCESS -> {
-                                    Optional.empty()
-                                }
+            .ifPresent { responseBody ->
+                val requestStatus = responseBody.statusCode.asRequestStatus()
+                val event =
+                    ResponseEvent(
+                        RequestId(responseBody.requestId),
+                        Instant.ofEpochMilli(data.timestamp()),
+                        requestStatus,
+                        when (requestStatus) {
+                            RequestStatus.SUCCESS -> {
+                                Optional.empty()
+                            }
 
-                                RequestStatus.WARNING,
-                                RequestStatus.ERROR -> {
-                                    Optional.of(jsonMapper.writeValueAsString(responseBody.statusBody))
-                                }
+                            RequestStatus.WARNING,
+                            RequestStatus.ERROR -> {
+                                Optional.of(jsonMapper.writeValueAsString(responseBody.statusBody))
+                            }
 
-                                else -> {
-                                    logger.error(
-                                        "Kafka response: Unknown response code '{}'!",
-                                        responseBody.statusCode,
-                                    )
-                                    Optional.empty()
-                                }
-                            },
-                        )
-                    eventPublisher.publishEvent(event)
-                },
-                { logger.error("No requestId in Kafka response") },
-            )
+                            else -> {
+                                logger.error(
+                                    "Kafka response: Unknown response code '{}'!",
+                                    responseBody.statusCode,
+                                )
+                                Optional.empty()
+                            }
+                        },
+                    )
+                eventPublisher.publishEvent(event)
+            }
     }
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     data class ResponseBody(
         val requestId: String,
         val statusCode: Int,
-        val statusBody: Map<String, Any>,
+        val statusBody: Map<String, Any> = emptyMap(),
     )
 }

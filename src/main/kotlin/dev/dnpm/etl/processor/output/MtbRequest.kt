@@ -22,7 +22,7 @@ package dev.dnpm.etl.processor.output
 
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.RequestId
-import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.model.PatientRecord
 
 interface MtbRequest {
     val requestId: RequestId
@@ -37,9 +37,9 @@ sealed interface MtbFileRequest<out T> : MtbRequest {
 
 data class DnpmV2MtbFileRequest(
     override val requestId: RequestId,
-    override val content: Mtb,
-) : MtbFileRequest<Mtb> {
-    override fun patientPseudonym(): PatientPseudonym = PatientPseudonym(content.patient.id)
+    override val content: PatientRecord,
+) : MtbFileRequest<PatientRecord> {
+    override fun patientPseudonym(): PatientPseudonym = PatientPseudonym(content.patient!!.id)
 }
 
 data class DeleteRequest(

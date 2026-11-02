@@ -521,7 +521,25 @@ table.config-table td > button:last-of-type {
     background: #ffdddd;
 }
 
-.card > .card-sub-header > *:nth-child(2) {
+.card > .card-sub-header > .destination {
+    background: #ccc;
+    border: 1px solid #333;
+    border-radius: 3px;
+    padding-right: 4px;
+    font-size: small;
+    margin-left: 1rem;
+}
+
+.card > .card-sub-header > .destination:before {
+    content: "Ziel";
+    border-right: 1px solid #333;
+    padding: 0 4px;
+    margin-right: 4px;
+    color: #ccc;
+    background: #333;
+}
+
+.card > .card-sub-header > .accepted {
     margin: 0 0 0 auto;
 }
 

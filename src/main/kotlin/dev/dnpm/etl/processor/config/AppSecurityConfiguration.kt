@@ -131,24 +131,28 @@ class AppSecurityConfiguration(private val securityConfigProperties: SecurityCon
       appSecurityConfigProperties: SecurityConfigProperties,
   ): GrantedAuthoritiesMapper {
     return GrantedAuthoritiesMapper { grantedAuthority ->
-      grantedAuthority
-          .filterIsInstance<OidcUserAuthority>()
-          .onEach {
-            val userRole = userRoleRepository.findByUsername(it.userInfo.preferredUsername)
-            if (userRole.isEmpty) {
-              userRoleRepository.save(
-                  UserRole(
-                      null,
-                      it.userInfo.preferredUsername,
-                      appSecurityConfigProperties.defaultNewUserRole,
-                  )
-              )
+        grantedAuthority
+            .asSequence()
+            .filterIsInstance<OidcUserAuthority>()
+            .map { it.userInfo?.preferredUsername.orEmpty() }
+            .filter { it.isNotBlank() }
+            .onEach {
+                val userRole = userRoleRepository.findByUsername(it)
+                if (userRole.isEmpty) {
+                    userRoleRepository.save(
+                        UserRole(
+                            null,
+                            it,
+                            appSecurityConfigProperties.defaultNewUserRole,
+                        )
+                    )
+                }
             }
-          }
-          .map {
-            val userRole = userRoleRepository.findByUsername(it.userInfo.preferredUsername)
-            SimpleGrantedAuthority("ROLE_${userRole.get().role.toString().uppercase()}")
-          }
+            .map {
+                val userRole = userRoleRepository.findByUsername(it)
+                SimpleGrantedAuthority("ROLE_${userRole.get().role.toString().uppercase()}")
+            }
+            .toList()
     }
   }
 

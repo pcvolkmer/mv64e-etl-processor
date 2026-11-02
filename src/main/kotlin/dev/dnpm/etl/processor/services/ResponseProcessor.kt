@@ -78,6 +78,7 @@ class ResponseProcessor(
                 }
 
                 else -> {
+                  logger.error("Unknown request with UUID '{}' and status '{}' - Ignored", event.requestUuid, event.status)
                   return@ifPresentOrElse
                 }
               }

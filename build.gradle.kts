@@ -7,23 +7,23 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     java
-    id("org.springframework.boot") version "4.0.7"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
-    id("net.ltgt.errorprone") version "5.1.0"
-    id("net.ltgt.nullaway") version "3.0.0"
-    kotlin("jvm") version "2.3.20"
-    kotlin("plugin.spring") version "2.3.20"
+    id("net.ltgt.errorprone") version "5.1.1"
+    id("net.ltgt.nullaway") version "3.3.0"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
     jacoco
 }
 
 group = "dev.dnpm"
-version = "0.16.4" // x-release-please-version
+version = "0.18.0" // x-release-please-version
 
 // Additional versions
-val mtbDtoVersion by extra("0.3.0")
-val hapiFhirVersion by extra("8.8.1")
-val apacheCxfVersion by extra("4.1.5")
+val mtbModelVersion by extra("0.5.0")
+val hapiFhirVersion by extra("8.10.1")
+val apacheCxfVersion by extra("4.2.3")
 val springModulithVersion by extra("2.0.5")
 val springRetryVersion by extra("2.0.12")
 
@@ -33,7 +33,7 @@ val testcontainersVersion by extra("1.21.4")
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -63,7 +63,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
@@ -81,7 +80,7 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("dev.pcvolkmer.mv64e:mtb-dto:${mtbDtoVersion}")
+    implementation("dev.pcvolkmer.mv64e:mtb-model:${mtbModelVersion}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${hapiFhirVersion}")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiFhirVersion}")
     implementation("org.apache.httpcomponents.client5:httpclient5")
@@ -140,8 +139,7 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        freeCompilerArgs.add("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 }
 
@@ -183,17 +181,21 @@ tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("ghcr.io/pcvolkmer/mv64e-etl-processor")
 
     // Binding for CA Certs
-    bindings.set(listOf(
-        "$rootDir/bindings/ca-certificates/:/platform/bindings/ca-certificates"
-    ))
+    bindings.set(
+        listOf(
+            "$rootDir/bindings/ca-certificates/:/platform/bindings/ca-certificates"
+        )
+    )
 
-    environment.set(environment.get() + mapOf(
-        // Enable this line to embed CA Certs into image on build time
-        //"BP_EMBED_CERTS" to "true",
-        "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/mv64e-etl-processor",
-        "BP_OCI_LICENSES" to "AGPLv3",
-        "BP_OCI_DESCRIPTION" to "ETL Processor for MV § 64e and DNPM:DIP"
-    ))
+    environment.set(
+        environment.get() + mapOf(
+            // Enable this line to embed CA Certs into image on build time
+            //"BP_EMBED_CERTS" to "true",
+            "BP_OCI_SOURCE" to "https://github.com/pcvolkmer/mv64e-etl-processor",
+            "BP_OCI_LICENSES" to "AGPLv3",
+            "BP_OCI_DESCRIPTION" to "ETL Processor for MV § 64e and DNPM:DIP"
+        )
+    )
 }
 
 spotless {

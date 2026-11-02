@@ -26,7 +26,7 @@ import dev.dnpm.etl.processor.RequestId
 import dev.dnpm.etl.processor.consent.ConsentEvaluator
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -72,8 +72,8 @@ class KafkaInputListener(
 
     private fun handleDnpmV2Message(record: ConsumerRecord<String, String>) {
         try {
-            val mtbFile = jsonMapper.readValue(record.value(), Mtb::class.java)
-            val patientId = PatientId(mtbFile.patient.id)
+            val mtbFile = jsonMapper.readValue(record.value(), PatientRecord::class.java)
+            val patientId = PatientId(mtbFile.patient!!.id)
             val firstRequestIdHeader = record.headers().headers("requestId")?.firstOrNull()
             val requestId =
                 if (null != firstRequestIdHeader) {
@@ -106,7 +106,7 @@ class KafkaInputListener(
             }
         } catch (e: Exception) {
             logger.error("Error while processing MtbFile", e)
-            requestProcessor.processMtbFile(Mtb.builder().build())
+            requestProcessor.processMtbFile(PatientRecord.builder().build())
         }
     }
 }

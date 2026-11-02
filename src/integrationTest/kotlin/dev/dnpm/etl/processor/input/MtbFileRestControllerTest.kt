@@ -29,7 +29,11 @@ import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.UserRoleRepository
 import dev.dnpm.etl.processor.services.RequestProcessor
-import dev.pcvolkmer.mv64e.mtb.*
+import dev.pcvolkmer.mv64e.model.MtbEpisodeOfCare
+import dev.pcvolkmer.mv64e.model.Patient
+import dev.pcvolkmer.mv64e.model.PatientRecord
+import dev.pcvolkmer.mv64e.model.PeriodDate
+import dev.pcvolkmer.mv64e.model.Reference
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -112,7 +116,7 @@ class MtbFileRestControllerTest {
             ]
     )
     fun testShouldGrantPermissionToSendMtbFile(url: String) {
-        whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+        whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
         mockMvc
             .post(url) {
@@ -122,7 +126,7 @@ class MtbFileRestControllerTest {
             }
             .andExpect { status { isAccepted() } }
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
     }
 
     @ParameterizedTest
@@ -140,7 +144,7 @@ class MtbFileRestControllerTest {
             ]
     )
     fun testShouldGrantPermissionToSendMtbFileToAdminUser(url: String) {
-        whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+        whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
         mockMvc
             .post(url) {
@@ -150,7 +154,7 @@ class MtbFileRestControllerTest {
             }
             .andExpect { status { isAccepted() } }
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
     }
 
     @ParameterizedTest
@@ -168,7 +172,7 @@ class MtbFileRestControllerTest {
             ]
     )
     fun testShouldGrantPermissionToSendMtbFileToUser(url: String) {
-        whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+        whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
         mockMvc
             .post(url) {
@@ -178,7 +182,7 @@ class MtbFileRestControllerTest {
             }
             .andExpect { status { isAccepted() } }
 
-        verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
     }
 
     @ParameterizedTest
@@ -203,7 +207,7 @@ class MtbFileRestControllerTest {
             }
             .andExpect { status { isUnauthorized() } }
 
-        verify(requestProcessor, never()).processMtbFile(any<Mtb>())
+        verify(requestProcessor, never()).processMtbFile(any<PatientRecord>())
     }
 
     @ParameterizedTest
@@ -269,7 +273,7 @@ class MtbFileRestControllerTest {
             }
             .andExpect { status { isBadRequest() } }
 
-        val result = verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+        val result = verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
         assertThat(result).isFalse()
     }
 
@@ -301,7 +305,7 @@ class MtbFileRestControllerTest {
                 ]
         )
         fun testShouldGrantPermissionToSendMtbFileToAdminUser(url: String) {
-            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+            whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
             mockMvc
                 .post(url) {
@@ -311,7 +315,7 @@ class MtbFileRestControllerTest {
                 }
                 .andExpect { status { isAccepted() } }
 
-            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+            verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
         }
 
         @ParameterizedTest
@@ -329,7 +333,7 @@ class MtbFileRestControllerTest {
                 ]
         )
         fun testShouldGrantPermissionToSendMtbFileToUser(url: String) {
-            whenever { requestProcessor.processMtbFile(any<Mtb>()) }.thenReturn(true)
+            whenever { requestProcessor.processMtbFile(any<PatientRecord>()) }.thenReturn(true)
 
             mockMvc
                 .post(url) {
@@ -339,14 +343,14 @@ class MtbFileRestControllerTest {
                 }
                 .andExpect { status { isAccepted() } }
 
-            verify(requestProcessor, times(1)).processMtbFile(any<Mtb>())
+            verify(requestProcessor, times(1)).processMtbFile(any<PatientRecord>())
         }
     }
 
     companion object {
 
         val mtbFile =
-            Mtb.builder()
+            PatientRecord.builder()
                 .patient(Patient.builder().id("PID").build())
                 .episodesOfCare(
                     listOf(

@@ -119,6 +119,12 @@ app:
   #  input-topic: test_input
   #  output-topic: test_output
   #  output-response-topic: test_response
+  switch:
+    nngm:
+      uri: https://mvh-test.medicalsyn.com/api/v1.0/mvh-import/import-dnpm
+      api-key: a12b34decacdefg1213
+      icd10:
+        - C34
   security:
     admin-user: admin
     admin-password: "{noop}very-secret"

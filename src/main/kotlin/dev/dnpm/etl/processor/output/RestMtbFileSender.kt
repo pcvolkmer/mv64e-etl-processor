@@ -2,7 +2,7 @@
  * This file is part of ETL-Processor
  *
  * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
- * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2025-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -36,6 +36,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
+import org.springframework.web.util.UriComponentsBuilder
 
 abstract class RestMtbFileSender(
     private val restTemplate: RestTemplate,
@@ -63,19 +64,19 @@ abstract class RestMtbFileSender(
                         "Status-Code: ${response.statusCode.value()}",
                     )
                 }
-                logger.debug("Sent file via RestMtbFileSender")
+                logger.debug("Sent file via ${this::class.java.simpleName}")
                 return@execute MtbFileSender.Response(
                     reportService.deserialize(response.body).asRequestStatus(),
                     response.body.orEmpty(),
                 )
             }
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientResponseException) {
             logger.info(restTargetProperties.uri!!.toString())
             logger.error("Request data not accepted by remote system", e)
             return MtbFileSender.Response(
-                reportService.deserialize(e.responseBodyAsString).asRequestStatus(),
+                RequestStatus.ERROR,
                 e.responseBodyAsString,
             )
         }
@@ -88,10 +89,10 @@ abstract class RestMtbFileSender(
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(null, headers)
                 restTemplate.delete(deleteUrl(request.patientId), entityReq, String::class.java)
-                logger.debug("Sent file via RestMtbFileSender")
+                logger.debug("Sent file via RestDipMtbFileSender")
                 return@execute MtbFileSender.Response(RequestStatus.SUCCESS)
             }
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
             logger.info(restTargetProperties.uri!!.toString())
@@ -102,21 +103,5 @@ abstract class RestMtbFileSender(
 
     override fun endpoint(): String = this.restTargetProperties.uri.orEmpty()
 
-    private fun getHttpHeaders(request: MtbRequest): HttpHeaders {
-        val username = restTargetProperties.username
-        val password = restTargetProperties.password
-        val headers = HttpHeaders()
-        headers.contentType =
-            when (request) {
-                is DnpmV2MtbFileRequest -> CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON
-                else -> MediaType.APPLICATION_JSON
-            }
-
-        if (username.isNullOrBlank() || password.isNullOrBlank()) {
-            return headers
-        }
-
-        headers.setBasicAuth(username, password)
-        return headers
-    }
+    protected abstract fun getHttpHeaders(request: MtbRequest): HttpHeaders
 }

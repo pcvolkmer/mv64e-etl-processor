@@ -41,6 +41,7 @@ data class AppConfigProperties(
 data class PseudonymizeConfigProperties(
     var generator: PseudonymGenerator = PseudonymGenerator.BUILDIN,
     val prefix: String = "UNKNOWN",
+    val hmacKey: String? = null,
 ) {
     companion object {
         const val NAME = "app.pseudonymize"
@@ -111,11 +112,35 @@ data class RestTargetProperties(
     val uri: String?,
     val username: String?,
     val password: String?,
+    val apiKey: String? = null,
+    val type: RestTargetType = RestTargetType.DIP,
 ) {
     companion object {
         const val NAME = "app.rest"
     }
 }
+
+enum class RestTargetType {
+    DIP,
+    NNGM,
+}
+
+@ConfigurationProperties(RoutingProperties.NAME)
+data class RoutingProperties(
+    val nngm: SwitchTargetProperties? = null,
+) {
+    companion object {
+        const val NAME = "app.routing"
+    }
+}
+
+data class SwitchTargetProperties(
+    val uri: String,
+    val username: String?,
+    val password: String?,
+    val apiKey: String?,
+    val icd10: List<String> = listOf(),
+)
 
 @ConfigurationProperties(KafkaProperties.NAME)
 data class KafkaProperties(

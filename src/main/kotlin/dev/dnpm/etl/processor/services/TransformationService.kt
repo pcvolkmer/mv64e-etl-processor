@@ -22,16 +22,16 @@ package dev.dnpm.etl.processor.services
 
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
-import dev.pcvolkmer.mv64e.mtb.Mtb
+import dev.pcvolkmer.mv64e.model.PatientRecord
 import tools.jackson.databind.json.JsonMapper
 
 class TransformationService(
     private val jsonMapper: JsonMapper,
     private val transformations: List<Transformation>,
 ) {
-    fun transform(mtbFile: Mtb): Mtb {
+    fun transform(mtbFile: PatientRecord): PatientRecord {
         val json = transform(jsonMapper.writeValueAsString(mtbFile))
-        return jsonMapper.readValue(json, Mtb::class.java)
+        return jsonMapper.readValue(json, PatientRecord::class.java)
     }
 
     private fun transform(content: String): String {

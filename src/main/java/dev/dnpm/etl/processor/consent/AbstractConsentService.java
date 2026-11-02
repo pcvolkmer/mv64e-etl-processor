@@ -44,7 +44,8 @@ public abstract class AbstractConsentService implements IConsentService {
     try {
       var response = fhirContext.newJsonParser().parseResource(consentStatusResponse);
 
-      if (response instanceof Parameters responseParameters) {
+      if (response instanceof Parameters responseParameters
+          && null != responseParameters.getParameter("consented").getValue()) {
 
         var responseValue = responseParameters.getParameter("consented").getValue();
         var isConsented = responseValue.castToBoolean(responseValue);

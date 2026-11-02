@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.consent;
 
 import static dev.dnpm.etl.processor.consent.GicsConsentService.IS_CONSENTED_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -44,7 +45,10 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
 import org.springframework.http.MediaType;
@@ -256,5 +260,28 @@ class GicsConsentServiceTest {
     var actual = gicsConsentService.convertGicsResultToMiiBroadConsent(gicsConsentBundle);
 
     assertThat(fhirJsonParser.encodeToString(actual)).isEqualTo(miiConsent);
+  }
+
+  @Nested
+  static class WithoutValidConfig {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "mailto:test@example.com", "ftp://localhost"})
+    void shouldNotUseGicsConsentServiceWithoutGicsUri(String uri) throws Exception {
+      final var testConfigProperties =
+          new GIcsConfigProperties(uri, null, null, "", "", null, "", "", "", "", "", "");
+
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () ->
+                  new GicsConsentService(
+                      testConfigProperties,
+                      RetryTemplate.builder().maxAttempts(1).build(),
+                      new RestTemplate(),
+                      new AppFhirConfig()));
+
+      assertThat(exception.getMessage()).isEqualTo("gICS URI must be a valid URI in configuration");
+    }
   }
 }
