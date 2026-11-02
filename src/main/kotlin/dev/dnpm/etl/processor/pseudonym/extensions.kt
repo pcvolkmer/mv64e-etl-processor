@@ -95,6 +95,9 @@ infix fun PatientRecord.pseudonymizeWith(pseudonymizeService: PseudonymizeServic
   this.systemicTherapies?.filterNotNull()?.forEach { systemicTherapy ->
     systemicTherapy.history?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
   }
+  this.studyInclusions?.filterNotNull()?.forEach { studyInclusion ->
+    studyInclusion.history?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
+  }
   this.followUps?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
 
   this.msiFindings?.filterNotNull()?.forEach { it.patient?.id = patientPseudonym }
@@ -273,6 +276,14 @@ infix fun PatientRecord.anonymizeContentWith(pseudonymizeService: PseudonymizeSe
 
   this.systemicTherapies?.filterNotNull()?.forEach { systemicTherapy ->
     systemicTherapy.history?.filterNotNull()?.forEach { history ->
+      history.id = history.id?.let(::anonymize)
+      history.reason?.id = history.reason?.id?.let(::anonymize)
+      history.basedOn?.id = history.basedOn?.id?.let(::anonymize)
+    }
+  }
+
+  this.studyInclusions?.filterNotNull()?.forEach { studyInclusion ->
+    studyInclusion.history?.filterNotNull()?.forEach { history ->
       history.id = history.id?.let(::anonymize)
       history.reason?.id = history.reason?.id?.let(::anonymize)
       history.basedOn?.id = history.basedOn?.id?.let(::anonymize)
