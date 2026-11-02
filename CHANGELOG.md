@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.18.0...v0.18.1) (2026-11-02)
+
+
+### Features
+
+* update data model for use with DNPM:DIP 1.3.5 ([#332](https://github.com/pcvolkmer/mv64e-etl-processor/issues/332)) ([dba675a](https://github.com/pcvolkmer/mv64e-etl-processor/commit/dba675ae494ee836e1138f6133e2b2bd3233ea8e))
+
 ## [0.18.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.17.0...v0.18.0) (2026-10-05)
 
 
