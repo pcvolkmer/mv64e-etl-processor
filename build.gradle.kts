@@ -7,7 +7,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     java
-    id("org.springframework.boot") version "4.1.1"
+    id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.0.0"
     id("net.ltgt.errorprone") version "5.1.1"
@@ -18,10 +18,10 @@ plugins {
 }
 
 group = "dev.dnpm"
-version = "0.18.0" // x-release-please-version
+version = "0.18.1" // x-release-please-version
 
 // Additional versions
-val mtbModelVersion by extra("0.5.0")
+val mtbModelVersion by extra("0.6.0")
 val hapiFhirVersion by extra("8.10.1")
 val apacheCxfVersion by extra("4.2.3")
 val springModulithVersion by extra("2.0.5")

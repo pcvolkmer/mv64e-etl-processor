@@ -372,11 +372,12 @@ class RequestProcessor(
     }
 
     private fun fingerprint(s: String): Fingerprint {
-        return Fingerprint(
+        val f = Fingerprint(
             Base32().encodeAsString(DigestUtils.sha256(s))
                 .replace("=", "")
                 .lowercase()
         )
+        return f
     }
 
 }
