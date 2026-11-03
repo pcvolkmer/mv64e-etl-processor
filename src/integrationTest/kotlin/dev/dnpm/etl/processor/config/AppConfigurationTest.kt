@@ -35,6 +35,7 @@ import dev.dnpm.etl.processor.pseudonym.AnonymizingGenerator
 import dev.dnpm.etl.processor.pseudonym.AnonymizingHmacGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasPseudonymGenerator
 import dev.dnpm.etl.processor.pseudonym.GpasSoapPseudonymGenerator
+import dev.dnpm.etl.processor.pseudonym.VfpsPseudonymGenerator
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
 import dev.dnpm.etl.processor.services.RequestProcessor
@@ -267,6 +268,24 @@ class AppConfigurationTest {
             @Test
             fun shouldUseConfiguredGenerator() {
                 assertThat(context.getBean<GpasSoapPseudonymGenerator>()).isNotNull
+            }
+        }
+
+        @Nested
+        @TestPropertySource(
+            properties =
+                [
+                    "app.pseudonymize.generator=vfps",
+                    "app.pseudonymize.vfps.uri=http://localhost/",
+                    "app.pseudonymize.vfps.patient-namespace=test",
+                ],
+        )
+        inner class AppConfigurationPseudonymizeGeneratorVfpsTest(
+            private val context: ApplicationContext,
+        ) {
+            @Test
+            fun shouldUseConfiguredGenerator() {
+                assertThat(context.getBean<VfpsPseudonymGenerator>()).isNotNull
             }
         }
 

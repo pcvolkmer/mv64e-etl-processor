@@ -13,6 +13,7 @@ So können zum Beispiel alle Lungenfälle an nNGM, sonstige Fällen an DNPM:DIP 
 Zur Pseudonymgenerierung und Consentverwaltung werden
 die [Greifswalder Tools gPAS und gICS](https://www.ths-greifswald.de/)
 unterstützt.
+Für Pseudonymgenerierung wird alternativ auch [Vfps](https://github.com/miracum/vfps) unterstützt.
 
 Diese Anwendung erlaubt das Entgegennehmen von Datensetzen im DNPM-Datenmodell 2.1 aus
 dem [Onkostar](https://www.it-choice.de/produkte/onkostar/)-Plugin
@@ -26,6 +27,10 @@ Docker-Images dieser Anwendung werden hier bereitgestellt und sollen das lokale 
 https://github.com/pcvolkmer/mv64e-etl-processor/pkgs/container/mv64e-etl-processor
 
 ## Wichtige Änderungen
+
+### 🔥 Wichtige Änderungen in Version 0.19
+
+Ab Version 0.19 wird zur Pseudonymgenerierung alternativ Vfps unterstützt.
 
 ### 🔥 Wichtige Änderungen in Version 0.18
 
@@ -61,7 +66,7 @@ Weitere Informationen zur Konfiguration der Generierung von Vorgangsnummern gibt
 
 ### Pseudonymisierung der Patienten-ID
 
-Diese Anwendung nutzt die Pseudonymisierungsfunktion von gPAS oder [Vfps](https://github.com/miracum/vfps).
+Diese Anwendung nutzt die Pseudonymisierungsfunktion von gPAS oder Vfps.
 Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) oder zu einer Vfps-Instanz angegeben ist,
 wird diese verwendet.
 Ist diese nicht gesetzt, wird intern eine Anonymisierung der Patienten-ID vorgenommen.
