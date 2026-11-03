@@ -30,7 +30,9 @@ class PseudonymizeService(
 ) {
     fun patientPseudonym(patientId: PatientId): PatientPseudonym =
         when (generator) {
-            is GpasPseudonymGenerator -> PatientPseudonym(generator.generate(patientId.value))
+            is GpasPseudonymGenerator,
+            is VfpsPseudonymGenerator,
+            -> PatientPseudonym(generator.generate(patientId.value))
             else ->
                 PatientPseudonym("${configProperties.prefix}_${generator.generate(patientId.value)}")
         }

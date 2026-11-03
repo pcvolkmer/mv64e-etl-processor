@@ -68,6 +68,7 @@ import kotlin.time.toJavaDuration
             AppConfigProperties::class,
             PseudonymizeConfigProperties::class,
             GPasConfigProperties::class,
+            VfpsConfigProperties::class,
             ConsentConfigProperties::class,
             GIcsConfigProperties::class,
         ]
@@ -255,6 +256,17 @@ class AppConfiguration {
             gPasConfigProperties,
             connectionCheckUpdateProducer,
         )
+    }
+
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "VFPS")
+    @Bean
+    fun vfpsPseudonymGenerator(
+        configProperties: VfpsConfigProperties,
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+    ): Generator {
+        logger.info("Selected 'VfpsPseudonym Generator'")
+        return VfpsPseudonymGenerator(configProperties, retryTemplate, restTemplate)
     }
 
     @Bean

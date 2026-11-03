@@ -63,6 +63,18 @@ data class GPasConfigProperties(
     }
 }
 
+@ConfigurationProperties(VfpsConfigProperties.NAME)
+data class VfpsConfigProperties(
+    val uri: String? = null,
+    val patientNamespace: String = "etl-processor",
+    val genomDeTanNamespace: String = "ccdn",
+    val token: String? = null,
+) {
+    companion object {
+        const val NAME = "app.pseudonymize.vfps"
+    }
+}
+
 @ConfigurationProperties(ConsentConfigProperties.NAME)
 data class ConsentConfigProperties(
     var service: ConsentService = ConsentService.NONE,
@@ -177,6 +189,7 @@ data class UserProperties(
 enum class PseudonymGenerator {
     BUILDIN,
     GPAS,
+    VFPS,
 }
 
 enum class ConsentService {

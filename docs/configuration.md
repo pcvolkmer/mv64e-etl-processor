@@ -32,17 +32,22 @@ Dies lässt sich durch weitere Pseudonyme abbilden, allerdings werden pro Origin
 Pseudonyme benötigt.
 Zu diesem Zweck muss in gPas eine **Multi-Pseudonym-Domäne** konfiguriert werden (siehe auch
 *APP_PSEUDONYMIZE_GPAS_CCDN*).
+Bei Verwendung von Vfps wird ein Namespace benötigt, der mehrere Pseudonyme pro Originalwert unterstützt
+(`APP_PSEUDONYMIZE_VFPS_GENOM_DE_TAN_NAMESPACE`).
 
 **WICHTIG:** Deaktivierte Pseudonymisierung ist nur für Tests nutzbar. Vorgangsummern sind zufällig
 und werden anschließend verworfen.
 
 ### Pseudonymisierung der Patienten-ID
 
-Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) angegeben ist, wird diese verwendet.
+Wenn eine URI zu einer gPAS-Instanz (Version >= 2023.1.0) oder Vfps-Instanz angegeben ist, wird diese verwendet.
 Ist diese nicht gesetzt, wird intern eine Anonymisierung der Patienten-ID vorgenommen.
 
 * `APP_PSEUDONYMIZE_PREFIX`: Standortbezogenes Präfix - `UNKNOWN`, wenn nicht gesetzt
-* `APP_PSEUDONYMIZE_GENERATOR`: `BUILDIN` oder `GPAS` - `BUILDIN`, wenn nicht gesetzt
+* * `APP_PSEUDONYMIZE_GENERATOR`:
+    * `BUILDIN`: Interne SHA-256-/HMAC-Pseudonymisierung (Default)
+    * `GPAS`: Pseudonymisierung über gPAS
+    * `VFPS`: Pseudonymisierung über Vfps
 * `APP_PSEUDONYMIZE_HMAC_KEY`: Wenn in Verbindung mit `BUILDIN` gesetzt, wird anstelle `SHA256` nun `SHA256-HMAC` mit
   dem angegebenen Key verwendet.
 
@@ -70,6 +75,26 @@ Soll anstelle der REST-Schnittstelle von gPAS die SOAP-Schnittstelle verwendet w
 so ist nicht die URI der gPAS-Instanz anzugeben, sondern der SOAP-Endpoint:
 
 * `APP_PSEUDONYMIZE_GPAS_SOAP_ENDPOINT`: SOAP-Endpoint der gPAS-Instanz (e.g. http://127.0.0.1:9990/gpas/gpasService)
+
+#### Pseudonymisierung mit Vfps
+
+Alternativ zu gPAS kann Vfps als Pseudonymisierungsdienst verwendet werden.
+
+Hierfür muss `APP_PSEUDONYMIZE_GENERATOR=VFPS` gesetzt sein und folgende Parameter:
+
+* `APP_PSEUDONYMIZE_VFPS_URI`:
+  Base-URL des Vfps-Dienstes
+* `APP_PSEUDONYMIZE_VFPS_TOKEN`:
+  Bearer Token für die Authentifizierung
+* `APP_PSEUDONYMIZE_VFPS_PATIENT_NAMESPACE`:
+  Namespace für Patientenpseudonyme
+* `APP_PSEUDONYMIZE_VFPS_GENOM_DE_TAN_NAMESPACE`:
+  Multi-Pseudonym-Namespace für Vorgangsnummern
+
+Die Generierung von Patientenpseudonymen erfolgt über die Create-Operation, die Vorgangsnummerngenerierung über Append.
+
+Pseudonyme werden unverändert aus der Vfps-Antwort übernommen.
+Es wird kein Standortpräfix hinzugefügt, da dies im Vfps-Namespace selbst konfiguriert werden kann.
 
 #### Eingebaute Anonymisierung
 
