@@ -27,11 +27,11 @@ import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import dev.pcvolkmer.mv64e.model.MtbDiagnosis
 import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.slf4j.LoggerFactory
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
@@ -67,7 +67,7 @@ class RoutedRestNngmMtbFileSender(
 
     override fun send(request: MtbFileRequest<PatientRecord>): MtbFileSender.Response {
         try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+            return retryTemplate.execute {
                 val entityReq = HttpEntity(request.content, getHttpHeaders())
                 val response =
                     restTemplate.exchange<String>(sendUrl(), HttpMethod.POST, entityReq)

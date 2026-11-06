@@ -1,10 +1,10 @@
 package dev.dnpm.etl.processor.pseudonym
 
 import dev.dnpm.etl.processor.config.VfpsConfigProperties
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForObject
@@ -29,7 +29,7 @@ class VfpsPseudonymGenerator(
 
     override fun generate(id: String): String =
         execute {
-            retryTemplate.execute<String, Exception> {
+            retryTemplate.execute {
                 request(configProperties.patientNamespace, "pseudonyms", id)
             }
         }

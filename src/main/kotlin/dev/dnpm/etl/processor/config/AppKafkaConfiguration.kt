@@ -37,11 +37,11 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
-import org.springframework.retry.support.RetryTemplate
 import reactor.core.publisher.Sinks
 import tools.jackson.databind.json.JsonMapper
 

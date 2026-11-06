@@ -48,7 +48,7 @@ import org.springframework.beans.factory.getBean
 import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
-import org.springframework.retry.support.RetryTemplate
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.test.context.ContextConfiguration
@@ -331,12 +331,15 @@ class AppConfigurationTest {
             val retryTemplate = context.getBean<RetryTemplate>()
             assertThat(retryTemplate).isNotNull
 
+            var retries = 0
             assertThrows<RuntimeException> {
-                retryTemplate.execute<Void, RuntimeException> {
-                    assertThat(it.retryCount).isLessThan(maxRetryAttempts)
+                retryTemplate.invoke {
+                    retries++
                     throw RuntimeException()
                 }
             }
+
+            assertThat(retries).isEqualTo(maxRetryAttempts)
         }
     }
 

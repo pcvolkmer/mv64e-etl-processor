@@ -25,7 +25,6 @@ val mtbModelVersion = "0.6.0"
 val hapiFhirVersion = "8.10.2"
 val apacheCxfVersion = "4.2.4"
 val springModulithVersion = "2.1.2"
-val springRetryVersion = "2.0.13"
 
 // Additional test versions
 val mockitoKotlinVersion = "6.4.0"
@@ -75,7 +74,6 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.springframework.retry:spring-retry:$springRetryVersion")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
