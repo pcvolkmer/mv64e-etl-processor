@@ -42,8 +42,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
+import org.springframework.core.retry.RetryPolicy;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -87,13 +88,12 @@ class GicsGetBroadConsentServiceTest {
 
     var restTemplate = new RestTemplate();
 
+    var retryTemplyte = new RetryTemplate(RetryPolicy.builder().maxRetries(0).build());
+
     this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
     this.service =
         new GicsGetBroadConsentService(
-            this.gIcsConfigProperties,
-            RetryTemplate.builder().maxAttempts(1).build(),
-            restTemplate,
-            this.appFhirConfig);
+            this.gIcsConfigProperties, retryTemplyte, restTemplate, this.appFhirConfig);
   }
 
   @Test

@@ -51,8 +51,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
+import org.springframework.core.retry.RetryPolicy;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -88,13 +89,12 @@ class GicsConsentServiceTest {
 
     var restTemplate = new RestTemplate();
 
+    var retryTemplate = new RetryTemplate(RetryPolicy.builder().maxRetries(0).build());
+
     this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
     this.gicsConsentService =
         new GicsConsentService(
-            this.gIcsConfigProperties,
-            RetryTemplate.builder().maxAttempts(1).build(),
-            restTemplate,
-            this.appFhirConfig);
+            this.gIcsConfigProperties, retryTemplate, restTemplate, this.appFhirConfig);
   }
 
   @Test
@@ -277,7 +277,7 @@ class GicsConsentServiceTest {
               () ->
                   new GicsConsentService(
                       testConfigProperties,
-                      RetryTemplate.builder().maxAttempts(1).build(),
+                      new RetryTemplate(RetryPolicy.builder().maxRetries(0).build()),
                       new RestTemplate(),
                       new AppFhirConfig()));
 

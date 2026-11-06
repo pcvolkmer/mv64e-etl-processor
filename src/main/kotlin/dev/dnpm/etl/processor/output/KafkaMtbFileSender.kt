@@ -27,8 +27,8 @@ import dev.pcvolkmer.mv64e.model.MvhMetadata
 import dev.pcvolkmer.mv64e.model.PatientRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.retry.support.RetryTemplate
 import tools.jackson.databind.json.JsonMapper
 
 class KafkaMtbFileSender(
@@ -41,7 +41,7 @@ class KafkaMtbFileSender(
 
     override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
         return try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+            return retryTemplate.execute {
                 val record =
                     ProducerRecord(
                         kafkaProperties.outputTopic,
@@ -79,7 +79,7 @@ class KafkaMtbFileSender(
         val dummyMtbFile = PatientRecord.builder().metadata(MvhMetadata()).build()
 
         return try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+            return retryTemplate.execute {
                 val record =
                     ProducerRecord(
                         kafkaProperties.outputTopic,
