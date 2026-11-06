@@ -32,9 +32,13 @@ class PseudonymizeService(
         when (generator) {
             is GpasPseudonymGenerator,
             is VfpsPseudonymGenerator,
-            -> PatientPseudonym(generator.generate(patientId.value))
-            else ->
+            -> {
+                PatientPseudonym(generator.generate(patientId.value))
+            }
+
+            else -> {
                 PatientPseudonym("${configProperties.prefix}_${generator.generate(patientId.value)}")
+            }
         }
 
     fun genomDeTan(patientId: PatientId): String = generator.generateGenomDeTan(patientId.value)

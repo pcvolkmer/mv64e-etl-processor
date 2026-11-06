@@ -51,13 +51,14 @@ class KafkaMtbFileSender(
                 record.headers().add("requestId", request.requestId.value.toByteArray())
                 record.headers().add("requestMethod", "POST".toByteArray())
                 when (request) {
-                    is DnpmV2MtbFileRequest ->
+                    is DnpmV2MtbFileRequest -> {
                         record
                             .headers()
                             .add(
                                 "contentType",
                                 CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE.toByteArray(),
                             )
+                    }
                 }
 
                 val result = kafkaTemplate.send(record)
@@ -114,9 +115,16 @@ class KafkaMtbFileSender(
 
     private fun key(request: MtbRequest): String =
         when (request) {
-            is DnpmV2MtbFileRequest -> "{\"pid\": \"${request.content.patient?.id}\"}"
-            is DeleteRequest -> "{\"pid\": \"${request.patientId.value}\"}"
-            else ->
+            is DnpmV2MtbFileRequest -> {
+                "{\"pid\": \"${request.content.patient?.id}\"}"
+            }
+
+            is DeleteRequest -> {
+                "{\"pid\": \"${request.patientId.value}\"}"
+            }
+
+            else -> {
                 throw IllegalArgumentException("Unsupported request type: ${request::class.simpleName}")
+            }
         }
 }

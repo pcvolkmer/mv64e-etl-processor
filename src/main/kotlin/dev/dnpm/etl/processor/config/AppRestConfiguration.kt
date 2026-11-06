@@ -57,6 +57,7 @@ class AppRestConfiguration {
                 logger.info("Selected 'RestDipMtbFileSender'")
                 RestDipMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)
             }
+
             RestTargetType.NNGM -> {
                 logger.info("Selected 'RestNngmMtbFileSender'")
                 RestNngmMtbFileSender(restTemplate, restTargetProperties, retryTemplate, reportService)

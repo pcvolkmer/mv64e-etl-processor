@@ -9,11 +9,11 @@ plugins {
     java
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "8.0.0"
+    id("com.diffplug.spotless") version "8.11.0"
     id("net.ltgt.errorprone") version "5.1.1"
     id("net.ltgt.nullaway") version "3.3.0"
-    kotlin("jvm") version "2.4.10"
-    kotlin("plugin.spring") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
+    kotlin("plugin.spring") version "2.4.20"
     jacoco
 }
 
@@ -21,15 +21,15 @@ group = "dev.dnpm"
 version = "0.18.1" // x-release-please-version
 
 // Additional versions
-val mtbModelVersion by extra("0.6.0")
-val hapiFhirVersion by extra("8.10.1")
-val apacheCxfVersion by extra("4.2.3")
-val springModulithVersion by extra("2.0.5")
-val springRetryVersion by extra("2.0.12")
+val mtbModelVersion = "0.6.0"
+val hapiFhirVersion = "8.10.2"
+val apacheCxfVersion = "4.2.4"
+val springModulithVersion = "2.1.2"
+val springRetryVersion = "2.0.13"
 
 // Additional test versions
-val mockitoKotlinVersion by extra("6.2.3")
-val testcontainersVersion by extra("1.21.4")
+val mockitoKotlinVersion = "6.4.0"
+val testcontainersVersion = "1.21.4"
 
 java {
     toolchain {
@@ -75,20 +75,20 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.springframework.retry:spring-retry:${springRetryVersion}")
+    implementation("org.springframework.retry:spring-retry:$springRetryVersion")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.flywaydb:flyway-mysql")
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("dev.pcvolkmer.mv64e:mtb-model:${mtbModelVersion}")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:${hapiFhirVersion}")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiFhirVersion}")
+    implementation("dev.pcvolkmer.mv64e:mtb-model:$mtbModelVersion")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiFhirVersion")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:$hapiFhirVersion")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("com.jayway.jsonpath:json-path")
     implementation("org.jspecify:jspecify")
     // gPAS via Soap
-    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:${apacheCxfVersion}")
-    implementation("org.apache.cxf:cxf-rt-transports-http:${apacheCxfVersion}")
+    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-rt-transports-http:$apacheCxfVersion")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.modulith:spring-modulith-starter-jdbc")
 
@@ -109,10 +109,10 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:${mockitoKotlinVersion}")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
 
-    integrationTestImplementation("org.testcontainers:junit-jupiter:${testcontainersVersion}")
-    integrationTestImplementation("org.testcontainers:postgresql:${testcontainersVersion}")
+    integrationTestImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    integrationTestImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
 

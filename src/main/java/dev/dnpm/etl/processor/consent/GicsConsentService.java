@@ -169,10 +169,9 @@ public class GicsConsentService extends AbstractConsentService {
         new HttpEntity<>(parameterAsXml, this.headersWithHttpBasicAuth());
     try {
       var responseEntity =
-          retryTemplate.execute(
-              ctx ->
-                  restTemplate.exchange(
-                      endpointUri(endpoint), HttpMethod.POST, requestEntity, String.class));
+          retryTemplate.execute(ctx ->
+              restTemplate.exchange(
+                  endpointUri(endpoint), HttpMethod.POST, requestEntity, String.class));
 
       if (responseEntity.getStatusCode().is2xxSuccessful()) {
         return responseEntity.getBody();
@@ -332,10 +331,8 @@ public class GicsConsentService extends AbstractConsentService {
 
     consentAsOne
         .getCategory()
-        .removeIf(
-            category ->
-                category.hasCoding(
-                    "http://fhir.de/ConsentManagement/CodeSystem/ResultType", "policy"));
+        .removeIf(category ->
+            category.hasCoding("http://fhir.de/ConsentManagement/CodeSystem/ResultType", "policy"));
 
     final var miiConsentCategory = new CodeableConcept();
     miiConsentCategory.addCoding(
@@ -347,12 +344,10 @@ public class GicsConsentService extends AbstractConsentService {
 
     gIcsResultBundle.getEntry().stream()
         .skip(1)
-        .forEach(
-            c ->
-                consentAsOne
-                    .getProvision()
-                    .addProvision(
-                        ((Consent) c.getResource()).getProvision().getProvisionFirstRep()));
+        .forEach(c ->
+            consentAsOne
+                .getProvision()
+                .addProvision(((Consent) c.getResource()).getProvision().getProvisionFirstRep()));
 
     gIcsResultBundle.getEntry().clear();
     gIcsResultBundle.addEntry(bundleEntryComponent);
