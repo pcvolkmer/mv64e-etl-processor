@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.19.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.18.1...v0.19.0) (2026-11-06)
+
+
+### Features
+
+* Vfps pseudonym service ([#330](https://github.com/pcvolkmer/mv64e-etl-processor/issues/330)) ([2df37cb](https://github.com/pcvolkmer/mv64e-etl-processor/commit/2df37cb52ee1d0e13d9a1a358609e900b86d29af))
+
+
+### Miscellaneous Chores
+
+* release 0.19.0 ([b32fc59](https://github.com/pcvolkmer/mv64e-etl-processor/commit/b32fc5958462ae7a2811ca65a4a3ba84cfbd96dd))
+
 ## [0.18.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.18.0...v0.18.1) (2026-11-02)
 
 
