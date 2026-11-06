@@ -36,11 +36,13 @@ class ConsentEvaluator(
             ttpConsentStatus == TtpConsentStatus.BROAD_CONSENT_GIVEN ||
                 ttpConsentStatus == TtpConsentStatus.GENOM_DE_CONSENT_SEQUENCING_PERMIT ||
                 // Aktuell nur Modellvorhaben Consent im File
-                ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE &&
-                mtbFile.metadata?.modelProjectConsent?.provisions?.any {
-                    it.purpose == ModelProjectConsentPurpose.SEQUENCING &&
-                        it.type == ConsentProvisionType.PERMIT
-                } == true
+                (
+                    ttpConsentStatus == TtpConsentStatus.UNKNOWN_CHECK_FILE &&
+                        mtbFile.metadata?.modelProjectConsent?.provisions?.any {
+                            it.purpose == ModelProjectConsentPurpose.SEQUENCING &&
+                                it.type == ConsentProvisionType.PERMIT
+                        } == true
+                )
 
         return ConsentEvaluation(ttpConsentStatus, consentGiven)
     }

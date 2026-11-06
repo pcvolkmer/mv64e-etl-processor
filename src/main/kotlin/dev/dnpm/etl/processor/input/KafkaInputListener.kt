@@ -43,8 +43,14 @@ class KafkaInputListener(
 
     override fun onMessage(record: ConsumerRecord<String, String>) {
         when (guessMimeType(record)) {
-            MediaType.APPLICATION_JSON_VALUE -> handleDnpmV2Message(record)
-            CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE -> handleDnpmV2Message(record)
+            MediaType.APPLICATION_JSON_VALUE -> {
+                handleDnpmV2Message(record)
+            }
+
+            CustomMediaType.APPLICATION_VND_DNPM_V2_MTB_JSON_VALUE -> {
+                handleDnpmV2Message(record)
+            }
+
             else -> {
                 // ignore other messages
             }

@@ -152,9 +152,8 @@ public class GpasPseudonymGenerator implements Generator {
     try {
       var targetUrl = buildRequestUrl(apiEndpoint);
       ResponseEntity<String> responseEntity =
-          retryTemplate.execute(
-              ctx ->
-                  restTemplate.exchange(targetUrl, HttpMethod.POST, requestEntity, String.class));
+          retryTemplate.execute(ctx ->
+              restTemplate.exchange(targetUrl, HttpMethod.POST, requestEntity, String.class));
       if (responseEntity.getStatusCode().is2xxSuccessful()) {
         log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
         return responseEntity;

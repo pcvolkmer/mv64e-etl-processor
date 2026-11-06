@@ -129,10 +129,9 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
       }
 
       final var response =
-          this.retryTemplate.execute(
-              retryContext ->
-                  this.restTemplate.exchange(
-                      uri, HttpMethod.GET, new HttpEntity<>(requestHeaders), String.class));
+          this.retryTemplate.execute(retryContext ->
+              this.restTemplate.exchange(
+                  uri, HttpMethod.GET, new HttpEntity<>(requestHeaders), String.class));
       if (response.getStatusCode().is2xxSuccessful()) {
         return response.getBody();
       } else {
