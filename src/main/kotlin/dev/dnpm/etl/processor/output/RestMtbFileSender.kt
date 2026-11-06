@@ -27,11 +27,11 @@ import dev.dnpm.etl.processor.monitoring.ReportService
 import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.asRequestStatus
 import org.slf4j.LoggerFactory
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.retry.support.RetryTemplate
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
@@ -52,7 +52,7 @@ abstract class RestMtbFileSender(
 
     override fun <T> send(request: MtbFileRequest<T>): MtbFileSender.Response {
         try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+            return retryTemplate.execute {
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(request.content, headers)
                 val response =
@@ -85,7 +85,7 @@ abstract class RestMtbFileSender(
 
     override fun send(request: DeleteRequest): MtbFileSender.Response {
         try {
-            return retryTemplate.execute<MtbFileSender.Response, Exception> {
+            return retryTemplate.execute {
                 val headers = getHttpHeaders(request)
                 val entityReq = HttpEntity(null, headers)
                 restTemplate.delete(deleteUrl(request.patientId), entityReq, String::class.java)

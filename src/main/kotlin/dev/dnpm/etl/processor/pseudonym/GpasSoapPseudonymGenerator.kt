@@ -22,7 +22,7 @@ package dev.dnpm.etl.processor.pseudonym
 
 import dev.dnpm.etl.processor.config.AppFhirConfig
 import dev.dnpm.etl.processor.config.GPasConfigProperties
-import org.springframework.retry.support.RetryTemplate
+import org.springframework.core.retry.RetryTemplate
 
 class GpasSoapPseudonymGenerator(
     private val gpasCfg: GPasConfigProperties,
@@ -31,12 +31,12 @@ class GpasSoapPseudonymGenerator(
     private val appFhirConfig: AppFhirConfig,
 ) : Generator {
     override fun generate(id: String): String =
-        retryTemplate.execute<String, Exception> {
+        retryTemplate.execute {
             gpasSoapService.getOrCreatePseudonymFor(id, gpasCfg.patientDomain)
         }
 
     override fun generateGenomDeTan(id: String): String =
-        retryTemplate.execute<String, Exception> {
+        retryTemplate.execute {
             gpasSoapService.createPseudonymsFor(id, gpasCfg.genomDeTanDomain, 1).first()
         }
 }

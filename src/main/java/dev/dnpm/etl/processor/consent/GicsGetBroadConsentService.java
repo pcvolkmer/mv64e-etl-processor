@@ -29,11 +29,11 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.retry.RetryException;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.retry.TerminatedRetryException;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -129,7 +129,7 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
       }
 
       final var response =
-          this.retryTemplate.execute(retryContext ->
+          this.retryTemplate.execute(() ->
               this.restTemplate.exchange(
                   uri, HttpMethod.GET, new HttpEntity<>(requestHeaders), String.class));
       if (response.getStatusCode().is2xxSuccessful()) {
@@ -142,20 +142,20 @@ public class GicsGetBroadConsentService extends AbstractConsentService {
         log.error(msg);
         return null;
       }
+    } catch (URISyntaxException e) {
+      var msg = String.format("Invalid URI for consents status request: '%s'", e.getMessage());
+      log.error(msg);
+      return null;
     } catch (RestClientException e) {
       var msg = String.format("Get consents status request failed reason: '%s", e.getMessage());
       log.error(msg);
       return null;
 
-    } catch (TerminatedRetryException terminatedRetryException) {
+    } catch (RetryException retryException) {
       var msg =
           String.format(
               "Get consents status process has been terminated. termination reason: '%s",
-              terminatedRetryException.getMessage());
-      log.error(msg);
-      return null;
-    } catch (URISyntaxException e) {
-      var msg = String.format("Invalid URI for consents status request: '%s'", e.getMessage());
+              retryException.getMessage());
       log.error(msg);
       return null;
     }

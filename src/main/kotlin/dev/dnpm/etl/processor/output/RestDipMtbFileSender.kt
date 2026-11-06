@@ -24,18 +24,10 @@ import dev.dnpm.etl.processor.CustomMediaType
 import dev.dnpm.etl.processor.PatientPseudonym
 import dev.dnpm.etl.processor.config.RestTargetProperties
 import dev.dnpm.etl.processor.monitoring.ReportService
-import dev.dnpm.etl.processor.monitoring.RequestStatus
-import dev.dnpm.etl.processor.monitoring.asRequestStatus
-import org.slf4j.LoggerFactory
-import org.springframework.http.HttpEntity
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.retry.support.RetryTemplate
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.exchange
 import org.springframework.web.util.UriComponentsBuilder
 
 class RestDipMtbFileSender(

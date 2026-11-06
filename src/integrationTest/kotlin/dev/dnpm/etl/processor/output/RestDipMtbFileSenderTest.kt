@@ -39,11 +39,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.retry.RetryPolicy
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.retry.policy.SimpleRetryPolicy
-import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -89,7 +89,11 @@ class RestDipMtbFileSenderTest {
     ) {
       val restTemplate = restTemplate
       val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
-      val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+      val retryTemplate = RetryTemplate(
+        RetryPolicy.builder()
+          .maxRetries(0)
+          .build()
+      )
 
       this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 

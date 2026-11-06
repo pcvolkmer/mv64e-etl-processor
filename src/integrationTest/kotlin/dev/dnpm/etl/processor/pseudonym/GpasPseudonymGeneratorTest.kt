@@ -27,11 +27,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.core.retry.RetryPolicy
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.retry.policy.SimpleRetryPolicy
-import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
@@ -49,7 +49,13 @@ class GpasPseudonymGeneratorTest {
 
     @BeforeEach
     fun setup() {
-        val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+        val retryTemplate =
+            RetryTemplate(
+                RetryPolicy
+                    .builder()
+                    .maxRetries(0)
+                    .build(),
+            )
         val gPasConfigProperties =
             GPasConfigProperties(CONFIGURED_URI, null, null, "test", "test2", null, null)
 
