@@ -20,10 +20,8 @@
 
 package dev.dnpm.etl.processor.pseudonym
 
-import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.PseudonymizeConfigProperties
 import org.apache.commons.codec.binary.Base32
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.codec.digest.HmacAlgorithms
 import org.apache.commons.codec.digest.HmacUtils
 import java.security.SecureRandom

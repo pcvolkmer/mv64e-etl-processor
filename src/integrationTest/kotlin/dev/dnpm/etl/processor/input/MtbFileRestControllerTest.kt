@@ -349,7 +349,7 @@ class MtbFileRestControllerTest {
 
     companion object {
 
-        val mtbFile =
+        val mtbFile: PatientRecord =
             PatientRecord.builder()
                 .patient(Patient.builder().id("PID").build())
                 .episodesOfCare(

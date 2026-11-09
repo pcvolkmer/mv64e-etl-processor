@@ -61,7 +61,7 @@ class ReportService(private val jsonMapper: JsonMapper) {
         val details: Optional<String> = Optional.empty(),
         val path: Optional<String> = Optional.empty(),
     ) {
-        fun getMessageText() = message.orElse(details.orElse("No details available"))
+        fun getMessageText() = message.orElse(details.orElse("No details available")) ?: "No information"
     }
 
     @EnumNaming(EnumNamingStrategies.LowerCaseStrategy::class)

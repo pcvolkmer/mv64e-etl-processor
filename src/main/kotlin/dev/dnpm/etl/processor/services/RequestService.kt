@@ -56,12 +56,12 @@ class RequestService(private val requestRepository: RequestRepository) {
       requestRepository.findAllByPatientPseudonymOrderByProcessedAtDesc(patientPseudonym)
 
   fun lastMtbFileRequestForPatientPseudonym(patientPseudonym: PatientPseudonym) =
-      Companion.lastMtbFileRequestForPatientPseudonym(
+      lastMtbFileRequestForPatientPseudonym(
           allRequestsByPatientPseudonym(patientPseudonym)
       )
 
   fun isLastRequestWithKnownStatusDeletion(patientPseudonym: PatientPseudonym) =
-      Companion.isLastRequestWithKnownStatusDeletion(
+      isLastRequestWithKnownStatusDeletion(
           allRequestsByPatientPseudonym(patientPseudonym)
       )
 

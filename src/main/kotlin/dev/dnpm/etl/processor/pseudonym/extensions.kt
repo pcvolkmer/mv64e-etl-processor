@@ -132,7 +132,7 @@ infix fun PatientRecord.anonymizeContentWith(pseudonymizeService: PseudonymizeSe
     episodeOfCare.diagnoses?.filterNotNull()?.forEach { it.id = it.id?.let(::anonymize) }
   }
 
-  this.carePlans?.onEach { carePlan ->
+  this.carePlans?.forEach { carePlan ->
     carePlan?.apply {
       this.id = id?.let { anonymize(it) }
 
