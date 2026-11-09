@@ -71,7 +71,7 @@ abstract class RestMtbFileSender(
         } catch (_: IllegalArgumentException) {
             logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientResponseException) {
-            logger.info(restTargetProperties.uri!!.toString())
+            logger.info(restTargetProperties.uri!!)
             logger.error("Request data not accepted by remote system", e)
             return MtbFileSender.Response(
                 RequestStatus.ERROR,
@@ -91,14 +91,14 @@ abstract class RestMtbFileSender(
                 return@execute MtbFileSender.Response(RequestStatus.SUCCESS)
             }
         } catch (_: IllegalArgumentException) {
-            logger.error("Not a valid URI to export to: '{}'", restTargetProperties.uri!!)
+            logger.error("Not a valid URI for delete: '{}'", restTargetProperties.uri!!)
         } catch (e: RestClientException) {
-            logger.info(restTargetProperties.uri!!.toString())
+            logger.info(restTargetProperties.uri!!)
             logger.error("Cannot send data to remote system", e)
         } catch (e: RetryException) {
             val cause = e.cause
             if (cause is RestClientException) {
-                logger.info(restTargetProperties.uri!!.toString())
+                logger.info(restTargetProperties.uri!!)
                 logger.error("Cannot send data to remote system", e)
             }
         }

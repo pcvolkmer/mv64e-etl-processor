@@ -51,6 +51,6 @@ class UserRoleService(
             .filterIsInstance<OidcUser>()
             .filter { it.preferredUsername == username }
             .flatMap { sessionRegistry.getAllSessions(it, true) }
-            .onEach { it.expireNow() }
+            .forEach { it.expireNow() }
     }
 }
