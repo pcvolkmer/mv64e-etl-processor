@@ -22,7 +22,6 @@ package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.monitoring.*
-import dev.dnpm.etl.processor.output.RestDipMtbFileSender
 import dev.dnpm.etl.processor.output.RestMtbFileSender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

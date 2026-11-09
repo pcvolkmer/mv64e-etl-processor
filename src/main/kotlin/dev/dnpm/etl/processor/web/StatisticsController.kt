@@ -24,7 +24,6 @@ import dev.dnpm.etl.processor.monitoring.RequestStatus
 import dev.dnpm.etl.processor.monitoring.RequestType
 import dev.dnpm.etl.processor.monitoring.SubmissionType
 import dev.dnpm.etl.processor.services.RequestService
-import net.sf.saxon.tree.tiny.Statistics
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping

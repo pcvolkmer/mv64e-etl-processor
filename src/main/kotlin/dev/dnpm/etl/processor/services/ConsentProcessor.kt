@@ -288,22 +288,19 @@ class ConsentProcessor(
                   isValidCoding &&
                   isRequestDateInRange(requestDate, (entry.resource as Consent).provision.period)
             }
-            .map { entry: BundleEntryComponent ->
+            .flatMap { entry: BundleEntryComponent ->
               val consent = (entry.getResource() as Consent)
               consent.provision.provision
                   .filter { subProvision ->
                     isRequestDateInRange(requestDate, subProvision.period)
                     // search coding entries of current provision for code and system
-                    subProvision.code
-                        .map { c -> c.coding }
-                        .flatten()
-                        .any { code ->
+                      subProvision.code.flatMap { c -> c.coding }
+                          .any { code ->
                           targetCode.equals(code.code) && targetSystem.equals(code.system)
                         }
                   }
                   .map { subProvision -> subProvision }
             }
-            .flatten()
 
     if (entriesOfInterest.isNotEmpty()) {
       return entriesOfInterest.first().type

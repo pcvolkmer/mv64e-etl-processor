@@ -145,6 +145,17 @@ class AppConfiguration {
         return GpasPseudonymGenerator(configProperties, retryTemplate, restTemplate, appFhirConfig)
     }
 
+    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "VFPS")
+    @Bean
+    fun vfpsPseudonymGenerator(
+        configProperties: VfpsConfigProperties,
+        retryTemplate: RetryTemplate,
+        restTemplate: RestTemplate,
+    ): Generator {
+        logger.info("Selected 'VfpsPseudonym Generator'")
+        return VfpsPseudonymGenerator(configProperties, retryTemplate, restTemplate)
+    }
+
     @ConditionalOnProperty(
         value = ["app.pseudonymize.generator"],
         havingValue = "BUILDIN",
@@ -262,17 +273,6 @@ class AppConfiguration {
             gPasConfigProperties,
             connectionCheckUpdateProducer,
         )
-    }
-
-    @ConditionalOnProperty(value = ["app.pseudonymize.generator"], havingValue = "VFPS")
-    @Bean
-    fun vfpsPseudonymGenerator(
-        configProperties: VfpsConfigProperties,
-        retryTemplate: RetryTemplate,
-        restTemplate: RestTemplate,
-    ): Generator {
-        logger.info("Selected 'VfpsPseudonym Generator'")
-        return VfpsPseudonymGenerator(configProperties, retryTemplate, restTemplate)
     }
 
     @Bean
