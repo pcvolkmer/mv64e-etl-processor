@@ -37,8 +37,8 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.*;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 import org.springframework.web.client.RestTemplate;
@@ -152,8 +152,8 @@ public class GpasPseudonymGenerator implements Generator {
     try {
       var targetUrl = buildRequestUrl(apiEndpoint);
       ResponseEntity<String> responseEntity =
-          retryTemplate.execute(ctx ->
-              restTemplate.exchange(targetUrl, HttpMethod.POST, requestEntity, String.class));
+          retryTemplate.execute(
+              () -> restTemplate.exchange(targetUrl, HttpMethod.POST, requestEntity, String.class));
       if (responseEntity.getStatusCode().is2xxSuccessful()) {
         log.debug("API request succeeded. Response: {}", responseEntity.getStatusCode());
         return responseEntity;

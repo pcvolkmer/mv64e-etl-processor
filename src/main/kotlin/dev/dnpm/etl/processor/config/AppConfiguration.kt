@@ -42,15 +42,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ConfigurationCondition
+import org.springframework.core.retry.*
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
-import org.springframework.retry.RetryCallback
-import org.springframework.retry.RetryContext
-import org.springframework.retry.RetryListener
-import org.springframework.retry.policy.SimpleRetryPolicy
-import org.springframework.retry.support.RetryTemplate
-import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
@@ -189,24 +184,35 @@ class AppConfiguration {
 
     @Bean
     fun retryTemplate(configProperties: AppConfigProperties): RetryTemplate {
-        return RetryTemplateBuilder()
-            .notRetryOn(IllegalArgumentException::class.java)
-            .notRetryOn(HttpClientErrorException.BadRequest::class.java)
-            .notRetryOn(HttpClientErrorException.UnprocessableContent::class.java)
-            .exponentialBackoff(2.seconds.toJavaDuration(), 1.25, 5.seconds.toJavaDuration())
-            .customPolicy(SimpleRetryPolicy(configProperties.maxRetryAttempts))
-            .withListener(
-                object : RetryListener {
-                    override fun <T : Any, E : Throwable> onError(
-                        context: RetryContext,
-                        callback: RetryCallback<T, E>,
-                        throwable: Throwable,
-                    ) {
-                        logger.warn("Error occured: {}. Retrying {}", throwable.message, context.retryCount)
+        val retryPolicy = RetryPolicy.builder()
+            .excludes(
+                IllegalArgumentException::class.java,
+                HttpClientErrorException.BadRequest::class.java,
+                HttpClientErrorException.UnprocessableContent::class.java
+            )
+            .maxRetries(configProperties.maxRetryAttempts.toLong() - 1)
+            .delay(2.seconds.toJavaDuration())
+            .multiplier(1.25)
+            .maxDelay(5.seconds.toJavaDuration())
+            .build()
+
+        return RetryTemplate(retryPolicy).apply {
+            setRetryListener(object : RetryListener {
+                override fun onRetryableExecution(
+                    retryPolicy: RetryPolicy,
+                    retryable: Retryable<*>,
+                    retryState: RetryState,
+                ) {
+                    if (!retryState.isSuccessful) {
+                        logger.warn(
+                            "Error occured: {}. Retrying {}",
+                            retryState.lastException.message,
+                            retryState.retryCount
+                        )
                     }
                 }
-            )
-            .build()
+            })
+        }
     }
 
     @ConditionalOnProperty(value = ["app.security.enable-tokens"], havingValue = "true")

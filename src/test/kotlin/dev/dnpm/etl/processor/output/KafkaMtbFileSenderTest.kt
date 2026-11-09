@@ -43,10 +43,10 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
+import org.springframework.core.retry.RetryPolicy
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
-import org.springframework.retry.policy.SimpleRetryPolicy
-import org.springframework.retry.support.RetryTemplateBuilder
 import tools.jackson.databind.json.JsonMapper
 import java.time.Instant
 import java.util.*
@@ -68,7 +68,11 @@ class KafkaMtbFileSenderTest {
     @BeforeEach
     fun setup(@Mock kafkaTemplate: KafkaTemplate<String, String>) {
       val kafkaProperties = KafkaProperties("testtopic")
-      val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+        val retryTemplate = RetryTemplate(
+            RetryPolicy.builder()
+                .maxRetries(0)
+                .build()
+        )
 
       this.jsonMapper = JsonMapper.builder().build()
       this.kafkaTemplate = kafkaTemplate
@@ -97,7 +101,11 @@ class KafkaMtbFileSenderTest {
     @MethodSource("dev.dnpm.etl.processor.output.KafkaMtbFileSenderTest#requestWithResponseSource")
     fun shouldRetryOnDeleteKafkaSendError(testData: TestData) {
       val kafkaProperties = KafkaProperties("testtopic")
-      val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        val retryTemplate = RetryTemplate(
+            RetryPolicy.builder()
+                .maxRetries(2)
+                .build()
+        )
       this.kafkaMtbFileSender =
           KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.jsonMapper)
 
@@ -136,7 +144,11 @@ class KafkaMtbFileSenderTest {
     @BeforeEach
     fun setup(@Mock kafkaTemplate: KafkaTemplate<String, String>) {
       val kafkaProperties = KafkaProperties("testtopic")
-      val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+        val retryTemplate = RetryTemplate(
+            RetryPolicy.builder()
+                .maxRetries(0)
+                .build()
+        )
 
       this.jsonMapper = JsonMapper()
       this.kafkaTemplate = kafkaTemplate
@@ -215,7 +227,11 @@ class KafkaMtbFileSenderTest {
     @MethodSource("dev.dnpm.etl.processor.output.KafkaMtbFileSenderTest#requestWithResponseSource")
     fun shouldRetryOnMtbFileKafkaSendError(testData: TestData) {
       val kafkaProperties = KafkaProperties("testtopic")
-      val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(3)).build()
+        val retryTemplate = RetryTemplate(
+            RetryPolicy.builder()
+                .maxRetries(2)
+                .build()
+        )
       this.kafkaMtbFileSender =
           KafkaMtbFileSender(this.kafkaTemplate, kafkaProperties, retryTemplate, this.jsonMapper)
 

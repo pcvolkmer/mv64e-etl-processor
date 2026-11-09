@@ -39,12 +39,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.core.retry.RetryPolicy
+import org.springframework.core.retry.RetryTemplate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.retry.backoff.NoBackOffPolicy
-import org.springframework.retry.policy.SimpleRetryPolicy
-import org.springframework.retry.support.RetryTemplateBuilder
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
@@ -70,7 +69,11 @@ class RestDipMtbFileSenderTest {
         fun setup() {
             val restTemplate = RestTemplate()
             val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
-            val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+            val retryTemplate = RetryTemplate(
+                RetryPolicy.builder()
+                    .maxRetries(0)
+                    .build()
+            )
 
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
@@ -118,7 +121,11 @@ class RestDipMtbFileSenderTest {
         fun setup() {
             val restTemplate = RestTemplate()
             val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
-            val retryTemplate = RetryTemplateBuilder().customPolicy(SimpleRetryPolicy(1)).build()
+            val retryTemplate = RetryTemplate(
+                RetryPolicy.builder()
+                    .maxRetries(0)
+                    .build()
+            )
 
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
 
@@ -155,7 +162,6 @@ class RestDipMtbFileSenderTest {
             val restTemplate = RestTemplate()
             val restTargetProperties = RestTargetProperties("http://localhost:9000/api", null, null)
             val retryTemplate = AppConfiguration().retryTemplate(AppConfigProperties())
-            retryTemplate.setBackOffPolicy(NoBackOffPolicy())
 
             this.mockRestServiceServer = MockRestServiceServer.createServer(restTemplate)
             this.restMtbFileSender =
