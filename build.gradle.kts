@@ -22,7 +22,7 @@ version = "0.19.0" // x-release-please-version
 
 // Additional versions
 val mtbModelVersion = "0.6.0"
-val hapiFhirVersion = "8.10.2"
+val hapiFhirVersion = "8.12.1"
 val apacheCxfVersion = "4.2.4"
 val springModulithVersion = "2.1.2"
 
@@ -62,7 +62,10 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf") {
+        // Due to CVE-2026-19880
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+    }
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
@@ -79,7 +82,10 @@ dependencies {
     implementation("commons-codec:commons-codec")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("dev.pcvolkmer.mv64e:mtb-model:$mtbModelVersion")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiFhirVersion")
+    implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiFhirVersion") {
+        // Due to CVE-2026-118259
+        exclude(group = "io.opentelemetry", module = "opentelemetry-api")
+    }
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:$hapiFhirVersion")
     implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("com.jayway.jsonpath:json-path")
@@ -116,6 +122,17 @@ dependencies {
 
     errorprone("com.google.errorprone:error_prone_core:2.48.0")
     errorprone("com.uber.nullaway:nullaway:0.13.1")
+
+    // Security related Overrides
+    // Override due to CVE-2026-119078
+    implementation("commons-codec:commons-codec:1.23.0")
+
+    // Override due to CVE-2026-110879
+    implementation("tools.jackson.core:jackson-databind:3.1.8")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.8")
+
+    // Override due to CVE-2026-119078
+    implementation("org.apache.kafka:kafka-clients:4.4.0")
 }
 
 dependencyManagement {
