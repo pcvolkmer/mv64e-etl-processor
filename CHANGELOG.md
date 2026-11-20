@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.19.0...v0.19.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependencies with security fixes ([#347](https://github.com/pcvolkmer/mv64e-etl-processor/issues/347)) ([ed98c43](https://github.com/pcvolkmer/mv64e-etl-processor/commit/ed98c4346c4a213ea7f2f97b46dd5bf9ca3ea6b2))
+
 ## [0.19.0](https://github.com/pcvolkmer/mv64e-etl-processor/compare/v0.18.1...v0.19.0) (2026-11-09)
 
 
