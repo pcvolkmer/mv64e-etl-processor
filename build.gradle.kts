@@ -7,10 +7,10 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     java
-    id("org.springframework.boot") version "4.1.2"
+    id("org.springframework.boot") version "4.1.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.11.0"
-    id("net.ltgt.errorprone") version "5.1.1"
+    id("net.ltgt.errorprone") version "5.2.0"
     id("net.ltgt.nullaway") version "3.3.0"
     kotlin("jvm") version "2.4.20"
     kotlin("plugin.spring") version "2.4.20"
@@ -21,7 +21,7 @@ group = "dev.dnpm"
 version = "0.19.0" // x-release-please-version
 
 // Additional versions
-val mtbModelVersion = "0.6.0"
+val mtbModelVersion = "0.6.4"
 val hapiFhirVersion = "8.12.1"
 val apacheCxfVersion = "4.2.4"
 val springModulithVersion = "2.1.2"
@@ -120,17 +120,12 @@ dependencies {
     integrationTestImplementation("org.htmlunit:htmlunit")
     integrationTestImplementation("org.springframework:spring-webflux")
 
-    errorprone("com.google.errorprone:error_prone_core:2.48.0")
-    errorprone("com.uber.nullaway:nullaway:0.13.1")
+    errorprone("com.google.errorprone:error_prone_core:2.53.0")
+    errorprone("com.uber.nullaway:nullaway:0.14.4")
 
     // Security related Overrides
     // Override due to CVE-2026-119078
     implementation("commons-codec:commons-codec:1.23.0")
-
-    // Override due to CVE-2026-110879
-    implementation("tools.jackson.core:jackson-databind:3.1.8")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.8")
-
     // Override due to CVE-2026-119078
     implementation("org.apache.kafka:kafka-clients:4.4.0")
 }
