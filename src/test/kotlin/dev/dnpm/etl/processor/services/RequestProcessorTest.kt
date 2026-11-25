@@ -22,6 +22,7 @@ package dev.dnpm.etl.processor.services
 
 import dev.dnpm.etl.processor.*
 import dev.dnpm.etl.processor.config.AppConfigProperties
+import dev.dnpm.etl.processor.consent.ConsentProcessor
 import dev.dnpm.etl.processor.consent.TtpConsentStatus
 import dev.dnpm.etl.processor.monitoring.Request
 import dev.dnpm.etl.processor.monitoring.RequestStatus

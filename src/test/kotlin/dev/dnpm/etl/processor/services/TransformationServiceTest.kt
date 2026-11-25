@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import dev.dnpm.etl.processor.config.JacksonConfig
+import dev.dnpm.etl.processor.consent.ConsentProcessorTest
 import dev.pcvolkmer.mv64e.model.Coding
 import dev.pcvolkmer.mv64e.model.ConsentProvisionType
 import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose

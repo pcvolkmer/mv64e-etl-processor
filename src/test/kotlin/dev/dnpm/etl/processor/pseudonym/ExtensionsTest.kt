@@ -25,8 +25,8 @@ import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
 import dev.dnpm.etl.processor.consent.MtbFileConsentService
-import dev.dnpm.etl.processor.services.ConsentProcessor
-import dev.dnpm.etl.processor.services.ConsentProcessorTest
+import dev.dnpm.etl.processor.consent.ConsentProcessor
+import dev.dnpm.etl.processor.consent.ConsentProcessorTest
 import dev.pcvolkmer.mv64e.model.GenderCoding
 import dev.pcvolkmer.mv64e.model.Msi
 import dev.pcvolkmer.mv64e.model.MtbDiagnosis
