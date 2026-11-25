@@ -28,7 +28,7 @@ import dev.dnpm.etl.processor.monitoring.*
 import dev.dnpm.etl.processor.pseudonym.*
 import dev.dnpm.etl.processor.security.TokenRepository
 import dev.dnpm.etl.processor.security.TokenService
-import dev.dnpm.etl.processor.services.ConsentProcessor
+import dev.dnpm.etl.processor.consent.ConsentProcessor
 import dev.dnpm.etl.processor.services.Transformation
 import dev.dnpm.etl.processor.services.TransformationService
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean

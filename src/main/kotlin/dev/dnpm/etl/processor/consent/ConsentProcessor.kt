@@ -1,5 +1,5 @@
 /*
- * This file is part of ETL-Processor
+ * This file is part of mv64e-etl-processor
  *
  * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
  * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
@@ -18,15 +18,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.services
+package dev.dnpm.etl.processor.consent
 
 import ca.uhn.fhir.context.FhirContext
 import com.fasterxml.jackson.core.JsonProcessingException
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
-import dev.dnpm.etl.processor.consent.ConsentDomain
-import dev.dnpm.etl.processor.consent.IConsentService
-import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.dnpm.etl.processor.pseudonym.ensureMetaDataIsInitialized
 import dev.pcvolkmer.mv64e.model.ConsentProvisionType
 import dev.pcvolkmer.mv64e.model.ModelProjectConsentPurpose
@@ -233,7 +230,7 @@ class ConsentProcessor(
   /**
    * @param consentBundle consent resource
    * @param requestDate date which must be within validation period of provision
-   * @return type of provision, will be [org.hl7.fhir.r4.model.Consent.ConsentProvisionType.NULL] if
+   * @return type of provision, will be [Consent.ConsentProvisionType.NULL] if
    *   none is found.
    */
   fun getProvisionTypeByPolicyCode(
@@ -263,7 +260,7 @@ class ConsentProcessor(
    * @param targetCode policyRule and provision code value
    * @param targetSystem policyRule and provision system value
    * @param requestDate date which must be within validation period of provision
-   * @return type of provision, will be [org.hl7.fhir.r4.model.Consent.ConsentProvisionType.NULL] if
+   * @return type of provision, will be [Consent.ConsentProvisionType.NULL] if
    *   none is found.
    */
   fun getProvisionTypeByPolicyCode(

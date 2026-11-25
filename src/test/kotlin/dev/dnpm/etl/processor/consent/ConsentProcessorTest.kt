@@ -1,8 +1,8 @@
 /*
- * This file is part of ETL-Processor
+ * This file is part of mv64e-etl-processor
  *
  * Copyright (c) 2023       Comprehensive Cancer Center Mainfranken
- * Copyright (c) 2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
+ * Copyright (c) 2023-2026  Paul-Christian Volkmer, Datenintegrationszentrum Philipps-Universität Marburg and Contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -18,15 +18,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.dnpm.etl.processor.services
+package dev.dnpm.etl.processor.consent
 
 import ca.uhn.fhir.context.FhirContext
 import dev.dnpm.etl.processor.config.AppConfigProperties
 import dev.dnpm.etl.processor.config.GIcsConfigProperties
 import dev.dnpm.etl.processor.config.JacksonConfig
-import dev.dnpm.etl.processor.consent.ConsentDomain
-import dev.dnpm.etl.processor.consent.GicsConsentService
-import dev.dnpm.etl.processor.consent.MtbFileConsentService
 import dev.pcvolkmer.mv64e.model.*
 import dev.pcvolkmer.mv64e.model.Patient
 import org.assertj.core.api.Assertions.assertThat
